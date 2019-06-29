@@ -8,7 +8,6 @@ This is React note list app that gets data via a Node back-end server from a Mon
 Once loaded add a username at the top and click on either my notes or all notes
 
 - My Notes will only show notes created by you.
-- All Notes will show all notes in the list.
 
 A live demo version can be found [here](https://henryk91-note.glitch.me) 
 
@@ -28,7 +27,7 @@ Testing is done with a Jest/Enzyme combination. The folder also contains a snaps
 
 ```bash
 # Clone the repository
-git clone https://github.com/Henryk91/note-list.git
+git clone https://github.com/Henryk91/note.git
 
 # Go inside the directory
 cd note-list
