@@ -18,7 +18,7 @@ export default class NewNote extends Component {
     let number = event.target.number.value
     let tag = event.target.tagType.value
 
-    tag === "Other" ? tag = event.target.tagTypeText.value : tag
+    tag === "Note" ? tag = event.target.tagTypeText.value : tag
 
     let uniqueId = docId();
     console.log(uniqueId)
