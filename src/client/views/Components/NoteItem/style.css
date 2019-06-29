@@ -1,0 +1,22 @@
+.noteItemBox{
+    margin:0;
+    width:100%;
+}
+.noteItemBox > button{
+    float: right;
+    margin: 0;
+    margin-left: 5px;
+}
+.noteItem{
+    margin: 4px;
+    padding: 0px;
+}
+#noteItemEditBox > button{
+    margin-top: 5px; 
+    float: none
+}
+#noteItemEditBox{
+    margin-bottom: 10px; 
+    height: 60px;
+    text-align: center;
+}

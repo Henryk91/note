@@ -1,0 +1,220 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NoteDetail component renders all details 1`] = `
+<div
+  id="home"
+>
+  <div>
+    <br />
+    <div
+      className="listNameButton"
+    >
+      <a
+        href="/notes/wCQ9iHNbXqwLsYBz2QUM"
+        onClick={[Function]}
+        style={
+          Object {
+            "textDecoration": "none",
+          }
+        }
+      >
+        <h3>
+          Bob
+           
+          Hope
+        </h3>
+      </a>
+    </div>
+    <div
+      className="listNameButton"
+    >
+      <a
+        href="/notes/wCQ9iHebXqwLaYBz2QUM"
+        onClick={[Function]}
+        style={
+          Object {
+            "textDecoration": "none",
+          }
+        }
+      >
+        <h3>
+          Bobb
+           
+          Hope
+        </h3>
+      </a>
+    </div>
+    <div
+      className="listNameButton"
+    >
+      <a
+        href="/notes/wCQ9iHNwXqwLaYBz2QUM"
+        onClick={[Function]}
+        style={
+          Object {
+            "textDecoration": "none",
+          }
+        }
+      >
+        <h3>
+          Boby
+           
+          Hope
+        </h3>
+      </a>
+    </div>
+    <div
+      className="listNameButton"
+    >
+      <a
+        href="/notes/wCQ9iHNbXqxLaYBz2QUM"
+        onClick={[Function]}
+        style={
+          Object {
+            "textDecoration": "none",
+          }
+        }
+      >
+        <h3>
+          Bobyy
+           
+          Hope
+        </h3>
+      </a>
+    </div>
+    <div
+      className="listNameButton"
+    >
+      <a
+        href="/notes/wCQ9qHNbXqwLaYBz2QUq"
+        onClick={[Function]}
+        style={
+          Object {
+            "textDecoration": "none",
+          }
+        }
+      >
+        <h3>
+          Stevee
+           
+          Jobs
+        </h3>
+      </a>
+    </div>
+    <div
+      className="listNameButton"
+    >
+      <a
+        href="/notes/wCQ9iHNbXqwgaYBz2QUq"
+        onClick={[Function]}
+        style={
+          Object {
+            "textDecoration": "none",
+          }
+        }
+      >
+        <h3>
+          Steve
+           
+          Jobs
+        </h3>
+      </a>
+    </div>
+    <div
+      className="listNameButton"
+    >
+      <a
+        href="/notes/wCQ9gHNbXqwLaYBz2QUq"
+        onClick={[Function]}
+        style={
+          Object {
+            "textDecoration": "none",
+          }
+        }
+      >
+        <h3>
+          Stteve
+           
+          Jobs
+        </h3>
+      </a>
+    </div>
+    <div
+      className="listNameButton"
+    >
+      <a
+        href="/notes/wCQ9iHNbXqwLaYBg2sdM"
+        onClick={[Function]}
+        style={
+          Object {
+            "textDecoration": "none",
+          }
+        }
+      >
+        <h3>
+          Walt
+           
+          Sis
+        </h3>
+      </a>
+    </div>
+    <div
+      className="listNameButton"
+    >
+      <a
+        href="/notes/wCQ9igNqXqwLaYBz2sdM"
+        onClick={[Function]}
+        style={
+          Object {
+            "textDecoration": "none",
+          }
+        }
+      >
+        <h3>
+          Waltt
+           
+          Sis
+        </h3>
+      </a>
+    </div>
+    <div
+      className="listNameButton"
+    >
+      <a
+        href="/notes/wCQ9iHNbgqwLaYBz2sdM"
+        onClick={[Function]}
+        style={
+          Object {
+            "textDecoration": "none",
+          }
+        }
+      >
+        <h3>
+          Walter
+           
+          Sis
+        </h3>
+      </a>
+    </div>
+    <div
+      className="listNameButton"
+    >
+      <a
+        href="/notes/wCQ9igNbXqwLaYBz2sdM"
+        onClick={[Function]}
+        style={
+          Object {
+            "textDecoration": "none",
+          }
+        }
+      >
+        <h3>
+          Walty
+           
+          Sis
+        </h3>
+      </a>
+    </div>
+  </div>
+</div>
+`;

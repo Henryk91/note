@@ -1,0 +1,15 @@
+
+.listNameButton{
+  background: rgb(241, 241, 241);
+  border: 1px solid rgb(185, 185, 185);
+  margin-top: 2px;
+  width: 80vw;
+  margin-left: 10vw;
+}
+
+@media(min-width: 1000px){
+  .listNameButton{
+    width: 40vw;
+    margin-left: 30vw;
+  }
+}

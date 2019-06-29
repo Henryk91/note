@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+
+header{
+  padding-bottom: 10px;
+}
+
+h1 , h3 , h2{
+  color: #231f20;
+}
+body {
+  background-color: #eef3f6;
+  color: #7c7c80;
+  text-align: center;
+  font-family: 'Open Sans', sans-serif;
+  margin: auto;
+}
+
+button{
+  background: rgb(187, 59, 0);
+  border: none;
+  margin: 5px;
+  padding: 2px;
+  color: white;
+  border-radius: 2px;
+  text-align: right;
+  font-size: 18px;
+}
+button:hover{
+  background: rgba(187, 59, 0, 0.7);
+}
+Link{
+  text-decoration: unset;
+  color: white;
+}
+p{
+  font-size: 18px;
+}
+input[type="text"],[type="email"],[type="number"]{
+  text-align: center;
+  background: rgb(187, 59, 0);
+  color: white;
+  border: none;
+  border-radius: 2px;
+  margin-top: 5px;
+  width: 200px;
+  font-size: 18px;
+}
+#quickDay{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  grid-auto-rows: auto;
+}
+.blueHover:hover{
+  background: rgba(187, 59, 0, 0.5);
+}
+@media(min-width: 1000px){
+  #quickDay, .weatherLine, .bigScreen{
+    margin-left:20vw;
+    width: 60vw; 
+  }
+  #pushOver{
+    width: 0px;
+  }
+}
+
+@media(max-width: 600px){
+  span::before {content: '\A'; white-space: pre;}
+}
+h2{
+  margin: 0px;
+}
+
+
+#links{
+  margin-top: 10px;
+  background: rgb(187, 59, 0);
+}
+.navLink{
+  color: 	white;
+  font-size: 20px;
+  margin: 0px 5px 0px 5px;
+  font-weight: bolder;
+}
+.navLink:hover{
+  border: 1px solid white;
+  border-radius: 2px;
+  padding: 1px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+*:focus {
+  outline: none;
+}
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: white;
+  opacity: 1; /* Firefox */
+}
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+  color: white;
+}
+::-ms-input-placeholder { /* Microsoft Edge */
+  color: white;
+}
+
+@import url('./views/Components/SearchBar/style.css');
+@import url('./views/Components/Home/style.css');
+@import url('./views/Components/NoteDetail/style.css');
+@import url('./views/Components/NewNote/style.css');
+@import url('./views/Components/NoteItem/style.css');
+@import url('./views/Components/EditNoteCheck/style.css');

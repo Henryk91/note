@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NoteDetail component renders all details 1`] = `
+<form
+  onSubmit={[Function]}
+>
+  <br />
+  <input
+    name="heading"
+    placeholder="First Name"
+    required="required"
+    type="text"
+  />
+  <br />
+  <input
+    name="lastName"
+    placeholder="last Name"
+    required="required"
+    type="text"
+  />
+  <br />
+  <br />
+  <div>
+    <div
+      className="radioBox"
+    >
+      <label>
+        Number
+      </label>
+      <label>
+        Email 
+      </label>
+      <label>
+        Other
+      </label>
+      <br />
+      <input
+        defaultChecked={true}
+        name="tagType"
+        onClick={[Function]}
+        type="radio"
+        value="Number"
+      />
+      <input
+        name="tagType"
+        onClick={[Function]}
+        type="radio"
+        value="Email"
+      />
+      <input
+        name="tagType"
+        onClick={[Function]}
+        type="radio"
+        value="Other"
+      />
+    </div>
+    <div>
+      <input
+        name="number"
+        placeholder="Add Number"
+        type="number"
+      />
+      <br />
+      <br />
+    </div>
+  </div>
+  <button
+    type="submit"
+  >
+    Submit
+  </button>
+</form>
+`;

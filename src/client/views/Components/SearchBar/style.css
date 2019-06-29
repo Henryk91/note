@@ -1,0 +1,17 @@
+#searchBox{
+  font-size: 25px;
+  background: rgb(187, 59, 0);
+  border-bottom: 1px solid white;
+  margin-bottom: 0;
+}
+#userNameBox{
+  margin-top: 0;
+  font-size: 25px;
+  margin: 1px;
+  border-bottom: 1px solid white;
+  background: rgb(187, 59, 0);
+}
+header{
+
+  background: rgb(187, 59, 0);
+}
