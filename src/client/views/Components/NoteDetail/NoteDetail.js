@@ -175,7 +175,7 @@ export default class NoteDetail extends Component {
               )
       })
       return (
-        <div className="detailedBox" key={prop + i} onClick={() => showTag !== prop ? this.showTagChange(prop): null}>
+        <div className="detailedBox" key={prop + i} onClick={() => showTag !== prop && prop !== 'Log'  ? this.showTagChange(prop): null}>
           <h3 className="detailBoxTitle">{prop}:</h3> 
           {showDateSelector ?
             <form className="detailBoxTitle dateSelector" onSubmit={this.changeDate}>
@@ -190,7 +190,12 @@ export default class NoteDetail extends Component {
                 <button className="detailBoxTitleButton" onClick={() => this.showTagChange('')}> 
                   Hide </button> 
               </div>:
-              null 
+              prop === 'Log' ? 
+              <div> 
+                <button className="detailBoxTitleButton" onClick={() => this.showTagChange(prop)}> 
+                  Show </button> 
+              </div>:
+              null
           }
             { bunch }
         </div>
