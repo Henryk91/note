@@ -45,7 +45,7 @@ input[type="text"],[type="password"],[type="email"],[type="number"]{
   width: 200px;
   font-size: 18px;
 }
-editNoteTextarea{
+textarea{
   text-align: left;
   background: rgb(187, 59, 0);
   color: white;
@@ -132,7 +132,7 @@ h2{
 .logoutButton{
   position: absolute;
     top: 5vh;
-    left: 5vw;
+    left: 2.5vw;
     font-size: 20px;
     color: white;
     background: rgb(187, 59, 0);

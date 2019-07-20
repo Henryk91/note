@@ -64,8 +64,10 @@ export default class App extends Component {
     if (user !== '') {
       
       getMyNotes(user, (res) => {
-        res.sort(compareSort)
-        this.setState({ notes: res, filteredNotes: res })
+        if(res.length > 0){
+          res.sort(compareSort)
+          this.setState({ notes: res, filteredNotes: res })
+        }
       })
     } else {
       alert("Please add username at the top")
@@ -99,13 +101,6 @@ export default class App extends Component {
             <SearchBar set={this.setFilterNote} notes={this.state.notes} />
             <nav className="bigScreen" id="links">
               <Link
-                onClick={this.getAllNotes}
-                className="navLink"
-                to="/all"
-                title="All Note List">
-                Get All Notes
-              </Link>
-              <Link
                 onClick={this.getMyNotes}
                 className="navLink"
                 to="/"
@@ -136,7 +131,7 @@ export default class App extends Component {
             exact path='/new-note'
             component={() => <NewNote set={this.addNewNote} />}
           />
-            <button className="logoutButton" onClick={() => {localStorage.removeItem("loginKey"),localStorage.removeItem("user"), window.location.reload()}}>Log Out</button>
+            <button className="logoutButton" onClick={() => {localStorage.removeItem("loginKey"),localStorage.removeItem("user"), window.location.reload()}}>Done</button>
         </div>
           : <Login />}
       </Router>

@@ -73,15 +73,42 @@ export function createAccount(note, next) {
 }
 
 export function updateNote(note, next) {
-
+  let savedItems = localStorage.getItem("updateNote")
+  let toUpdate = []
+  if(savedItems){
+    toUpdate = JSON.parse(savedItems)
+    toUpdate.push(note);
+  } else {
+    toUpdate = [note]
+  }
+  localStorage.setItem("updateNote",JSON.stringify(toUpdate))
+  
+  toUpdate.forEach((note) => {
+    
     fetch(`/api/update`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
         body: JSON.stringify(note),
-    })
-        .then(response => console.log(response));
+        })
+        .then(response => {
+      let savedItems = localStorage.getItem("updateNote")
+      if(savedItems){
+        let saveItemArray = JSON.parse(savedItems);
+        
+        if(saveItemArray.length > 1){
+          saveItemArray = saveItemArray.slice(1)
+          localStorage.setItem("updateNote",JSON.stringify(saveItemArray))
+        } else {
+          localStorage.removeItem("updateNote")
+        }
+      }
+      console.log(response)
+    });
+    
+  })
+    
 }
 export function saveNewNote(newNote, next) {
 
