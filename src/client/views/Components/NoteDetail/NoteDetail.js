@@ -169,13 +169,13 @@ export default class NoteDetail extends Component {
       
       let bunch = sort[prop].map((item, ind) => {
         return (
-              <div>
+              <div >
                 <NoteItem key={item + prop} item={item} date={selectedDate} show={showButton} set={this.updateNoteItem} type={prop} index={ind} />
               </div>
               )
       })
       return (
-        <div className="detailedBox" key={prop + i}>
+        <div className="detailedBox" key={prop + i} onClick={() => showTag !== prop ? this.showTagChange(prop): null}>
           <h3 className="detailBoxTitle">{prop}:</h3> 
           {showDateSelector ?
             <form className="detailBoxTitle dateSelector" onSubmit={this.changeDate}>
@@ -190,7 +190,7 @@ export default class NoteDetail extends Component {
                 <button className="detailBoxTitleButton" onClick={() => this.showTagChange('')}> 
                   Hide </button> 
               </div>:
-              <div> <button className="detailBoxTitleButton" onClick={() => this.showTagChange(prop)}> Show </button> </div> 
+              null 
           }
             { bunch }
         </div>

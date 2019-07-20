@@ -45,7 +45,7 @@ input[type="text"],[type="password"],[type="email"],[type="number"]{
   width: 200px;
   font-size: 18px;
 }
-textarea{
+editNoteTextarea{
   text-align: left;
   background: rgb(187, 59, 0);
   color: white;
@@ -53,7 +53,6 @@ textarea{
   border-radius: 2px;
   margin-top: 5px;
   width: 80vw;
-  height: 80px;
   font-size: 18px;
 }
 #quickDay{
@@ -102,6 +101,8 @@ h2{
   margin: 0px 3px 0px 3px;
 }
 
+
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -120,9 +121,23 @@ h2{
   color: white;
 }
 
+
 @import url('./views/Components/SearchBar/style.css');
 @import url('./views/Components/Home/style.css');
 @import url('./views/Components/NoteDetail/style.css');
 @import url('./views/Components/NewNote/style.css');
 @import url('./views/Components/NoteItem/style.css');
 @import url('./views/Components/EditNoteCheck/style.css');
+
+.logoutButton{
+  position: absolute;
+    top: 5vh;
+    left: 5vw;
+    font-size: 20px;
+    color: white;
+    background: rgb(187, 59, 0);
+    border: 1px solid rgb(185, 185, 185);
+    border-radius: 2px !important;
+    padding:5px;
+    z-index: 1000;
+}

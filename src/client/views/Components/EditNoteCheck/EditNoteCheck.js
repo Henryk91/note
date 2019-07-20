@@ -34,7 +34,7 @@ export default class EditNoteCheck extends Component {
           {radioType === "Note" ?
             <div>
               <input name="tagTypeText" type="text" placeholder="Sub Heading" defaultValue={showTag} /><br />
-              <textarea name="number" type="text" placeholder="eg: Company, Note" />
+              <textarea className="editNoteTextarea" name="number" type="text" placeholder="eg: Company, Note" />
               <br /></div> :
             null
           }

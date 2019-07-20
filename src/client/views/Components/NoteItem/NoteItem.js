@@ -116,7 +116,10 @@ export default class NoteItem extends Component {
     let isLog = false
     
     if(item) isLog = item.includes("json")
-    
+    if(editing){
+      if(!this.props.show) this.setState({editingItem: false})
+      editing = this.props.show;
+    }
     return (
       <div key={item}>
         {item ? 

@@ -136,7 +136,7 @@ export default class App extends Component {
             exact path='/new-note'
             component={() => <NewNote set={this.addNewNote} />}
           />
-            <button onClick={() => {localStorage.removeItem("loginKey"),localStorage.removeItem("user"), window.location.reload()}}>Log Out</button>
+            <button className="logoutButton" onClick={() => {localStorage.removeItem("loginKey"),localStorage.removeItem("user"), window.location.reload()}}>Log Out</button>
         </div>
           : <Login />}
       </Router>
