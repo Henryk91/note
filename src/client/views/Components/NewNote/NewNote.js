@@ -19,11 +19,12 @@ export default class NewNote extends Component {
     let tag = event.target.tagType.value
 
     tag === "Note" ? tag = event.target.tagTypeText.value : tag
-
+    var loginKey = localStorage.getItem("loginKey")
     let uniqueId = docId();
     console.log(uniqueId)
     var note = {
       "id": uniqueId,
+      "userId": loginKey,
       "createdBy": "Unknown",
       "heading": heading,
       // "lastName": lastName,
@@ -36,6 +37,7 @@ export default class NewNote extends Component {
   setRadioType(type) {
     this.setState({ radioType: type })
   }
+
 
   render() {
     return (

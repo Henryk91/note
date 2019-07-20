@@ -35,7 +35,7 @@ Link{
 p{
   font-size: 18px;
 }
-input[type="text"],[type="email"],[type="number"]{
+input[type="text"],[type="password"],[type="email"],[type="number"]{
   text-align: center;
   background: rgb(187, 59, 0);
   color: white;
@@ -43,6 +43,17 @@ input[type="text"],[type="email"],[type="number"]{
   border-radius: 2px;
   margin-top: 5px;
   width: 200px;
+  font-size: 18px;
+}
+textarea{
+  text-align: left;
+  background: rgb(187, 59, 0);
+  color: white;
+  border: none;
+  border-radius: 2px;
+  margin-top: 5px;
+  width: 80vw;
+  height: 80px;
   font-size: 18px;
 }
 #quickDay{
@@ -54,7 +65,10 @@ input[type="text"],[type="email"],[type="number"]{
   background: rgba(187, 59, 0, 0.5);
 }
 @media(min-width: 1000px){
-  #quickDay, .weatherLine, .bigScreen{
+  textarea{
+    width: 200px;
+  }
+  #quickDay, .weatherLine, .bigScreen, textarea{
     margin-left:20vw;
     width: 60vw; 
   }
@@ -85,6 +99,7 @@ h2{
   border: 1px solid white;
   border-radius: 2px;
   padding: 1px;
+  margin: 0px 3px 0px 3px;
 }
 
 @keyframes spin {

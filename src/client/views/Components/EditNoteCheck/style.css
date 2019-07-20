@@ -5,3 +5,9 @@ label{
     color: #231f20;
     margin: 5px;
 }
+@media(min-width: 1000px){
+  textarea{
+    margin-left:0vw;
+    width: 60vw; 
+  }
+}

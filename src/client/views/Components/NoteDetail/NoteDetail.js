@@ -7,16 +7,20 @@ export default class NoteDetail extends Component {
     super(props);
     this.state = {
       person: null,
+      showItem: false,
       showAddItem: false,
       editName: false,
       number: null,
       email: null,
-      tags: null
+      tags: null,
+      showTag: '',
+      displayDate: null,
     }
     this.addItem = this.addItem.bind(this)
     this.submitNewItem = this.submitNewItem.bind(this)
     this.getNoteByTag = this.getNoteByTag.bind(this)
     this.editNameBox = this.editNameBox.bind(this)
+    this.showTagChange = this.showTagChange.bind(this)
   }
 
   componentDidMount() {
@@ -39,12 +43,36 @@ export default class NoteDetail extends Component {
     let person = this.state.person
     let number = event.target.number.value
     let tag = event.target.tagType.value
+    
+    let textTag = event.target.tagTypeText.value 
+    
+    tag === "Note" ? tag = textTag : tag
 
-    tag === "Note" ? tag = event.target.tagTypeText.value : tag
-
+    if(tag === "Log"){
+      
+      let date = new Date(textTag);
+      var month = new Array();
+      month[0] = "January";
+      month[1] = "February";
+      month[2] = "March";
+      month[3] = "April";
+      month[4] = "May";
+      month[5] = "June";
+      month[6] = "July";
+      month[7] = "August";
+      month[8] = "September";
+      month[9] = "October";
+      month[10] = "November";
+      month[11] = "December";
+      var n = month[date.getMonth()];
+      
+      // tag = (date.getMonth()+1) + " " + n;
+      
+      number = JSON.stringify({ json : true,  date : textTag , data: number })
+    } 
+    
     person.dataLable.push({ tag: tag, data: number })
     this.props.set({ person })
-    console.log(event.target.number.value)
 
     this.refreshItems(person)
     this.setState({ showAddItem: false })
@@ -53,9 +81,11 @@ export default class NoteDetail extends Component {
   addItem() {
     return (
       <form onSubmit={this.submitNewItem}>
-        <EditNoteCheck />
+        <EditNoteCheck showTag={this.state.showTag} />
+        <br/>
         <button type="submit">Add</button>
-        <button onClick={() => this.setState({ showAddItem: false })}>Cancel</button>
+        <button onClick={() => this.setState({ showAddItem: false })}> Cancel </button>
+        <br />
       </form>
     )
   }
@@ -79,42 +109,90 @@ export default class NoteDetail extends Component {
 
     let person = this.state.person
     person.heading = heading;
-    // person.lastName = lastName;
 
     this.setState({ person, editName: false })
     this.props.set({ person })
+  }
+  
+  changeDate = (e) => {
+    e.preventDefault();
+    let selectedDate = e.target.dateSelector.value
+    
+    if(!selectedDate) selectedDate = new Date()
+
+    this.setState({displayDate : selectedDate})
   }
 
   editNameBox(heading) {
     return (
       <form onSubmit={this.submitNameChange}>
-        <input name="heading" type="text" defaultValue={heading}></input><br />
-        {/* <input name="lastName" type="text" defaultValue={lastName}></input><br /> */}
+        <br />
+        <input className="changeNameHeading" name="heading" type="text" defaultValue={heading}></input>
+        <br />
+        <br />
         <button type="submit">Submit</button>
         <button onClick={() => this.setState({ editName: false })}>Cancel</button>
+        <br />
+        <br />
       </form>
     )
   }
 
-  getNoteByTag = (items) => {
+  showTagChange = (tagName) => {
+    let person = this.state.person;
+    this.setState({ showTag: tagName})
+    let tags = this.getNoteByTag(person.dataLable, tagName)
+      this.setState({ person, tags })
+  }
+
+  getNoteByTag = (items, showTag) => {
+    let showItem = this.state.showItem
     let sort = {}
     items.forEach((tag) => {
       sort[tag.tag] ? sort[tag.tag].push(tag.data) : sort[tag.tag] = [tag.data]
-      console.log(tag.tag)
     })
 
-    let propertyArray = Object.keys(sort);
+    let propertyArray = Object.keys(sort).sort();
     let all = propertyArray.map((prop, i) => {
-
+      
+      let showButton = false;
+      let showDateSelector = false
+      
+      if(prop === 'Log') showDateSelector = true
+      
+      let stateShowTag = this.state.showTag;
+      let selectedDate = this.state.displayDate
+      
+      if(showTag === prop){
+        showButton = true
+      }
+      
       let bunch = sort[prop].map((item, ind) => {
         return (
-          <NoteItem key={item + prop} item={item} set={this.updateNoteItem} type={prop} index={ind} />
-        )
+              <div>
+                <NoteItem key={item + prop} item={item} date={selectedDate} show={showButton} set={this.updateNoteItem} type={prop} index={ind} />
+              </div>
+              )
       })
       return (
         <div className="detailedBox" key={prop + i}>
-          <h3>{prop}:</h3>
-          {bunch}
+          <h3 className="detailBoxTitle">{prop}:</h3> 
+          {showDateSelector ?
+            <form className="detailBoxTitle dateSelector" onSubmit={this.changeDate}>
+              <input  type="date" name="dateSelector" /> 
+              <button type="submit">Select</button>
+            </form>:
+            ''
+          }
+          {
+            showButton ?
+              <div> 
+                <button className="detailBoxTitleButton" onClick={() => this.showTagChange('')}> 
+                  Hide </button> 
+              </div>:
+              <div> <button className="detailBoxTitleButton" onClick={() => this.showTagChange(prop)}> Show </button> </div> 
+          }
+            { bunch }
         </div>
       )
     })
@@ -131,7 +209,7 @@ export default class NoteDetail extends Component {
 
     return (
       <div >
-        <Link id="detailBackButton" to="/" title="Note List">Back</Link>
+        <Link id="detailBackButton" to="/" title="Note List" >Back</Link>
         {person ?
           <div key={person.id}>
 
@@ -139,21 +217,26 @@ export default class NoteDetail extends Component {
               <div>{editNameB}</div> :
               <div >
                 <h1>{person.heading}</h1>
+              {showAddItem ? '':
                 <button
                   className="detailEditBoxButton"
                   onClick={() => this.setState({ editName: true })}>
                   Edit Name
                 </button>
-              </div>
-            }
+              }
+              { editName ? '':
             <button
               className="detailEditBoxButton"
-              onClick={() => this.setState({ showAddItem: true })}>
+              onClick={() => showAddItem ? this.setState({ showAddItem: false }) : this.setState({ showAddItem: true })}>
               Add Item
             </button>
+            }
+              <br />
+              </div>
+            }
             {showAddItem ? <div> {this.addItem()}</div> : null}
-
-            {tags ? <div> {tags} <br /></div> : null}
+            {tags ? <div> {tags} </div> : null}
+            <br />
           </div> :
           null
         }

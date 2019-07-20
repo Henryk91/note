@@ -1,8 +1,8 @@
 
 import React, { Component } from 'react'
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
-import { Home, SearchBar, NoteDetail, NewNote } from './views/Components/index';
-import { getMyNotes, saveNewNote, updateNote } from '../client/views/Helpers/requests'
+import { Home, SearchBar, NoteDetail, NewNote, Login } from './views/Components/index';
+import { getMyNotes, saveNewNote, updateNote, getAllNotes } from '../client/views/Helpers/requests'
 
 
 export default class App extends Component {
@@ -12,18 +12,23 @@ export default class App extends Component {
       notes: null,
       limitNotes: null,
       filteredNotes: null,
-      user: ''
+      user: '',
+      loginKey: null,
+      notesInitialLoad: false
     }
     this.addNewNote = this.addNewNote.bind(this)
     this.updateNote = this.updateNote.bind(this)
     this.setFilterNote = this.setFilterNote.bind(this)
-    // this.getAllNotes = this.getAllNotes.bind(this)
     this.getMyNotes = this.getMyNotes.bind(this)
+    this.getNotesOnLoad = this.getNotesOnLoad.bind(this)
+    this.getAllNotes = this.getAllNotes.bind(this)
   }
 
   componentWillMount() {
+    var loginKey = localStorage.getItem("loginKey")
     var user = localStorage.getItem("user")
     user !== null ? this.setState({ user }) : null
+    loginKey !== null ? this.setState({ loginKey }) : null
   }
 
   addNewNote = (val) => {
@@ -43,22 +48,21 @@ export default class App extends Component {
     updateNote(update, () => alert("setn"))
     this.setState({ notes, filteredNotes: notes })
   }
-
-  // getAllNotes() {
-  //   let user = this.state.user
-  //   if (user !== '') {
-  //     getAllNotes((res) => {
-  //       res.sort(compareSort)
-  //       this.setState({ notes: res, filteredNotes: res })
-  //     })
-  //   } else {
-  //     alert("Please add username at the top")
-  //   }
-  // }
+  
+  getAllNotes(){
+    let tempPass = this.state.loginKey
+    
+     getAllNotes((res) => {
+        res.sort(compareSort)
+        this.setState({ notes: res, filteredNotes: res })
+      })
+  }
 
   getMyNotes() {
     let user = this.state.user
+    let tempPass = this.state.loginKey
     if (user !== '') {
+      
       getMyNotes(user, (res) => {
         res.sort(compareSort)
         this.setState({ notes: res, filteredNotes: res })
@@ -72,13 +76,35 @@ export default class App extends Component {
     this.setState({ filteredNotes: val.filteredNotes, user: val.user })
   }
 
+  getNotesOnLoad(){
+    var notesLoaded = this.state.notesInitialLoad
+    if(!notesLoaded){
+      var loggedIn = this.state.loginKey
+      var user = this.state.user
+      if(loggedIn && !notesLoaded && user !== ''){
+        this.getMyNotes();
+        this.setState({notesInitialLoad: true})
+      }
+    }
+  }
+
   render() {
+    var loggedIn = this.state.loginKey
+    this.getNotesOnLoad();
     return (
       <Router>
+        { loggedIn ? 
         <div>
           <header>
             <SearchBar set={this.setFilterNote} notes={this.state.notes} />
             <nav className="bigScreen" id="links">
+              <Link
+                onClick={this.getAllNotes}
+                className="navLink"
+                to="/all"
+                title="All Note List">
+                Get All Notes
+              </Link>
               <Link
                 onClick={this.getMyNotes}
                 className="navLink"
@@ -86,23 +112,18 @@ export default class App extends Component {
                 title="Note List">
                 Get Notes
               </Link>
-              {/* <Link
-                onClick={this.getAllNotes}
-                className="navLink"
-                to="/"
-                title="Note List">
-                All Notes
-              </Link> */}
-              <span>
                 <Link
                   id="lastNavLink"
                   className="navLink"
                   to={`/new-note/`}>
                   Add Note
               </Link>
-              </span>
             </nav>
           </header>
+            <Route
+            exact path='/all'
+            component={(props) => <Home {...props} notes={this.state.notes} />}
+          />
           <Route
             exact path='/'
             component={(props) => <Home {...props} notes={this.state.filteredNotes} />}
@@ -115,7 +136,9 @@ export default class App extends Component {
             exact path='/new-note'
             component={() => <NewNote set={this.addNewNote} />}
           />
+            <button onClick={() => {localStorage.removeItem("loginKey"),localStorage.removeItem("user"), window.location.reload()}}>Log Out</button>
         </div>
+          : <Login />}
       </Router>
     )
   }

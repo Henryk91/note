@@ -1,17 +1,16 @@
-.noteItem{
-    display: inline-block;
-}
 
 .detailedBox{
     background: rgb(241, 241, 241);
     border: 1px solid rgb(185, 185, 185);
-    width: 70vw;
-    margin-left: 10vw;
+    width: 90vw;
+    margin-left: 0vw;
     margin-top: 2px;
     text-align: left;
     padding-left: 5vw; 
     padding-right: 5vw;
-    height: fit-content;
+}
+.changeNameHeading{
+  font-size: 30px !important;
 }
 .detailedBox > div{
     padding: 0px;
@@ -19,6 +18,7 @@
 }
 .detailEditBoxButton{
     font-size: 20px;
+  display: inline-block !important;
 }
 @media(min-width: 1000px){
     .detailedBox{
@@ -28,8 +28,8 @@
   }
   #detailBackButton{
     position: fixed;
-    top:40vh;
-    right: 10vw;
+    top: 5vh;
+    right: 5vw;
     font-size: 20px;
     color: white;
     background: rgb(187, 59, 0);
@@ -41,4 +41,18 @@
 #detailBackButton:hover{
   background: rgba(187, 59, 0, 0.7);
 }
+.detailBoxTitle{
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
 
+.detailBoxTitleButton{
+  position: relative;
+  float:right;
+  margin-right: 0px;
+  margin-top: -43px;
+}
+
+.dateSelector{
+  margin-left: 20px;
+}

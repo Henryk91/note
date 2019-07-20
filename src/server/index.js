@@ -1,6 +1,7 @@
 const express = require('express');
 var getNotes = require("./routes/getNotes");
 var updateNotes = require("./routes/updateNotes");
+var userCheck = require("./routes/userCheck");
 const bodyParser = require('body-parser')
 
 
@@ -17,6 +18,8 @@ app.use("/api/note", getNotes);
 
 
 updateNotes(app)
+
+userCheck(app)
 
 app.get('/*', function (req, res) {
 
