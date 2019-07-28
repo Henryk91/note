@@ -2,7 +2,7 @@
 import React, { Component } from 'react'
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import { Home, SearchBar, NoteDetail, NewNote, Login } from './views/Components/index';
-import { getMyNotes, saveNewNote, updateNote, getAllNotes } from '../client/views/Helpers/requests'
+import { getMyNotes, saveNewNote, updateNote, getAllNotes, getNoteNames } from '../client/views/Helpers/requests'
 
 
 export default class App extends Component {
@@ -14,14 +14,18 @@ export default class App extends Component {
       filteredNotes: null,
       user: '',
       loginKey: null,
-      notesInitialLoad: false
+      notesInitialLoad: false,
+      noteNames: null,
+      selectedNoteName: '',
     }
     this.addNewNote = this.addNewNote.bind(this)
     this.updateNote = this.updateNote.bind(this)
+    this.noteDetailSet = this.noteDetailSet.bind(this)
     this.setFilterNote = this.setFilterNote.bind(this)
     this.getMyNotes = this.getMyNotes.bind(this)
     this.getNotesOnLoad = this.getNotesOnLoad.bind(this)
     this.getAllNotes = this.getAllNotes.bind(this)
+    this.getNoteNames = this.getNoteNames.bind(this)
   }
 
   componentWillMount() {
@@ -41,6 +45,18 @@ export default class App extends Component {
     this.setState({ notes: updatedNote, filteredNotes: updatedNote })
   }
 
+  noteDetailSet = (msg) => {
+    
+    if(msg.noteName){
+      
+      let noteName = msg.noteName;
+      this.setState({user: noteName })
+      this.getMyNotes(noteName);
+    } else {
+      this.updateNote(msg);
+    }
+  }
+  
   updateNote = (update) => {
     let notes = this.state.notes;
     let index = notes.indexOf((val) => val.id === update.id)
@@ -58,16 +74,21 @@ export default class App extends Component {
       })
   }
 
-  getMyNotes() {
+  getMyNotes(noteName) {
     let user = this.state.user
+    
+    if(noteName) user = noteName;
+    
     let tempPass = this.state.loginKey
+    
     if (user !== '') {
-      
+      localStorage.setItem("user", user);
       getMyNotes(user, (res) => {
         if(res.length > 0){
           res.sort(compareSort)
-          this.setState({ notes: res, filteredNotes: res })
         }
+        this.setState({ notes: res, filteredNotes: res })
+        
       })
     } else {
       alert("Please add username at the top")
@@ -78,12 +99,30 @@ export default class App extends Component {
     this.setState({ filteredNotes: val.filteredNotes, user: val.user })
   }
 
+  getNoteNames(){
+    var loggedIn = this.state.loginKey;
+    var user = this.state.user;
+    var notesLoaded = this.state.notesInitialLoad
+    var noteNames = this.state.noteNames
+    if(loggedIn && !notesLoaded && !noteNames){
+         getNoteNames((res) => {
+            if(res.length > 0){
+              res.push('All')
+              res.push('None')
+              this.setState({noteNames: res})
+            }
+          })
+       }
+  }
+
   getNotesOnLoad(){
     var notesLoaded = this.state.notesInitialLoad
     if(!notesLoaded){
       var loggedIn = this.state.loginKey
       var user = this.state.user
+      this.getNoteNames();
       if(loggedIn && !notesLoaded && user !== ''){
+        
         this.getMyNotes();
         this.setState({notesInitialLoad: true})
       }
@@ -92,13 +131,14 @@ export default class App extends Component {
 
   render() {
     var loggedIn = this.state.loginKey
+    let noteNames = this.state.noteNames;
     this.getNotesOnLoad();
     return (
       <Router>
         { loggedIn ? 
         <div>
           <header>
-            <SearchBar set={this.setFilterNote} notes={this.state.notes} />
+            <SearchBar set={this.setFilterNote} noteName={this.state.user} notes={this.state.notes} />
             <nav className="bigScreen" id="links">
               <Link
                 onClick={this.getMyNotes}
@@ -121,11 +161,11 @@ export default class App extends Component {
           />
           <Route
             exact path='/'
-            component={(props) => <Home {...props} notes={this.state.filteredNotes} />}
+            component={(props) => <Home noteNames={noteNames} {...props} notes={this.state.filteredNotes} />}
           />
           <Route
             exact path='/notes/:id'
-            render={(props) => <NoteDetail {...props} set={this.updateNote} notes={this.state.notes} />}
+            render={(props) => <NoteDetail noteNames={noteNames} {...props} set={this.noteDetailSet} notes={this.state.notes} />}
           />
           <Route
             exact path='/new-note'

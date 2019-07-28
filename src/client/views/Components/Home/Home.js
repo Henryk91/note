@@ -9,17 +9,24 @@ export default class Home extends Component {
             list: null
         }
     }
+  
     render() {
         let list = this.props.notes
+        let noteNames = this.props.noteNames
         return (
             <div id="home">
+                { noteNames ?
+                      <Link  id="noteBooksButton" style={{ textDecoration: 'none' }} to={`/notes/note-names`}> Notes 
+                    </Link> 
+                      : null 
+                      }
                 {list ?
                     <div>
                       <br />
                       {createList(list)}
                       <br />
                     </div> :
-                    <h3>Please add your name at the top then <br /> click My Notes or All Notes.</h3>
+                    <h3>Please add note book name <br /> at the top then click Get Notes</h3>
                 }
             </div>
         );

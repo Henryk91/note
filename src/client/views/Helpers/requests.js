@@ -1,4 +1,24 @@
+export function getNoteNames(next) {
+  var loginKey = localStorage.getItem("loginKey")
+    fetch(`/api/note-names`+ '?tempPass='+loginKey)
+        .then(res => res.json())
+        .then(data => {
+            if(data === "Logout User"){
+              localStorage.removeItem("loginKey")
+              localStorage.removeItem("user")
+              window.location.reload()
+            } else {
+              next(data)
+            }
+            
+        })
+        .catch((error) => {
+            next(error)
+        });
+}
+
 export function getAllNotes(next) {
+  
   var loginKey = localStorage.getItem("loginKey")
     fetch(`/api/note?user=all`+ '&tempPass='+loginKey)
         .then(res => res.json())
@@ -18,6 +38,7 @@ export function getAllNotes(next) {
 }
 
 export function getMyNotes(user, next) {
+
   var loginKey = localStorage.getItem("loginKey")
     fetch(`/api/note?user=` + user + '&tempPass='+loginKey)
         .then(res => res.json())
@@ -101,7 +122,11 @@ export function updateNote(note, next) {
           saveItemArray = saveItemArray.slice(1)
           localStorage.setItem("updateNote",JSON.stringify(saveItemArray))
         } else {
-          localStorage.removeItem("updateNote")
+          if(saveItemArray.length === 0){
+            localStorage.setItem("updateNote",JSON.stringify([note]))
+          } else {
+            localStorage.removeItem("updateNote")
+          }
         }
       }
       console.log(response)

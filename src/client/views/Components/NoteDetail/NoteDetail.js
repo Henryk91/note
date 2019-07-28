@@ -21,6 +21,8 @@ export default class NoteDetail extends Component {
     this.getNoteByTag = this.getNoteByTag.bind(this)
     this.editNameBox = this.editNameBox.bind(this)
     this.showTagChange = this.showTagChange.bind(this)
+    this.showHideBox = this.showHideBox.bind(this)
+    this.showNoteNames = this.showNoteNames.bind(this)
   }
 
   componentDidMount() {
@@ -80,7 +82,7 @@ export default class NoteDetail extends Component {
 
   addItem() {
     return (
-      <form onSubmit={this.submitNewItem}>
+      <form  onSubmit={this.submitNewItem}>
         <EditNoteCheck showTag={this.state.showTag} />
         <br/>
         <button type="submit">Add</button>
@@ -144,13 +146,37 @@ export default class NoteDetail extends Component {
     let tags = this.getNoteByTag(person.dataLable, tagName)
       this.setState({ person, tags })
   }
-
+  
+  showNoteNames = (names) => {
+  
+  return names.map((name) => {
+    return (
+      <Link style={{ textDecoration: 'none' }} to="/" title="Note List" >
+      <div className="listNameButton" key={name} onClick={() => this.props.set({ noteName: name })}>      
+          <h3> { name } </h3>   
+      </div> 
+        </Link>
+    )
+  })
+}
+  
+  showHideBox = (showTag , prop) => {
+    
+      if (showTag !== prop && prop !== 'Log') {
+        this.showTagChange(prop)
+      } else if(showTag !== '' && prop !== 'Log') {
+        this.showTagChange('')
+      }
+    }
+  
   getNoteByTag = (items, showTag) => {
     let showItem = this.state.showItem
     let sort = {}
     items.forEach((tag) => {
       sort[tag.tag] ? sort[tag.tag].push(tag.data) : sort[tag.tag] = [tag.data]
     })
+    
+    
 
     let propertyArray = Object.keys(sort).sort();
     let all = propertyArray.map((prop, i) => {
@@ -175,17 +201,27 @@ export default class NoteDetail extends Component {
               )
       })
       return (
-        <div className="detailedBox" key={prop + i} onClick={() => showTag !== prop && prop !== 'Log'  ? this.showTagChange(prop): null}>
+        <div  className="detailedBox" key={prop + i} onClick={() => showTag !== prop && prop !== 'Log'  ? this.showTagChange(prop): null}>
+          <div className="detailTitleBox" onClick={() => this.showHideBox(showTag,prop)}>
           <h3 className="detailBoxTitle">{prop}:</h3> 
-          {showDateSelector ?
+            
+          
+            {showDateSelector ?
             <form className="detailBoxTitle dateSelector" onSubmit={this.changeDate}>
               <input  type="date" name="dateSelector" /> 
               <button type="submit">Select</button>
             </form>:
             ''
           }
+          { prop !== 'Log'? 
+          <div> 
+                <button className="detailBoxTitleButton" onClick={() => {window.scrollTo(0, 0), this.setState({ showAddItem: true })}}> 
+                  Add </button> 
+              </div> 
+            : null
+          }
           {
-            showButton ?
+            showTag === 'Log'?
               <div> 
                 <button className="detailBoxTitleButton" onClick={() => this.showTagChange('')}> 
                   Hide </button> 
@@ -194,9 +230,11 @@ export default class NoteDetail extends Component {
               <div> 
                 <button className="detailBoxTitleButton" onClick={() => this.showTagChange(prop)}> 
                   Show </button> 
-              </div>:
-              null
+              </div>
+              : null
           }
+            </div>
+          
             { bunch }
         </div>
       )
@@ -211,17 +249,21 @@ export default class NoteDetail extends Component {
     let editNameB = null;
 
     person ? editNameB = this.editNameBox(person.heading) : editNameB = null
-
+    
+    
+    const isNoteNames = this.props.match.url === '/notes/note-names'
+     let noteNameBlock = isNoteNames ? this.showNoteNames(this.props.noteNames) : null
     return (
       <div >
         <Link id="detailBackButton" to="/" title="Note List" >Back</Link>
+        { isNoteNames ? <div> <br /> { noteNameBlock } </div> : null }
         {person ?
           <div key={person.id}>
 
             {editName ?
               <div>{editNameB}</div> :
               <div >
-                <h1>{person.heading}</h1>
+                <h1 >{person.heading}</h1>
               {showAddItem ? '':
                 <button
                   className="detailEditBoxButton"
@@ -251,6 +293,16 @@ export default class NoteDetail extends Component {
   }
 }
 
+
+
 const getPerson = (notes, propForId) => {
+  
+  if(propForId === "note-name") {
+    console.log("NoteName")
+    
+    return this.props.noteNames
+  }
+  console.log(notes ? notes.filter((val) => val.id == propForId.params.id)[0] : null)
+  
   return notes ? notes.filter((val) => val.id == propForId.params.id)[0] : null
 }

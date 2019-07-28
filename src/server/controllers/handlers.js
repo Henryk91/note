@@ -37,6 +37,11 @@ module.exports = function () {
           }
           return text;
         }
+    
+    function onlyUnique(value, index, self) { 
+        return self.indexOf(value) === index;
+    }
+  
     this.newUser = (req, done) => {
          
         var user = req
@@ -159,6 +164,35 @@ module.exports = function () {
             done("Logout User")
           }
         })
+    }
+    
+    this.getNoteNames = (req , done ) => {
+      
+      var pass = req.query.tempPass;
+      var permId = null
+      
+      noteUser.find({tempPass : pass } , (err, docs) => {
+
+          if(docs[0]){
+            permId = docs[0].permId
+      
+            
+        Note.find({userId: permId} , (err, docs) => {
+            if(err) {
+              console.log(err) 
+              done("No notes") 
+            }
+            let nameArray = docs.map(doc => doc = doc.createdBy)
+            
+            var unique = nameArray.filter( onlyUnique );
+              done(unique)
+          })  
+            } else {
+            
+            done("Logout User")
+          }
+        })
+      
     }
 
     this.updateNote = (req , done) => {

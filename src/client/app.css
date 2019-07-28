@@ -65,9 +65,9 @@ textarea{
 }
 @media(min-width: 1000px){
   textarea{
-    width: 200px;
+    width: 60vw; 
   }
-  #quickDay, .weatherLine, .bigScreen, textarea{
+  #quickDay, .weatherLine, .bigScreen{
     margin-left:20vw;
     width: 60vw; 
   }

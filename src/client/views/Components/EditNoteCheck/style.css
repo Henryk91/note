@@ -11,6 +11,6 @@ editNoteTextArea{
 @media(min-width: 1000px){
   editNoteTextarea{
     margin-left:0vw;
-    width: 60vw; 
+    width: 10vw; 
   }
 }
