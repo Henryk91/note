@@ -1,22 +1,75 @@
 .noteItemBox{
     margin:0;
     width:100%;
+    height: 100%;
 }
-.noteItemBox > button{
-    float: right;
-    margin: 0;
-    margin-left: 5px;
-}
+
 .noteItem{
-    margin: 4px;
-    padding: 0px;
+/*   white-space: pre-line; */
+/*     margin: 4px; */
+  overflow: hidden;
+  margin-right: 0px;
+    padding: 0px !important;
+  width: 85%;
+  display: inline-block !important;
 }
-#noteItemEditBox > button{
+.noteItemEditBox > button{
     margin-top: 5px; 
     float: none
 }
-#noteItemEditBox{
-    margin-bottom: 10px; 
-    height: 60px;
+.editTextarea{
+  
+  height: 100%;
+  width: 100%;
+  text-align: left;
+  background: rgb(187, 59, 0);
+  color: white;
+  border: none;
+  border-radius: 2px;
+  margin-top: 5px;
+  width: 80vw;
+  font-size: 18px;
+}
+.editButtons{
+  
+  float:right;
+  margin: 5px;
+  margin-top: 20px;
+  margin-left: 0px;
+  display: inline-block !important;
+}
+
+.noteItemEditBox{
+    padding-bottom: 10px;
+    margin-bottom: 80px !important; 
     text-align: center;
+    height: 40vh;
+}
+
+.dateHeading{
+  color: black;
+}
+@media(min-width: 1000px){
+  .editTextarea{
+    margin-left:0vw;
+    width: 100%; 
+  }
+  .noteItem{
+    width: 90%;
+  }
+}
+.viewerBox{
+  padding: 0;
+  margin: 0;
+}
+.preview{
+ padding-top:0;
+  padding-bottom:0;
+  margin-top:0;
+  margin-bottom:0;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
 }

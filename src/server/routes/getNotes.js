@@ -7,19 +7,19 @@ var dbHandler = new Handler();
 
 
 
-router.get("/", function (req, res) {
+router.get('/', function (req, res) {
+  
   var user = req.query.user;
-
-//   if(false){
-//   dbHandler.getAllNotes((docs) => {
-//     res.json(docs)
-//   })
-// }else {
-
-  dbHandler.getMyNotes(user , (docs) => {
+  if(user === 'all' || user === 'All'){
+  dbHandler.getAllNotes(req, (docs) => {
     res.json(docs)
   })
-// }
+} else {
+  
+  dbHandler.getMyNotes(req , (docs) => {
+    res.json(docs)
+  })
+}
   // res.json(noteDummy)
 });
 

@@ -5,3 +5,12 @@ label{
     color: #231f20;
     margin: 5px;
 }
+editNoteTextArea{
+  height: 80px;
+}
+@media(min-width: 1000px){
+  editNoteTextarea{
+    margin-left:0vw;
+    width: 10vw; 
+  }
+}

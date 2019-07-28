@@ -3,8 +3,8 @@
   background: rgb(241, 241, 241);
   border: 1px solid rgb(185, 185, 185);
   margin-top: 2px;
-  width: 80vw;
-  margin-left: 10vw;
+  width: 90vw;
+  margin-left: 5vw;
 }
 
 @media(min-width: 1000px){
@@ -12,4 +12,19 @@
     width: 40vw;
     margin-left: 30vw;
   }
+}
+#noteBooksButton{
+    position: absolute;
+    top: 5vh;
+    right: 2.5vw;
+    font-size: 20px;
+    color: white;
+    background: rgb(187, 59, 0);
+    border: 1px solid rgb(185, 185, 185);
+    border-radius: 2px !important;
+    padding:5px;
+    z-index: 1000;
+}
+#noteBooksButton:hover{
+  background: rgba(187, 59, 0, 0.7);
 }

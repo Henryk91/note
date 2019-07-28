@@ -20,18 +20,21 @@ export default class SearchBar extends Component {
             let searchTerm = this.title.value
             note = note.filter((val) => {
                 let firtName = val.heading.toLowerCase()
-                // let lastName = val.lastName.toLowerCase()
                 let term = searchTerm.toLowerCase()
                 return firtName.includes(term)
             })
         }
-        localStorage.setItem("user", this.title2.value);
+        // localStorage.setItem("user", this.title2.value);
         this.props.set({ filteredNotes: note, user: this.title2.value })
     }
 
     render() {
-        var user = localStorage.getItem("user")
-
+        var user = this.props.noteName
+        
+        if (user && this.title2){
+         this.title2.value = user 
+          // localStorage.setItem("user", user);
+        }
         return (
             <header>
                 <input
@@ -40,7 +43,7 @@ export default class SearchBar extends Component {
                     aria-label="User Name"
                     onKeyUp={this.search}
                     defaultValue={user}
-                    placeholder="Add Username" >
+                    placeholder="Add Note Name" >
                 </input><br />
                 <input
                     id="searchBox"
@@ -49,7 +52,7 @@ export default class SearchBar extends Component {
                     type="text" ref={(c) => this.title = c}
                     placeholder="Search By Name..." >
                 </input>
-                {this.state.search ? <div className="loader"></div> : null}
+                {this.state.search ? <div id="addItem" className="loader"></div> : null}
             </header>
         )
     }
