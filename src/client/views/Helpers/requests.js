@@ -94,6 +94,7 @@ export function createAccount(note, next) {
 }
 
 export function updateNote(note, next) {
+  var loginKey = localStorage.getItem("loginKey")
   let savedItems = localStorage.getItem("updateNote")
   let toUpdate = []
   if(savedItems){
@@ -106,7 +107,7 @@ export function updateNote(note, next) {
   
   toUpdate.forEach((note) => {
     
-    fetch(`/api/update`, {
+    fetch(`/api/update?tempPass=`+loginKey, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

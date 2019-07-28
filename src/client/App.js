@@ -61,6 +61,7 @@ export default class App extends Component {
     let notes = this.state.notes;
     let index = notes.indexOf((val) => val.id === update.id)
     notes[index] = update
+
     updateNote(update, () => alert("setn"))
     this.setState({ notes, filteredNotes: notes })
   }
@@ -85,6 +86,7 @@ export default class App extends Component {
       localStorage.setItem("user", user);
       getMyNotes(user, (res) => {
         if(res.length > 0){
+         
           res.sort(compareSort)
         }
         this.setState({ notes: res, filteredNotes: res })

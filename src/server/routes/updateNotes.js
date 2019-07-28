@@ -7,7 +7,8 @@ module.exports = function (app) {
     dbHandler.newNote(req.body ,(dbResp) => res.json({ Ok: dbResp }))
   })
   app.post('/api/update', function (req, res) {
-    dbHandler.updateNote(req.body ,(dbResp) => res.json({ Ok: dbResp }))
+    
+    dbHandler.updateNote(req,(dbResp) => res.json({ Ok: dbResp }))
     res.json({ Ok: '100' })
   })
 };

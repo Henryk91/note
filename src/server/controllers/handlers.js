@@ -157,6 +157,11 @@ module.exports = function () {
               console.log(err) 
               done("No notes") 
             }
+            docs = docs.map(doc => {
+              
+              return {createdBy: doc.createdBy, dataLable: doc.dataLable, heading: doc.heading, id: doc.id};
+            })
+              
               done(docs)
           })  
             } else {
@@ -197,11 +202,22 @@ module.exports = function () {
 
     this.updateNote = (req , done) => {
 
-        console.log(req.person.id)
-        let updateNoteId = req.person.id
-        Note.findOne({id: updateNoteId} , (err, doc) => {
+        console.log(req.query.tempPass)
+        console.log(req.body.person.id)
+        let updateNoteId = req.body.person.id
+        
+        
+        var pass = req.query.tempPass;
+      var permId = null
+      
+      noteUser.find({tempPass : pass } , (err, docs) => {
+
+          if(docs[0]){
+            permId = docs[0].permId
+            
+        Note.findOne({id: updateNoteId, userId: permId} , (err, doc) => {
             if(err) console.log(err)
-            let update = req.person;
+            let update = req.body.person;
             doc.heading = update.heading
             doc.dataLable = update.dataLable
             doc.save(function (err) {
@@ -212,7 +228,11 @@ module.exports = function () {
                 
             })
         })
+        
+      
         done
+          }
+      })
     }
 }
 
