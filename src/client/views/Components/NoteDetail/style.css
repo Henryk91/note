@@ -26,21 +26,8 @@
       margin-left: 25vw;
     }
   }
-  #detailBackButton{
-    position: fixed;
-    top: 5vh;
-    right: 5vw;
-    font-size: 20px;
-    color: white;
-    background: rgb(187, 59, 0);
-    border: 1px solid rgb(185, 185, 185);
-    border-radius: 2px !important;
-    padding:5px;
-    z-index: 1000;
-}
-#detailBackButton:hover{
-  background: rgba(187, 59, 0, 0.7);
-}
+
+
 .detailBoxTitle{
   display: inline-block !important;
   vertical-align: middle !important;
@@ -55,4 +42,15 @@
 
 .dateSelector{
   margin-left: 20px;
+}
+.nameBox{
+  display: inline-block;
+  color: white !important;
+}
+#nameBoxButton{
+  margin-left: 50px !important;
+  border-radius: 50px;
+  background: rgb(187, 59, 0);
+  padding: 4px 7px 4px 7px;
+  color: white;
 }

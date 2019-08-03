@@ -135,11 +135,8 @@ export default class App extends Component {
             <header>
               <SearchBar set={this.setFilterNote} noteName={this.state.user} notes={this.state.notes} />
               <nav className="bigScreen" id="links">
-                <Link onClick={this.getMyNotes} className="navLink" to="/" title="Note List">
-                  Get Notes
-                </Link>
-                <Link id="lastNavLink" className="navLink" to={`/new-note/`}>
-                  Add Note
+                <Link style={{ textDecoration: 'none' }} id="menuButton" to={`/notes/note-names`}>
+                  <i class="fas fa-bars " />
                 </Link>
               </nav>
             </header>
@@ -151,14 +148,6 @@ export default class App extends Component {
               render={props => <NoteDetail noteNames={noteNames} {...props} set={this.noteDetailSet} notes={this.state.notes} />}
             />
             <Route exact path="/new-note" component={() => <NewNote set={this.addNewNote} />} />
-            <button
-              className="logoutButton"
-              onClick={() => {
-                localStorage.removeItem('loginKey'), localStorage.removeItem('user'), window.location.reload();
-              }}
-            >
-              Done
-            </button>
           </div>
         ) : (
           <Login />

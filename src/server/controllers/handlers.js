@@ -150,6 +150,34 @@ module.exports = function() {
     });
   };
 
+  this.getNote = (req, done) => {
+    var user = req.query.user;
+    var noteHeading = req.query.noteHeading;
+    var pass = req.query.tempPass;
+    var permId = null;
+
+    noteUser.find({ tempPass: pass }, (err, docs) => {
+      if (docs[0]) {
+        permId = docs[0].permId;
+        console.log('AAAAAAAAA', noteHeading);
+        console.log(noteHeading);
+        Note.find({ createdBy: user, userId: permId, id: noteHeading }, (err, docs) => {
+          if (err) {
+            console.log(err);
+            done('No notes');
+          }
+          docs = docs.map(doc => {
+            return { createdBy: doc.createdBy, dataLable: doc.dataLable, heading: doc.heading, id: doc.id };
+          });
+
+          done(docs);
+        });
+      } else {
+        done('Logout User');
+      }
+    });
+  };
+
   this.getNoteNames = (req, done) => {
     var pass = req.query.tempPass;
     var permId = null;

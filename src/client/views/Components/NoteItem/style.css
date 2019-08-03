@@ -31,7 +31,10 @@
   font-size: 18px;
 }
 .editButtons{
-  
+  background: rgb(187, 59, 0);
+  color: white;
+  border-radius: 50px;
+  padding: 4px 7px 4px 7px;
   float:right;
   margin: 5px;
   margin-top: 20px;
