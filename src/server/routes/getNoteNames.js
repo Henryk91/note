@@ -1,8 +1,8 @@
-var express = require('express');
-var router = express.Router();
-var Handler = require('../controllers/handlers.js');
+let express = require('express');
+let router = express.Router();
+let Handler = require('../controllers/handlers.js');
 
-var dbHandler = new Handler();
+let dbHandler = new Handler();
 
 router.get('/', function(req, res) {
   dbHandler.getNoteNames(req, docs => {

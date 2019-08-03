@@ -24,13 +24,25 @@ export default class App extends Component {
     this.getNotesOnLoad = this.getNotesOnLoad.bind(this);
     this.getAllNotes = this.getAllNotes.bind(this);
     this.getNoteNames = this.getNoteNames.bind(this);
+    this.checkLoginState = this.checkLoginState.bind(this)
   }
 
   componentWillMount() {
-    var loginKey = localStorage.getItem('loginKey');
-    var user = localStorage.getItem('user');
+    this.checkLoginState();
+    
+    
+  }
+
+  checkLoginState(){
+    let loginKey = localStorage.getItem('loginKey');
+    let user = localStorage.getItem('user');
     user !== null ? this.setState({ user }) : null;
-    loginKey !== null ? this.setState({ loginKey }) : null;
+    if (loginKey !== null) {
+      this.setState({ loginKey });
+      this.getNoteNames(loginKey);
+      
+      this.getNotesOnLoad(loginKey, user);
+    } 
   }
 
   addNewNote = val => {
@@ -76,8 +88,6 @@ export default class App extends Component {
 
     if (noteName) user = noteName;
 
-    let tempPass = this.state.loginKey;
-
     if (user !== '') {
       localStorage.setItem('user', user);
       getMyNotes(user, res => {
@@ -87,7 +97,7 @@ export default class App extends Component {
         this.setState({ notes: res, filteredNotes: res });
       });
     } else {
-      alert('Please add username at the top');
+      // alert('Please add username at the top');
     }
   }
 
@@ -95,12 +105,11 @@ export default class App extends Component {
     this.setState({ filteredNotes: val.filteredNotes, user: val.user });
   }
 
-  getNoteNames() {
-    var loggedIn = this.state.loginKey;
-    var user = this.state.user;
-    var notesLoaded = this.state.notesInitialLoad;
-    var noteNames = this.state.noteNames;
-    if (loggedIn && !notesLoaded && !noteNames) {
+  getNoteNames(loginKey) {
+
+    let notesLoaded = this.state.notesInitialLoad;
+    let noteNames = this.state.noteNames;
+    if (loginKey && !notesLoaded && !noteNames) {
       getNoteNames(res => {
         if (res.length > 0) {
           res.push('All');
@@ -111,23 +120,19 @@ export default class App extends Component {
     }
   }
 
-  getNotesOnLoad() {
-    var notesLoaded = this.state.notesInitialLoad;
+  getNotesOnLoad(loggedIn, user) {
+    let notesLoaded = this.state.notesInitialLoad;
     if (!notesLoaded) {
-      var loggedIn = this.state.loginKey;
-      var user = this.state.user;
-      this.getNoteNames();
       if (loggedIn && !notesLoaded && user !== '') {
-        this.getMyNotes();
+        this.getMyNotes(user);
         this.setState({ notesInitialLoad: true });
       }
     }
   }
 
   render() {
-    var loggedIn = this.state.loginKey;
+    let loggedIn = this.state.loginKey;
     let noteNames = this.state.noteNames;
-    this.getNotesOnLoad();
     return (
       <Router>
         {loggedIn ? (
@@ -135,8 +140,8 @@ export default class App extends Component {
             <header>
               <SearchBar set={this.setFilterNote} noteName={this.state.user} notes={this.state.notes} />
               <nav className="bigScreen" id="links">
-                <Link style={{ textDecoration: 'none' }} id="menuButton" to={`/notes/note-names`}>
-                  <i class="fas fa-bars " />
+                <Link style={{ textDecoration: 'none' }} className="dark-hover" id="menuButton" to={`/notes/note-names`}>
+                  <i className="fas fa-bars " />
                 </Link>
               </nav>
             </header>

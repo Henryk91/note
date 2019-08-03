@@ -21,10 +21,10 @@ export default class Home extends Component {
             localStorage.removeItem('loginKey'), localStorage.removeItem('user'), window.location.reload();
           }}
         >
-          <i class="fas fa-arrow-left" />
+          <i className="fas fa-times" />
         </button>
         <Link style={{ textDecoration: 'none' }} className="detailAddButton" to={`/new-note/`}>
-          <i class="fas fa-plus" />
+          <i className="fas fa-plus" />
         </Link>
 
         {list ? (
@@ -42,14 +42,22 @@ export default class Home extends Component {
     );
   }
 }
+const onlyUnique = (value, index, self) => {
+  return self.indexOf(value) === index;
+}
+
 const createList = notes => {
   let list = null;
+  
   if (notes) {
     list = notes.map(person => {
+
+      let dataLable = [...person.dataLable].map(lable => lable = lable.tag)
+      let noteCount = dataLable.filter(onlyUnique).length
       return (
-        <Link style={{ textDecoration: 'none' }} to={`/notes/${person.id}`}>
-          <div className="listNameButton" key={person.id}>
-            <div className="listCountBox" />
+        <Link key={person.id} style={{ textDecoration: 'none' }} to={`/notes/${person.id}`}>
+          <div className="listNameButton dark-hover" >
+            <div className="listCountBox" > { noteCount } </div>
             <h3>{person.heading}</h3>
           </div>
         </Link>

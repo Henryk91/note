@@ -14,11 +14,11 @@ export default class NoteItem extends Component {
     };
     this.deleteItem = this.deleteItem.bind(this);
     this.getMarkdownText = this.getMarkdownText.bind(this);
+    this.editItemSet = this.editItemSet.bind(this);
   }
 
   deleteItem = e => {
     e.preventDefault();
-    console.log(this.state.item);
     if (confirm('Are you sure you want to permanently delete this?')) {
       this.setState({ item: null });
       this.props.set({ oldItem: this.state.item, index: this.props.index, type: this.props.type, delete: true });
@@ -65,19 +65,21 @@ export default class NoteItem extends Component {
       <div className="noteItemBox">
         {this.props.show ? (
           <div>
-            <div className="noteItem" dangerouslySetInnerHTML={this.getMarkdownText(item)} />
+            <div className="noteItem white-color" dangerouslySetInnerHTML={this.getMarkdownText(item)} />
             <div className="editButtons" onClick={() => this.setState({ editingItem: true })}>
-              <i class="fas fa-pen" />
+              <i className="fas fa-pen" />
             </div>
             <hr />
           </div>
         ) : (
-          ''
-        )}
+            ''
+          )}
       </div>
     );
   }
-
+  editItemSet = bVal => {
+    this.setState({ editingItem: bVal });
+  };
   displayLogItemBox(item) {
     item = JSON.parse(item);
 
@@ -87,7 +89,6 @@ export default class NoteItem extends Component {
     if (selectedDate) {
       selectedDate = new Date(selectedDate) + '';
       selectedDate = selectedDate.substring(0, 16);
-      console.log(selectedDate);
       if (showItem && !date.includes(selectedDate)) {
         showItem = false;
       }
@@ -100,14 +101,14 @@ export default class NoteItem extends Component {
               <p className="noteItem dateHeading"> {date} </p>
               <p className="noteItem"> {item.data} </p>
               <button className="editButtons" onClick={() => this.setState({ editingItem: true })}>
-                Edit
+                <i className="fas fa-pen" />
               </button>
             </div>
             <hr />
           </div>
         ) : (
-          ''
-        )}
+            ''
+          )}
       </div>
     );
   }
@@ -119,11 +120,11 @@ export default class NoteItem extends Component {
 
     if (item) isLog = item.includes('json');
     if (editing) {
-      if (!this.props.show) this.setState({ editingItem: false });
+      if (!this.props.show) this.editItemSet(false);
       editing = this.props.show;
     }
     return (
-      <div key={item}>
+      <div>
         {item ? (
           <div className="noteTagBox">
             {editing ? this.editItemBox(item) : isLog ? this.displayLogItemBox(item) : this.displayItemBox(item)}

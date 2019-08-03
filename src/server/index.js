@@ -1,8 +1,8 @@
 const express = require('express');
-var getNotes = require('./routes/getNotes');
-var getNoteNames = require('./routes/getNoteNames');
-var updateNotes = require('./routes/updateNotes');
-var userCheck = require('./routes/userCheck');
+let getNotes = require('./routes/getNotes');
+let getNoteNames = require('./routes/getNoteNames');
+let updateNotes = require('./routes/updateNotes');
+let userCheck = require('./routes/userCheck');
 const bodyParser = require('body-parser');
 
 const app = express();

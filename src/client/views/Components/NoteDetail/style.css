@@ -1,7 +1,7 @@
 
 .detailedBox{
-    background: rgb(241, 241, 241);
-    border: 1px solid rgb(185, 185, 185);
+    /* background: rgb(241, 241, 241); */
+    /* border: 1px solid rgb(185, 185, 185); */
     width: 90vw;
     margin-left: 0vw;
     margin-top: 2px;
@@ -43,14 +43,30 @@
 .dateSelector{
   margin-left: 20px;
 }
+
 .nameBox{
-  display: inline-block;
   color: white !important;
 }
+#personHead{
+  display: inline-block;
+}
 #nameBoxButton{
-  margin-left: 50px !important;
+  position: absolute;
+  float: right;
+  top: 120px;
+  right: 4vw;
   border-radius: 50px;
-  background: rgb(187, 59, 0);
   padding: 4px 7px 4px 7px;
   color: white;
+}
+.detailTitleBox{
+  padding-left: 10px !important;
+}
+#nameBoxButton:hover{
+  background: rgba(187, 59, 0, 0.7);
+}
+@media(min-width: 1000px){
+  #nameBoxButton{
+    right: 26vw;
+  }
 }

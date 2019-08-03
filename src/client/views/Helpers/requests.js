@@ -1,5 +1,5 @@
 export function getNoteNames(next) {
-  var loginKey = localStorage.getItem('loginKey');
+  let loginKey = localStorage.getItem('loginKey');
   fetch(`/api/note-names` + '?tempPass=' + loginKey)
     .then(res => res.json())
     .then(data => {
@@ -17,7 +17,7 @@ export function getNoteNames(next) {
 }
 
 export function getAllNotes(next) {
-  var loginKey = localStorage.getItem('loginKey');
+  let loginKey = localStorage.getItem('loginKey');
   fetch(`/api/note?user=all` + '&tempPass=' + loginKey)
     .then(res => res.json())
     .then(data => {
@@ -35,7 +35,7 @@ export function getAllNotes(next) {
 }
 
 export function getMyNotes(user, next) {
-  var loginKey = localStorage.getItem('loginKey');
+  let loginKey = localStorage.getItem('loginKey');
   fetch(`/api/note?user=` + user + '&tempPass=' + loginKey)
     .then(res => res.json())
     .then(data => {
@@ -53,7 +53,7 @@ export function getMyNotes(user, next) {
 }
 
 export function getNote(user, noteHeading, next) {
-  var loginKey = localStorage.getItem("loginKey")
+  let loginKey = localStorage.getItem("loginKey")
     fetch(`/api/note?user=` + user + '&tempPass=' + loginKey + "&noteHeading=" + noteHeading)
         .then(res => res.json())
         .then(data => {
@@ -105,7 +105,7 @@ export function createAccount(note, next) {
 }
 
 export function updateNote(note, next) {
-  var loginKey = localStorage.getItem('loginKey');
+  let loginKey = localStorage.getItem('loginKey');
   let savedItems = localStorage.getItem('updateNote');
   let toUpdate = [];
   if (savedItems) {

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { EditNoteCheck } from '../index';
+import { Link } from 'react-router-dom';
 
 export default class NewNote extends Component {
   constructor(props) {
@@ -19,15 +20,14 @@ export default class NewNote extends Component {
     let tag = event.target.tagType.value;
 
     tag === 'Note' ? (tag = event.target.tagTypeText.value) : tag;
-    var loginKey = localStorage.getItem('loginKey');
+    let loginKey = localStorage.getItem('loginKey');
     let uniqueId = docId();
     console.log(uniqueId);
-    var note = {
+    let note = {
       id: uniqueId,
       userId: loginKey,
       createdBy: 'Unknown',
       heading: heading,
-      // "lastName": lastName,
       dataLable: [{ tag: tag, data: number }]
     };
     this.setState({ showAddItem: false });
@@ -40,14 +40,18 @@ export default class NewNote extends Component {
 
   render() {
     return (
-      <form onSubmit={this.addNewUser}>
-        <br />
-        <input name="heading" type="text" placeholder="Heading" required="required" />
-        <br />
-        {/* <input name="lastName" type="text" placeholder="last Name" required="required"></input><br /><br /> */}
-        <EditNoteCheck />
-        <button type="submit">Submit</button>
-      </form>
+      <div>
+        <Link className="backButton" style={{ textDecoration: 'none' }} to="/" title="Note List">
+          <i className="fas fa-arrow-left" />
+        </Link>
+        <form onSubmit={this.addNewUser}>
+          <br />
+          <input name="heading" type="text" placeholder="Heading" required="required" />
+          <br />
+          <EditNoteCheck />
+          <button type="submit">Submit</button>
+        </form>
+      </div>
     );
   }
 }

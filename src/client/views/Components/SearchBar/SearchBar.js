@@ -19,12 +19,12 @@ export default class SearchBar extends Component {
         return firtName.includes(term);
       });
     }
-    // localStorage.setItem("user", this.title2.value);
+    localStorage.setItem("user", this.title2.value);
     this.props.set({ filteredNotes: note, user: this.title2.value });
   };
 
   render() {
-    var user = this.props.noteName;
+    let user = this.props.noteName;
 
     if (user && this.title2) {
       this.title2.value = user;
@@ -50,7 +50,7 @@ export default class SearchBar extends Component {
           ref={c => (this.title = c)}
           placeholder="Search By Name..."
         />
-        {this.state.search ? <div id="addItem" className="loader" /> : null}
+        {/* {this.state.search ? <div id="addItem" className="loader" /> : null} */}
       </header>
     );
   }

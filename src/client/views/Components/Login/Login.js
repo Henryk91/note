@@ -9,6 +9,7 @@ export default class Login extends Component {
     };
     this.saveLogin = this.saveLogin.bind(this);
     this.createAccount = this.createAccount.bind(this);
+    this.loginState = this.loginState.bind(this)
   }
   saveLogin = type => {
     event.preventDefault();
@@ -61,6 +62,10 @@ export default class Login extends Component {
     }
   };
 
+  loginState(bVal){
+    this.setState({ signUp: bVal })
+  }
+
   render() {
     let signUp = this.state.signUp;
     return (
@@ -82,7 +87,7 @@ export default class Login extends Component {
               <button type="submit">Submit</button>
             </form>
             <br />
-            <button onClick={() => this.setState({ signUp: false })}> Login </button>
+            <button onClick={() => this.loginState(false)}> Login </button>
           </div>
         ) : (
           <div>
@@ -95,7 +100,7 @@ export default class Login extends Component {
               <button type="submit">Submit</button>
             </form>
             <br />
-            <button onClick={() => this.setState({ signUp: true })}> Sign Up </button>
+            <button onClick={() => this.loginState(true) }> Sign Up </button>
           </div>
         )}
       </div>
