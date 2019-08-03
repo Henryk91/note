@@ -15,10 +15,18 @@ router.get('/', function (req, res) {
     res.json(docs)
   })
 } else {
-  
-  dbHandler.getMyNotes(req , (docs) => {
+  var noteHeading = req.query.noteHeading;
+  if(noteHeading){
+    
+    dbHandler.getNote(req , (docs) => {
     res.json(docs)
   })
+  }else {
+    dbHandler.getMyNotes(req , (docs) => {
+    res.json(docs)
+  })
+  }
+  
 }
   // res.json(noteDummy)
 });

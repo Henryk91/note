@@ -57,6 +57,24 @@ export function getMyNotes(user, next) {
         });
 }
 
+export function getNote(user, noteHeading, next) {
+  var loginKey = localStorage.getItem("loginKey")
+    fetch(`/api/note?user=` + user + '&tempPass=' + loginKey + "&noteHeading=" + noteHeading)
+        .then(res => res.json())
+        .then(data => {
+            if(data === "Logout User"){
+              localStorage.removeItem("loginKey")
+              localStorage.removeItem("user")
+              window.location.reload()
+            } else {
+              next(data)
+            }
+        })
+        .catch((error) => {
+            next(error)
+        });
+}
+
 export function loginRequest(note, next) {
 
     fetch(`/api/login`, {

@@ -67,9 +67,9 @@ export default class NoteItem extends Component {
         {this.props.show ? 
           <div>
                 <div className="noteItem" dangerouslySetInnerHTML={this.getMarkdownText(item)} />
-                <button className="editButtons" onClick={() => this.setState({ editingItem: true })}>
-                  Edit
-                </button>
+                <div className="editButtons" onClick={() => this.setState({ editingItem: true })}>
+                  <i class="fas fa-pen"></i>
+                </div>
             <hr />
             </div>
         : ''}

@@ -14,12 +14,17 @@ export default class Home extends Component {
         let list = this.props.notes
         let noteNames = this.props.noteNames
         return (
-            <div id="home">
-                { noteNames ?
-                      <Link  id="noteBooksButton" style={{ textDecoration: 'none' }} to={`/notes/note-names`}> Notes 
-                    </Link> 
-                      : null 
-                      }
+            <div id="home1">
+            <button className="backButton" onClick={() => {localStorage.removeItem("loginKey"),localStorage.removeItem("user"), window.location.reload()}}>
+              <i class="fas fa-arrow-left"></i>
+            </button>
+             <Link
+               style={{ textDecoration: 'none' }} 
+               className="detailAddButton"
+               to={`/new-note/`}>
+               <i class="fas fa-plus"></i>
+            </Link>   
+                      
                 {list ?
                     <div>
                       <br />
@@ -39,6 +44,7 @@ const createList = (notes) => {
             return (
                     <Link style={{ textDecoration: 'none' }} to={`/notes/${person.id}`}>
                         <div className="listNameButton" key={person.id}>      
+                          <div className="listCountBox"></div>
                             <h3>{person.heading}</h3>   
                         </div>  
                     </Link>

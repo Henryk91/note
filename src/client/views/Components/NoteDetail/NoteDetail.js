@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { Link } from 'react-router-dom';
 import { EditNoteCheck } from '../index';
 import { NoteItem } from '../index'
+import { getNote } from '../../Helpers/requests'
 export default class NoteDetail extends Component {
   constructor(props) {
     super(props);
@@ -23,13 +24,34 @@ export default class NoteDetail extends Component {
     this.showTagChange = this.showTagChange.bind(this)
     this.showHideBox = this.showHideBox.bind(this)
     this.showNoteNames = this.showNoteNames.bind(this)
+    this.getSingleNote = this.getSingleNote.bind(this)
   }
 
   componentDidMount() {
-    let person = null
+    let person = null;
+    
     if (this.props.match) {
+      // this.getSingleNote(this.props.match.params.id);
       person = getPerson(this.props.notes, this.props.match)
       this.refreshItems(person)
+    }
+  }
+  
+  
+  getSingleNote(noteHeading) {
+    let user = localStorage.getItem("user")
+    if (user !== '') {
+      getNote(user, noteHeading, (res) => {
+        if(res.length > 0){
+         
+          console.log("SSSSSSSSSSSSS",res[0])
+          this.refreshItems(res[0])
+        }
+        
+        
+      })
+    } else {
+      alert("Please add username at the top")
     }
   }
 
@@ -203,7 +225,7 @@ export default class NoteDetail extends Component {
       return (
         <div  className="detailedBox" key={prop + i} onClick={() => showTag !== prop && prop !== 'Log'  ? this.showTagChange(prop): null}>
           <div className="detailTitleBox" onClick={() => this.showHideBox(showTag,prop)}>
-          <h3 className="detailBoxTitle">{prop}:</h3> 
+          <h3 className="detailBoxTitle">{prop}</h3> 
             
           
             {showDateSelector ?
@@ -213,13 +235,7 @@ export default class NoteDetail extends Component {
             </form>:
             ''
           }
-          { prop !== 'Log'? 
-          <div> 
-                <button className="detailBoxTitleButton" onClick={() => {window.scrollTo(0, 0), this.setState({ showAddItem: true })}}> 
-                  Add </button> 
-              </div> 
-            : null
-          }
+          
           {
             showTag === 'Log'?
               <div> 
@@ -252,10 +268,17 @@ export default class NoteDetail extends Component {
     
     
     const isNoteNames = this.props.match.url === '/notes/note-names'
-     let noteNameBlock = isNoteNames ? this.showNoteNames(this.props.noteNames) : null
+    let noteNameBlock = null 
+    if(isNoteNames){
+      noteNameBlock =  this.showNoteNames(this.props.noteNames);
+      person = null;
+    }
+     // let noteNameBlock = isNoteNames ? this.showNoteNames(this.props.noteNames) : null
     return (
       <div >
-        <Link id="detailBackButton" to="/" title="Note List" >Back</Link>
+        <Link className="backButton" style={{ textDecoration: 'none' }} to="/" title="Note List" >
+          <i class="fas fa-arrow-left"></i>
+        </Link>
         { isNoteNames ? <div> <br /> { noteNameBlock } </div> : null }
         {person ?
           <div key={person.id}>
@@ -263,31 +286,32 @@ export default class NoteDetail extends Component {
             {editName ?
               <div>{editNameB}</div> :
               <div >
-                <h1 >{person.heading}</h1>
+                <h1 className="nameBox">{person.heading}</h1>
               {showAddItem ? '':
-                <button
-                  className="detailEditBoxButton"
+                <div
+                  className="nameBox"
+                  id="nameBoxButton"
                   onClick={() => this.setState({ editName: true })}>
-                  Edit Name
-                </button>
+                  <i class="fas fa-pen"></i>
+                </div>
               }
-              { editName ? '':
-            <button
-              className="detailEditBoxButton"
-              onClick={() => showAddItem ? this.setState({ showAddItem: false }) : this.setState({ showAddItem: true })}>
-              Add Item
-            </button>
-            }
               <br />
               </div>
             }
+            
             {showAddItem ? <div> {this.addItem()}</div> : null}
             {tags ? <div> {tags} </div> : null}
             <br />
           </div> :
           null
         }
-      
+        { editName ? '':
+            <div
+              className="detailAddButton"
+              onClick={() => { showAddItem ? this.setState({ showAddItem: false }) : window.scrollTo(0, 0), this.setState({ showAddItem: true })}}>
+              <i class="fas fa-plus"></i>
+            </div>
+            }
       </div>
     )
   }

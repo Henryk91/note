@@ -137,24 +137,17 @@ export default class App extends Component {
     this.getNotesOnLoad();
     return (
       <Router>
-        { loggedIn ? 
+        { loggedIn ?
         <div>
           <header>
             <SearchBar set={this.setFilterNote} noteName={this.state.user} notes={this.state.notes} />
             <nav className="bigScreen" id="links">
-              <Link
-                onClick={this.getMyNotes}
-                className="navLink"
-                to="/"
-                title="Note List">
-                Get Notes
-              </Link>
-                <Link
-                  id="lastNavLink"
-                  className="navLink"
-                  to={`/new-note/`}>
-                  Add Note
-              </Link>
+              <Link  
+                style={{ textDecoration: 'none' }} 
+                id="menuButton" 
+                to={`/notes/note-names`}> 
+                <i class="fas fa-bars "></i>
+              </Link> 
             </nav>
           </header>
             <Route
@@ -173,7 +166,7 @@ export default class App extends Component {
             exact path='/new-note'
             component={() => <NewNote set={this.addNewNote} />}
           />
-            <button className="logoutButton" onClick={() => {localStorage.removeItem("loginKey"),localStorage.removeItem("user"), window.location.reload()}}>Done</button>
+            
         </div>
           : <Login />}
       </Router>
