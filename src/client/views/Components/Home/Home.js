@@ -12,18 +12,17 @@ export default class Home extends Component {
 
   render() {
     let list = this.props.notes;
-    let noteNames = this.props.noteNames;
     return (
       <div id="home1">
         <button
-          className="backButton"
+          className="backButton red-back"
           onClick={() => {
             localStorage.removeItem('loginKey'), localStorage.removeItem('user'), window.location.reload();
           }}
         >
           <i className="fas fa-times" />
         </button>
-        <Link style={{ textDecoration: 'none' }} className="detailAddButton" to={`/new-note/`}>
+        <Link style={{ textDecoration: 'none' }} className="detailAddButton red-back" to={`/new-note/`}>
           <i className="fas fa-plus" />
         </Link>
 
@@ -44,20 +43,19 @@ export default class Home extends Component {
 }
 const onlyUnique = (value, index, self) => {
   return self.indexOf(value) === index;
-}
+};
 
 const createList = notes => {
   let list = null;
-  
+
   if (notes) {
     list = notes.map(person => {
-
-      let dataLable = [...person.dataLable].map(lable => lable = lable.tag)
-      let noteCount = dataLable.filter(onlyUnique).length
+      let dataLable = [...person.dataLable].map(lable => (lable = lable.tag));
+      let noteCount = dataLable.filter(onlyUnique).length;
       return (
         <Link key={person.id} style={{ textDecoration: 'none' }} to={`/notes/${person.id}`}>
-          <div className="listNameButton dark-hover" >
-            <div className="listCountBox" > { noteCount } </div>
+          <div className="listNameButton dark-hover">
+            <div className="listCountBox red-border-thick"> {noteCount} </div>
             <h3>{person.heading}</h3>
           </div>
         </Link>
@@ -66,4 +64,3 @@ const createList = notes => {
   }
   return list;
 };
-

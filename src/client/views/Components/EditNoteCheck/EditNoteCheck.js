@@ -32,23 +32,23 @@ export default class EditNoteCheck extends Component {
 
         {radioType === 'Note' ? (
           <div>
-            <input name="tagTypeText" type="text" placeholder="Sub Heading" defaultValue={showTag} />
+            <input className="red-back" name="tagTypeText" type="text" placeholder="Sub Heading" defaultValue={showTag} />
             <br />
-            <textarea className="editNoteTextarea" name="number" type="text" placeholder="eg: Company, Note" />
+            <textarea className="editNoteTextarea red-back" name="number" type="text" placeholder="eg: Company, Note" />
             <br />
           </div>
         ) : null}
         {radioType === 'Log' ? (
           <div>
-            <input name="tagTypeText" type="text" defaultValue={now} />
+            <input className="red-back" name="tagTypeText" type="text" defaultValue={now} />
             <br />
-            <input name="number" type="text" placeholder="Info" />
+            <input className="red-back" name="number" type="text" placeholder="Info" />
             <br />
           </div>
         ) : null}
         {radioType === 'Number' ? (
           <div>
-            <input name="number" type="number" placeholder="Add Number" />
+            <input className="red-back" name="number" type="number" placeholder="Add Number" />
             <br />
             <br />
           </div>
@@ -56,7 +56,7 @@ export default class EditNoteCheck extends Component {
         {radioType === 'Email' ? (
           <div>
             {' '}
-            <input name="number" type="email" placeholder="Add Email" />
+            <input className="red-back" name="number" type="email" placeholder="Add Email" />
             <br />
             <br />
           </div>

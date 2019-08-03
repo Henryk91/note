@@ -31,8 +31,9 @@ export default class SearchBar extends Component {
       // localStorage.setItem("user", user);
     }
     return (
-      <header>
+      <header className="red-back">
         <input
+          className="red-back"
           id="userNameBox"
           type="text"
           ref={c => (this.title2 = c)}
@@ -43,6 +44,7 @@ export default class SearchBar extends Component {
         />
         <br />
         <input
+          className="red-back"
           id="searchBox"
           aria-label="Search Name"
           onKeyUp={this.search}
@@ -51,6 +53,8 @@ export default class SearchBar extends Component {
           placeholder="Search By Name..."
         />
         {/* {this.state.search ? <div id="addItem" className="loader" /> : null} */}
+        <br />
+        <br />
       </header>
     );
   }

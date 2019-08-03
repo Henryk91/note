@@ -74,33 +74,33 @@ export default class Login extends Component {
           <div>
             <form onSubmit={this.createAccount}>
               <br />
-              <input name="firstName" type="text" placeholder="First Name" required="required" />
+              <input className="red-back" name="firstName" type="text" placeholder="First Name" required="required" />
               <br />
-              <input name="lastName" type="text" placeholder="Last Name" required="required" />
+              <input className="red-back" name="lastName" type="text" placeholder="Last Name" required="required" />
               <br />
-              <input name="email" type="email" placeholder="Email" required="required" />
+              <input className="red-back" name="email" type="email" placeholder="Email" required="required" />
               <br />
-              <input name="password" type="password" placeholder="Password" required="required" />
+              <input className="red-back" name="password" type="password" placeholder="Password" required="required" />
               <br />
-              <input name="password2" type="password" placeholder="Password" required="required" />
+              <input className="red-back" name="password2" type="password" placeholder="Password" required="required" />
               <br />
-              <button type="submit">Submit</button>
+              <button className="red-back" type="submit">Submit</button>
             </form>
             <br />
-            <button onClick={() => this.loginState(false)}> Login </button>
+            <button className="red-back" onClick={() => this.loginState(false)}> Login </button>
           </div>
         ) : (
           <div>
             <form onSubmit={this.saveLogin}>
               <br />
-              <input name="email" type="email" placeholder="Email" required="required" />
+              <input className="red-back" name="email" type="email" placeholder="Email" required="required" />
               <br />
-              <input name="password" type="password" placeholder="Password" required="required" />
+              <input className="red-back" name="password" type="password" placeholder="Password" required="required" />
               <br />
-              <button type="submit">Submit</button>
+              <button className="red-back" type="submit">Submit</button>
             </form>
             <br />
-            <button onClick={() => this.loginState(true) }> Sign Up </button>
+            <button className="red-back" onClick={() => this.loginState(true) }> Sign Up </button>
           </div>
         )}
       </div>

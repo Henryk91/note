@@ -46,10 +46,10 @@ export default class NewNote extends Component {
         </Link>
         <form onSubmit={this.addNewUser}>
           <br />
-          <input name="heading" type="text" placeholder="Heading" required="required" />
+          <input className="red-back" name="heading" type="text" placeholder="Heading" required="required" />
           <br />
           <EditNoteCheck />
-          <button type="submit">Submit</button>
+          <button className="submit-button red-back" type="submit"> <i className="fas fa-check" /></button>
         </form>
       </div>
     );

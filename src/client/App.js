@@ -29,8 +29,6 @@ export default class App extends Component {
 
   componentWillMount() {
     this.checkLoginState();
-    
-    
   }
 
   checkLoginState(){
@@ -134,13 +132,13 @@ export default class App extends Component {
     let loggedIn = this.state.loginKey;
     let noteNames = this.state.noteNames;
     return (
-      <Router>
+      <Router >
         {loggedIn ? (
           <div>
             <header>
               <SearchBar set={this.setFilterNote} noteName={this.state.user} notes={this.state.notes} />
               <nav className="bigScreen" id="links">
-                <Link style={{ textDecoration: 'none' }} className="dark-hover" id="menuButton" to={`/notes/note-names`}>
+                <Link style={{ textDecoration: 'none' }} className="red-back dark-hover" id="menuButton" to={`/notes/note-names`}>
                   <i className="fas fa-bars " />
                 </Link>
               </nav>

@@ -15,7 +15,7 @@ export default class NoteDetail extends Component {
       email: null,
       tags: null,
       showTag: '',
-      displayDate: null
+      displayDate: new Date()
     };
     this.addItem = this.addItem.bind(this);
     this.submitNewItem = this.submitNewItem.bind(this);
@@ -34,7 +34,7 @@ export default class NoteDetail extends Component {
 
     if (this.props.match) {
       // this.getSingleNote(this.props.match.params.id);
-      
+
       person = getPerson(this.props.notes, this.props.match);
       // console.log("AAAAAAAAAAAAAAAA",this.props.notes,this.props.match, person)
       this.refreshItems(person);
@@ -88,8 +88,13 @@ export default class NoteDetail extends Component {
       <form onSubmit={this.submitNewItem}>
         <EditNoteCheck showTag={this.state.showTag} />
         <br />
-        <button type="submit">Add</button>
-        <button onClick={() => this.setState({ showAddItem: false })}> Cancel </button>
+        <button className="submit-button red-back" type="submit">
+          <i className="fas fa-check" />
+        </button>
+        <button className="submit-button red-back" onClick={() => this.setState({ showAddItem: false })}>
+          {' '}
+          <i className="fas fa-times" />{' '}
+        </button>
         <br />
       </form>
     );
@@ -118,7 +123,7 @@ export default class NoteDetail extends Component {
 
   changeDate = e => {
     e.preventDefault();
-    let selectedDate = e.target.dateSelector.value;
+    let selectedDate = e.target.value;
 
     if (!selectedDate) selectedDate = new Date();
 
@@ -129,11 +134,17 @@ export default class NoteDetail extends Component {
     return (
       <form onSubmit={this.submitNameChange}>
         <br />
-        <input className="changeNameHeading" name="heading" type="text" defaultValue={heading} />
+        <input className="changeNameHeading red-back" name="heading" type="text" defaultValue={heading} />
         <br />
         <br />
-        <button type="submit">Submit</button>
-        <button onClick={() => this.setState({ editName: false })}>Cancel</button>
+        <button className="submit-button red-back" type="submit">
+          {' '}
+          <i className="fas fa-check" />
+        </button>
+        <button className="submit-button red-back" type="submit">
+          {' '}
+          <i className="fas fa-times" />
+        </button>
         <br />
         <br />
       </form>
@@ -183,7 +194,7 @@ export default class NoteDetail extends Component {
 
   showAddItemSet = bVal => {
     this.setState({ showAddItem: bVal });
-    if(bVal) window.scrollTo(0, 0);
+    if (bVal) window.scrollTo(0, 0);
   };
 
   getNoteByTag = (items, showTag) => {
@@ -217,26 +228,29 @@ export default class NoteDetail extends Component {
       return (
         <div className="detailedBox" key={prop + i} onClick={() => (showTag !== prop && prop !== 'Log' ? this.showTagChange(prop) : null)}>
           <div className="detailTitleBox dark-hover" onClick={() => this.showHideBox(showTag, prop)}>
-            <div className="listCountBox white-color" > { bunch.length } </div>
+            <div className="listCountBox red-border-thick white-color"> {bunch.length} </div>
             <h3 className="detailBoxTitle white-color">{prop} </h3>
             {showDateSelector ? (
               <form className="detailBoxTitle dateSelector" onSubmit={this.changeDate}>
-                <input type="date" name="dateSelector" />
-                <button type="submit">Select</button>
+                <input 
+                onChange={this.changeDate}
+                className="red-back" 
+                type="date" 
+                name="dateSelector" />
               </form>
             ) : (
-                ''
-              )}
+              ''
+            )}
 
             {showTag === 'Log' ? (
               <div>
-                <button className="detailBoxTitleButton" onClick={() => this.showTagChange('')}>
+                <button className="detailBoxTitleButton red-back" onClick={() => this.showTagChange('')}>
                   Hide{' '}
                 </button>
               </div>
             ) : prop === 'Log' ? (
               <div>
-                <button className="detailBoxTitleButton" onClick={() => this.showTagChange(prop)}>
+                <button className="detailBoxTitleButton red-back" onClick={() => this.showTagChange(prop)}>
                   Show{' '}
                 </button>
               </div>
@@ -267,7 +281,7 @@ export default class NoteDetail extends Component {
     }
     return (
       <div>
-        <Link className="backButton" style={{ textDecoration: 'none' }} to="/" title="Note List">
+        <Link className="backButton red-back" style={{ textDecoration: 'none' }} to="/" title="Note List">
           <i className="fas fa-arrow-left" />
         </Link>
         {isNoteNames ? (
@@ -281,18 +295,19 @@ export default class NoteDetail extends Component {
             {editName ? (
               <div>{editNameB}</div>
             ) : (
-                <div id="personContainer">
-                  <h1 id="personHead" className="nameBox">{person.heading}</h1>
-                  {showAddItem ? (
-                    ''
-                  ) : (
-                      <div className="nameBox rust-back" id="nameBoxButton" onClick={() => this.editNameSet(true)}>
-                        <i className="fas fa-pen" />
-                      </div>
-                    )}
-                </div>
-                
-              )}
+              <div id="personContainer">
+                <h1 id="personHead" className="nameBox">
+                  {person.heading}
+                </h1>
+                {showAddItem ? (
+                  ''
+                ) : (
+                  <div className="nameBox red-back" id="nameBoxButton" onClick={() => this.editNameSet(true)}>
+                    <i className="fas fa-pen" />
+                  </div>
+                )}
+              </div>
+            )}
 
             {showAddItem ? <div> {this.addItem()}</div> : null}
             {tags ? <div> {tags} </div> : null}
@@ -302,18 +317,18 @@ export default class NoteDetail extends Component {
         {editName ? (
           ''
         ) : (
-            <div
-              className="detailAddButton"
-              onClick={() => {
-                showAddItem ? this.showAddItemSet(false) :  this.showAddItemSet(true);
-              }}
-            >
-              <i className="fas fa-plus" />
-            </div>
-          )}
-          <br />
-          <br />
-          <br />
+          <div
+            className="detailAddButton red-back"
+            onClick={() => {
+              showAddItem ? this.showAddItemSet(false) : this.showAddItemSet(true);
+            }}
+          >
+            <i className="fas fa-plus" />
+          </div>
+        )}
+        <br />
+        <br />
+        <br />
       </div>
     );
   }

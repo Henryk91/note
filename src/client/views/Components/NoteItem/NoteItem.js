@@ -44,11 +44,11 @@ export default class NoteItem extends Component {
   editItemBox(item) {
     return (
       <form onSubmit={this.submitChange} className="noteItemBox" className="noteItemEditBox">
-        <textarea className="editTextarea" name="item" type="text" defaultValue={item} />
+        <textarea className="editTextarea red-back" name="item" type="text" defaultValue={item} />
         <br />
-        <button type="submit">Submit</button>
-        <button onClick={() => this.setState({ editingItem: false })}>Cancel</button>
-        <button onClick={this.deleteItem}> Delete</button>
+        <button className="submit-button red-back" type="submit"> <i className="fas fa-check" /></button>
+        <button className="submit-button red-back" onClick={() => this.setState({ editingItem: false })}><i className="fas fa-times" /></button>
+        <button className="red-back" onClick={this.deleteItem}> Delete</button>
         <hr />
         <br />
       </form>
@@ -66,7 +66,7 @@ export default class NoteItem extends Component {
         {this.props.show ? (
           <div>
             <div className="noteItem white-color" dangerouslySetInnerHTML={this.getMarkdownText(item)} />
-            <div className="editButtons" onClick={() => this.setState({ editingItem: true })}>
+            <div className="editButtons red-back" onClick={() => this.setState({ editingItem: true })}>
               <i className="fas fa-pen" />
             </div>
             <hr />
@@ -98,9 +98,9 @@ export default class NoteItem extends Component {
         {showItem ? (
           <div>
             <div>
-              <p className="noteItem dateHeading"> {date} </p>
+              <p className="noteItem white-color"> {date} </p>
               <p className="noteItem"> {item.data} </p>
-              <button className="editButtons" onClick={() => this.setState({ editingItem: true })}>
+              <button className="editButtons red-back" onClick={() => this.setState({ editingItem: true })}>
                 <i className="fas fa-pen" />
               </button>
             </div>
