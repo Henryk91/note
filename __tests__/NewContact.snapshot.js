@@ -8,7 +8,7 @@ test('NoteDetail component renders all details', () => {
 
     const rendered = renderer.create(
         <Router>
-            <NewNote />
+            <NewNote Theme={this.props.Theme} />
         </Router>
     );
     expect(rendered.toJSON()).toMatchSnapshot();

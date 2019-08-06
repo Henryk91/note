@@ -48,7 +48,7 @@ export default class NewNote extends Component {
           <br />
           <input className="red-back" name="heading" type="text" placeholder="Heading" required="required" />
           <br />
-          <EditNoteCheck />
+          <EditNoteCheck Theme={this.props.Theme} />
           <button className="submit-button red-back" type="submit"> <i className="fas fa-check" /></button>
         </form>
       </div>

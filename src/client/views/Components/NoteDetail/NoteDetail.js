@@ -83,9 +83,10 @@ export default class NoteDetail extends Component {
 
   addItem() {
     let themeBack = this.props.Theme.toLowerCase() + "-back";
+    let themeHover = this.props.Theme.toLowerCase() + "-hover";
     return (
       <form onSubmit={this.submitNewItem}>
-        <EditNoteCheck showTag={this.state.showTag} />
+        <EditNoteCheck Theme={this.props.Theme} showTag={this.state.showTag} />
         <br />
         <button className={`submit-button ${themeHover} ${themeBack}`} type="submit">
           <i className="fas fa-check" />
