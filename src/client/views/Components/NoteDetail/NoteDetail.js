@@ -24,6 +24,7 @@ export default class NoteDetail extends Component {
     this.showTagChange = this.showTagChange.bind(this);
     this.showHideBox = this.showHideBox.bind(this);
     this.showNoteNames = this.showNoteNames.bind(this);
+    this.showNoteThemes = this.showNoteThemes.bind(this);
     this.getSingleNote = this.getSingleNote.bind(this);
     this.editNameSet = this.editNameSet.bind(this);
     this.showAddItemSet = this.showAddItemSet.bind(this);
@@ -34,9 +35,7 @@ export default class NoteDetail extends Component {
 
     if (this.props.match) {
       // this.getSingleNote(this.props.match.params.id);
-
       person = getPerson(this.props.notes, this.props.match);
-      // console.log("AAAAAAAAAAAAAAAA",this.props.notes,this.props.match, person)
       this.refreshItems(person);
     }
   }
@@ -46,7 +45,6 @@ export default class NoteDetail extends Component {
     if (user !== '') {
       getNote(user, noteHeading, res => {
         if (res.length > 0) {
-          console.log('SSSSSSSSSSSSS', res[0]);
           this.refreshItems(res[0]);
         }
       });
@@ -84,14 +82,15 @@ export default class NoteDetail extends Component {
   };
 
   addItem() {
+    let themeBack = this.props.Theme.toLowerCase() + "-back";
     return (
       <form onSubmit={this.submitNewItem}>
         <EditNoteCheck showTag={this.state.showTag} />
         <br />
-        <button className="submit-button red-back" type="submit">
+        <button className={`submit-button ${themeHover} ${themeBack}`} type="submit">
           <i className="fas fa-check" />
         </button>
-        <button className="submit-button red-back" onClick={() => this.setState({ showAddItem: false })}>
+        <button className={`submit-button ${themeHover} ${themeBack}`} onClick={() => this.setState({ showAddItem: false })}>
           {' '}
           <i className="fas fa-times" />{' '}
         </button>
@@ -131,17 +130,19 @@ export default class NoteDetail extends Component {
   };
 
   editNameBox(heading) {
+    let themeBack = this.props.Theme.toLowerCase() + "-back";
+    let themeHover = this.props.Theme.toLowerCase() + "-hover";
     return (
       <form onSubmit={this.submitNameChange}>
         <br />
-        <input className="changeNameHeading red-back" name="heading" type="text" defaultValue={heading} />
+        <input className={`changeNameHeading ${themeHover} ${themeBack}`}  name="heading" type="text" defaultValue={heading} />
         <br />
         <br />
-        <button className="submit-button red-back" type="submit">
+        <button className={`submit-button ${themeHover} ${themeBack}`} type="submit">
           {' '}
           <i className="fas fa-check" />
         </button>
-        <button className="submit-button red-back" type="submit">
+        <button className={`submit-button ${themeHover} ${themeBack}`} type="submit">
           {' '}
           <i className="fas fa-times" />
         </button>
@@ -166,6 +167,18 @@ export default class NoteDetail extends Component {
         <Link key={name} style={{ textDecoration: 'none' }} to="/" title="Note List">
           <div className="listNameButton" onClick={() => this.props.set({ noteName: name })}>
             <h3> {name} </h3>
+          </div>
+        </Link>
+      );
+    });
+  };
+
+  showNoteThemes = (names) => {
+    return names.map(name => {
+      return (
+        <Link key={name} style={{ textDecoration: 'none' }} to="/" title="Note List">
+          <div className="listNameButton" onClick={() => this.props.set({ noteTheme: name })}>
+            <h3> {name} Theme </h3>
           </div>
         </Link>
       );
@@ -205,13 +218,19 @@ export default class NoteDetail extends Component {
     });
 
     let propertyArray = Object.keys(sort).sort();
+
+    if(propertyArray.includes("Log")){
+      propertyArray = propertyArray.filter(prop => prop !== "Log");
+      propertyArray.unshift("Log")
+    }
+
     let all = propertyArray.map((prop, i) => {
+      let themeBack = this.props.Theme.toLowerCase() + "-back";
       let showButton = false;
       let showDateSelector = false;
 
       if (prop === 'Log') showDateSelector = true;
 
-      let stateShowTag = this.state.showTag;
       let selectedDate = this.state.displayDate;
 
       if (showTag === prop) {
@@ -221,40 +240,46 @@ export default class NoteDetail extends Component {
       let bunch = sort[prop].map((item, ind) => {
         return (
           <div key={item + prop + ind}>
-            <NoteItem item={item} date={selectedDate} show={showButton} set={this.updateNoteItem} type={prop} index={ind} />
+            <NoteItem item={item} date={selectedDate} Theme={this.props.Theme} show={showButton} set={this.updateNoteItem} type={prop} index={ind} />
           </div>
         );
       });
+      let themeBorder = this.props.Theme.toLowerCase() + "-border-thick";
       return (
         <div className="detailedBox" key={prop + i} onClick={() => (showTag !== prop && prop !== 'Log' ? this.showTagChange(prop) : null)}>
           <div className="detailTitleBox dark-hover" onClick={() => this.showHideBox(showTag, prop)}>
-            <div className="listCountBox red-border-thick white-color"> {bunch.length} </div>
+            <div className={`listCountBox white-color ${themeBorder}`}> {bunch.length} </div>
             <h3 className="detailBoxTitle white-color">{prop} </h3>
-            {showDateSelector ? (
+            {
+              showDateSelector ? 
               <form className="detailBoxTitle dateSelector" onSubmit={this.changeDate}>
                 <input 
                 onChange={this.changeDate}
-                className="red-back" 
+                className={themeBack} 
                 type="date" 
                 name="dateSelector" />
               </form>
-            ) : (
-              ''
-            )}
-
-            {showTag === 'Log' ? (
+              : ''
+            }
+            {
+              showTag === 'Log' && prop === 'Log' ? 
               <div>
-                <button className="detailBoxTitleButton red-back" onClick={() => this.showTagChange('')}>
-                  Hide{' '}
+                <button 
+                  className={`detailBoxTitleButton ${themeBack}`}
+                  onClick={() => this.showTagChange('')}>
+                  Hide
                 </button>
               </div>
-            ) : prop === 'Log' ? (
+             : prop === 'Log' ? 
               <div>
-                <button className="detailBoxTitleButton red-back" onClick={() => this.showTagChange(prop)}>
-                  Show{' '}
+                <button 
+                  className={`detailBoxTitleButton ${themeBack}`}
+                  onClick={() => this.showTagChange(prop)}>
+                  Show
                 </button>
               </div>
-            ) : null}
+              : null
+             }
           </div>
 
           {bunch}
@@ -275,19 +300,28 @@ export default class NoteDetail extends Component {
 
     const isNoteNames = this.props.match.url === '/notes/note-names';
     let noteNameBlock = null;
+    let noteThemeBlock = null;
     if (isNoteNames) {
       noteNameBlock = this.showNoteNames(this.props.noteNames);
+      noteThemeBlock = this.showNoteThemes(["Red", "Blue"]);
       person = null;
     }
+    let themeBack = this.props.Theme.toLowerCase() + "-back";
+    let themeHover = this.props.Theme.toLowerCase() + "-hover";
     return (
       <div>
-        <Link className="backButton red-back" style={{ textDecoration: 'none' }} to="/" title="Note List">
+        <Link className={`backButton ${themeBack}`} style={{ textDecoration: 'none' }} to="/" title="Note List">
           <i className="fas fa-arrow-left" />
         </Link>
         {isNoteNames ? (
           <div>
-            {' '}
-            <br /> {noteNameBlock}{' '}
+            
+            <br /> 
+            <h3>Note Book Names</h3>
+            {noteNameBlock}
+            <br />
+            <h3>Themes</h3>
+            {noteThemeBlock}
           </div>
         ) : null}
         {person ? (
@@ -302,7 +336,7 @@ export default class NoteDetail extends Component {
                 {showAddItem ? (
                   ''
                 ) : (
-                  <div className="nameBox red-back" id="nameBoxButton" onClick={() => this.editNameSet(true)}>
+                  <div className={`nameBox ${themeHover} ${themeBack}`} id="nameBoxButton" onClick={() => this.editNameSet(true)}>
                     <i className="fas fa-pen" />
                   </div>
                 )}
@@ -318,7 +352,7 @@ export default class NoteDetail extends Component {
           ''
         ) : (
           <div
-            className="detailAddButton red-back"
+            className={`detailAddButton ${themeHover} ${themeBack}`}
             onClick={() => {
               showAddItem ? this.showAddItemSet(false) : this.showAddItemSet(true);
             }}
@@ -336,11 +370,7 @@ export default class NoteDetail extends Component {
 
 const getPerson = (notes, propForId) => {
   if (propForId === 'note-name') {
-    console.log('NoteName');
-
     return this.props.noteNames;
   }
-  // console.log(notes ? notes.filter(val => val.id == propForId.params.id)[0] : null);
-
   return notes ? notes.filter(val => val.id == propForId.params.id)[0] : null;
 };

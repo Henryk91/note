@@ -68,39 +68,40 @@ export default class Login extends Component {
 
   render() {
     let signUp = this.state.signUp;
+    let themeBack = this.props.Theme.toLowerCase() + "-back";
     return (
       <div>
         {signUp ? (
           <div>
             <form onSubmit={this.createAccount}>
               <br />
-              <input className="red-back" name="firstName" type="text" placeholder="First Name" required="required" />
+              <input className={themeBack} name="firstName" type="text" placeholder="First Name" required="required" />
               <br />
-              <input className="red-back" name="lastName" type="text" placeholder="Last Name" required="required" />
+              <input className={themeBack} name="lastName" type="text" placeholder="Last Name" required="required" />
               <br />
-              <input className="red-back" name="email" type="email" placeholder="Email" required="required" />
+              <input className={themeBack} name="email" type="email" placeholder="Email" required="required" />
               <br />
-              <input className="red-back" name="password" type="password" placeholder="Password" required="required" />
+              <input className={themeBack} name="password" type="password" placeholder="Password" required="required" />
               <br />
-              <input className="red-back" name="password2" type="password" placeholder="Password" required="required" />
+              <input className={themeBack} name="password2" type="password" placeholder="Password" required="required" />
               <br />
-              <button className="red-back" type="submit">Submit</button>
+              <button className={themeBack} type="submit">Submit</button>
             </form>
             <br />
-            <button className="red-back" onClick={() => this.loginState(false)}> Login </button>
+            <button className={themeBack} onClick={() => this.loginState(false)}> Login </button>
           </div>
         ) : (
           <div>
             <form onSubmit={this.saveLogin}>
               <br />
-              <input className="red-back" name="email" type="email" placeholder="Email" required="required" />
+              <input className={themeBack} name="email" type="email" placeholder="Email" required="required" />
               <br />
-              <input className="red-back" name="password" type="password" placeholder="Password" required="required" />
+              <input className={themeBack} name="password" type="password" placeholder="Password" required="required" />
               <br />
-              <button className="red-back" type="submit">Submit</button>
+              <button className={themeBack} type="submit">Submit</button>
             </form>
             <br />
-            <button className="red-back" onClick={() => this.loginState(true) }> Sign Up </button>
+            <button className={themeBack} onClick={() => this.loginState(true) }> Sign Up </button>
           </div>
         )}
       </div>

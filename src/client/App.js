@@ -14,7 +14,8 @@ export default class App extends Component {
       loginKey: null,
       notesInitialLoad: false,
       noteNames: null,
-      selectedNoteName: ''
+      selectedNoteName: '',
+      theme: 'Red'
     };
     this.addNewNote = this.addNewNote.bind(this);
     this.updateNote = this.updateNote.bind(this);
@@ -24,23 +25,23 @@ export default class App extends Component {
     this.getNotesOnLoad = this.getNotesOnLoad.bind(this);
     this.getAllNotes = this.getAllNotes.bind(this);
     this.getNoteNames = this.getNoteNames.bind(this);
-    this.checkLoginState = this.checkLoginState.bind(this)
+    this.checkLoginState = this.checkLoginState.bind(this);
   }
 
   componentWillMount() {
     this.checkLoginState();
   }
 
-  checkLoginState(){
+  checkLoginState() {
     let loginKey = localStorage.getItem('loginKey');
     let user = localStorage.getItem('user');
     user !== null ? this.setState({ user }) : null;
     if (loginKey !== null) {
       this.setState({ loginKey });
       this.getNoteNames(loginKey);
-      
+
       this.getNotesOnLoad(loginKey, user);
-    } 
+    }
   }
 
   addNewNote = val => {
@@ -58,6 +59,8 @@ export default class App extends Component {
       let noteName = msg.noteName;
       this.setState({ user: noteName });
       this.getMyNotes(noteName);
+    } else if (msg.noteTheme) {
+      this.setState({ theme: msg.noteTheme });
     } else {
       this.updateNote(msg);
     }
@@ -73,8 +76,6 @@ export default class App extends Component {
   };
 
   getAllNotes() {
-    let tempPass = this.state.loginKey;
-
     getAllNotes(res => {
       res.sort(compareSort);
       this.setState({ notes: res, filteredNotes: res });
@@ -104,7 +105,6 @@ export default class App extends Component {
   }
 
   getNoteNames(loginKey) {
-
     let notesLoaded = this.state.notesInitialLoad;
     let noteNames = this.state.noteNames;
     if (loginKey && !notesLoaded && !noteNames) {
@@ -131,29 +131,36 @@ export default class App extends Component {
   render() {
     let loggedIn = this.state.loginKey;
     let noteNames = this.state.noteNames;
+    let themeBack = this.state.theme.toLowerCase() + "-back";
     return (
-      <Router >
+      <Router>
         {loggedIn ? (
           <div>
             <header>
-              <SearchBar set={this.setFilterNote} noteName={this.state.user} notes={this.state.notes} />
+              <SearchBar set={this.setFilterNote} noteName={this.state.user} Theme={this.state.theme} notes={this.state.notes} />
               <nav className="bigScreen" id="links">
-                <Link style={{ textDecoration: 'none' }} className="red-back dark-hover" id="menuButton" to={`/notes/note-names`}>
+                <Link style={{ textDecoration: 'none' }} className={`dark-hover ${themeBack}`} id="menuButton" to={`/notes/note-names`}>
                   <i className="fas fa-bars " />
                 </Link>
               </nav>
             </header>
-            <Route exact path="/all" component={props => <Home {...props} notes={this.state.notes} />} />
-            <Route exact path="/" component={props => <Home noteNames={noteNames} {...props} notes={this.state.filteredNotes} />} />
+            <Route exact path="/all" component={props => <Home {...props} Theme={this.state.theme} notes={this.state.notes} />} />
+            <Route
+              exact
+              path="/"
+              component={props => <Home noteNames={noteNames} Theme={this.state.theme} {...props} notes={this.state.filteredNotes} />}
+            />
             <Route
               exact
               path="/notes/:id"
-              render={props => <NoteDetail noteNames={noteNames} {...props} set={this.noteDetailSet} notes={this.state.notes} />}
+              render={props => (
+                <NoteDetail noteNames={noteNames} Theme={this.state.theme} {...props} set={this.noteDetailSet} notes={this.state.notes} />
+              )}
             />
-            <Route exact path="/new-note" component={() => <NewNote set={this.addNewNote} />} />
+            <Route exact path="/new-note" component={() => <NewNote Theme={this.state.theme} set={this.addNewNote} />} />
           </div>
         ) : (
-          <Login />
+          <Login Theme={this.state.theme}/>
         )}
       </Router>
     );

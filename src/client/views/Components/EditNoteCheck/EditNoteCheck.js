@@ -16,6 +16,7 @@ export default class EditNoteCheck extends Component {
     let radioType = this.state.radioType;
     const now = new Date();
     let showTag = this.props.showTag;
+    let themeBack = this.props.Theme.toLowerCase() + "-back";
     return (
       <div>
         <div className="radioBox">
@@ -32,23 +33,23 @@ export default class EditNoteCheck extends Component {
 
         {radioType === 'Note' ? (
           <div>
-            <input className="red-back" name="tagTypeText" type="text" placeholder="Sub Heading" defaultValue={showTag} />
+            <input className={themeBack} name="tagTypeText" type="text" placeholder="Sub Heading" defaultValue={showTag} />
             <br />
-            <textarea className="editNoteTextarea red-back" name="number" type="text" placeholder="eg: Company, Note" />
+            <textarea className={`editNoteTextarea ${themeBack}`} name="number" type="text" placeholder="eg: Company, Note" />
             <br />
           </div>
         ) : null}
         {radioType === 'Log' ? (
           <div>
-            <input className="red-back" name="tagTypeText" type="text" defaultValue={now} />
+            <input className={themeBack} name="tagTypeText" type="text" defaultValue={now} />
             <br />
-            <input className="red-back" name="number" type="text" placeholder="Info" />
+            <input className={themeBack} name="number" type="text" placeholder="Info" />
             <br />
           </div>
         ) : null}
         {radioType === 'Number' ? (
           <div>
-            <input className="red-back" name="number" type="number" placeholder="Add Number" />
+            <input className={themeBack} name="number" type="number" placeholder="Add Number" />
             <br />
             <br />
           </div>
@@ -56,7 +57,7 @@ export default class EditNoteCheck extends Component {
         {radioType === 'Email' ? (
           <div>
             {' '}
-            <input className="red-back" name="number" type="email" placeholder="Add Email" />
+            <input className={themeBack} name="number" type="email" placeholder="Add Email" />
             <br />
             <br />
           </div>

@@ -42,13 +42,14 @@ export default class NoteItem extends Component {
   }
 
   editItemBox(item) {
+    let themeBack = this.props.Theme.toLowerCase() + "-back";
     return (
       <form onSubmit={this.submitChange} className="noteItemBox" className="noteItemEditBox">
-        <textarea className="editTextarea red-back" name="item" type="text" defaultValue={item} />
+        <textarea className={`editTextarea ${themeBack}`} name="item" type="text" defaultValue={item} />
         <br />
-        <button className="submit-button red-back" type="submit"> <i className="fas fa-check" /></button>
-        <button className="submit-button red-back" onClick={() => this.setState({ editingItem: false })}><i className="fas fa-times" /></button>
-        <button className="red-back" onClick={this.deleteItem}> Delete</button>
+        <button className={`submit-button ${themeBack}`} type="submit"> <i className="fas fa-check" /></button>
+        <button className={`submit-button ${themeBack}`} onClick={() => this.setState({ editingItem: false })}><i className="fas fa-times" /></button>
+        <button className={`submit-button ${themeBack}`} onClick={this.deleteItem}> <i className="far fa-trash-alt"></i> </button>
         <hr />
         <br />
       </form>
@@ -61,12 +62,13 @@ export default class NoteItem extends Component {
   }
 
   displayItemBox(item) {
+    let themeBack = this.props.Theme.toLowerCase() + "-back";
     return (
       <div className="noteItemBox">
         {this.props.show ? (
           <div>
             <div className="noteItem white-color" dangerouslySetInnerHTML={this.getMarkdownText(item)} />
-            <div className="editButtons red-back" onClick={() => this.setState({ editingItem: true })}>
+            <div className={`editButtons ${themeBack}`} onClick={() => this.setState({ editingItem: true })}>
               <i className="fas fa-pen" />
             </div>
             <hr />
@@ -93,6 +95,7 @@ export default class NoteItem extends Component {
         showItem = false;
       }
     }
+    let themeBack = this.props.Theme.toLowerCase() + "-back";
     return (
       <div className="noteItemBox">
         {showItem ? (
@@ -100,7 +103,7 @@ export default class NoteItem extends Component {
             <div>
               <p className="noteItem white-color"> {date} </p>
               <p className="noteItem"> {item.data} </p>
-              <button className="editButtons red-back" onClick={() => this.setState({ editingItem: true })}>
+              <button className={`editButtons ${themeBack}`} onClick={() => this.setState({ editingItem: true })}>
                 <i className="fas fa-pen" />
               </button>
             </div>

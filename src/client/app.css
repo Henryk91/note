@@ -148,7 +148,7 @@ h2 {
   box-shadow: 1px 1px 5px grey;
 }
 .detailAddButton:hover {
-  background: rgba(187, 59, 0, 0.7);
+  /* background: rgba(187, 59, 0, 0.7); */
 }
 
 #menuButton {
@@ -191,7 +191,7 @@ h2 {
 .red-back{
   background: rgb(208, 0, 0);
 }
-.red-backX:hover{
+.red-hover:hover{
   background: rgba(208, 0, 0, 0.7);
 }
 .red-border{
@@ -210,6 +210,12 @@ h2 {
 .blue-back-back{
   background: rgb(53, 55, 61);
 }
+.blue-border-thick{
+  border: 2px solid rgb(56, 205, 184);
+}
+.blue-hover:hover{
+  background: rgba(56, 205, 184, 0.7);
+}
 .rust-back{
   background: rgb(187, 59, 0);
 }
@@ -227,6 +233,10 @@ h2 {
 }
 
 .submit-button{
+  text-align: center;
   border-radius: 50px;
   padding: 5px;
+  width: 40px;
+  height: 40px;
+  line-height: 35px;
 }

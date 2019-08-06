@@ -25,15 +25,15 @@ export default class SearchBar extends Component {
 
   render() {
     let user = this.props.noteName;
-
+    let themeBack = this.props.Theme.toLowerCase() + "-back";
     if (user && this.title2) {
       this.title2.value = user;
       // localStorage.setItem("user", user);
     }
     return (
-      <header className="red-back">
+      <header className={themeBack}>
         <input
-          className="red-back"
+          className={themeBack}
           id="userNameBox"
           type="text"
           ref={c => (this.title2 = c)}
@@ -44,7 +44,7 @@ export default class SearchBar extends Component {
         />
         <br />
         <input
-          className="red-back"
+          className={themeBack}
           id="searchBox"
           aria-label="Search Name"
           onKeyUp={this.search}

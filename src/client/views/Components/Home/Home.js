@@ -12,24 +12,27 @@ export default class Home extends Component {
 
   render() {
     let list = this.props.notes;
+    let themeBack = this.props.Theme.toLowerCase() + "-back";
+    let themeHover = this.props.Theme.toLowerCase() + "-hover";
+    let theme = this.props.Theme;
     return (
       <div id="home1">
         <button
-          className="backButton red-back"
+          className={`backButton ${themeBack}`}
           onClick={() => {
             localStorage.removeItem('loginKey'), localStorage.removeItem('user'), window.location.reload();
           }}
         >
           <i className="fas fa-times" />
         </button>
-        <Link style={{ textDecoration: 'none' }} className="detailAddButton red-back" to={`/new-note/`}>
+        <Link style={{ textDecoration: 'none' }} className={`detailAddButton ${themeHover} ${themeBack}`} to={`/new-note/`}>
           <i className="fas fa-plus" />
         </Link>
 
         {list ? (
           <div>
             <br />
-            {createList(list)}
+            {createList(list, theme)}
             <br />
           </div>
         ) : (
@@ -45,9 +48,10 @@ const onlyUnique = (value, index, self) => {
   return self.indexOf(value) === index;
 };
 
-const createList = notes => {
+const createList = (notes, theme) => {
   let list = null;
-
+  
+  let themeBorder = theme.toLowerCase() + "-border-thick";
   if (notes) {
     list = notes.map(person => {
       let dataLable = [...person.dataLable].map(lable => (lable = lable.tag));
@@ -55,7 +59,7 @@ const createList = notes => {
       return (
         <Link key={person.id} style={{ textDecoration: 'none' }} to={`/notes/${person.id}`}>
           <div className="listNameButton dark-hover">
-            <div className="listCountBox red-border-thick"> {noteCount} </div>
+            <div className={`listCountBox ${themeBorder}`}> {noteCount} </div>
             <h3>{person.heading}</h3>
           </div>
         </Link>
