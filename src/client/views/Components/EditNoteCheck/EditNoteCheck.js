@@ -16,7 +16,6 @@ export default class EditNoteCheck extends Component {
     let radioType = this.state.radioType;
     const now = new Date();
     let showTag = this.props.showTag;
-    console.log("AAAAAAAAAAAA",this.props)
     let themeBack = this.props.Theme.toLowerCase() + "-back";
     return (
       <div>

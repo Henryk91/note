@@ -30,6 +30,7 @@ export default class App extends Component {
 
   componentWillMount() {
     this.checkLoginState();
+    
   }
 
   checkLoginState() {
@@ -41,6 +42,10 @@ export default class App extends Component {
       this.getNoteNames(loginKey);
 
       this.getNotesOnLoad(loginKey, user);
+      var savedTheme = localStorage.getItem('theme');
+      if(savedTheme){
+        this.setState({theme: savedTheme});
+      }
     }
   }
 

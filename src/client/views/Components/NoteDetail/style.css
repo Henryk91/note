@@ -63,7 +63,7 @@
   padding-left: 10px !important;
 }
 #nameBoxButton:hover{
-  background: rgba(187, 59, 0, 0.7);
+  /* background: rgba(187, 59, 0, 0.7); */
 }
 @media(min-width: 1000px){
   #nameBoxButton{

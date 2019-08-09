@@ -28,6 +28,7 @@ export default class NoteDetail extends Component {
     this.getSingleNote = this.getSingleNote.bind(this);
     this.editNameSet = this.editNameSet.bind(this);
     this.showAddItemSet = this.showAddItemSet.bind(this);
+    this.setNoteTheme = this.setNoteTheme.bind(this);
   }
 
   componentDidMount() {
@@ -174,11 +175,17 @@ export default class NoteDetail extends Component {
     });
   };
 
+  setNoteTheme = (name) => {
+    this.props.set({ noteTheme: name });
+    console.log("XXXXXXXXXXX",name)
+    localStorage.setItem('theme',name);
+  }
+
   showNoteThemes = (names) => {
     return names.map(name => {
       return (
         <Link key={name} style={{ textDecoration: 'none' }} to="/" title="Note List">
-          <div className="listNameButton" onClick={() => this.props.set({ noteTheme: name })}>
+          <div className="listNameButton" onClick={() => this.setNoteTheme(name)}>
             <h3> {name} Theme </h3>
           </div>
         </Link>

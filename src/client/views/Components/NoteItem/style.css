@@ -40,7 +40,7 @@
   display: inline-block !important;
 }
 .editButtons:hover{
-  background: rgba(187, 59, 0, 0.7);
+  /* background: rgba(187, 59, 0, 0.7); */
 }
 
 .noteItemEditBox{
