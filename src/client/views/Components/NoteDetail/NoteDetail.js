@@ -253,6 +253,7 @@ export default class NoteDetail extends Component {
         );
       });
       let themeBorder = this.props.Theme.toLowerCase() + "-border-thick";
+      let themeHover = this.props.Theme.toLowerCase() + "-hover";
       return (
         <div className="detailedBox" key={prop + i} onClick={() => (showTag !== prop && prop !== 'Log' ? this.showTagChange(prop) : null)}>
           <div className="detailTitleBox dark-hover" onClick={() => this.showHideBox(showTag, prop)}>
@@ -273,7 +274,7 @@ export default class NoteDetail extends Component {
               showTag === 'Log' && prop === 'Log' ? 
               <div>
                 <button 
-                  className={`detailBoxTitleButton ${themeBack}`}
+                  className={`detailBoxTitleButton ${themeBack} ${themeHover}`}
                   onClick={() => this.showTagChange('')}>
                   Hide
                 </button>
@@ -281,7 +282,7 @@ export default class NoteDetail extends Component {
              : prop === 'Log' ? 
               <div>
                 <button 
-                  className={`detailBoxTitleButton ${themeBack}`}
+                  className={`detailBoxTitleButton ${themeBack} ${themeHover}`}
                   onClick={() => this.showTagChange(prop)}>
                   Show
                 </button>
