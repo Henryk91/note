@@ -16,7 +16,9 @@ export default class EditNoteCheck extends Component {
     let radioType = this.state.radioType;
     const now = new Date();
     let showTag = this.props.showTag;
+    if(showTag === 'Log') radioType = 'Log';
     let themeBack = this.props.Theme.toLowerCase() + "-back";
+    let lable = this.props.lable;
     return (
       <div>
         <div className="radioBox">
@@ -43,7 +45,12 @@ export default class EditNoteCheck extends Component {
           <div>
             <input className={themeBack} name="tagTypeText" type="text" defaultValue={now} />
             <br />
-            <input className={themeBack} name="number" type="text" placeholder="Info" />
+            {
+              lable ? 
+              <input className={themeBack} name="number" type="text" defaultValue={lable} />
+              :
+              <input className={themeBack} name="number" type="text" placeholder="Info" />
+            }
             <br />
           </div>
         ) : null}

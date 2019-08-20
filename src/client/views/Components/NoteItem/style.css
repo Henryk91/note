@@ -5,12 +5,14 @@
 }
 
 .noteItem{
-
   overflow: hidden;
   margin-right: 0px;
-    padding: 0px !important;
+  padding: 0px !important;
   width: 85%;
   display: inline-block !important;
+}
+.logNoteItem{
+  width: 75%;
 }
 .noteItemEditBox > button{
     margin-top: 5px; 
@@ -60,6 +62,9 @@
   }
   .noteItem{
     width: 90%;
+  }
+  .logNoteItem{
+    width: 60%;
   }
 }
 .viewerBox{

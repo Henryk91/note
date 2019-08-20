@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import { Redirect , BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import { Home, SearchBar, NoteDetail, NewNote, Login } from './views/Components/index';
-import { getMyNotes, saveNewNote, updateNote, getAllNotes, getNoteNames } from '../client/views/Helpers/requests';
+import { withRouter , getMyNotes, saveNewNote, updateNote, getAllNotes, getNoteNames } from '../client/views/Helpers/requests';
 
 export default class App extends Component {
   constructor(props) {
@@ -15,7 +15,7 @@ export default class App extends Component {
       notesInitialLoad: false,
       noteNames: null,
       selectedNoteName: '',
-      theme: 'Red'
+      theme: 'Red',
     };
     this.addNewNote = this.addNewNote.bind(this);
     this.updateNote = this.updateNote.bind(this);
@@ -87,18 +87,28 @@ export default class App extends Component {
     });
   }
 
+  setRedirect = () => {
+      const path = window.location.pathname;
+      if (path != '/') {
+        document.location.href="/";
+      }   
+  }
+
   getMyNotes(noteName) {
     let user = this.state.user;
-
+ 
     if (noteName) user = noteName;
 
-    if (user !== '') {
+    if (user !== '' && this.state.notes === null) {
+
       localStorage.setItem('user', user);
       getMyNotes(user, res => {
         if (res.length > 0) {
           res.sort(compareSort);
         }
         this.setState({ notes: res, filteredNotes: res });
+        
+        this.setRedirect();
       });
     } else {
       // alert('Please add username at the top');
@@ -126,6 +136,7 @@ export default class App extends Component {
   getNotesOnLoad(loggedIn, user) {
     let notesLoaded = this.state.notesInitialLoad;
     if (!notesLoaded) {
+      
       if (loggedIn && !notesLoaded && user !== '') {
         this.getMyNotes(user);
         this.setState({ notesInitialLoad: true });

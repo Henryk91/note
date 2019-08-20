@@ -15,6 +15,7 @@ export default class NoteDetail extends Component {
       email: null,
       tags: null,
       showTag: '',
+      addLable: null,
       displayDate: new Date()
     };
     this.addItem = this.addItem.bind(this);
@@ -87,7 +88,11 @@ export default class NoteDetail extends Component {
     let themeHover = this.props.Theme.toLowerCase() + "-hover";
     return (
       <form onSubmit={this.submitNewItem}>
-        <EditNoteCheck Theme={this.props.Theme} showTag={this.state.showTag} />
+        <EditNoteCheck 
+        Theme={this.props.Theme} 
+        showTag={this.state.showTag} 
+        lable={this.state.addLable}
+        />
         <br />
         <button className={`submit-button ${themeHover} ${themeBack}`} type="submit">
           <i className="fas fa-check" />
@@ -110,6 +115,11 @@ export default class NoteDetail extends Component {
       person.dataLable.splice(index, 1);
     }
     this.props.set({ person });
+  };
+
+  continueLog = val => {
+    this.setState({ addLable: val.cont })
+    this.showAddItemSet(true);
   };
 
   submitNameChange = e => {
@@ -246,9 +256,21 @@ export default class NoteDetail extends Component {
       }
 
       let bunch = sort[prop].map((item, ind) => {
+
+        let prevItem = ind > -1 ? sort[prop][ (ind-1) ] : null
         return (
           <div key={item + prop + ind}>
-            <NoteItem item={item} date={selectedDate} Theme={this.props.Theme} show={showButton} set={this.updateNoteItem} type={prop} index={ind} />
+            <NoteItem 
+              prevItem={prevItem} 
+              item={item} 
+              date={selectedDate} 
+              Theme={this.props.Theme} 
+              show={showButton} 
+              set={this.updateNoteItem} 
+              cont={this.continueLog} 
+              type={prop} 
+              index={ind} 
+            />
           </div>
         );
       });

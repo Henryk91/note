@@ -10,6 +10,7 @@ export default class NoteItem extends Component {
     super(props);
     this.state = {
       item: this.props.item,
+      prevItem: this.props.prevItem,
       editingItem: false
     };
     this.deleteItem = this.deleteItem.bind(this);
@@ -107,16 +108,29 @@ export default class NoteItem extends Component {
     }
     let themeBack = this.props.Theme.toLowerCase() + '-back';
     let themeBackHover = this.props.Theme.toLowerCase() + '-hover';
+    const hasBreak = item.data === 'Break' ? "logNoteItem" : item.data === 'Pause' ? "logNoteItem" : null;
+    let prevData = null;
+    
+    if (this.props.prevItem !== null && this.props.prevItem !== undefined) {
+      prevData = JSON.parse(this.props.prevItem).data;
+    }
+    
     return (
       <div className="noteItemBox">
         {showItem ? (
           <div>
             <div>
               <p className="noteItem white-color"> {date} </p>
-              <p className="noteItem"> {item.data} </p>
+              <p className={`noteItem ${hasBreak}`}> {item.data} </p>
               <button className={`editButtons ${themeBack} ${themeBackHover}`} onClick={() => this.setState({ editingItem: true })}>
                 <i className="fas fa-pen" />
               </button>
+              { 
+                hasBreak && prevData ? 
+                <button className={`editButtons ${themeBack} ${themeBackHover}`} onClick={() => this.props.cont({ cont: prevData })}>
+                Cont
+              </button> 
+              : null  }
             </div>
             <hr />
           </div>
@@ -129,6 +143,7 @@ export default class NoteItem extends Component {
 
   render() {
     const item = this.state.item;
+    const prevData = this.state.itemPrev;
     let editing = this.state.editingItem;
     let isLog = false;
 
@@ -141,7 +156,7 @@ export default class NoteItem extends Component {
       <div>
         {item ? (
           <div className="noteTagBox">
-            {editing ? this.editItemBox(item) : isLog ? this.displayLogItemBox(item) : this.displayItemBox(item)}
+            {editing ? this.editItemBox(item) : isLog ? this.displayLogItemBox(item, prevData) : this.displayItemBox(item)}
           </div>
         ) : null}
       </div>
