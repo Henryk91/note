@@ -16,8 +16,15 @@ export default class EditNoteCheck extends Component {
     let radioType = this.state.radioType;
     const now = new Date();
     let showTag = this.props.showTag;
-    if(showTag === 'Log') radioType = 'Log';
-    let themeBack = this.props.Theme.toLowerCase() + "-back";
+
+    let defaultNote = true;
+    let defaultLog = false;
+    if(showTag === 'Log') {
+      radioType = 'Log';
+      defaultLog = true;
+      defaultNote = false;
+    }
+      let themeBack = this.props.Theme.toLowerCase() + "-back";
     let lable = this.props.lable;
     return (
       <div>
@@ -27,8 +34,8 @@ export default class EditNoteCheck extends Component {
           <label>Number</label>
           <label>Email </label>
           <br />
-          <input onClick={() => this.setRadioType('Note')} type="radio" name="tagType" value="Note" defaultChecked />
-          <input onClick={() => this.setRadioType('Log')} type="radio" name="tagType" value="Log" />
+          <input onClick={() => this.setRadioType('Note')} type="radio" name="tagType" value="Note" defaultChecked={defaultNote} />
+          <input onClick={() => this.setRadioType('Log')} type="radio" name="tagType" value="Log" defaultChecked={defaultLog}/>
           <input onClick={() => this.setRadioType('Number')} type="radio" name="tagType" value="Number" />
           <input onClick={() => this.setRadioType('Email')} type="radio" name="tagType" value="Email" />
         </div>
