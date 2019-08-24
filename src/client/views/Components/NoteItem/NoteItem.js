@@ -108,7 +108,7 @@ export default class NoteItem extends Component {
     }
     let themeBack = this.props.Theme.toLowerCase() + '-back';
     let themeBackHover = this.props.Theme.toLowerCase() + '-hover';
-    const hasBreak = item.data === 'Break' ? "logNoteItem" : item.data === 'Pause' ? "logNoteItem" : null;
+    const hasBreak = item.data === 'Break' ? "logNoteItem" : item.data === 'Pause' ? "logNoteItem" : item.data === 'Lunch' ? "logNoteItem" : null;
     let prevData = null;
     
     if (this.props.prevItem !== null && this.props.prevItem !== undefined) {

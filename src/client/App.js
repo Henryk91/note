@@ -96,11 +96,10 @@ export default class App extends Component {
 
   getMyNotes(noteName) {
     let user = this.state.user;
- 
     if (noteName) user = noteName;
 
-    if (user !== '' && this.state.notes === null) {
-
+    if (user !== '') {
+    // if (user !== '' && this.state.notes === null) {
       localStorage.setItem('user', user);
       getMyNotes(user, res => {
         if (res.length > 0) {
@@ -116,6 +115,11 @@ export default class App extends Component {
   }
 
   setFilterNote(val) {
+    const oldUser = this.state.user
+    
+    if(oldUser !== val.user){
+      this.getMyNotes(val.user);
+    }
     this.setState({ filteredNotes: val.filteredNotes, user: val.user });
   }
 
@@ -148,6 +152,13 @@ export default class App extends Component {
     let loggedIn = this.state.loginKey;
     let noteNames = this.state.noteNames;
     let themeBack = this.state.theme.toLowerCase() + "-back";
+
+    if(this.state.theme === "Red"){
+      document.body.style.backgroundColor = "#030303";
+    } 
+    if(this.state.theme === "Blue"){
+      document.body.style.backgroundColor = "#35373D";
+    } 
     return (
       <Router>
         {loggedIn ? (
@@ -160,11 +171,11 @@ export default class App extends Component {
                 </Link>
               </nav>
             </header>
-            <Route exact path="/all" component={props => <Home {...props} Theme={this.state.theme} notes={this.state.notes} />} />
+            <Route exact path="/all" component={props => <Home {...props}  Theme={this.state.theme} notes={this.state.notes} />} />
             <Route
               exact
               path="/"
-              component={props => <Home noteNames={noteNames} Theme={this.state.theme} {...props} notes={this.state.filteredNotes} />}
+              component={props => <Home noteNames={noteNames} User={this.state.user}  Theme={this.state.theme} {...props} notes={this.state.filteredNotes} />}
             />
             <Route
               exact

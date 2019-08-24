@@ -15,6 +15,7 @@ export default class Home extends Component {
     let themeBack = this.props.Theme.toLowerCase() + "-back";
     let themeHover = this.props.Theme.toLowerCase() + "-hover";
     let theme = this.props.Theme;
+    let user = this.props.User
     return (
       <div id="home1">
         <button
@@ -25,10 +26,11 @@ export default class Home extends Component {
         >
           <i className="fas fa-times" />
         </button>
+        {user !== "None" ?
         <Link style={{ textDecoration: 'none' }} className={`detailAddButton ${themeHover} ${themeBack}`} to={`/new-note/`}>
           <i className="fas fa-plus" />
         </Link>
-
+        : null }
         {list ? (
           <div>
             <br />

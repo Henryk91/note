@@ -187,7 +187,6 @@ export default class NoteDetail extends Component {
 
   setNoteTheme = (name) => {
     this.props.set({ noteTheme: name });
-    console.log("XXXXXXXXXXX",name)
     localStorage.setItem('theme',name);
   }
 
