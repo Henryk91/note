@@ -25,6 +25,7 @@ export default class Login extends Component {
         localStorage.setItem('loginKey', res.id);
         window.location.reload();
       } else {
+        alert("Login Error")
         console.log(res);
       }
     });
