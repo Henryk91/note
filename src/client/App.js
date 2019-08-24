@@ -155,11 +155,11 @@ export default class App extends Component {
 
     if(this.state.theme === "Red"){
       document.body.style.backgroundColor = "#030303";
-      document.querySelector('meta[name="theme-color"]').setAttribute("content","#030303")
+      document.querySelector('meta[name="theme-color"]').setAttribute("content","#d00000")
     } 
     if(this.state.theme === "Blue"){
       document.body.style.backgroundColor = "#35373D";
-      document.querySelector('meta[name="theme-color"]').setAttribute("content", "#35373D")
+      document.querySelector('meta[name="theme-color"]').setAttribute("content", "#38cdb8")
     } 
     return (
       <Router>
