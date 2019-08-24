@@ -336,6 +336,10 @@ export default class NoteDetail extends Component {
       noteNameBlock = this.showNoteNames(this.props.noteNames);
       noteThemeBlock = this.showNoteThemes(["Red", "Blue"]);
       person = null;
+    } else {
+      if(isMobileDevice()){
+        document.documentElement.webkitRequestFullscreen();
+      } 
     }
     let themeBack = this.props.Theme.toLowerCase() + "-back";
     let themeHover = this.props.Theme.toLowerCase() + "-hover";
@@ -404,4 +408,8 @@ const getPerson = (notes, propForId) => {
     return this.props.noteNames;
   }
   return notes ? notes.filter(val => val.id == propForId.params.id)[0] : null;
+};
+
+function isMobileDevice() {
+  return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
 };
