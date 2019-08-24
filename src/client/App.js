@@ -142,6 +142,7 @@ export default class App extends Component {
     if (!notesLoaded) {
       
       if (loggedIn && !notesLoaded && user !== '') {
+        console.log("AAAAAAAAAAAAAAAAAAAAA")
         this.getMyNotes(user);
         this.setState({ notesInitialLoad: true });
       }
