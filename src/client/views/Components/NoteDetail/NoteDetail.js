@@ -336,8 +336,6 @@ export default class NoteDetail extends Component {
       noteNameBlock = this.showNoteNames(this.props.noteNames);
       noteThemeBlock = this.showNoteThemes(["Red", "Blue"]);
       person = null;
-    } else {
-      document.documentElement.webkitRequestFullscreen();
     }
     let themeBack = this.props.Theme.toLowerCase() + "-back";
     let themeHover = this.props.Theme.toLowerCase() + "-hover";
