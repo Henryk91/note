@@ -153,6 +153,9 @@ export default class App extends Component {
     let noteNames = this.state.noteNames;
     let themeBack = this.state.theme.toLowerCase() + "-back";
 
+    if(!document.location.pathname.includes("note-names") && isMobileDevice()){
+      document.documentElement.webkitRequestFullscreen();
+    } 
     if(this.state.theme === "Red"){
       document.body.style.backgroundColor = "#030303";
       document.querySelector('meta[name="theme-color"]').setAttribute("content","#d00000")
@@ -207,4 +210,8 @@ let compareSort = (a, b) => {
     comparison = -1;
   }
   return comparison;
+};
+
+function isMobileDevice() {
+  return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
 };
