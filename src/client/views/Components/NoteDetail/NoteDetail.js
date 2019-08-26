@@ -338,7 +338,7 @@ export default class NoteDetail extends Component {
       person = null;
     } else {
       if(isMobileDevice()){
-        document.documentElement.webkitRequestFullscreen();
+        // document.documentElement.webkitRequestFullscreen();
       } 
     }
     let themeBack = this.props.Theme.toLowerCase() + "-back";

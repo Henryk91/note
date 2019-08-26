@@ -154,7 +154,7 @@ export default class App extends Component {
     let themeBack = this.state.theme.toLowerCase() + "-back";
 
     if(!document.location.pathname.includes("note-names") && isMobileDevice()){
-      document.documentElement.webkitRequestFullscreen();
+      // document.documentElement.webkitRequestFullscreen();
     } 
     if(this.state.theme === "Red"){
       document.body.style.backgroundColor = "#030303";
