@@ -20,7 +20,7 @@ export default class SearchBar extends Component {
       });
     }
     localStorage.setItem("user", this.title2.value);
-    this.props.set({ filteredNotes: note, user: this.title2.value });
+    this.props.set({ filteredNotes: note, user: this.title2.value, searchTerm:this.title.value.toLowerCase() });
   };
 
   render() {
@@ -50,7 +50,7 @@ export default class SearchBar extends Component {
           onKeyUp={this.search}
           type="text"
           ref={c => (this.title = c)}
-          placeholder="Search By Name..."
+          placeholder="Search..."
         />
         {/* {this.state.search ? <div id="addItem" className="loader" /> : null} */}
         <br />

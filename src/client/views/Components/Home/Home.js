@@ -12,25 +12,25 @@ export default class Home extends Component {
 
   render() {
     let list = this.props.notes;
-    let themeBack = this.props.Theme.toLowerCase() + "-back";
-    let themeHover = this.props.Theme.toLowerCase() + "-hover";
+    let themeBack = this.props.Theme.toLowerCase() + '-back';
+    let themeHover = this.props.Theme.toLowerCase() + '-hover';
     let theme = this.props.Theme;
-    let user = this.props.User
+    let user = this.props.User;
     return (
       <div id="home1">
         <button
           className={`backButton ${themeBack}`}
           onClick={() => {
-            localStorage.removeItem('loginKey'), localStorage.removeItem('user'), window.location.reload();
+            localStorage.removeItem('loginKey'), localStorage.removeItem('user1'), window.location.reload();
           }}
         >
           <i className="fas fa-times" />
         </button>
-        {user !== "None" ?
-        <Link style={{ textDecoration: 'none' }} className={`detailAddButton ${themeHover} ${themeBack}`} to={`/new-note/`}>
-          <i className="fas fa-plus" />
-        </Link>
-        : null }
+        {user !== 'None' ? (
+          <Link style={{ textDecoration: 'none' }} className={`detailAddButton ${themeHover} ${themeBack}`} to={`/new-note/`}>
+            <i className="fas fa-plus" />
+          </Link>
+        ) : null}
         {list ? (
           <div>
             <br />
@@ -52,8 +52,8 @@ const onlyUnique = (value, index, self) => {
 
 const createList = (notes, theme) => {
   let list = null;
-  
-  let themeBorder = theme.toLowerCase() + "-border-thick";
+
+  let themeBorder = theme.toLowerCase() + '-border-thick';
   if (notes) {
     list = notes.map(person => {
       let dataLable = [...person.dataLable].map(lable => (lable = lable.tag));

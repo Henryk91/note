@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import { Redirect , BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import { Redirect, BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import { Home, SearchBar, NoteDetail, NewNote, Login } from './views/Components/index';
-import { withRouter , getMyNotes, saveNewNote, updateNote, getAllNotes, getNoteNames } from '../client/views/Helpers/requests';
+import { withRouter, getMyNotes, saveNewNote, updateNote, getAllNotes, getNoteNames } from '../client/views/Helpers/requests';
 
 export default class App extends Component {
   constructor(props) {
@@ -16,6 +16,7 @@ export default class App extends Component {
       noteNames: null,
       selectedNoteName: '',
       theme: 'Red',
+      searchTerm: ''
     };
     this.addNewNote = this.addNewNote.bind(this);
     this.updateNote = this.updateNote.bind(this);
@@ -30,7 +31,6 @@ export default class App extends Component {
 
   componentWillMount() {
     this.checkLoginState();
-    
   }
 
   checkLoginState() {
@@ -43,8 +43,8 @@ export default class App extends Component {
 
       this.getNotesOnLoad(loginKey, user);
       var savedTheme = localStorage.getItem('theme');
-      if(savedTheme){
-        this.setState({theme: savedTheme});
+      if (savedTheme) {
+        this.setState({ theme: savedTheme });
       }
     }
   }
@@ -55,8 +55,12 @@ export default class App extends Component {
 
     user !== '' ? (val.note.createdBy = user) : null;
     let updatedNote = [...notes, val.note];
-    saveNewNote(val.note, () => alert('setn'));
-    this.setState({ notes: updatedNote, filteredNotes: updatedNote });
+    if (this.state.searchTerm === '') {
+      saveNewNote(val.note, () => alert('setn'));
+      this.setState({ notes: updatedNote, filteredNotes: updatedNote });
+    } else {
+      alert("Cant update in search");
+    }
   };
 
   noteDetailSet = msg => {
@@ -76,8 +80,13 @@ export default class App extends Component {
     let index = notes.indexOf(val => val.id === update.id);
     notes[index] = update;
 
-    updateNote(update, () => alert('setn'));
-    this.setState({ notes, filteredNotes: notes });
+    if (this.state.searchTerm === '') {
+      updateNote(update, () => alert('setn'));
+
+      this.setState({ notes, filteredNotes: notes });
+    } else {
+      alert("Cant update in search");
+    }
   };
 
   getAllNotes() {
@@ -88,25 +97,25 @@ export default class App extends Component {
   }
 
   setRedirect = () => {
-      const path = window.location.pathname;
-      if (path != '/') {
-        document.location.href="/";
-      }   
-  }
+    const path = window.location.pathname;
+    if (path != '/') {
+      document.location.href = '/';
+    }
+  };
 
   getMyNotes(noteName) {
     let user = this.state.user;
     if (noteName) user = noteName;
 
     if (user !== '') {
-    // if (user !== '' && this.state.notes === null) {
+      // if (user !== '' && this.state.notes === null) {
       localStorage.setItem('user', user);
       getMyNotes(user, res => {
         if (res.length > 0) {
           res.sort(compareSort);
         }
         this.setState({ notes: res, filteredNotes: res });
-        
+
         this.setRedirect();
       });
     } else {
@@ -115,12 +124,11 @@ export default class App extends Component {
   }
 
   setFilterNote(val) {
-    const oldUser = this.state.user
-    
-    if(oldUser !== val.user){
+    const oldUser = this.state.user;
+    if (oldUser !== val.user) {
       this.getMyNotes(val.user);
     }
-    this.setState({ filteredNotes: val.filteredNotes, user: val.user });
+    this.setState({ filteredNotes: val.filteredNotes, user: val.user, searchTerm: val.searchTerm });
   }
 
   getNoteNames(loginKey) {
@@ -140,7 +148,6 @@ export default class App extends Component {
   getNotesOnLoad(loggedIn, user) {
     let notesLoaded = this.state.notesInitialLoad;
     if (!notesLoaded) {
-      
       if (loggedIn && !notesLoaded && user !== '') {
         this.getMyNotes(user);
         this.setState({ notesInitialLoad: true });
@@ -151,19 +158,19 @@ export default class App extends Component {
   render() {
     let loggedIn = this.state.loginKey;
     let noteNames = this.state.noteNames;
-    let themeBack = this.state.theme.toLowerCase() + "-back";
+    let themeBack = this.state.theme.toLowerCase() + '-back';
 
-    if(!document.location.pathname.includes("note-names") && isMobileDevice()){
+    if (!document.location.pathname.includes('note-names') && isMobileDevice()) {
       // document.documentElement.webkitRequestFullscreen();
-    } 
-    if(this.state.theme === "Red"){
-      document.body.style.backgroundColor = "#030303";
-      document.querySelector('meta[name="theme-color"]').setAttribute("content","#d00000")
-    } 
-    if(this.state.theme === "Blue"){
-      document.body.style.backgroundColor = "#35373D";
-      document.querySelector('meta[name="theme-color"]').setAttribute("content", "#38cdb8")
-    } 
+    }
+    if (this.state.theme === 'Red') {
+      document.body.style.backgroundColor = '#030303';
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#d00000');
+    }
+    if (this.state.theme === 'Blue') {
+      document.body.style.backgroundColor = '#35373D';
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#38cdb8');
+    }
     return (
       <Router>
         {loggedIn ? (
@@ -176,24 +183,26 @@ export default class App extends Component {
                 </Link>
               </nav>
             </header>
-            <Route exact path="/all" component={props => <Home {...props}  Theme={this.state.theme} notes={this.state.notes} />} />
+            <Route exact path="/all" component={props => <Home {...props} SearchTerm={this.state.searchTerm} Theme={this.state.theme} notes={this.state.notes} />} />
             <Route
               exact
               path="/"
-              component={props => <Home noteNames={noteNames} User={this.state.user}  Theme={this.state.theme} {...props} notes={this.state.filteredNotes} />}
+              component={props => (
+                <Home SearchTerm={this.state.searchTerm} noteNames={noteNames} User={this.state.user} Theme={this.state.theme} {...props} notes={this.state.filteredNotes} />
+              )}
             />
             <Route
               exact
               path="/notes/:id"
               render={props => (
-                <NoteDetail noteNames={noteNames} Theme={this.state.theme} {...props} set={this.noteDetailSet} notes={this.state.notes} />
+                <NoteDetail SearchTerm={this.state.searchTerm} noteNames={noteNames} Theme={this.state.theme} {...props} set={this.noteDetailSet} notes={this.state.notes} />
               )}
             />
             <Route exact path="/new-note" component={() => <NewNote Theme={this.state.theme} set={this.addNewNote} />} />
           </div>
         ) : (
-          <Login Theme={this.state.theme}/>
-        )}
+            <Login Theme={this.state.theme} />
+          )}
       </Router>
     );
   }
@@ -213,5 +222,5 @@ let compareSort = (a, b) => {
 };
 
 function isMobileDevice() {
-  return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
-};
+  return typeof window.orientation !== 'undefined' || navigator.userAgent.indexOf('IEMobile') !== -1;
+}
