@@ -240,3 +240,7 @@ h2 {
   height: 40px;
   line-height: 35px;
 }
+
+::-webkit-scrollbar{
+  display: none;
+}
