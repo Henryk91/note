@@ -355,7 +355,7 @@ export default class NoteDetail extends Component {
 
         let selDates = [...allDates].filter(val => val.includes(selDate));
         if (selDates.length > 0) {
-          selDates = selDates.slice(selDates.length - 1);
+          selDates = selDates.slice(selDates.length - 2);
           let contData = JSON.parse(selDates[0]).data;
           this.setState({ continueData: contData });
         }

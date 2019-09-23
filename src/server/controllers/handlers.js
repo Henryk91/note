@@ -19,7 +19,7 @@ let noteUserSchema = new Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   password: { type: String, required: true },
-  tempPass: { type: String, required: true },
+  tempPass: { type: Array, required: true },
   permId: { type: String, required: true }
 });
 
@@ -59,10 +59,21 @@ module.exports = function() {
     done(docId);
   };
 
+  tempPassCheck = (tempPass, done) => {
+    noteUser.find({ tempPass: tempPass }, (err, docs) => {
+      if (err) {
+        done(err.name);
+      } else {
+        done(docs);
+      }
+    })
+  }
+
   this.newNote = (req, done) => {
     let note = req;
+    let pass = req.userId;
 
-    noteUser.find({ tempPass: req.userId }, (err, docs) => {
+      tempPassCheck(pass,(docs) => {
       if (docs[0]) {
         permId = docs[0].permId;
 
@@ -88,7 +99,7 @@ module.exports = function() {
     let pass = req.query.tempPass;
     let permId = null;
 
-    noteUser.find({ tempPass: pass }, (err, docs) => {
+    tempPassCheck(pass,(docs) => {
       if (docs[0]) {
         permId = docs[0].permId;
 
@@ -108,9 +119,15 @@ module.exports = function() {
   this.userLogin = (req, done) => {
     noteUser.findOne({ email: req.email, password: req.password }, (err, docs) => {
       if (docs && docs.password === req.password) {
-        let newTemp = this.docId(10);
-        docs.tempPass = newTemp;
-
+        let newTemp = this.docId(30);
+        if(docs.tempPass.length > 0) {
+          if(docs.tempPass.length > 1) {
+           docs.tempPass = docs.tempPass.slice(1)
+          }
+          docs.tempPass.push(newTemp)
+        } else {
+          docs.tempPass = [newTemp];
+        }
         docs.save(function(err) {
           if (err) {
             console.log(err);
@@ -129,7 +146,8 @@ module.exports = function() {
     let pass = req.query.tempPass;
     let permId = null;
 
-    noteUser.find({ tempPass: pass }, (err, docs) => {
+    tempPassCheck(pass,(docs) => {
+
       if (docs[0]) {
         permId = docs[0].permId;
 
@@ -156,7 +174,7 @@ module.exports = function() {
     let pass = req.query.tempPass;
     let permId = null;
 
-    noteUser.find({ tempPass: pass }, (err, docs) => {
+    tempPassCheck(pass,(docs) => {
       if (docs[0]) {
         permId = docs[0].permId;
         console.log('AAAAAAAAA', noteHeading);
@@ -182,7 +200,7 @@ module.exports = function() {
     let pass = req.query.tempPass;
     let permId = null;
 
-    noteUser.find({ tempPass: pass }, (err, docs) => {
+    tempPassCheck(pass,(docs) => {
       if (docs[0]) {
         permId = docs[0].permId;
 
@@ -210,7 +228,7 @@ module.exports = function() {
     let pass = req.query.tempPass;
     let permId = null;
 
-    noteUser.find({ tempPass: pass }, (err, docs) => {
+    tempPassCheck(pass,(docs) => {
       if (docs[0]) {
         permId = docs[0].permId;
 

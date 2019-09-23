@@ -23,4 +23,9 @@ userCheck(app);
 app.get('/*', function(req, res) {
   res.redirect('/');
 });
+
+app.get('/sw.js', (req, res) => {
+  res.setHeader('Cache-Control', 'max-age=0, no-cache, no-store, must-revalidate');
+  res.sendFile('sw.js', { root: path.join(__dirname, 'dist') });
+});
 app.listen(process.env.PORT || 8080, () => console.log(`Listening on port ${process.env.PORT || 8080}!`));

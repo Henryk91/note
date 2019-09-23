@@ -2,15 +2,16 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-const ServiceWorkerWebpackPlugin = require('serviceworker-webpack-plugin');
 const outputDirectory = 'dist';
+const {InjectManifest} = require('workbox-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: ['babel-polyfill', './src/client/index.js'],
   output: {
     path: path.join(__dirname, outputDirectory),
     filename: 'bundle.js',
-    publicPath: './'
+    publicPath: '/'
   },
   module: {
     rules: [{
@@ -25,7 +26,7 @@ module.exports = {
       use: ['style-loader', 'css-loader']
     },
     {
-      test: /\.(png|woff|woff2|eot|ttf|svg)$/,
+      test: /\.(PNG|png|woff|woff2|eot|ttf|svg)$/,
       loader: 'url-loader?limit=100000'
     }
     ]
@@ -47,8 +48,14 @@ module.exports = {
       template: './public/index.html',
       favicon: './public/favicon.ico'
     }),
-    new ServiceWorkerWebpackPlugin({
-      entry: path.join(__dirname, './src/sw.js'),
+    new InjectManifest({
+      swSrc: path.join(__dirname, './src/sw.js'),
+      swDest: 'sw.js',
     }),
+    new CopyPlugin([
+      { from: './src/manifest.json', to: "./manifest.json", },
+      { from: './public/favicon.png', to: "./favicon.png", },
+      { from: './public/favicon512.png', to: "./favicon512.png", },
+    ]),
   ]
 };
