@@ -315,6 +315,12 @@ export default class NoteDetail extends Component {
         showButton = true;
       }
       let allDates = [...sort[prop]];
+      
+      allDates = allDates.sort((a, b) => { 
+        if(a.includes("json")){
+          return new Date(JSON.parse(a).date) - new Date(JSON.parse(b).date)
+        }
+      });
 
       if (this.state.searchTerm) {
         allDates = allDates.filter(item =>
@@ -323,6 +329,8 @@ export default class NoteDetail extends Component {
             .includes(this.state.searchTerm)
         );
       }
+
+
 
       let logDaysBunch = null;
       if (prop === 'Log') {
@@ -341,7 +349,7 @@ export default class NoteDetail extends Component {
         );
 
         let logDaysTemp = [...allLogDays].filter((v, i, s) => s.indexOf(v) === i);
-
+        
         let logDays = [...logDaysTemp].map(day => {
           let total = allLogDays.filter(allDay => allDay === day).length;
 

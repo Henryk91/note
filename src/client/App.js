@@ -54,7 +54,13 @@ export default class App extends Component {
     let user = this.state.user;
 
     user !== '' ? (val.note.createdBy = user) : null;
-    let updatedNote = [...notes, val.note];
+    let updatedNote = [];
+    
+    if(notes){
+      updatedNote = [...notes, val.note];
+    } else {
+      updatedNote = [val.note];
+    }
     if (this.state.searchTerm === '') {
       saveNewNote(val.note, () => alert('setn'));
       this.setState({ notes: updatedNote, filteredNotes: updatedNote });
