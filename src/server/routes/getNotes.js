@@ -1,23 +1,24 @@
-let express = require('express');
-let router = express.Router();
-let Handler = require('../controllers/handlers.js');
+const express = require('express');
 
-let dbHandler = new Handler();
+const router = express.Router();
+const Handler = require('../controllers/handlers.js');
 
-router.get('/', function(req, res) {
-  let user = req.query.user;
+const dbHandler = new Handler();
+
+router.get('/', (req, res) => {
+  const { user } = req.query;
   if (user === 'all' || user === 'All') {
-    dbHandler.getAllNotes(req, docs => {
+    dbHandler.getAllNotes(req, (docs) => {
       res.json(docs);
     });
   } else {
-    let noteHeading = req.query.noteHeading;
+    const { noteHeading } = req.query;
     if (noteHeading) {
-      dbHandler.getNote(req, docs => {
+      dbHandler.getNote(req, (docs) => {
         res.json(docs);
       });
     } else {
-      dbHandler.getMyNotes(req, docs => {
+      dbHandler.getMyNotes(req, (docs) => {
         res.json(docs);
       });
     }

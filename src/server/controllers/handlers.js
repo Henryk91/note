@@ -1,20 +1,25 @@
+/* eslint-disable no-plusplus */
+/* eslint-disable no-return-assign */
+/* eslint-disable prefer-destructuring */
+/* eslint-disable no-param-reassign */
+/* eslint-disable func-names */
 require('dotenv').config();
 
 const mongoose = require('mongoose');
+
 mongoose.connect(process.env.DB, { useNewUrlParser: true });
 
-let Schema = mongoose.Schema;
+const { Schema } = mongoose;
 
-let noteSchema = new Schema({
+const noteSchema = new Schema({
   id: { type: String, required: true },
   userId: { type: String, required: true },
   createdBy: { type: String, required: true },
   heading: { type: String, required: true },
-  // lastName: {type: String, required: true},
   dataLable: { type: Array }
 });
 
-let noteUserSchema = new Schema({
+const noteUserSchema = new Schema({
   email: { type: String, required: true },
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
@@ -23,11 +28,11 @@ let noteUserSchema = new Schema({
   permId: { type: String, required: true }
 });
 
-let Note = mongoose.model('Notes', noteSchema);
-let noteUser = mongoose.model('NoteUsers', noteUserSchema);
+const Note = mongoose.model('Notes', noteSchema);
+const NoteUser = mongoose.model('NoteUsers', noteUserSchema);
 
-module.exports = function() {
-  this.docId = count => {
+module.exports = function () {
+  this.docId = (count) => {
     let text = '';
     const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     for (let i = 0; i < count; i++) {
@@ -41,51 +46,50 @@ module.exports = function() {
   }
 
   this.newUser = (req, done) => {
-    let user = req;
-    let docId = this.docId(10);
-    let permId = this.docId(20);
+    const user = req;
+    const docId = this.docId(10);
 
     user.tempPass = docId;
     user.permId = docId;
-    let createUser = new noteUser(user);
+    const createUser = new NoteUser(user);
 
     createUser.save((err, data) => {
       if (err) {
         console.log(err);
         done(err.name);
       } else {
+        console.log('User Created', data);
       }
     });
     done(docId);
   };
 
-  tempPassCheck = (tempPass, done) => {
-    noteUser.find({ tempPass: tempPass }, (err, docs) => {
+  function tempPassCheck(tempPass, done) {
+    NoteUser.find({ tempPass }, (err, docs) => {
       if (err) {
         done(err.name);
       } else {
         done(docs);
       }
-    })
+    });
   }
 
   this.newNote = (req, done) => {
-    let note = req;
-    let pass = req.userId;
+    const note = req;
+    const pass = req.userId;
 
-      tempPassCheck(pass,(docs) => {
-      if (docs[0]) {
-        permId = docs[0].permId;
+    tempPassCheck(pass, (docPass) => {
+      if (docPass[0]) {
+        note.userId = docPass[0].permId;
 
-        note.userId = docs[0].permId;
-
-        let createNote = new Note(note);
+        const createNote = new Note(note);
 
         createNote.save((err, data) => {
           if (err) {
             console.log(err);
             done(err.name);
           } else {
+            console.log(data);
             done('Created');
           }
         });
@@ -96,12 +100,12 @@ module.exports = function() {
   };
 
   this.getAllNotes = (req, done) => {
-    let pass = req.query.tempPass;
+    const pass = req.query.tempPass;
     let permId = null;
 
-    tempPassCheck(pass,(docs) => {
-      if (docs[0]) {
-        permId = docs[0].permId;
+    tempPassCheck(pass, (docPass) => {
+      if (docPass[0]) {
+        permId = docPass[0].permId;
 
         Note.find({ userId: permId }, (err, docs) => {
           if (err) {
@@ -117,20 +121,20 @@ module.exports = function() {
   };
 
   this.userLogin = (req, done) => {
-    noteUser.findOne({ email: req.email, password: req.password }, (err, docs) => {
+    NoteUser.findOne({ email: req.email, password: req.password }, (err, docs) => {
       if (docs && docs.password === req.password) {
-        let newTemp = this.docId(30);
-        if(docs.tempPass.length > 0) {
-          if(docs.tempPass.length > 1) {
-           docs.tempPass = docs.tempPass.slice(1)
+        const newTemp = this.docId(30);
+        if (docs.tempPass.length > 0) {
+          if (docs.tempPass.length > 1) {
+            docs.tempPass = docs.tempPass.slice(1);
           }
-          docs.tempPass.push(newTemp)
+          docs.tempPass.push(newTemp);
         } else {
           docs.tempPass = [newTemp];
         }
-        docs.save(function(err) {
-          if (err) {
-            console.log(err);
+        docs.save((error) => {
+          if (error) {
+            console.log(error);
             done('Save Fail');
           }
           done(newTemp);
@@ -142,23 +146,22 @@ module.exports = function() {
   };
 
   this.getMyNotes = (req, done) => {
-    let user = req.query.user;
-    let pass = req.query.tempPass;
+    const { user } = req.query;
+    const pass = req.query.tempPass;
     let permId = null;
 
-    tempPassCheck(pass,(docs) => {
-
-      if (docs[0]) {
-        permId = docs[0].permId;
+    tempPassCheck(pass, (docPass) => {
+      if (docPass[0]) {
+        permId = docPass[0].permId;
 
         Note.find({ createdBy: user, userId: permId }, (err, docs) => {
           if (err) {
             console.log(err);
             done('No notes');
           }
-          docs = docs.map(doc => {
-            return { createdBy: doc.createdBy, dataLable: doc.dataLable, heading: doc.heading, id: doc.id };
-          });
+          docs = docs.map(doc => ({
+            createdBy: doc.createdBy, dataLable: doc.dataLable, heading: doc.heading, id: doc.id
+          }));
 
           done(docs);
         });
@@ -169,14 +172,14 @@ module.exports = function() {
   };
 
   this.getNote = (req, done) => {
-    let user = req.query.user;
-    let noteHeading = req.query.noteHeading;
-    let pass = req.query.tempPass;
+    const { user } = req.query;
+    const { noteHeading } = req.query;
+    const pass = req.query.tempPass;
     let permId = null;
 
-    tempPassCheck(pass,(docs) => {
-      if (docs[0]) {
-        permId = docs[0].permId;
+    tempPassCheck(pass, (docPass) => {
+      if (docPass[0]) {
+        permId = docPass[0].permId;
         console.log('AAAAAAAAA', noteHeading);
         console.log(noteHeading);
         Note.find({ createdBy: user, userId: permId, id: noteHeading }, (err, docs) => {
@@ -184,9 +187,9 @@ module.exports = function() {
             console.log(err);
             done('No notes');
           }
-          docs = docs.map(doc => {
-            return { createdBy: doc.createdBy, dataLable: doc.dataLable, heading: doc.heading, id: doc.id };
-          });
+          docs = docs.map(doc => ({
+            createdBy: doc.createdBy, dataLable: doc.dataLable, heading: doc.heading, id: doc.id
+          }));
 
           done(docs);
         });
@@ -197,21 +200,21 @@ module.exports = function() {
   };
 
   this.getNoteNames = (req, done) => {
-    let pass = req.query.tempPass;
+    const pass = req.query.tempPass;
     let permId = null;
 
-    tempPassCheck(pass,(docs) => {
-      if (docs[0]) {
-        permId = docs[0].permId;
+    tempPassCheck(pass, (docPass) => {
+      if (docPass[0]) {
+        permId = docPass[0].permId;
 
         Note.find({ userId: permId }, (err, docs) => {
           if (err) {
             console.log(err);
             done('No notes');
           }
-          let nameArray = docs.map(doc => (doc = doc.createdBy));
+          const nameArray = docs.map(doc => (doc = doc.createdBy));
 
-          let unique = nameArray.filter(onlyUnique);
+          const unique = nameArray.filter(onlyUnique);
           done(unique);
         });
       } else {
@@ -223,29 +226,32 @@ module.exports = function() {
   this.updateNote = (req, done) => {
     console.log(req.query.tempPass);
     console.log(req.body.person.id);
-    let updateNoteId = req.body.person.id;
+    const updateNoteId = req.body.person.id;
 
-    let pass = req.query.tempPass;
+    const pass = req.query.tempPass;
     let permId = null;
 
-    tempPassCheck(pass,(docs) => {
-      if (docs[0]) {
-        permId = docs[0].permId;
+    tempPassCheck(pass, (docPass) => {
+      if (docPass[0]) {
+        permId = docPass[0].permId;
 
         Note.findOne({ id: updateNoteId, userId: permId }, (err, doc) => {
-          if (err) console.log(err);
-          let update = req.body.person;
-          doc.heading = update.heading;
-          doc.dataLable = update.dataLable;
-          doc.save(function(err) {
-            if (err) {
-              console.log(err);
-              done('success');
-            }
-          });
-        });
+          if (err) {
+            console.log(err);
+            done('Error', err);
+          } else {
+            const update = req.body.person;
+            doc.heading = update.heading;
+            doc.dataLable = update.dataLable;
+            doc.save((error) => {
+              if (error) {
+                console.log(error);
 
-        done;
+                done('success');
+              }
+            });
+          }
+        });
       }
     });
   };

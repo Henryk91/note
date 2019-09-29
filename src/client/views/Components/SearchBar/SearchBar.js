@@ -1,33 +1,36 @@
+/* eslint-disable max-len */
+/* eslint-disable no-return-assign */
+/* eslint-disable react/destructuring-assignment */
+/* eslint-disable react/prop-types */
 import React, { Component } from 'react';
 
 export default class SearchBar extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      search: false
     };
     this.search = this.search.bind(this);
   }
-  componentDidMount() {}
+
   search = () => {
-    let note = this.props.notes;
-    if (note) {
-      let searchTerm = this.title.value;
-      note = note.filter(val => {
-        let firtName = val.heading.toLowerCase();
-        let term = searchTerm.toLowerCase();
+    let { notes } = this.props;
+    if (notes) {
+      const searchTerm = this.title.value;
+      notes = notes.filter((val) => {
+        const firtName = val.heading.toLowerCase();
+        const term = searchTerm.toLowerCase();
         return firtName.includes(term);
       });
     }
-    localStorage.setItem("user", this.title2.value);
-    this.props.set({ filteredNotes: note, user: this.title2.value, searchTerm:this.title.value.toLowerCase() });
+    localStorage.setItem('user', this.title2.value);
+    this.props.set({ filteredNotes: notes, user: this.title2.value, searchTerm: this.title.value.toLowerCase() });
   };
 
   render() {
-    let user = this.props.noteName;
-    let themeBack = this.props.Theme.toLowerCase() + "-back";
-    if (user && this.title2) {
-      this.title2.value = user;
+    const { noteName, Theme } = this.props;
+    const themeBack = `${Theme.toLowerCase()}-back`;
+    if (noteName && this.title2) {
+      this.title2.value = noteName;
       // localStorage.setItem("user", user);
     }
     return (
@@ -39,7 +42,7 @@ export default class SearchBar extends Component {
           ref={c => (this.title2 = c)}
           aria-label="User Name"
           onKeyUp={this.search}
-          defaultValue={user}
+          defaultValue={noteName}
           placeholder="Add Note Name"
         />
         <br />

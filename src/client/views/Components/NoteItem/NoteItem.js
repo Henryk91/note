@@ -1,3 +1,13 @@
+/* eslint-disable react/no-danger */
+/* eslint-disable no-restricted-globals */
+/* eslint-disable no-alert */
+/* eslint-disable react/destructuring-assignment */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable max-len */
+/* eslint-disable no-nested-ternary */
+/* eslint-disable react/prop-types */
+/* eslint-disable react/button-has-type */
 import React, { Component } from 'react';
 import marked from 'marked';
 
@@ -10,7 +20,6 @@ export default class NoteItem extends Component {
     super(props);
     this.state = {
       item: this.props.item,
-      prevItem: this.props.prevItem,
       editingItem: false
     };
     this.deleteItem = this.deleteItem.bind(this);
@@ -18,19 +27,14 @@ export default class NoteItem extends Component {
     this.editItemSet = this.editItemSet.bind(this);
   }
 
-  deleteItem = e => {
-    e.preventDefault();
-    if (confirm('Are you sure you want to permanently delete this?')) {
-      this.setState({ item: null });
-      this.props.set({ oldItem: this.state.item, index: this.props.index, type: this.props.type, delete: true });
-    }
-  };
 
-  editItem = () => {
-    this.setState({ editingItem: true });
-  };
+  // eslint-disable-next-line class-methods-use-this
+  getMarkdownText(input) {
+    const rawMarkup = marked(input, { sanitize: true });
+    return { __html: rawMarkup };
+  }
 
-  submitChange = e => {
+  submitChange = (e) => {
     e.preventDefault();
     let update = e.target.item.value;
     if (e.target.itemDate) {
@@ -41,18 +45,36 @@ export default class NoteItem extends Component {
       };
       update = JSON.stringify(update);
     }
-    this.props.set({ item: update, oldItem: this.state.item, index: this.props.index, type: this.props.type, delete: false });
+    const { item } = this.state;
+    const { index, type } = this.props;
+    this.props.set({
+      item: update, oldItem: item, index, type, delete: false
+    });
     this.setState({ editingItem: false, item: update });
   };
 
-  getMarkdownText(input) {
-    let rawMarkup = marked(input, { sanitize: true });
-    return { __html: rawMarkup };
-  }
+  editItem = () => {
+    this.setState({ editingItem: true });
+  };
+
+  deleteItem = (e) => {
+    e.preventDefault();
+    if (confirm('Are you sure you want to permanently delete this?')) {
+      this.setState({ item: null });
+      this.props.set({
+        oldItem: this.state.item, index: this.props.index, type: this.props.type, delete: true
+      });
+    }
+  };
+
+  editItemSet = (bVal) => {
+    this.setState({ editingItem: bVal });
+  };
 
   editItemBox(item) {
-    let themeBack = this.props.Theme.toLowerCase() + '-back';
-    let themeHover = this.props.Theme.toLowerCase() + '-hover';
+    const { Theme } = this.props;
+    const themeBack = `${Theme.toLowerCase()}-back`;
+    const themeHover = `${Theme.toLowerCase()}-hover`;
     let editText = item;
     const isLog = item.includes('json');
     let editDate = null;
@@ -78,7 +100,8 @@ export default class NoteItem extends Component {
         </button>
         <button className={`submit-button ${themeBack} ${themeHover}`} onClick={this.deleteItem}>
           {' '}
-          <i className="far fa-trash-alt" />{' '}
+          <i className="far fa-trash-alt" />
+          {' '}
         </button>
         <hr />
         <br />
@@ -86,26 +109,33 @@ export default class NoteItem extends Component {
     );
   }
 
-  getMarkdownText(item) {
-    let rawMarkup = marked(item, { sanitize: true });
-    return { __html: rawMarkup };
-  }
   displayItemBox(item) {
-    let themeBack = this.props.Theme.toLowerCase() + '-back';
-    let themeBackHover = this.props.Theme.toLowerCase() + '-hover';
-    let themeBorder = this.props.Theme.toLowerCase() + "-border-thick";
-    let showEdit = this.props.showEdit
-    let noteItemClass = this.props.count > 0 ? "noteItemHasCount": "noteItem";
+    const {
+      Theme, showEdit, count, show
+    } = this.props;
+    const themeBack = `${Theme.toLowerCase()}-back`;
+    const themeBackHover = `${Theme.toLowerCase()}-hover`;
+    const themeBorder = `${Theme.toLowerCase()}-border-thick`;
+
+    const noteItemClass = count > 0 ? 'noteItemHasCount' : 'noteItem';
 
     return (
       <div className="noteItemBox">
-        {this.props.show ? (
+        {show ? (
           <div>
-            {showEdit ? null: <div className={`listCountBox noteItemCount ${themeBorder}`}> {this.props.count} </div> }
+            {showEdit ? null : (
+              <div className={`listCountBox noteItemCount ${themeBorder}`}>
+                {' '}
+                {count}
+                {' '}
+              </div>
+            ) }
             <div className={`${noteItemClass} white-color`} dangerouslySetInnerHTML={this.getMarkdownText(item)} />
-            {showEdit ? <div className={`editButtons ${themeBack} ${themeBackHover}`} onClick={() => this.setState({ editingItem: true })}>
-              <i className="fas fa-pen" /> 
-            </div> : null }
+            {showEdit ? (
+              <div className={`editButtons ${themeBack} ${themeBackHover}`} onClick={() => this.setState({ editingItem: true })}>
+                <i className="fas fa-pen" />
+              </div>
+            ) : null }
             <hr />
           </div>
         ) : (
@@ -114,30 +144,31 @@ export default class NoteItem extends Component {
       </div>
     );
   }
-  editItemSet = bVal => {
-    this.setState({ editingItem: bVal });
-  };
-  displayLogItemBox(item) {
-    item = JSON.parse(item);
 
-    let showItem = this.props.show;
-    let date = item.date.substring(0, item.date.indexOf('GMT')).trim();
-    let selectedDate = this.props.date;
+
+  displayLogItemBox(item) {
+    const {
+      show, date, Theme, prevItem
+    } = this.props;
+    const parsedItem = JSON.parse(item);
+
+    let showItem = show;
+    const newDate = parsedItem.date.substring(0, parsedItem.date.indexOf('GMT')).trim();
+    let selectedDate = date;
     if (selectedDate) {
-      selectedDate = new Date(selectedDate) + '';
+      selectedDate = `${new Date(selectedDate)}`;
       selectedDate = selectedDate.substring(0, 16);
-      if (showItem && !date.includes(selectedDate)) {
+      if (showItem && !newDate.includes(selectedDate)) {
         showItem = false;
       }
     }
-    let themeBack = this.props.Theme.toLowerCase() + '-back';
-    let themeBackHover = this.props.Theme.toLowerCase() + '-hover';
-    const hasBreak =
-      item.data === 'Break' ? 'logNoteItem' : item.data === 'Pause' ? 'logNoteItem' : item.data === 'Lunch' ? 'logNoteItem' : null;
+    const themeBack = `${Theme.toLowerCase()}-back`;
+    const themeBackHover = `${Theme.toLowerCase()}-hover`;
+    const hasBreak = parsedItem.data === 'Break' ? 'logNoteItem' : parsedItem.data === 'Pause' ? 'logNoteItem' : parsedItem.data === 'Lunch' ? 'logNoteItem' : null;
     let prevData = null;
 
-    if (this.props.prevItem !== null && this.props.prevItem !== undefined) {
-      prevData = JSON.parse(this.props.prevItem).data;
+    if (prevItem !== null && prevItem !== undefined) {
+      prevData = JSON.parse(prevItem).data;
     }
 
     return (
@@ -145,8 +176,12 @@ export default class NoteItem extends Component {
         {showItem ? (
           <div>
             <div>
-              <p className="noteItem white-color"> {date} </p>
-              <p className={`noteItem ${hasBreak}`}> {item.data} </p>
+              <p className="noteItem white-color">
+                {newDate}
+              </p>
+              <p className={`noteItem ${hasBreak}`}>
+                {parsedItem.data}
+              </p>
               <button className={`editButtons ${themeBack} ${themeBackHover}`} onClick={() => this.setState({ editingItem: true })}>
                 <i className="fas fa-pen" />
               </button>
@@ -166,21 +201,22 @@ export default class NoteItem extends Component {
   }
 
   render() {
-    const item = this.state.item;
-    const prevData = this.state.itemPrev;
-    let editing = this.state.editingItem;
+    const { item } = this.state;
+    const { itemPrev, editingItem } = this.state;
+    const { show } = this.props;
+    let editing = editingItem;
     let isLog = false;
 
     if (item) isLog = item.includes('json');
     if (editing) {
-      if (!this.props.show) this.editItemSet(false);
-      editing = this.props.show;
+      if (!show) this.editItemSet(false);
+      editing = show;
     }
     return (
       <div>
         {item ? (
           <div className="noteTagBox">
-            {editing ? this.editItemBox(item) : isLog ? this.displayLogItemBox(item, prevData) : this.displayItemBox(item)}
+            {editing ? this.editItemBox(item) : isLog ? this.displayLogItemBox(item, itemPrev) : this.displayItemBox(item)}
           </div>
         ) : null}
       </div>

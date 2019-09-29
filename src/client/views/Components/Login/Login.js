@@ -1,3 +1,7 @@
+/* eslint-disable no-restricted-globals */
+/* eslint-disable react/prop-types */
+/* eslint-disable react/button-has-type */
+/* eslint-disable no-alert */
 import React, { Component } from 'react';
 import { loginRequest, createAccount } from '../../Helpers/requests';
 
@@ -9,48 +13,49 @@ export default class Login extends Component {
     };
     this.saveLogin = this.saveLogin.bind(this);
     this.createAccount = this.createAccount.bind(this);
-    this.loginState = this.loginState.bind(this)
+    this.loginState = this.loginState.bind(this);
   }
-  saveLogin = type => {
-    event.preventDefault();
-    let password = event.target.password.value;
-    let email = event.target.email.value;
 
-    let user = {
-      email: email,
-      password: password
+  saveLogin = () => {
+    event.preventDefault();
+    const password = event.target.password.value;
+    const email = event.target.email.value;
+
+    const user = {
+      email,
+      password
     };
-    loginRequest(user, res => {
+    loginRequest(user, (res) => {
       if (res.id) {
         localStorage.setItem('loginKey', res.id);
         window.location.reload();
       } else {
-        alert("Login Error")
+        alert('Login Error');
         console.log(res);
       }
     });
   };
 
-  createAccount = event => {
+  createAccount = (event) => {
     event.preventDefault();
 
-    let password = event.target.password.value;
-    let password2 = event.target.password2.value;
+    const password = event.target.password.value;
+    const password2 = event.target.password2.value;
 
     if (password === password2) {
-      let firstName = event.target.firstName.value;
-      let lastName = event.target.lastName.value;
-      let email = event.target.email.value;
+      const firstName = event.target.firstName.value;
+      const lastName = event.target.lastName.value;
+      const email = event.target.email.value;
 
-      let user = {
-        email: email,
-        firstName: firstName,
-        lastName: lastName,
-        password: password,
+      const user = {
+        email,
+        firstName,
+        lastName,
+        password,
         tempPass: '',
         permId: ''
       };
-      createAccount(user, res => {
+      createAccount(user, (res) => {
         if (res.id) {
           localStorage.setItem('loginKey', res.id);
           window.location.reload();
@@ -63,13 +68,14 @@ export default class Login extends Component {
     }
   };
 
-  loginState(bVal){
-    this.setState({ signUp: bVal })
+  loginState(bVal) {
+    this.setState({ signUp: bVal });
   }
 
   render() {
-    let signUp = this.state.signUp;
-    let themeBack = this.props.Theme.toLowerCase() + "-back";
+    const { signUp } = this.state;
+    const { Theme } = this.props;
+    const themeBack = `${Theme.toLowerCase()}-back`;
     return (
       <div>
         {signUp ? (
@@ -102,7 +108,7 @@ export default class Login extends Component {
               <button className={themeBack} type="submit">Submit</button>
             </form>
             <br />
-            <button className={themeBack} onClick={() => this.loginState(true) }> Sign Up </button>
+            <button className={themeBack} onClick={() => this.loginState(true)}> Sign Up </button>
           </div>
         )}
       </div>

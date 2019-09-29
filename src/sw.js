@@ -1,7 +1,10 @@
+/* eslint-disable no-restricted-globals */
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable no-undef */
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/3.5.0/workbox-sw.js');
 
 if (workbox) {
-  console.log(`Workbox is loaded`);
+  console.log('Workbox is loaded');
 
   workbox.skipWaiting();
   workbox.clientsClaim();
@@ -24,7 +27,7 @@ if (workbox) {
     })
   );
 
-  //API Calls
+  // API Calls
   // workbox.routing.registerRoute(/.*\/my_api\/v1.*/, workbox.strategies.staleWhileRevalidate({
   //   cacheName: 'apis-cache',
   //   plugins: [
@@ -46,5 +49,5 @@ if (workbox) {
     })
   );
 } else {
-  console.log(` Workbox didn't load`);
+  console.log(' Workbox didn\'t load');
 }

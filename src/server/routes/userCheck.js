@@ -1,10 +1,12 @@
-let Handler = require('../controllers/handlers.js');
-let dbHandler = new Handler();
+/* eslint-disable func-names */
+const Handler = require('../controllers/handlers.js');
 
-module.exports = function(app) {
-  app.post('/api/login', function(req, res) {
+const dbHandler = new Handler();
+
+module.exports = function (app) {
+  app.post('/api/login', (req, res) => {
     let docId = '';
-    dbHandler.userLogin(req.body, dbResp => {
+    dbHandler.userLogin(req.body, (dbResp) => {
       docId = dbResp;
 
       if (docId.indexOf('Login') < 0) {
@@ -12,9 +14,9 @@ module.exports = function(app) {
       }
     });
   });
-  app.post('/api/register', function(req, res) {
+  app.post('/api/register', (req, res) => {
     let docId = '';
-    dbHandler.newUser(req.body, dbResp => {
+    dbHandler.newUser(req.body, (dbResp) => {
       docId = dbResp;
     });
     res.json({ id: docId });

@@ -1,24 +1,46 @@
+/* eslint-disable prefer-destructuring */
+/* eslint-disable no-nested-ternary */
+/* eslint-disable react/button-has-type */
+/* eslint-disable react/no-array-index-key */
+/* eslint-disable array-callback-return */
+/* eslint-disable consistent-return */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable max-len */
+/* eslint-disable react/destructuring-assignment */
+/* eslint-disable no-unused-expressions */
+/* eslint-disable no-alert */
+/* eslint-disable react/prop-types */
+/* eslint-disable no-param-reassign */
+/* eslint-disable no-return-assign */
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import { EditNoteCheck } from '../index';
-import { NoteItem } from '../index';
+import { EditNoteCheck, NoteItem } from '../index';
 import { getNote } from '../../Helpers/requests';
+
+const getPerson = (notes, propForId) => {
+  if (propForId === 'note-name') {
+    return this.props.noteNames;
+  }
+  return notes ? notes.filter(val => val.id === propForId.params.id)[0] : null;
+};
+
+function isMobileDevice() {
+  return typeof window.orientation !== 'undefined' || navigator.userAgent.indexOf('IEMobile') !== -1;
+}
+
 export default class NoteDetail extends Component {
   constructor(props) {
     super(props);
     this.state = {
       person: null,
-      showItem: false,
       showAddItem: false,
       editName: false,
-      number: null,
-      email: null,
       tags: null,
       showTag: '',
       addLable: null,
       displayDate: null,
       continueData: null,
-      logDays: null,
       showLogDaysBunch: false,
       searchTerm: ''
     };
@@ -40,27 +62,27 @@ export default class NoteDetail extends Component {
 
   componentDidMount() {
     let person = null;
-
-    if (this.props.match) {
+    const { match, notes } = this.props;
+    if (match) {
       // this.getSingleNote(this.props.match.params.id);
-      person = getPerson(this.props.notes, this.props.match);
+      person = getPerson(notes, match);
       this.refreshItems(person);
     }
   }
 
   componentWillReceiveProps(nextProps) {
     this.setState({ searchTerm: nextProps.SearchTerm });
-    let self = this;
+    const self = this;
     setTimeout(() => {
-      let person = getPerson(self.props.notes, self.props.match);
+      const person = getPerson(self.props.notes, self.props.match);
       self.refreshItems(person);
     }, 200);
   }
 
   getSingleNote(noteHeading) {
-    let user = localStorage.getItem('user');
+    const user = localStorage.getItem('user');
     if (user !== '') {
-      getNote(user, noteHeading, res => {
+      getNote(user, noteHeading, (res) => {
         if (res.length > 0) {
           this.refreshItems(res[0]);
         }
@@ -70,20 +92,20 @@ export default class NoteDetail extends Component {
     }
   }
 
-  refreshItems = person => {
+  refreshItems = (person) => {
     if (person) {
-      let tags = this.getNoteByTag(person.dataLable);
+      const tags = this.getNoteByTag(person.dataLable);
       this.setState({ person, tags });
     }
   };
 
-  submitNewItem = event => {
+  submitNewItem = (event) => {
     event.preventDefault();
-    let person = this.state.person;
+    const { person } = this.state;
     let number = event.target.number.value;
     let tag = event.target.tagType.value;
 
-    let textTag = event.target.tagTypeText.value;
+    const textTag = event.target.tagTypeText.value;
 
     tag === 'Note' ? (tag = textTag) : tag;
 
@@ -91,7 +113,7 @@ export default class NoteDetail extends Component {
       number = JSON.stringify({ json: true, date: textTag, data: number });
     }
 
-    person.dataLable.push({ tag: tag, data: number });
+    person.dataLable.push({ tag, data: number });
     this.props.set({ person });
 
     this.refreshItems(person);
@@ -101,28 +123,9 @@ export default class NoteDetail extends Component {
     event.target.tagTypeText.value = '';
   };
 
-  addItem() {
-    let themeBack = this.props.Theme.toLowerCase() + '-back';
-    let themeHover = this.props.Theme.toLowerCase() + '-hover';
-    return (
-      <form onSubmit={this.submitNewItem}>
-        <EditNoteCheck Theme={this.props.Theme} showTag={this.state.showTag} lable={this.state.addLable} />
-        <br />
-        <button className={`submit-button ${themeHover} ${themeBack}`} type="submit">
-          <i className="fas fa-check" />
-        </button>
-        <button className={`submit-button ${themeHover} ${themeBack}`} onClick={() => this.setState({ showAddItem: false })}>
-          {' '}
-          <i className="fas fa-times" />{' '}
-        </button>
-        <br />
-      </form>
-    );
-  }
-
-  updateNoteItem = val => {
-    let person = this.state.person;
-    let index = person.dataLable.findIndex(item => item.tag === val.type && item.data === val.oldItem);
+  updateNoteItem = (val) => {
+    const { person } = this.state;
+    const index = person.dataLable.findIndex(item => item.tag === val.type && item.data === val.oldItem);
     if (!val.delete) {
       person.dataLable[index].data = val.item;
     } else {
@@ -131,27 +134,27 @@ export default class NoteDetail extends Component {
     this.props.set({ person });
   };
 
-  continueLog = val => {
+  continueLog = (val) => {
     this.setState({ addLable: val.cont });
     this.showAddItemSet(true);
   };
 
-  submitNameChange = e => {
+  submitNameChange = (e) => {
     e.preventDefault();
-    let heading = e.target.heading.value;
-    let person = this.state.person;
+    const heading = e.target.heading.value;
+    const { person } = this.state;
     person.heading = heading;
 
     this.setState({ person, editName: false });
     this.props.set({ person });
   };
 
-  changeDate = e => {
+  changeDate = (e) => {
     e.preventDefault();
-    let selectedDate = e.target.value;
+    const selectedDate = e.target.value;
     this.setState({ displayDate: selectedDate });
     this.showTagChange('');
-    let self = this;
+    const self = this;
 
     setTimeout(() => {
       self.showTagChange('Log');
@@ -162,7 +165,7 @@ export default class NoteDetail extends Component {
     if (prop === 'Log Days') {
       this.setState({ displayDate: date, showLogDaysBunch: false });
       this.showTagChange('');
-      let self = this;
+      const self = this;
       setTimeout(() => {
         window.scrollTo(0, 0);
         self.showTagChange('Log');
@@ -170,65 +173,47 @@ export default class NoteDetail extends Component {
     }
   };
 
-  editNameBox(heading) {
-    let themeBack = this.props.Theme.toLowerCase() + '-back';
-    let themeHover = this.props.Theme.toLowerCase() + '-hover';
-    return (
-      <form onSubmit={this.submitNameChange}>
-        <br />
-        <input className={`changeNameHeading ${themeHover} ${themeBack}`} name="heading" type="text" defaultValue={heading} />
-        <br />
-        <br />
-        <button className={`submit-button ${themeHover} ${themeBack}`} type="submit">
-          {' '}
-          <i className="fas fa-check" />
-        </button>
-        <button className={`submit-button ${themeHover} ${themeBack}`} type="submit">
-          {' '}
-          <i className="fas fa-times" />
-        </button>
-        <br />
-        <br />
-      </form>
-    );
-  }
 
-  showTagChange = tagName => {
-    let person = this.state.person;
-    let tags = this.getNoteByTag(person.dataLable, tagName);
+  showTagChange = (tagName) => {
+    const { person } = this.state;
+    const tags = this.getNoteByTag(person.dataLable, tagName);
     this.setState({ showTag: tagName, person, tags });
   };
 
-  showNoteNames = names => {
+  showNoteNames = (names) => {
     if (!names) return;
 
-    return names.map(name => {
-      return (
-        <Link key={name} style={{ textDecoration: 'none' }} to="/" title="Note List">
-          <div className="listNameButton" onClick={() => this.props.set({ noteName: name })}>
-            <h3> {name} </h3>
-          </div>
-        </Link>
-      );
-    });
+    return names.map(name => (
+      <Link key={name} style={{ textDecoration: 'none' }} to="/" title="Note List">
+        <div className="listNameButton" onClick={() => this.props.set({ noteName: name })}>
+          <h3>
+            {' '}
+            {name}
+            {' '}
+          </h3>
+        </div>
+      </Link>
+    ));
   };
 
-  setNoteTheme = name => {
+  setNoteTheme = (name) => {
     this.props.set({ noteTheme: name });
     localStorage.setItem('theme', name);
   };
 
-  showNoteThemes = names => {
-    return names.map(name => {
-      return (
-        <Link key={name} style={{ textDecoration: 'none' }} to="/" title="Note List">
-          <div className="listNameButton" onClick={() => this.setNoteTheme(name)}>
-            <h3> {name} Theme </h3>
-          </div>
-        </Link>
-      );
-    });
-  };
+  showNoteThemes = names => names.map(name => (
+    <Link key={name} style={{ textDecoration: 'none' }} to="/" title="Note List">
+      <div className="listNameButton" onClick={() => this.setNoteTheme(name)}>
+        <h3>
+          {' '}
+          {name}
+          {' '}
+Theme
+          {' '}
+        </h3>
+      </div>
+    </Link>
+  ));
 
   showHideBox = (showTag, prop) => {
     if (showTag !== prop && prop !== 'Log') {
@@ -238,60 +223,19 @@ export default class NoteDetail extends Component {
     }
   };
 
-  editNameSet = bVal => {
+  editNameSet = (bVal) => {
     this.setState({ editName: bVal });
   };
 
-  showAddItemSet = bVal => {
+  showAddItemSet = (bVal) => {
     this.setState({ showAddItem: bVal });
     if (bVal) window.scrollTo(0, 0);
   };
 
-  createNoteItemBunch(items, prop, selectedDate, showButton) {
-    let showEdit = prop !== 'Log Days';
-
-    return items.map((item, ind) => {
-      let prevItem = ind > -1 ? items[ind - 1] : null;
-      let count = 0;
-      if (prop === 'Log Days') {
-        count = item.count;
-        item = item.date;
-      }
-      return (
-        <div onClick={() => this.setDate(prop, item)} key={item + prop + ind}>
-          <NoteItem
-            prevItem={prevItem}
-            item={item}
-            date={selectedDate}
-            Theme={this.props.Theme}
-            show={showButton}
-            set={this.updateNoteItem}
-            cont={this.continueLog}
-            type={prop}
-            index={ind}
-            showEdit={showEdit}
-            count={count}
-          />
-        </div>
-      );
-    });
-  }
-
-  showLogDays() {
-    if (this.state.person) {
-      const showLogDaysBunch = this.state.showLogDaysBunch;
-      this.setState({ showLogDaysBunch: !showLogDaysBunch });
-      let self = this;
-      setTimeout(() => {
-        self.showTagChange('');
-      }, 200);
-    }
-  }
 
   getNoteByTag = (items, showTag) => {
-    let showItem = this.state.showItem;
-    let sort = {};
-    items.forEach(tag => {
+    const sort = {};
+    items.forEach((tag) => {
       sort[tag.tag] ? sort[tag.tag].push(tag.data) : (sort[tag.tag] = [tag.data]);
     });
 
@@ -302,35 +246,33 @@ export default class NoteDetail extends Component {
       propertyArray.unshift('Log');
     }
 
-    let all = propertyArray.map((prop, i) => {
-      let themeBack = this.props.Theme.toLowerCase() + '-back';
+    const all = propertyArray.map((prop, i) => {
+      const { Theme } = this.props;
+      const { displayDate, searchTerm } = this.state;
+      const themeBack = `${Theme.toLowerCase()}-back`;
       let showButton = false;
       let showDateSelector = false;
 
       if (prop === 'Log') showDateSelector = true;
 
-      let selectedDate = this.state.displayDate;
+      let selectedDate = displayDate;
 
       if (showTag === prop) {
         showButton = true;
       }
       let allDates = [...sort[prop]];
-      
-      allDates = allDates.sort((a, b) => { 
-        if(a.includes("json")){
-          return new Date(JSON.parse(a).date) - new Date(JSON.parse(b).date)
+
+      allDates = allDates.sort((a, b) => {
+        if (a.includes('json')) {
+          return new Date(JSON.parse(a).date) - new Date(JSON.parse(b).date);
         }
       });
 
-      if (this.state.searchTerm) {
-        allDates = allDates.filter(item =>
-          JSON.stringify(item)
-            .toLowerCase()
-            .includes(this.state.searchTerm)
-        );
+      if (searchTerm) {
+        allDates = allDates.filter(item => JSON.stringify(item)
+          .toLowerCase()
+          .includes(searchTerm));
       }
-
-
 
       let logDaysBunch = null;
       if (prop === 'Log') {
@@ -341,22 +283,17 @@ export default class NoteDetail extends Component {
             selectedDate = lastDate;
           }
         }
-        let allLogDays = [...allDates].map(
-          day =>
-            (day = JSON.parse(day)
-              .date.substring(0, 15)
-              .trim())
-        );
+        const allLogDays = [...allDates].map(day => (day = JSON.parse(day).date.substring(0, 15).trim()));
 
-        let logDaysTemp = [...allLogDays].filter((v, i, s) => s.indexOf(v) === i);
-        
-        let logDays = [...logDaysTemp].map(day => {
-          let total = allLogDays.filter(allDay => allDay === day).length;
+        const logDaysTemp = [...allLogDays].filter((v, ind, s) => s.indexOf(v) === ind);
+
+        const logDays = [...logDaysTemp].map((day) => {
+          const total = allLogDays.filter(allDay => allDay === day).length;
 
           return { date: day, count: total };
         });
 
-        let selDate = new Date(selectedDate) + '';
+        let selDate = `${new Date(selectedDate)}`;
         selDate = selDate.substring(0, 15).trim();
 
         logDaysBunch = this.createNoteItemBunch(logDays.reverse(), 'Log Days', selectedDate, this.state.showLogDaysBunch);
@@ -364,14 +301,14 @@ export default class NoteDetail extends Component {
         let selDates = [...allDates].filter(val => val.includes(selDate));
         if (selDates.length > 0) {
           selDates = selDates.slice(selDates.length - 2);
-          let contData = JSON.parse(selDates[0]).data;
+          const contData = JSON.parse(selDates[0]).data;
           this.setState({ continueData: contData });
         }
       }
 
-      let bunch = this.createNoteItemBunch(allDates, prop, selectedDate, showButton);
-      let themeBorder = this.props.Theme.toLowerCase() + '-border-thick';
-      let themeHover = this.props.Theme.toLowerCase() + '-hover';
+      const bunch = this.createNoteItemBunch(allDates, prop, selectedDate, showButton);
+      const themeBorder = `${Theme.toLowerCase()}-border-thick`;
+      const themeHover = `${Theme.toLowerCase()}-hover`;
 
       if (bunch.length === 0) return;
 
@@ -380,9 +317,13 @@ export default class NoteDetail extends Component {
           <div className="detailTitleBox dark-hover" onClick={() => this.showHideBox(showTag, prop)}>
             <div className={`listCountBox white-color ${themeBorder}`} onClick={() => this.showLogDays()}>
               {' '}
-              {bunch.length}{' '}
+              {bunch.length}
+              {' '}
             </div>
-            <h3 className="detailBoxTitle white-color">{prop} </h3>
+            <h3 className="detailBoxTitle white-color">
+              {prop}
+              {' '}
+            </h3>
             {showDateSelector ? (
               <form className="detailBoxTitle dateSelector" onSubmit={this.changeDate}>
                 <input onChange={this.changeDate} className={themeBack} type="date" name="dateSelector" />
@@ -418,30 +359,112 @@ export default class NoteDetail extends Component {
     return all;
   };
 
+  showLogDays() {
+    const { showLogDaysBunch, person } = this.state;
+    if (person) {
+      this.setState({ showLogDaysBunch: !showLogDaysBunch });
+      const self = this;
+      setTimeout(() => {
+        self.showTagChange('');
+      }, 200);
+    }
+  }
+
+  createNoteItemBunch(items, prop, selectedDate, showButton) {
+    const showEdit = prop !== 'Log Days';
+
+    return items.map((item, ind) => {
+      const prevItem = ind > -1 ? items[ind - 1] : null;
+      let count = 0;
+      if (prop === 'Log Days') {
+        count = item.count;
+        item = item.date;
+      }
+      return (
+        <div onClick={() => this.setDate(prop, item)} key={item + prop + ind}>
+          <NoteItem
+            prevItem={prevItem}
+            item={item}
+            date={selectedDate}
+            Theme={this.props.Theme}
+            show={showButton}
+            set={this.updateNoteItem}
+            cont={this.continueLog}
+            type={prop}
+            index={ind}
+            showEdit={showEdit}
+            count={count}
+          />
+        </div>
+      );
+    });
+  }
+
+  editNameBox(heading) {
+    const themeBack = `${this.props.Theme.toLowerCase()}-back`;
+    const themeHover = `${this.props.Theme.toLowerCase()}-hover`;
+    return (
+      <form onSubmit={this.submitNameChange}>
+        <br />
+        <input className={`changeNameHeading ${themeHover} ${themeBack}`} name="heading" type="text" defaultValue={heading} />
+        <br />
+        <br />
+        <button className={`submit-button ${themeHover} ${themeBack}`} type="submit">
+          {' '}
+          <i className="fas fa-check" />
+        </button>
+        <button className={`submit-button ${themeHover} ${themeBack}`} type="submit">
+          {' '}
+          <i className="fas fa-times" />
+        </button>
+        <br />
+        <br />
+      </form>
+    );
+  }
+
+  addItem() {
+    const themeBack = `${this.props.Theme.toLowerCase()}-back`;
+    const themeHover = `${this.props.Theme.toLowerCase()}-hover`;
+    return (
+      <form onSubmit={this.submitNewItem}>
+        <EditNoteCheck Theme={this.props.Theme} showTag={this.state.showTag} lable={this.state.addLable} />
+        <br />
+        <button className={`submit-button ${themeHover} ${themeBack}`} type="submit">
+          <i className="fas fa-check" />
+        </button>
+        <button className={`submit-button ${themeHover} ${themeBack}`} onClick={() => this.setState({ showAddItem: false })}>
+          {' '}
+          <i className="fas fa-times" />
+          {' '}
+        </button>
+        <br />
+      </form>
+    );
+  }
+
   render() {
-    let person = this.state.person;
-    const showAddItem = this.state.showAddItem;
-    let tags = this.state.tags;
-    let editName = this.state.editName;
+    let { person, } = this.state;
+    const { showAddItem, tags, editName } = this.state;
+    const { match, noteNames, Theme } = this.props;
+
     let editNameB = null;
 
     person ? (editNameB = this.editNameBox(person.heading)) : (editNameB = null);
 
-    const isNoteNames = this.props.match.url === '/notes/note-names';
+    const isNoteNames = match.url === '/notes/note-names';
     let noteNameBlock = null;
     let noteThemeBlock = null;
     if (isNoteNames) {
       document.webkitExitFullscreen();
-      noteNameBlock = this.showNoteNames(this.props.noteNames);
+      noteNameBlock = this.showNoteNames(noteNames);
       noteThemeBlock = this.showNoteThemes(['Red', 'Blue']);
       person = null;
-    } else {
-      if (isMobileDevice()) {
-        // document.documentElement.webkitRequestFullscreen();
-      }
+    } else if (isMobileDevice()) {
+      // document.documentElement.webkitRequestFullscreen();
     }
-    let themeBack = this.props.Theme.toLowerCase() + '-back';
-    let themeHover = this.props.Theme.toLowerCase() + '-hover';
+    const themeBack = `${Theme.toLowerCase()}-back`;
+    const themeHover = `${Theme.toLowerCase()}-hover`;
     return (
       <div>
         <Link className={`backButton ${themeBack}`} style={{ textDecoration: 'none' }} to="/" title="Note List">
@@ -476,8 +499,19 @@ export default class NoteDetail extends Component {
               </div>
             )}
 
-            {showAddItem ? <div> {this.addItem()}</div> : null}
-            {tags ? <div> {tags} </div> : null}
+            {showAddItem ? (
+              <div>
+                {' '}
+                {this.addItem()}
+              </div>
+            ) : null}
+            {tags ? (
+              <div>
+                {' '}
+                {tags}
+                {' '}
+              </div>
+            ) : null}
             <br />
           </div>
         ) : null}
@@ -499,15 +533,4 @@ export default class NoteDetail extends Component {
       </div>
     );
   }
-}
-
-const getPerson = (notes, propForId) => {
-  if (propForId === 'note-name') {
-    return this.props.noteNames;
-  }
-  return notes ? notes.filter(val => val.id == propForId.params.id)[0] : null;
-};
-
-function isMobileDevice() {
-  return typeof window.orientation !== 'undefined' || navigator.userAgent.indexOf('IEMobile') !== -1;
 }

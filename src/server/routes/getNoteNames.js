@@ -1,11 +1,12 @@
-let express = require('express');
-let router = express.Router();
-let Handler = require('../controllers/handlers.js');
+const express = require('express');
 
-let dbHandler = new Handler();
+const router = express.Router();
+const Handler = require('../controllers/handlers.js');
 
-router.get('/', function(req, res) {
-  dbHandler.getNoteNames(req, docs => {
+const dbHandler = new Handler();
+
+router.get('/', (req, res) => {
+  dbHandler.getNoteNames(req, (docs) => {
     res.json(docs);
   });
 });

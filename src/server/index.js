@@ -1,9 +1,10 @@
+/* eslint-disable no-undef */
 const express = require('express');
-let getNotes = require('./routes/getNotes');
-let getNoteNames = require('./routes/getNoteNames');
-let updateNotes = require('./routes/updateNotes');
-let userCheck = require('./routes/userCheck');
 const bodyParser = require('body-parser');
+const getNotes = require('./routes/getNotes');
+const getNoteNames = require('./routes/getNoteNames');
+const updateNotes = require('./routes/updateNotes');
+const userCheck = require('./routes/userCheck');
 
 const app = express();
 
@@ -20,7 +21,7 @@ updateNotes(app);
 
 userCheck(app);
 
-app.get('/*', function(req, res) {
+app.get('/*', (req, res) => {
   res.redirect('/');
 });
 
@@ -28,4 +29,4 @@ app.get('/sw.js', (req, res) => {
   res.setHeader('Cache-Control', 'max-age=0, no-cache, no-store, must-revalidate');
   res.sendFile('sw.js', { root: path.join(__dirname, 'dist') });
 });
-app.listen(process.env.PORT || 8080, () => console.log(`Listening on port ${process.env.PORT || 8080}!`));
+app.listen(process.env.PORT || 8081, () => console.log(`Listening on port ${process.env.PORT || 8080}!`));

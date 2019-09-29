@@ -1,11 +1,13 @@
-let Handler = require('../controllers/handlers.js');
-let dbHandler = new Handler();
+/* eslint-disable func-names */
+const Handler = require('../controllers/handlers.js');
 
-module.exports = function(app) {
-  app.post('/api/save', function(req, res) {
+const dbHandler = new Handler();
+
+module.exports = function (app) {
+  app.post('/api/save', (req, res) => {
     dbHandler.newNote(req.body, dbResp => res.json({ Ok: dbResp }));
   });
-  app.post('/api/update', function(req, res) {
+  app.post('/api/update', (req, res) => {
     dbHandler.updateNote(req, dbResp => res.json({ Ok: dbResp }));
     res.json({ Ok: '100' });
   });
