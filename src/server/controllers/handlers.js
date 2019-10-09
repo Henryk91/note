@@ -53,6 +53,7 @@ module.exports = function () {
     user.permId = docId;
     const createUser = new NoteUser(user);
 
+
     createUser.save((err, data) => {
       if (err) {
         console.log(err);
