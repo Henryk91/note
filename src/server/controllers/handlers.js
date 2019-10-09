@@ -49,7 +49,7 @@ module.exports = function () {
     const user = req;
     const docId = this.docId(10);
 
-    user.tempPass = docId;
+    user.tempPass = [docId];
     user.permId = docId;
     const createUser = new NoteUser(user);
 
