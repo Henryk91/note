@@ -52,7 +52,7 @@ export default class Login extends Component {
         firstName,
         lastName,
         password,
-        tempPass: '',
+        tempPass: [''],
         permId: ''
       };
       createAccount(user, (res) => {
