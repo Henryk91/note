@@ -1,35 +1,30 @@
-/* eslint-disable no-unused-expressions */
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable react/prop-types */
 /* eslint-disable no-plusplus */
+/* eslint-disable react/sort-comp */
+/* eslint-disable react/no-unused-state */
+/* eslint-disable no-use-before-define */
+/* eslint-disable no-unused-expressions */
+/* eslint-disable import/order */
+/* eslint-disable react/prop-types */
+/* eslint-disable arrow-parens */
+/* eslint-disable react/destructuring-assignment */
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import { EditNoteCheck } from '../index';
+import { Link } from 'react-router-dom';
 
-const docId = () => {
-  let text = '';
-
-  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-  for (let i = 0; i < 20; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  return text;
-};
 export default class NewNote extends Component {
   constructor(props) {
     super(props);
     this.state = {
-
+      radioType: 'Number'
     };
     this.addNewUser = this.addNewUser.bind(this);
     this.setRadioType = this.setRadioType.bind(this);
   }
 
-  addNewUser = (event) => {
+  addNewUser = event => {
     event.preventDefault();
-
     const heading = event.target.heading.value;
+    // let lastName = event.target.lastName.value
     const number = event.target.number.value;
     let tag = event.target.tagType.value;
 
@@ -44,12 +39,15 @@ export default class NewNote extends Component {
       heading,
       dataLable: [{ tag, data: number }]
     };
+    this.setState({ showAddItem: false });
     this.props.set({ note });
   };
 
+  setRadioType(type) {
+    this.setState({ radioType: type });
+  }
 
   render() {
-    const { Theme } = this.props;
     return (
       <div>
         <Link className="backButton" style={{ textDecoration: 'none' }} to="/" title="Note List">
@@ -59,7 +57,7 @@ export default class NewNote extends Component {
           <br />
           <input className="red-back" name="heading" type="text" placeholder="Heading" required="required" />
           <br />
-          <EditNoteCheck Theme={Theme} />
+          <EditNoteCheck Theme={this.props.Theme} />
           <button className="submit-button red-back" type="submit">
             {' '}
             <i className="fas fa-check" />
@@ -69,3 +67,14 @@ export default class NewNote extends Component {
     );
   }
 }
+
+const docId = () => {
+  let text = '';
+
+  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+  for (let i = 0; i < 20; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
+};
