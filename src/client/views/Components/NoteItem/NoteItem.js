@@ -30,7 +30,7 @@ export default class NoteItem extends Component {
 
   // eslint-disable-next-line class-methods-use-this
   getMarkdownText(input) {
-    const rawMarkup = marked(input, { sanitize: true });
+    const rawMarkup = marked(input, { sanitize: false });
     return { __html: rawMarkup };
   }
 
