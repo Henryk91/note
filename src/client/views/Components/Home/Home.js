@@ -43,8 +43,7 @@ export default class Home extends Component {
   }
 
   logOut = () => {
-    localStorage.removeItem('loginKey');
-    localStorage.removeItem('user1');
+    localStorage.clear();
     window.location.reload();
   }
 

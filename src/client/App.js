@@ -88,13 +88,25 @@ export default class App extends Component {
     if (user !== '') {
       // if (user !== '' && this.state.notes === null) {
       localStorage.setItem('user', user);
+
+      const data = localStorage.getItem(user);
+      if (data && data[0] && data.length > 0) {
+        const pdata = JSON.parse(data);
+        this.setState({ notes: pdata, filteredNotes: pdata });
+      }
+
       getMyNotes(user, (res) => {
         if (res.length > 0) {
           res.sort(compareSort);
         }
-        this.setState({ notes: res, filteredNotes: res });
 
-        this.setRedirect();
+        if (res.length > 0) {
+          console.log(user, res);
+          localStorage.setItem(user, JSON.stringify(res));
+
+          this.setState({ notes: res, filteredNotes: res });
+          this.setRedirect();
+        }
       });
     } else {
       // alert('Please add username at the top');
@@ -112,12 +124,20 @@ export default class App extends Component {
   getNoteNames(loginKey) {
     const { notesInitialLoad } = this.state;
     const { noteNames } = this.state;
+
+    const savedNames = localStorage.getItem('notenames');
+    if (savedNames) {
+      this.setState({ noteNames: JSON.parse(savedNames) });
+    }
     if (loginKey && !notesInitialLoad && !noteNames) {
       getNoteNames((res) => {
         if (res.length > 0) {
           res.push('All');
           res.push('None');
-          this.setState({ noteNames: res });
+          if (res && res.length > 0) {
+            localStorage.setItem('notenames', JSON.stringify(res));
+            this.setState({ noteNames: res });
+          }
         }
       });
     }
