@@ -92,7 +92,9 @@ export default class App extends Component {
       const data = localStorage.getItem(user);
       if (data && data[0] && data.length > 0) {
         const pdata = JSON.parse(data);
-        this.setState({ notes: pdata, filteredNotes: pdata });
+        if (this.state.notes !== pdata) {
+          this.setState({ notes: pdata, filteredNotes: pdata });
+        }
       }
 
       getMyNotes(user, (res) => {
@@ -125,9 +127,14 @@ export default class App extends Component {
     const { notesInitialLoad } = this.state;
     const { noteNames } = this.state;
 
-    const savedNames = localStorage.getItem('notenames');
+    let savedNames = localStorage.getItem('notenames');
+
     if (savedNames) {
-      this.setState({ noteNames: JSON.parse(savedNames) });
+      savedNames = JSON.parse(savedNames);
+      const { user } = this.state;
+      const selectedUser = user.length > 1 ? user : savedNames[0];
+      this.setState({ noteNames: savedNames, user: selectedUser });
+      this.getMyNotes(selectedUser);
     }
     if (loginKey && !notesInitialLoad && !noteNames) {
       getNoteNames((res) => {
