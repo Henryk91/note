@@ -132,9 +132,9 @@ export default class App extends Component {
     if (savedNames) {
       savedNames = JSON.parse(savedNames);
       const { user } = this.state;
-      const selectedUser = user.length > 1 ? user : savedNames[0];
-      this.setState({ noteNames: savedNames, user: selectedUser });
-      this.getMyNotes(selectedUser);
+      const selectedUser = user.length > 1 ? user : null;
+      this.setState({ noteNames: savedNames });
+      if (selectedUser) this.getMyNotes(selectedUser);
     }
     if (loginKey && !notesInitialLoad && !noteNames) {
       getNoteNames((res) => {
