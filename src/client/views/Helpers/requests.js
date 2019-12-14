@@ -34,7 +34,7 @@ export function getAllNotes(next) {
     });
 }
 
-export function getMyNotes(user, next) {
+export function getMyNotesRec(user, next) {
   const loginKey = localStorage.getItem('loginKey');
   fetch(`/api/note?user=${user}&tempPass=${loginKey}`)
     .then(res => res.json())

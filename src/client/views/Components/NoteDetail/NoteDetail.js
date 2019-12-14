@@ -94,8 +94,10 @@ export default class NoteDetail extends Component {
 
   refreshItems = (person) => {
     if (person) {
-      const tags = this.getNoteByTag(person.dataLable);
-      this.setState({ person, tags });
+      const { showTag } = this.state;
+      const tags = this.getNoteByTag(person.dataLable, showTag);
+      this.setState({ person, tags, showTag });
+      if (showTag) window.scrollBy(0, document.body.scrollHeight);
     }
   };
 

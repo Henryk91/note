@@ -9,7 +9,7 @@ import {
   Home, SearchBar, NoteDetail, NewNote, Login
 } from './views/Components/index';
 import {
-  getMyNotes, saveNewNote, updateNote, getAllNotes, getNoteNames
+  getMyNotesRec, saveNewNote, updateNote, getAllNotes, getNoteNames
 } from './views/Helpers/requests';
 
 const compareSort = (a, b) => {
@@ -95,17 +95,20 @@ export default class App extends Component {
         if (this.state.notes !== pdata) {
           this.setState({ notes: pdata, filteredNotes: pdata });
         }
+      } else {
+        this.setState({ notes: null, filteredNotes: null });
       }
 
-      getMyNotes(user, (res) => {
+      getMyNotesRec(user, (res) => {
         if (res.length > 0) {
           res.sort(compareSort);
         }
 
-        if (res.length > 0) {
-          console.log(user, res);
-          localStorage.setItem(user, JSON.stringify(res));
+        const stateNotes = this.state.notes;
+        const reRender = res && stateNotes ? (res.toString() !== stateNotes.toString()) : res.length > 0;
 
+        if (reRender) {
+          localStorage.setItem(user, JSON.stringify(res));
           this.setState({ notes: res, filteredNotes: res });
           this.setRedirect();
         }
