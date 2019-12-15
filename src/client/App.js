@@ -102,7 +102,7 @@ export default class App extends Component {
 
         const stateNotes = this.state.notes;
         const reRender = res && stateNotes ? (JSON.stringify(res) !== JSON.stringify(stateNotes)) : res.length > 0;
-        if (reRender) {
+        if (reRender && res.length > 0) {
           localStorage.setItem(user, JSON.stringify(res));
           this.setState({ notes: res, filteredNotes: res });
           this.setRedirect();
