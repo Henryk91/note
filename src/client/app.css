@@ -188,6 +188,7 @@ h2 {
     width: 0px;
   }
 }
+/* Red Theme */
 .red-back{
   background: rgb(208, 0, 0);
 }
@@ -203,19 +204,46 @@ h2 {
 .red-back-back{
   background-color: #030303;
 }
-
-.blue-back{
+/* Ocean Theme */
+.ocean-back{
   background: rgb(56, 205, 184);
 }
-.blue-back-back{
+.ocean-back-back{
   background: rgb(53, 55, 61);
 }
-.blue-border-thick{
+.ocean-border-thick{
   border: 2px solid rgb(56, 205, 184);
 }
-.blue-hover:hover{
+.ocean-hover:hover{
   background: rgba(56, 205, 184, 0.7);
 }
+/* Dark Theme */
+.dark-back{
+  background: rgb(0, 144, 200);
+}
+.dark-back-back{
+  background: rgb(6, 31, 47);
+}
+.dark-border-thick{
+  border: 2px solid rgb(0, 144, 200);
+}
+.dark-hover:hover{
+  background: rgba(0, 144, 200, 0.7);
+}
+/* Night Theme */
+.night-back{
+  background: rgb(39, 52, 59);
+}
+.night-back-back{
+  background: rgb(6, 31, 47);
+}
+.night-border-thick{
+  border: 2px solid rgb(0, 144, 200);
+}
+.night-hover:hover{
+  background: rgba(0, 144, 200, 0.7);
+}
+
 .rust-back{
   background: rgb(187, 59, 0);
 }

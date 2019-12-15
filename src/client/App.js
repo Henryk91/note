@@ -228,9 +228,17 @@ export default class App extends Component {
       document.body.style.backgroundColor = '#030303';
       document.querySelector('meta[name="theme-color"]').setAttribute('content', '#d00000');
     }
-    if (theme === 'Blue') {
+    if (theme === 'Ocean') {
       document.body.style.backgroundColor = '#35373D';
       document.querySelector('meta[name="theme-color"]').setAttribute('content', '#38cdb8');
+    }
+    if (theme === 'Dark') {
+      document.body.style.backgroundColor = '#061f2f';
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#061f2f');
+    }
+    if (theme === 'Night') {
+      document.body.style.backgroundColor = '#061f2f';
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#061f2f');
     }
     return (
       <Router>

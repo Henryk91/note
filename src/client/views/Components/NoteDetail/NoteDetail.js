@@ -463,7 +463,7 @@ Theme
     if (isNoteNames) {
       document.webkitExitFullscreen();
       noteNameBlock = this.showNoteNames(noteNames);
-      noteThemeBlock = this.showNoteThemes(['Red', 'Blue']);
+      noteThemeBlock = this.showNoteThemes(['Red', 'Ocean', 'Dark', 'Night']);
       person = null;
     } else if (isMobileDevice()) {
       // document.documentElement.webkitRequestFullscreen();

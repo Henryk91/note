@@ -3,6 +3,7 @@
     "short_name": "note",
     "start_url": "index.html",
     "display": "standalone",
+    "theme_color": "#d00000",
     "icons": [
       {
         "src": "favicon.ico",
