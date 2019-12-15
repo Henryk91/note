@@ -233,11 +233,11 @@ export default class App extends Component {
       document.querySelector('meta[name="theme-color"]').setAttribute('content', '#38cdb8');
     }
     if (theme === 'Dark') {
-      document.body.style.backgroundColor = '#061f2f';
+      document.body.style.backgroundColor = '#0090c8';
       document.querySelector('meta[name="theme-color"]').setAttribute('content', '#061f2f');
     }
     if (theme === 'Night') {
-      document.body.style.backgroundColor = '#061f2f';
+      document.body.style.backgroundColor = '#27343b';
       document.querySelector('meta[name="theme-color"]').setAttribute('content', '#061f2f');
     }
     return (
