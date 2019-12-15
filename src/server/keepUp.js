@@ -30,7 +30,7 @@ function KeepUp(url, startHour, endHour, minuteInterval) {
     isRunning = true;
     refresh(url, startHour, endHour, minuteInterval);
   } else {
-    console.log('Already Running');
+    // console.log('Already Running');
   }
 }
 

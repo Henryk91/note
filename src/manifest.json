@@ -1,6 +1,6 @@
 {
     "name": "Note List",
-    "short_name": "note",
+    "short_name": "Note",
     "start_url": "index.html",
     "display": "standalone",
     "theme_color": "#d00000",

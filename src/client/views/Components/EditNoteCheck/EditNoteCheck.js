@@ -7,17 +7,31 @@ export default class EditNoteCheck extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      radioType: 'Note'
+      radioType: 'Note',
+      upload: null
     };
     this.setRadioType = this.setRadioType.bind(this);
+    this.handleChangeFile = this.handleChangeFile.bind(this);
   }
 
   setRadioType(type) {
     this.setState({ radioType: type });
   }
 
+  handleChangeFile = (event) => {
+    const reader = new FileReader();
+    if (event.target.files && event.target.files.length) {
+      const [file] = event.target.files;
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        this.setState({ upload: reader.result.toString() });
+      };
+    }
+  }
+
   render() {
-    let { radioType, } = this.state;
+    let { radioType } = this.state;
+    const { upload } = this.state;
     const now = new Date();
     const { showTag, Theme, lable } = this.props;
 
@@ -35,13 +49,11 @@ export default class EditNoteCheck extends Component {
         <div className="radioBox">
           <label>Note</label>
           <label>Log</label>
-          <label>Number</label>
-          <label>Email </label>
+          <label>Upload</label>
           <br />
           <input onClick={() => this.setRadioType('Note')} type="radio" name="tagType" value="Note" defaultChecked={defaultNote} />
           <input onClick={() => this.setRadioType('Log')} type="radio" name="tagType" value="Log" defaultChecked={defaultLog} />
-          <input onClick={() => this.setRadioType('Number')} type="radio" name="tagType" value="Number" />
-          <input onClick={() => this.setRadioType('Email')} type="radio" name="tagType" value="Email" />
+          <input onClick={() => this.setRadioType('Upload')} type="radio" name="tagType" value="Upload" />
         </div>
 
         {radioType === 'Note' ? (
@@ -61,6 +73,23 @@ export default class EditNoteCheck extends Component {
             ) : (
               <input className={themeBack} name="number" type="text" placeholder="Info" />
             )}
+            <br />
+          </div>
+        ) : null}
+        {radioType === 'Upload' ? (
+          <div>
+            <input className={themeBack} name="tagTypeText" type="text" placeholder="Sub Heading" defaultValue={showTag} />
+            <br />
+            <input onChange={e => this.handleChangeFile(e)} className={themeBack} name="upload" type="file" />
+            {upload !== null
+              ? (
+                <input
+                  style={{ visibility: 'hidden', height: '0px', width: '0px' }}
+                  name="number"
+                  type="text"
+                  defaultValue={upload}
+                />
+              ) : null}
             <br />
           </div>
         ) : null}

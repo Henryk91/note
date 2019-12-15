@@ -109,11 +109,18 @@ export default class NoteDetail extends Component {
 
     const textTag = event.target.tagTypeText.value;
 
-    tag === 'Note' ? (tag = textTag) : tag;
+    tag === 'Note' || tag === 'Upload' ? (tag = textTag) : tag;
 
     if (tag === 'Log') {
       number = JSON.stringify({ json: true, date: textTag, data: number });
     }
+
+    if (number.includes(';base64,')) {
+      const b64 = number.substring(number.indexOf('base64') + 7);
+      console.log(b64);
+      number = `${window.atob(b64)}<br />${number}`;
+    }
+
 
     person.dataLable.push({ tag, data: number });
 
