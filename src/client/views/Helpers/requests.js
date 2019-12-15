@@ -129,7 +129,7 @@ export function updateOneNoteRec(note, done) {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(sendData)
+      body: JSON.stringify(toUpdateNote)
     }).then((response) => {
       done(response);
       if (response.ok) {
