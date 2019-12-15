@@ -12,7 +12,7 @@ const createList = (notes, theme) => {
   let list = null;
 
   const themeBorder = `${theme.toLowerCase()}-border-thick`;
-  if (notes) {
+  if (notes[0]) {
     list = notes.map((person) => {
       const dataLable = [...person.dataLable].map(dataL => (dataL = dataL.tag));
       const noteCount = dataLable.filter(onlyUnique).length;

@@ -181,7 +181,7 @@ module.exports = function () {
     tempPassCheck(pass, (docPass) => {
       if (docPass[0]) {
         permId = docPass[0].permId;
-        console.log('AAAAAAAAA', noteHeading);
+        console.log('Note Heading:', noteHeading);
         console.log(noteHeading);
         Note.find({ createdBy: user, userId: permId, id: noteHeading }, (err, docs) => {
           if (err) {
@@ -247,7 +247,50 @@ module.exports = function () {
             doc.save((error) => {
               if (error) {
                 console.log(error);
+                done('success');
+              }
+            });
+          }
+        });
+      }
+    });
+  };
+  this.updateOneNote = (req, done) => {
+    const updateNoteId = req.body.person.id;
 
+    const pass = req.query.tempPass;
+    let permId = null;
+
+    tempPassCheck(pass, (docPass) => {
+      if (docPass[0]) {
+        permId = docPass[0].permId;
+
+        Note.findOne({ id: updateNoteId, userId: permId }, (err, doc) => {
+          if (err) {
+            console.log(err);
+          } else {
+            const update = req.body.person;
+            doc.heading = update.heading;
+            if (doc.dataLable) {
+              if (req.body.delete) {
+                const newLable = doc.dataLable
+                  .filter(item => JSON.stringify(item) !== JSON.stringify(update.dataLable));
+                doc.dataLable = newLable;
+              } else if (update.dataLable.edit) {
+                const dataLable = update.dataLable;
+                const docDataLable = JSON.parse(JSON.stringify(doc.dataLable));
+                const ind = docDataLable.findIndex(item => item.data === dataLable.data);
+                docDataLable[ind].data = dataLable.edit;
+                doc.dataLable = docDataLable;
+              } else {
+                doc.dataLable.push(update.dataLable);
+              }
+            }
+            doc.save((error) => {
+              if (error) {
+                console.log('Error', error);
+                done('fail');
+              } else {
                 done('success');
               }
             });

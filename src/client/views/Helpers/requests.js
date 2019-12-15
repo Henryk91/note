@@ -104,6 +104,52 @@ export function createAccount(note, next) {
     });
 }
 
+export function updateOneNoteRec(note, done) {
+  console.log(note);
+  const sendData = JSON.parse(JSON.stringify(note));
+  const { dataLable } = note.person;
+
+  const newLable = dataLable[dataLable.length - 1];
+  sendData.person.dataLable = newLable;
+
+  const savedItems = localStorage.getItem('updateOneNote');
+  let toUpdate = [];
+  if (savedItems) {
+    toUpdate = JSON.parse(savedItems);
+    toUpdate.push(sendData);
+  } else {
+    toUpdate = [sendData];
+  }
+  localStorage.setItem('updateOneNote', JSON.stringify(toUpdate));
+
+  const loginKey = localStorage.getItem('loginKey');
+  toUpdate.forEach((toUpdateNote) => {
+    fetch(`/api/update-one?tempPass=${loginKey}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(sendData)
+    }).then((response) => {
+      done(response);
+      if (response.ok) {
+        const updateSavedItems = localStorage.getItem('updateOneNote');
+        if (updateSavedItems) {
+          let saveItemArray = JSON.parse(updateSavedItems);
+          saveItemArray = saveItemArray
+            .filter(item => JSON.stringify(item) !== JSON.stringify(toUpdateNote));
+          console.log(saveItemArray);
+          if (saveItemArray.length > 0) {
+            localStorage.setItem('updateOneNote', JSON.stringify(saveItemArray));
+          } else {
+            localStorage.removeItem('updateOneNote');
+          }
+        }
+      }
+    });
+  });
+}
+
 export function updateNote(note) {
   const loginKey = localStorage.getItem('loginKey');
   const savedItems = localStorage.getItem('updateNote');

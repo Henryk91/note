@@ -9,7 +9,7 @@ import {
   Home, SearchBar, NoteDetail, NewNote, Login
 } from './views/Components/index';
 import {
-  getMyNotesRec, saveNewNote, updateNote, getAllNotes, getNoteNames
+  getMyNotesRec, saveNewNote, updateOneNoteRec, getAllNotes, getNoteNames
 } from './views/Helpers/requests';
 
 const compareSort = (a, b) => {
@@ -86,17 +86,13 @@ export default class App extends Component {
     if (noteName) user = noteName;
 
     if (user !== '') {
-      // if (user !== '' && this.state.notes === null) {
       localStorage.setItem('user', user);
-
       const data = localStorage.getItem(user);
       if (data && data[0] && data.length > 0) {
         const pdata = JSON.parse(data);
         if (this.state.notes !== pdata) {
           this.setState({ notes: pdata, filteredNotes: pdata });
         }
-      } else {
-        this.setState({ notes: null, filteredNotes: null });
       }
 
       getMyNotesRec(user, (res) => {
@@ -105,8 +101,7 @@ export default class App extends Component {
         }
 
         const stateNotes = this.state.notes;
-        const reRender = res && stateNotes ? (res.toString() !== stateNotes.toString()) : res.length > 0;
-
+        const reRender = res && stateNotes ? (JSON.stringify(res) !== JSON.stringify(stateNotes)) : res.length > 0;
         if (reRender) {
           localStorage.setItem(user, JSON.stringify(res));
           this.setState({ notes: res, filteredNotes: res });
@@ -159,9 +154,13 @@ export default class App extends Component {
     notes[index] = update;
 
     if (searchTerm === '') {
-      updateNote(update, () => alert('setn'));
-
-      this.setState({ notes, filteredNotes: notes });
+      console.log(update);
+      updateOneNoteRec({ person: update.updateData, delete: update.delete }, () => {
+        if (update.delete) {
+          const noteUser = localStorage.getItem('user');
+          this.getMyNotes(noteUser);
+        }
+      });
     } else {
       alert('Cant update in search');
     }
@@ -189,7 +188,7 @@ export default class App extends Component {
   noteDetailSet = (msg) => {
     if (msg.noteName) {
       const { noteName } = msg;
-      this.setState({ user: noteName });
+      this.setState({ user: noteName, notes: null, filteredNotes: null });
       this.getMyNotes(noteName);
     } else if (msg.noteTheme) {
       this.setState({ theme: msg.noteTheme });

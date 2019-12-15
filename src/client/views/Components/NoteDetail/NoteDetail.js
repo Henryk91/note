@@ -22,7 +22,7 @@ const getPerson = (notes, propForId) => {
   if (propForId === 'note-name') {
     return this.props.noteNames;
   }
-  return notes ? notes.filter(val => val.id === propForId.params.id)[0] : null;
+  return notes && notes[0] ? notes.filter(val => val.id === propForId.params.id)[0] : null;
 };
 
 function isMobileDevice() {
@@ -116,7 +116,10 @@ export default class NoteDetail extends Component {
     }
 
     person.dataLable.push({ tag, data: number });
-    this.props.set({ person });
+
+    const updateData = JSON.parse(JSON.stringify(person));
+    updateData.dataLable = [{ tag, data: number }];
+    this.props.set({ updateData });
 
     this.refreshItems(person);
     this.setState({ showAddItem: false });
@@ -127,13 +130,13 @@ export default class NoteDetail extends Component {
 
   updateNoteItem = (val) => {
     const { person } = this.state;
-    const index = person.dataLable.findIndex(item => item.tag === val.type && item.data === val.oldItem);
+    const updateData = JSON.parse(JSON.stringify(person));
+    updateData.dataLable = [{ tag: val.type, data: val.oldItem, edit: val.item }];
     if (!val.delete) {
-      person.dataLable[index].data = val.item;
+      this.props.set({ updateData, edit: val.item });
     } else {
-      person.dataLable.splice(index, 1);
+      this.props.set({ updateData, delete: true });
     }
-    this.props.set({ person });
   };
 
   continueLog = (val) => {
