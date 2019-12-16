@@ -7,7 +7,7 @@ const KeepUp = require('../keepUp.js');
 const dbHandler = new Handler();
 
 router.get('/', (req, res) => {
-  KeepUp('https://henryk91-note.herokuapp.com/', 7, 19, 14);
+  KeepUp('https://henryk91-note.herokuapp.com/', 5, 19, 14);
 
   const { user } = req.query;
   if (user === 'all' || user === 'All') {
