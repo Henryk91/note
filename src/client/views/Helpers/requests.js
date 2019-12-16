@@ -12,6 +12,7 @@ export function getNoteNames(next) {
       }
     })
     .catch((error) => {
+      console.log('Error:', error);
       next(error);
     });
 }
@@ -30,6 +31,7 @@ export function getAllNotes(next) {
       }
     })
     .catch((error) => {
+      console.log('Error:', error);
       next(error);
     });
 }
@@ -48,6 +50,7 @@ export function getMyNotesRec(user, next) {
       }
     })
     .catch((error) => {
+      console.log('Error:', error);
       next(error);
     });
 }
@@ -66,6 +69,7 @@ export function getNote(user, noteHeading, next) {
       }
     })
     .catch((error) => {
+      console.log('Error:', error);
       next(error);
     });
 }
@@ -83,6 +87,7 @@ export function loginRequest(note, next) {
       next(data);
     })
     .catch((error) => {
+      console.log('Error:', error);
       next(error);
     });
 }
