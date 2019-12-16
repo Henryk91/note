@@ -5,12 +5,8 @@
 /* eslint-disable no-unused-expressions */
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
-import {
-  Home, SearchBar, NoteDetail, NewNote, Login
-} from './views/Components/index';
-import {
-  getMyNotesRec, saveNewNote, updateOneNoteRec, getAllNotes, getNoteNames
-} from './views/Helpers/requests';
+import { Home, SearchBar, NoteDetail, NewNote, Login } from './views/Components/index';
+import { getMyNotesRec, saveNewNote, updateOneNoteRec, getAllNotes, getNoteNames } from './views/Helpers/requests';
 
 const compareSort = (a, b) => {
   const nameA = a.heading.toUpperCase();
@@ -75,7 +71,7 @@ export default class App extends Component {
   }
 
   getAllNotes() {
-    getAllNotes((res) => {
+    getAllNotes(res => {
       res.sort(compareSort);
       this.setState({ notes: res, filteredNotes: res });
     });
@@ -95,13 +91,13 @@ export default class App extends Component {
         }
       }
 
-      getMyNotesRec(user, (res) => {
+      getMyNotesRec(user, res => {
         if (res.length > 0) {
           res.sort(compareSort);
         }
 
         const stateNotes = this.state.notes;
-        const reRender = res && stateNotes ? (JSON.stringify(res) !== JSON.stringify(stateNotes)) : res.length > 0;
+        const reRender = res && stateNotes ? JSON.stringify(res) !== JSON.stringify(stateNotes) : res.length > 0;
         if (reRender && res.length > 0) {
           localStorage.setItem(user, JSON.stringify(res));
           this.setState({ notes: res, filteredNotes: res });
@@ -135,7 +131,7 @@ export default class App extends Component {
       if (selectedUser) this.getMyNotes(selectedUser);
     }
     if (loginKey && !notesInitialLoad && !noteNames) {
-      getNoteNames((res) => {
+      getNoteNames(res => {
         if (res.length > 0) {
           res.push('All');
           res.push('None');
@@ -148,7 +144,7 @@ export default class App extends Component {
     }
   }
 
-  updateNote = (update) => {
+  updateNote = update => {
     const { notes, searchTerm } = this.state;
     const index = notes.indexOf(val => val.id === update.id);
     notes[index] = update;
@@ -166,7 +162,7 @@ export default class App extends Component {
     }
   };
 
-  addNewNote = (newNote) => {
+  addNewNote = newNote => {
     const { notes, user, searchTerm } = this.state;
     const usedNewNote = newNote;
     user !== '' ? (usedNewNote.note.createdBy = user) : null;
@@ -185,7 +181,7 @@ export default class App extends Component {
     }
   };
 
-  noteDetailSet = (msg) => {
+  noteDetailSet = msg => {
     if (msg.noteName) {
       const { noteName } = msg;
       this.setState({ user: noteName, notes: null, filteredNotes: null });
@@ -214,9 +210,7 @@ export default class App extends Component {
   }
 
   render() {
-    const {
-      theme, notes, user, searchTerm, filteredNotes, loginKey
-    } = this.state;
+    const { theme, notes, user, searchTerm, filteredNotes, loginKey } = this.state;
 
     const { noteNames } = this.state;
     const themeBack = `${theme.toLowerCase()}-back`;

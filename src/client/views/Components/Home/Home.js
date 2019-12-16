@@ -13,17 +13,13 @@ const createList = (notes, theme) => {
 
   const themeBorder = `${theme.toLowerCase()}-border-thick`;
   if (notes) {
-    list = notes.map((person) => {
+    list = notes.map(person => {
       const dataLable = [...person.dataLable].map(dataL => (dataL = dataL.tag));
       const noteCount = dataLable.filter(onlyUnique).length;
       return (
         <Link key={person.id} style={{ textDecoration: 'none' }} to={`/notes/${person.id}`}>
           <div className="listNameButton dark-hover">
-            <div className={`listCountBox ${themeBorder}`}>
-              {' '}
-              {noteCount}
-              {' '}
-            </div>
+            <div className={`listCountBox ${themeBorder}`}> {noteCount} </div>
             <h3>{person.heading}</h3>
           </div>
         </Link>
@@ -33,19 +29,17 @@ const createList = (notes, theme) => {
   return list;
 };
 
-
 export default class Home extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-    };
+    this.state = {};
     this.logOut = this.logOut.bind(this);
   }
 
   logOut = () => {
     localStorage.clear();
     window.location.reload();
-  }
+  };
 
   render() {
     const { notes, Theme, User } = this.props;
@@ -75,11 +69,7 @@ export default class Home extends Component {
           </div>
         ) : (
           <h3>
-            Please add note book name
-            {' '}
-            <br />
-            {' '}
-at the top then click Get Notes
+            Please add note book name <br /> at the top then click Get Notes
           </h3>
         )}
       </div>

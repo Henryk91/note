@@ -18,7 +18,7 @@ export default class EditNoteCheck extends Component {
     this.setState({ radioType: type });
   }
 
-  handleChangeFile = (event) => {
+  handleChangeFile = event => {
     const reader = new FileReader();
     if (event.target.files && event.target.files.length) {
       const [file] = event.target.files;
@@ -27,7 +27,7 @@ export default class EditNoteCheck extends Component {
         this.setState({ upload: reader.result.toString() });
       };
     }
-  }
+  };
 
   render() {
     let { radioType } = this.state;
@@ -81,15 +81,9 @@ export default class EditNoteCheck extends Component {
             <input className={themeBack} name="tagTypeText" type="text" placeholder="Sub Heading" defaultValue={showTag} />
             <br />
             <input onChange={e => this.handleChangeFile(e)} className={themeBack} name="upload" type="file" />
-            {upload !== null
-              ? (
-                <input
-                  style={{ visibility: 'hidden', height: '0px', width: '0px' }}
-                  name="number"
-                  type="text"
-                  defaultValue={upload}
-                />
-              ) : null}
+            {upload !== null ? (
+              <input style={{ visibility: 'hidden', height: '0px', width: '0px' }} name="number" type="text" defaultValue={upload} />
+            ) : null}
             <br />
           </div>
         ) : null}

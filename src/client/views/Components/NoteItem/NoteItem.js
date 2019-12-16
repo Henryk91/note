@@ -27,14 +27,13 @@ export default class NoteItem extends Component {
     this.editItemSet = this.editItemSet.bind(this);
   }
 
-
   // eslint-disable-next-line class-methods-use-this
   getMarkdownText(input) {
     const rawMarkup = marked(input, { sanitize: false });
     return { __html: rawMarkup };
   }
 
-  submitChange = (e) => {
+  submitChange = e => {
     e.preventDefault();
     let update = e.target.item.value;
     if (e.target.itemDate) {
@@ -48,7 +47,11 @@ export default class NoteItem extends Component {
     const { item } = this.state;
     const { index, type } = this.props;
     this.props.set({
-      item: update, oldItem: item, index, type, delete: false
+      item: update,
+      oldItem: item,
+      index,
+      type,
+      delete: false
     });
     this.setState({ editingItem: false, item: update });
   };
@@ -57,17 +60,20 @@ export default class NoteItem extends Component {
     this.setState({ editingItem: true });
   };
 
-  deleteItem = (e) => {
+  deleteItem = e => {
     e.preventDefault();
     if (confirm('Are you sure you want to permanently delete this?')) {
       this.setState({ item: null });
       this.props.set({
-        oldItem: this.state.item, index: this.props.index, type: this.props.type, delete: true
+        oldItem: this.state.item,
+        index: this.props.index,
+        type: this.props.type,
+        delete: true
       });
     }
   };
 
-  editItemSet = (bVal) => {
+  editItemSet = bVal => {
     this.setState({ editingItem: bVal });
   };
 
@@ -100,8 +106,7 @@ export default class NoteItem extends Component {
         </button>
         <button className={`submit-button ${themeBack} ${themeHover}`} onClick={this.deleteItem}>
           {' '}
-          <i className="far fa-trash-alt" />
-          {' '}
+          <i className="far fa-trash-alt" />{' '}
         </button>
         <hr />
         <br />
@@ -110,9 +115,7 @@ export default class NoteItem extends Component {
   }
 
   displayItemBox(item) {
-    const {
-      Theme, showEdit, count, show
-    } = this.props;
+    const { Theme, showEdit, count, show } = this.props;
     const themeBack = `${Theme.toLowerCase()}-back`;
     const themeBackHover = `${Theme.toLowerCase()}-hover`;
     const themeBorder = `${Theme.toLowerCase()}-border-thick`;
@@ -123,19 +126,13 @@ export default class NoteItem extends Component {
       <div className="noteItemBox">
         {show ? (
           <div>
-            {showEdit ? null : (
-              <div className={`listCountBox noteItemCount ${themeBorder}`}>
-                {' '}
-                {count}
-                {' '}
-              </div>
-            ) }
+            {showEdit ? null : <div className={`listCountBox noteItemCount ${themeBorder}`}> {count} </div>}
             <div className={`${noteItemClass} white-color`} dangerouslySetInnerHTML={this.getMarkdownText(item)} />
             {showEdit ? (
               <div className={`editButtons ${themeBack} ${themeBackHover}`} onClick={() => this.setState({ editingItem: true })}>
                 <i className="fas fa-pen" />
               </div>
-            ) : null }
+            ) : null}
             <hr />
           </div>
         ) : (
@@ -145,11 +142,8 @@ export default class NoteItem extends Component {
     );
   }
 
-
   displayLogItemBox(item) {
-    const {
-      show, date, Theme, prevItem
-    } = this.props;
+    const { show, date, Theme, prevItem } = this.props;
     const parsedItem = JSON.parse(item);
 
     let showItem = show;
@@ -164,7 +158,14 @@ export default class NoteItem extends Component {
     }
     const themeBack = `${Theme.toLowerCase()}-back`;
     const themeBackHover = `${Theme.toLowerCase()}-hover`;
-    const hasBreak = parsedItem.data === 'Break' ? 'logNoteItem' : parsedItem.data === 'Pause' ? 'logNoteItem' : parsedItem.data === 'Lunch' ? 'logNoteItem' : null;
+    const hasBreak =
+      parsedItem.data === 'Break'
+        ? 'logNoteItem'
+        : parsedItem.data === 'Pause'
+        ? 'logNoteItem'
+        : parsedItem.data === 'Lunch'
+        ? 'logNoteItem'
+        : null;
     let prevData = null;
 
     if (prevItem !== null && prevItem !== undefined) {
@@ -176,12 +177,8 @@ export default class NoteItem extends Component {
         {showItem ? (
           <div>
             <div>
-              <p className="noteItem white-color">
-                {newDate}
-              </p>
-              <p className={`noteItem ${hasBreak}`}>
-                {parsedItem.data}
-              </p>
+              <p className="noteItem white-color">{newDate}</p>
+              <p className={`noteItem ${hasBreak}`}>{parsedItem.data}</p>
               <button className={`editButtons ${themeBack} ${themeBackHover}`} onClick={() => this.setState({ editingItem: true })}>
                 <i className="fas fa-pen" />
               </button>

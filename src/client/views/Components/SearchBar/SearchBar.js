@@ -7,8 +7,7 @@ import React, { Component } from 'react';
 export default class SearchBar extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-    };
+    this.state = {};
     this.search = this.search.bind(this);
   }
 
@@ -16,7 +15,7 @@ export default class SearchBar extends Component {
     let { notes } = this.props;
     if (notes) {
       const searchTerm = this.title.value;
-      notes = notes.filter((val) => {
+      notes = notes.filter(val => {
         const firtName = val.heading.toLowerCase();
         const term = searchTerm.toLowerCase();
         return firtName.includes(term);

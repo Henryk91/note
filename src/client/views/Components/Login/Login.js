@@ -25,7 +25,7 @@ export default class Login extends Component {
       email,
       password
     };
-    loginRequest(user, (res) => {
+    loginRequest(user, res => {
       if (res.id) {
         localStorage.setItem('loginKey', res.id);
         window.location.reload();
@@ -36,7 +36,7 @@ export default class Login extends Component {
     });
   };
 
-  createAccount = (event) => {
+  createAccount = event => {
     event.preventDefault();
 
     const password = event.target.password.value;
@@ -55,7 +55,7 @@ export default class Login extends Component {
         tempPass: [''],
         permId: ''
       };
-      createAccount(user, (res) => {
+      createAccount(user, res => {
         if (res.id) {
           localStorage.setItem('loginKey', res.id);
           window.location.reload();
@@ -92,10 +92,15 @@ export default class Login extends Component {
               <br />
               <input className={themeBack} name="password2" type="password" placeholder="Password" required="required" />
               <br />
-              <button className={themeBack} type="submit">Submit</button>
+              <button className={themeBack} type="submit">
+                Submit
+              </button>
             </form>
             <br />
-            <button className={themeBack} onClick={() => this.loginState(false)}> Login </button>
+            <button className={themeBack} onClick={() => this.loginState(false)}>
+              {' '}
+              Login{' '}
+            </button>
           </div>
         ) : (
           <div>
@@ -105,10 +110,15 @@ export default class Login extends Component {
               <br />
               <input className={themeBack} name="password" type="password" placeholder="Password" required="required" />
               <br />
-              <button className={themeBack} type="submit">Submit</button>
+              <button className={themeBack} type="submit">
+                Submit
+              </button>
             </form>
             <br />
-            <button className={themeBack} onClick={() => this.loginState(true)}> Sign Up </button>
+            <button className={themeBack} onClick={() => this.loginState(true)}>
+              {' '}
+              Sign Up{' '}
+            </button>
           </div>
         )}
       </div>
