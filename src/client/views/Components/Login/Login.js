@@ -18,14 +18,21 @@ export default class Login extends Component {
 
   saveLogin = () => {
     event.preventDefault();
-    const password = event.target.password.value;
-    const email = event.target.email.value;
-
+    let password = event.target.password.value;
+    let email = event.target.email.value;
+    if(password && email){
+      password = password.trim();
+      email = email.trim();
+    }
     const user = {
       email,
       password
     };
+    console.log('Trying to log in!');
+    
     loginRequest(user, res => {
+      console.log('Login res',res);
+      
       if (res.id) {
         localStorage.setItem('loginKey', res.id);
         window.location.reload();
@@ -39,14 +46,21 @@ export default class Login extends Component {
   createAccount = event => {
     event.preventDefault();
 
-    const password = event.target.password.value;
+    let password = event.target.password.value;
     const password2 = event.target.password2.value;
 
     if (password === password2) {
-      const firstName = event.target.firstName.value;
-      const lastName = event.target.lastName.value;
-      const email = event.target.email.value;
+      let firstName = event.target.firstName.value;
+      let lastName = event.target.lastName.value;
+      let email = event.target.email.value;
 
+      let password = event.target.password.value;
+      
+      if(password) password = password.trim();
+      if(email) email = email.trim();
+      if(firstName) firstName = firstName.trim();
+      if(lastName) lastName = lastName.trim();
+      
       const user = {
         email,
         firstName,

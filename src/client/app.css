@@ -189,11 +189,7 @@ h2 {
   .detail-scroll {
     right: 26vw;
   }
-  .search-clear{
-    /* display: inline; */
-    /* margin-top: -4vh !important;
-    margin-right: -50vw !important; */
-  }
+
   .backButton {
     left: 24vw;
   }

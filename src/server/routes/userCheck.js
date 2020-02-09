@@ -5,10 +5,12 @@ const dbHandler = new Handler();
 
 module.exports = function (app) {
   app.post('/api/login', (req, res) => {
+    console.log('Trying to log in');
+    
     let docId = '';
     dbHandler.userLogin(req.body, (dbResp) => {
       docId = dbResp;
-
+      console.log('Db Trying to log in res',dbResp);
       if (docId.indexOf('Login') < 0) {
         res.json({ id: docId });
       }
