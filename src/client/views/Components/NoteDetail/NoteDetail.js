@@ -314,7 +314,7 @@ export default class NoteDetail extends Component {
       }
 
       let animate = '';
-      if(showTag === prop && showTag !== '') animate = 'grow'
+      if(showTag === prop && showTag !== '' && prop !== 'Log') animate = 'grow'
       const bunch = this.createNoteItemBunch(allDates, prop, selectedDate, showButton);
       const themeBorder = `${Theme.toLowerCase()}-border-thick`;
       const themeHover = `${Theme.toLowerCase()}-hover`;
@@ -342,11 +342,12 @@ export default class NoteDetail extends Component {
                   Hide
                 </button>
                 <button
-                  className={`editButtons ${themeBack} ${themeHover}`}
+                  className={`editButtons continue-button ${themeBack} ${themeHover}`}
                   onClick={() => this.continueLog({ cont: this.state.continueData })}
                 >
-                  Cont
+                  Continue Previous Task
                 </button>
+                <br/>
               </div>
             ) : prop === 'Log' ? (
               <div>

@@ -313,13 +313,3 @@ h2 {
   from {max-height: 0px;}
   to {max-height: 1000px;}
 }
-.shrink{
-  background: red !important;
-  animation-name: shrink;
-  animation-duration: 1s;
-  overflow: hidden;
-}
-@keyframes shrink {
-  from {max-height: 0px;}
-  to {max-height: 1000px;}
-}
