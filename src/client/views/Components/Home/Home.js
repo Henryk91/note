@@ -57,9 +57,11 @@ export default class Home extends Component {
           <i className="fas fa-times" />
         </button>
         {User !== 'None' ? (
-          <Link style={{ textDecoration: 'none' }} className={`detailAddButton ${themeHover} ${themeBack}`} to="/new-note/">
-            <i className="fas fa-plus" />
-          </Link>
+          <div className="detail-scroll">
+            <Link style={{ textDecoration: 'none' }} className={`detailAddButton ${themeHover} ${themeBack}`} to="/new-note/">
+              <i className="fas fa-plus" />
+            </Link>
+          </div>
         ) : null}
         {notes ? (
           <div>

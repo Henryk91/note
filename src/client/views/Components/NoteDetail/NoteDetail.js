@@ -436,7 +436,9 @@ export default class NoteDetail extends Component {
         <button className={`submit-button ${themeHover} ${themeBack}`} type="submit">
           <i className="fas fa-check" />
         </button>
-        <button className={`submit-button ${themeHover} ${themeBack}`} onClick={() => this.setState({ showAddItem: false })}>
+        <button 
+          className={`submit-button ${themeHover} ${themeBack}`} 
+          onClick={() => this.setState({ showAddItem: false, addLable: null })}>
           {' '}
           <i className="fas fa-times" />{' '}
         </button>
@@ -509,13 +511,23 @@ export default class NoteDetail extends Component {
         {editName ? (
           ''
         ) : (
-          <div
-            className={`detailAddButton ${themeHover} ${themeBack}`}
-            onClick={() => {
-              showAddItem ? this.showAddItemSet(false) : this.showAddItemSet(true);
-            }}
-          >
-            <i className="fas fa-plus" />
+          <div className="detail-scroll">
+            <div
+              className={`detailUpButton ${themeHover} ${themeBack}`}
+              onClick={() => {
+                window.scrollTo(0, 0);
+              }}
+            >
+              <i className="fas fa-arrow-up"/>
+            </div>
+            <div
+              className={`detailAddButton ${themeHover} ${themeBack}`}
+              onClick={() => {
+                showAddItem ? this.showAddItemSet(false) : this.showAddItemSet(true);
+              }}
+            >
+              <i className="fas fa-plus" />
+            </div>
           </div>
         )}
         <br />
