@@ -45,7 +45,7 @@ export default class EditNoteCheck extends Component {
     const themeBack = `${Theme.toLowerCase()}-back`;
     // let lable = lable;
     return (
-      <div>
+      <div className="slide-in">
         <div className="radioBox">
           <label>Note</label>
           <label>Log</label>

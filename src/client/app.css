@@ -294,3 +294,32 @@ h2 {
   display: flex;
   flex-direction: column;
 }
+.slide-in{
+  animation-name: slide;
+  animation-duration: 1s;
+  overflow: hidden;
+}
+@keyframes slide {
+  from {max-width: 0px;}
+  to {max-width: 1000px;}
+}
+
+.grow{
+  animation-name: grow;
+  animation-duration: 1s;
+  overflow: hidden;
+}
+@keyframes grow {
+  from {max-height: 0px;}
+  to {max-height: 1000px;}
+}
+.shrink{
+  background: red !important;
+  animation-name: shrink;
+  animation-duration: 1s;
+  overflow: hidden;
+}
+@keyframes shrink {
+  from {max-height: 0px;}
+  to {max-height: 1000px;}
+}

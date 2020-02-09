@@ -313,6 +313,8 @@ export default class NoteDetail extends Component {
         }
       }
 
+      let animate = '';
+      if(showTag === prop && showTag !== '') animate = 'grow'
       const bunch = this.createNoteItemBunch(allDates, prop, selectedDate, showButton);
       const themeBorder = `${Theme.toLowerCase()}-border-thick`;
       const themeHover = `${Theme.toLowerCase()}-hover`;
@@ -354,8 +356,10 @@ export default class NoteDetail extends Component {
               </div>
             ) : null}
           </div>
+          <div className={`${animate}`}>
           {logDaysBunch}
           {bunch}
+          </div>
         </div>
       );
     });
@@ -470,7 +474,7 @@ export default class NoteDetail extends Component {
     const themeBack = `${Theme.toLowerCase()}-back`;
     const themeHover = `${Theme.toLowerCase()}-hover`;
     return (
-      <div>
+      <div className="slide-in">
         <Link className={`backButton ${themeBack}`} style={{ textDecoration: 'none' }} to="/" title="Note List">
           <i className="fas fa-arrow-left" />
         </Link>
