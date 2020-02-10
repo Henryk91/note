@@ -280,8 +280,10 @@ module.exports = function () {
                 const dataLable = update.dataLable;
                 const docDataLable = JSON.parse(JSON.stringify(doc.dataLable));
                 const ind = docDataLable.findIndex(item => item.data === dataLable.data);
-                docDataLable[ind].data = dataLable.edit;
-                doc.dataLable = docDataLable;
+                if(docDataLable[ind]){
+                  docDataLable[ind].data = dataLable.edit;
+                  doc.dataLable = docDataLable;
+                }
               } else {
                 doc.dataLable.push(update.dataLable);
               }
