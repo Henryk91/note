@@ -82,7 +82,7 @@ export default class NoteItem extends Component {
     const themeBack = `${Theme.toLowerCase()}-back`;
     const themeHover = `${Theme.toLowerCase()}-hover`;
     let editText = item;
-    const isLog = item.includes('json');
+    const isLog = item.includes('"json":true');
     let editDate = null;
     if (isLog) {
       const logObj = JSON.parse(item);
@@ -204,7 +204,8 @@ export default class NoteItem extends Component {
     let editing = editingItem;
     let isLog = false;
 
-    if (item) isLog = item.includes('json');
+    if (item) isLog = item.includes('"json":true');
+
     if (editing) {
       if (!show) this.editItemSet(false);
       editing = show;

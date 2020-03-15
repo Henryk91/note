@@ -263,7 +263,7 @@ export default class NoteDetail extends Component {
       let allDates = [...sort[prop]];
 
       allDates = allDates.sort((a, b) => {
-        if (a.includes('json')) {
+        if (a.includes('"json":true')) {
           return new Date(JSON.parse(a).date) - new Date(JSON.parse(b).date);
         }
       });
