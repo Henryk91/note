@@ -315,6 +315,7 @@ export default class NoteDetail extends Component {
 
       let animate = '';
       if(showTag === prop && showTag !== '' && prop !== 'Log') animate = 'grow'
+      if(showTag === prop && showTag !== '' && prop === 'Log') animate = 'growb'
       const bunch = this.createNoteItemBunch(allDates, prop, selectedDate, showButton);
       const themeBorder = `${Theme.toLowerCase()}-border-thick`;
       const themeHover = `${Theme.toLowerCase()}-hover`;
@@ -484,6 +485,13 @@ export default class NoteDetail extends Component {
             <br />
             <h3>Note Book Names</h3>
             {noteNameBlock}
+            <br />
+            <h3>Apps</h3>
+            <Link key="pomodoro" style={{ textDecoration: 'none' }} to="/pomodoro" title="Note List">
+              <div className="listNameButton" > {/*onClick={() => this.props.set({ noteName: name })}>*/}
+                <h3> Pomodoro </h3>
+              </div>
+            </Link>
             <br />
             <h3>Themes</h3>
             {noteThemeBlock}

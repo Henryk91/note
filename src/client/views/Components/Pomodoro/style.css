@@ -1,0 +1,71 @@
+@font-face {font-family: "OPTICalculator";
+  src: url("//db.onlinewebfonts.com/t/a4e40941cd04772dbe49aa5790ad5905.eot");
+  src: url("//db.onlinewebfonts.com/t/a4e40941cd04772dbe49aa5790ad5905.eot?#iefix") format("embedded-opentype"),
+  url("//db.onlinewebfonts.com/t/a4e40941cd04772dbe49aa5790ad5905.woff2") format("woff2"),
+  url("//db.onlinewebfonts.com/t/a4e40941cd04772dbe49aa5790ad5905.woff") format("woff"),
+  url("//db.onlinewebfonts.com/t/a4e40941cd04772dbe49aa5790ad5905.ttf") format("truetype"),
+  url("//db.onlinewebfonts.com/t/a4e40941cd04772dbe49aa5790ad5905.svg#OPTICalculator") format("svg");
+}
+
+.App{
+  text-align: center;
+  /* background-color: #1a15bd; */
+  /* width: 30vw;
+  margin-left: 35vw;
+  margin-top: 15vh;
+  padding-top: 2vh;
+  padding-bottom: 10vh;   */
+  /* width: fit-content; */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  /* border: 5px solid #08946d; */
+  border-radius: 5px;
+  color: white;
+  font-weight: bold;
+}
+h1{
+  /* font-weight: bold; */
+}
+label{
+  /* margin-left: 10px;
+  margin-right: 10px; */
+}
+body {
+  /* background-color: #120a6b; */
+
+  }
+.timeChangers{
+  display: inline-block;
+  margin: 5px;
+}
+.timeChangers span{
+  color: #47e77a;
+  margin:  5px;
+}
+
+.timePlay{
+  display: inline-block;
+  background: #08946d;
+  width: 100px;
+  padding: 5px;
+  margin-top: 10px;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+#time-left{
+  font-family: OPTICalculator;
+}
+
+#timerBox{
+  border: 5px solid #08946d;
+  border-radius: 5px;
+  margin: 5px;
+  padding: 0px;
+}
+.fa-sync{
+  size: 2px;
+}
