@@ -149,7 +149,7 @@ export class Timer extends Component {
         <div className="timePlay" id="reset" onClick={this.restart}>
           <span className="fas fa-sync" ></span>
         </div>
-        <audio id="beep" preload="auto" src="https://goo.gl/65cBl1" ref={(audio) => { this.audio = audio; }} > </audio>
+        <audio id="beep" preload="auto" src="https://www.myinstants.com/media/sounds/erro.mp3" ref={(audio) => { this.audio = audio; }} > </audio>
       </div>
     );
   }
