@@ -6,4 +6,5 @@ import { default as NoteItem } from './NoteItem/NoteItem'
 import { default as NewNote } from './NewNote/NewNote'
 import { default as EditNoteCheck } from './EditNoteCheck/EditNoteCheck'
 import { default as Login } from './Login/Login'
-export { SearchBar , Home , NoteDetail ,NoteItem , NewNote , EditNoteCheck ,Login};
+import { default as Pomodoro } from './Pomodoro/Pomodoro'
+export { SearchBar , Home , NoteDetail ,NoteItem , NewNote , EditNoteCheck ,Login, Pomodoro};
