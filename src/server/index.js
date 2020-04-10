@@ -5,6 +5,7 @@ const getNotes = require('./routes/getNotes');
 const getNoteNames = require('./routes/getNoteNames');
 const updateNotes = require('./routes/updateNotes');
 const userCheck = require('./routes/userCheck');
+const getDashData = require('./routes/getDashData');
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use('/api/note', getNotes);
 app.use('/api/note-names', getNoteNames);
 
 updateNotes(app);
+getDashData(app);
 
 userCheck(app);
 

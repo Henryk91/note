@@ -26,6 +26,7 @@
     "body-parser": "^1.18.3",
     "browserslist": "^4.7.0",
     "caniuse-lite": "^1.0.30000989",
+    "cors": "^2.8.5",
     "css-loader": "^2.0.0",
     "dotenv": "^6.2.0",
     "enzyme": "^3.3.0",
