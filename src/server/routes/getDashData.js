@@ -28,6 +28,14 @@ module.exports = function (app) {
         res.json(data);
       })
   });
+  app.get('/api/dash-data/historical',cors(), (req, res) => {
+    fetch('https://corona.lmao.ninja/v2/historical/all?lastdays=80')
+      .then((fRes) => fRes.json())
+      .then((data) => {
+        console.log('Countries req.');
+        res.json(data);
+      })
+  });
   app.get('/api/dash-data/map-data',cors(), (req, res) => {
     fetch('https://thevirustracker.com/timeline/map-data.json')
       .then((fRes) => fRes.json())
