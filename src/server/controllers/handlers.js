@@ -309,15 +309,19 @@ module.exports = function () {
         console.log(err);
       } else {
         doc.heading = 'Site Track';
+        console.log('userId',userId);
         if (doc.dataLable) {
             const referer = req.headers.referer;
             const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
             const data = `Referer: ${referer}\nIp: ${ip}\nDate: ${new Date()}`;
             let siteTag = 'Site one';
             if(referer){
-              let siteName = referer.replace('https://','');
-              siteTag = siteName.subString(0, siteName.indexOf('/'));
+              let siteName = referer.replace('http://','').replace('https://','')+"";
+              if(siteName){
+                siteTag = siteName.substring(0, siteName.indexOf('/'));
+              }
             }
+            console.log('siteTag',siteTag);
             doc.dataLable.push({ tag: siteTag, data });
         }
         doc.save((error) => {
