@@ -301,4 +301,34 @@ module.exports = function () {
       }
     });
   };
+  this.updateSiteLog = (req, done) => {
+    const sitesId = 'KdE0rnAoFwb7BaRJgaYd';
+    const userId = 'UUvFcBXO6Q';
+    Note.findOne({ id: sitesId, userId }, (err, doc) => {
+      if (err) {
+        console.log(err);
+      } else {
+        doc.heading = 'Site Track';
+        if (doc.dataLable) {
+            const referer = req.headers.referer;
+            const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+            const data = `Referer: ${referer}\nIp: ${ip}\nDate: ${new Date()}`;
+            let siteTag = 'Site one';
+            if(referer){
+              let siteName = referer.replace('https://','');
+              siteTag = siteName.subString(0, siteName.indexOf('/'));
+            }
+            doc.dataLable.push({ tag: siteTag, data });
+        }
+        doc.save((error) => {
+          if (error) {
+            console.log('Error', error);
+            done('fail');
+          } else {
+            done('success');
+          }
+        });
+      }
+    });
+  };
 };

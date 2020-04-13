@@ -1,7 +1,7 @@
 /* eslint-disable func-names */
 const Handler = require('../controllers/handlers.js');
-var fetch = require("node-fetch");
-var cors = require('cors')
+const fetch = require("node-fetch");
+const cors = require('cors')
 
 module.exports = function (app) {
   app.get('/api/dash-data/weather', cors(), (req, res) => {
