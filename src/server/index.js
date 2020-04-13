@@ -6,6 +6,7 @@ const getNoteNames = require('./routes/getNoteNames');
 const updateNotes = require('./routes/updateNotes');
 const userCheck = require('./routes/userCheck');
 const getDashData = require('./routes/getDashData');
+const sendEmail = require('./routes/sendEmail');
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use('/api/note-names', getNoteNames);
 
 updateNotes(app);
 getDashData(app);
+sendEmail(app);
 
 userCheck(app);
 
