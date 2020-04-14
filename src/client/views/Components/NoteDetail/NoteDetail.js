@@ -332,7 +332,7 @@ export default class NoteDetail extends Component {
             <h3 className="detailBoxTitle white-color">{prop} </h3>
             {showDateSelector ? (
               <form className="detailBoxTitle dateSelector" onSubmit={this.changeDate}>
-                <input onChange={this.changeDate} className={themeBack} type="date" name="dateSelector" />
+                <input id="note-detail-date" onChange={this.changeDate} className={themeBack} type="date" name="dateSelector" />
               </form>
             ) : (
               ''

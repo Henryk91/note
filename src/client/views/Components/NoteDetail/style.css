@@ -70,3 +70,12 @@
     right: 26vw;
   }
 }
+
+#note-detail-date{
+  width: 152px
+}
+
+input[type="date"]::-webkit-inner-spin-button{
+    display: none;
+    -webkit-appearance: none;
+}
