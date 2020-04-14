@@ -48,6 +48,10 @@ export default class NewNote extends Component {
   }
 
   render() {
+    const { Theme } = this.props
+    const themeBack = `${Theme.toLowerCase()}-back`;
+    const themeHover = `${Theme.toLowerCase()}-hover`;
+    
     return (
       <div>
         <Link className="backButton" style={{ textDecoration: 'none' }} to="/" title="Note List">
@@ -55,10 +59,10 @@ export default class NewNote extends Component {
         </Link>
         <form onSubmit={this.addNewUser}>
           <br />
-          <input className="red-back" name="heading" type="text" placeholder="Heading" required="required" />
+          <input className={themeBack}  name="heading" type="text" placeholder="Heading" required="required" />
           <br />
           <EditNoteCheck Theme={this.props.Theme} />
-          <button className="submit-button red-back" type="submit">
+          <button className={`submit-button ${themeHover} ${themeBack}`} type="submit">
             {' '}
             <i className="fas fa-check" />
           </button>

@@ -34,6 +34,7 @@ p {
 input[type='text'],
 [type='password'],
 [type='email'],
+[type='date'],
 [type='number'] {
   text-align: center;
   color: white;

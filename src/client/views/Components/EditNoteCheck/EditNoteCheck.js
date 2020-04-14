@@ -9,11 +9,13 @@ export default class EditNoteCheck extends Component {
     this.state = {
       radioType: 'Note',
       upload: null,
-      displayDate: new Date()
+      displayDate: new Date(),
+      inputDisplayDate: new Date().toISOString().split('T')[0]
     };
     this.changeDate = this.changeDate.bind(this)
     this.setRadioType = this.setRadioType.bind(this);
     this.handleChangeFile = this.handleChangeFile.bind(this);
+    this.onTodoChange = this.onTodoChange.bind(this);
   }
 
   setRadioType(type) {
@@ -23,10 +25,14 @@ export default class EditNoteCheck extends Component {
   changeDate = e => {
     e.preventDefault();
     const selectedDate = e.target.value;
-    this.setState({ displayDate: new Date(selectedDate) });
-
-    document.getElementById('text-date').value = new Date(selectedDate);
+    let date = new Date(selectedDate);
+    this.setState({ displayDate: date, inputDisplayDate: date.toISOString().split('T')[0] });
+    document.getElementById('text-date').value = date;
   };
+
+  onTodoChange = (value) => {
+    this.setState({ displayDate: value });
+  }
 
   handleChangeFile = event => {
     const reader = new FileReader();
@@ -40,11 +46,9 @@ export default class EditNoteCheck extends Component {
   };
 
   render() {
-    let { radioType, displayDate } = this.state;
+    let { radioType, displayDate, inputDisplayDate } = this.state;
     const { upload } = this.state;
-    const now = displayDate;
     const { showTag, Theme, lable } = this.props;
-    console.log('displayDate',displayDate.toISOString().split('T')[0]);
     let defaultNote = true;
     let defaultLog = false;
     if (showTag === 'Log') {
@@ -53,7 +57,7 @@ export default class EditNoteCheck extends Component {
       defaultNote = false;
     }
     const themeBack = `${Theme.toLowerCase()}-back`;
-    // let lable = lable;
+
     return (
       <div className="slide-in">
         <div className="radioBox">
@@ -76,9 +80,9 @@ export default class EditNoteCheck extends Component {
         ) : null}
         {radioType === 'Log' ? (
           <div>
-            <input onChange={this.changeDate} value={displayDate.toISOString().split('T')[0]} className={themeBack} type="date" name="dateSelector" />
+            <input onChange={this.changeDate} value={inputDisplayDate} className={themeBack} type="date" name="dateSelector" />
             <br />
-            <input id="text-date" className={themeBack} name="tagTypeText" type="text" value={this.state.displayDate} />
+            <input id="text-date" className={themeBack} name="tagTypeText" type="text" defaultValue={displayDate} onChange={e => this.onTodoChange(e.target.value)}/>
             <br />
             {lable ? (
               <input className={themeBack} name="number" type="text" defaultValue={lable} />
