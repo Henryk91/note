@@ -8,8 +8,10 @@ export default class EditNoteCheck extends Component {
     super(props);
     this.state = {
       radioType: 'Note',
-      upload: null
+      upload: null,
+      displayDate: new Date()
     };
+    this.changeDate = this.changeDate.bind(this)
     this.setRadioType = this.setRadioType.bind(this);
     this.handleChangeFile = this.handleChangeFile.bind(this);
   }
@@ -17,6 +19,14 @@ export default class EditNoteCheck extends Component {
   setRadioType(type) {
     this.setState({ radioType: type });
   }
+
+  changeDate = e => {
+    e.preventDefault();
+    const selectedDate = e.target.value;
+    this.setState({ displayDate: new Date(selectedDate) });
+
+    document.getElementById('text-date').value = new Date(selectedDate);
+  };
 
   handleChangeFile = event => {
     const reader = new FileReader();
@@ -30,11 +40,11 @@ export default class EditNoteCheck extends Component {
   };
 
   render() {
-    let { radioType } = this.state;
+    let { radioType, displayDate } = this.state;
     const { upload } = this.state;
-    const now = new Date();
+    const now = displayDate;
     const { showTag, Theme, lable } = this.props;
-
+    console.log('displayDate',displayDate.toISOString().split('T')[0]);
     let defaultNote = true;
     let defaultLog = false;
     if (showTag === 'Log') {
@@ -66,7 +76,9 @@ export default class EditNoteCheck extends Component {
         ) : null}
         {radioType === 'Log' ? (
           <div>
-            <input className={themeBack} name="tagTypeText" type="text" defaultValue={now} />
+            <input onChange={this.changeDate} value={displayDate.toISOString().split('T')[0]} className={themeBack} type="date" name="dateSelector" />
+            <br />
+            <input id="text-date" className={themeBack} name="tagTypeText" type="text" value={this.state.displayDate} />
             <br />
             {lable ? (
               <input className={themeBack} name="number" type="text" defaultValue={lable} />
