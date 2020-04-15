@@ -535,6 +535,14 @@ export default class NoteDetail extends Component {
               <i className="fas fa-arrow-up"/>
             </div>
             <div
+              className={`detailUpButton ${themeHover} ${themeBack}`}
+              onClick={() => {
+                window.scrollBy(0, document.body.scrollHeight);
+              }}
+            >
+              <i className="fas fa-arrow-down"/>
+            </div>
+            <div
               className={`detailAddButton ${themeHover} ${themeBack}`}
               onClick={() => {
                 showAddItem ? this.showAddItemSet(false) : this.showAddItemSet(true);
@@ -544,6 +552,9 @@ export default class NoteDetail extends Component {
             </div>
           </div>
         )}
+        <br />
+        <br />
+        <br />
         <br />
         <br />
         <br />
