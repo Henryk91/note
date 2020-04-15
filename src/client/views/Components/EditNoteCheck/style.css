@@ -13,4 +13,30 @@ editNoteTextArea{
     margin-left:0vw;
     width: 10vw; 
   }
+  #div-text-area {
+    margin-left: 20vw;
+    width: 60vw;
+  }
+}
+
+#input-div-text-area {
+  visibility: hidden !important;
+  height: 0px;
+  padding: 0px;
+}
+#div-text-area {
+
+  text-align: left !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 2px !important;
+  margin-top: 5px !important;
+  width: 80vw;
+  margin-left: 10vw;
+  font-size: 18px !important;
+  padding : 2px;
+  min-height: 50px;
+  max-height: 48vh;
+  overflow: scroll;
+  margin-top: -15px !important;
 }

@@ -104,6 +104,7 @@ export default class NoteDetail extends Component {
   submitNewItem = event => {
     event.preventDefault();
     const { person } = this.state;
+    console.log('event',event);
     let number = event.target.number.value;
     let tag = event.target.tagType.value;
 
