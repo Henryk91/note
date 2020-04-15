@@ -19,6 +19,7 @@ export default class EditNoteCheck extends Component {
     this.onTextChange = this.onTextChange.bind(this);
     this.getText = this.getText.bind(this);
     this.getTextForFirefox = this.getTextForFirefox.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
 
   setRadioType(type) {
@@ -69,9 +70,19 @@ export default class EditNoteCheck extends Component {
   }
 
   onTextChange(ev) {
-    var text = this.getText(ev.target);
-    console.log("text",text)
+    const text = this.getText(ev.target);
     document.getElementById('input-div-text-area').value = text;
+  }
+
+  handleChange(event) {
+    let input = event.target.value;
+    if(input.length > 17) {
+      let divTextArea = document.getElementById('div-text-area');
+      divTextArea.textContent = input;
+      divTextArea.classList.remove('hidden');  
+      document.getElementById('input-div-text-area').classList.add('hidden');  
+      divTextArea.focus();
+    }
   }
 
   render() {
@@ -117,8 +128,8 @@ export default class EditNoteCheck extends Component {
               <input className={themeBack} name="number" type="text" defaultValue={lable} />
             ) : (
               <div>
-                <input id="input-div-text-area" className={themeBack} name="number" type="text" placeholder="Info" />
-                <div id="div-text-area" contentEditable className={themeBack} onInput={ this.onTextChange } name="number" type="text" placeholder="Info" />
+                <input id="input-div-text-area" className={themeBack} onChange={this.handleChange} name="number" type="text" placeholder="Info" />
+                <div id="div-text-area" contentEditable className={`hidden ${themeBack}`} onInput={ this.onTextChange } name="number" type="text" placeholder="Info" />
               </div>
             )}
             <br />

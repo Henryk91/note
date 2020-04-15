@@ -19,7 +19,12 @@ editNoteTextArea{
   }
 }
 
-#input-div-text-area {
+.hidden {
+  visibility: hidden !important;
+  height: 0px;
+  padding: 0px;
+}
+#input-div-text-area1 {
   visibility: hidden !important;
   height: 0px;
   padding: 0px;
