@@ -82,6 +82,9 @@ export default class EditNoteCheck extends Component {
       divTextArea.classList.remove('hidden');  
       document.getElementById('input-div-text-area').classList.add('hidden');  
       divTextArea.focus();
+      // Move cursor to end of line
+      document.execCommand('selectAll', false, null);
+      document.getSelection().collapseToEnd();
     }
   }
 
@@ -114,7 +117,8 @@ export default class EditNoteCheck extends Component {
           <div>
             <input className={themeBack} name="tagTypeText" type="text" placeholder="Sub Heading" defaultValue={showTag} />
             <br />
-            <textarea className={`editNoteTextarea ${themeBack}`} name="number" type="text" placeholder="eg: Company, Note" />
+            <textarea id="input-div-text-area" className={`editNoteTextarea ${themeBack}`} onChange={this.handleChange} name="number" type="text" placeholder="eg: Company, Note" />
+            <div id="div-text-area" contentEditable className={`hidden ${themeBack}`} onInput={ this.onTextChange } name="number" type="text" placeholder="Info" />
             <br />
           </div>
         ) : null}
