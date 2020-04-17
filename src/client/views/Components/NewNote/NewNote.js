@@ -31,7 +31,7 @@ export default class NewNote extends Component {
     tag === 'Note' ? (tag = event.target.tagTypeText.value) : tag;
     const loginKey = localStorage.getItem('loginKey');
     const uniqueId = docId();
-    console.log(uniqueId);
+
     const note = {
       id: uniqueId,
       userId: loginKey,

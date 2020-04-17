@@ -110,7 +110,7 @@ export function createAccount(note, next) {
 }
 
 export function updateOneNoteRec(note, done) {
-  console.log(note);
+
   const sendData = JSON.parse(JSON.stringify(note));
   const { dataLable } = note.person;
 
