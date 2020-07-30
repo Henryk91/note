@@ -1,4 +1,5 @@
 function registerSW() {
+  if(location.href.includes('localhost')) return
   navigator.serviceWorker.register('/sw.js').then(
     (registration) => {
       console.info('ServiceWorker registration successful: ', registration);
