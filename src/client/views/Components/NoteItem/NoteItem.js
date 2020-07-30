@@ -126,7 +126,7 @@ export default class NoteItem extends Component {
       <div className="noteItemBox">
         {show ? (
           <div>
-            {showEdit ? null : <div className={`listCountBox noteItemCount ${themeBorder}`}> {count} </div>}
+            {showEdit ? null : <div className={`listCountBox noteItemCount ${themeBorder}`}> <span className="list-count-item">{count}</span> </div>}
             <div className={`${noteItemClass} white-color`} dangerouslySetInnerHTML={this.getMarkdownText(item)} />
             {showEdit ? (
               <div className={`editButtons ${themeBack} ${themeBackHover}`} onClick={() => this.setState({ editingItem: true })}>

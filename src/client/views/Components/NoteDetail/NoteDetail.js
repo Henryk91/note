@@ -345,8 +345,10 @@ export default class NoteDetail extends Component {
         <div className="detailedBox" key={prop + i} onClick={() => (showTag !== prop && prop !== 'Log' ? this.showTagChange(prop) : null)}>
           <div className="detailTitleBox dark-hover" onClick={() => this.showHideBox(showTag, prop)}>
             <div className={`listCountBox white-color ${themeBorder}`} onClick={() => this.showLogDays()}>
-              {' '}
-              {bunch.length}{' '}
+              <span className="list-count-item">
+                {' '}
+                {bunch.length}{' '}
+              </span>
             </div>
             <h3 className="detailBoxTitle white-color">{prop} </h3>
             {showDateSelector ? (
