@@ -67,6 +67,10 @@ textarea {
     content: '\A';
     white-space: pre;
   }
+  .list-count-item::before {
+    content: normal;
+    white-space: normal;
+  }
 }
 h2 {
   margin: 0px;
