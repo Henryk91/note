@@ -79,3 +79,17 @@ input[type="date"]::-webkit-inner-spin-button{
     display: none;
     -webkit-appearance: none;
 }
+
+.day-forward-back{
+  /* border: 1px solid black; */
+  text-align: center;
+}
+.forward-back-button{
+  height: 40px;
+  width: 40px;
+  padding: 10px;
+  text-align: center;
+  border-radius: 50%;
+  margin-right: 15px;
+  margin-left: 15px;
+}

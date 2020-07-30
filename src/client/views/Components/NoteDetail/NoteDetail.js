@@ -234,6 +234,23 @@ export default class NoteDetail extends Component {
     if (bVal) window.scrollTo(0, 0);
   };
 
+  dateBackForward = (direction) => {
+    let { displayDate } = this.state;
+    if(displayDate){ 
+      
+      var dateObj = new Date(displayDate);
+      if(direction === 'back'){
+        dateObj.setDate(dateObj.getDate() - 1);
+      } else {
+        dateObj.setDate(dateObj.getDate() + 1);
+      }
+      
+      let dateToChangeTo = dateObj + '';
+      dateToChangeTo = dateToChangeTo.substring(0, 16).trim()
+      this.setDate('Log Days', dateToChangeTo)
+    }
+  }
+
   getNoteByTag = (items, showTag) => {
     const sort = {};
     items.forEach(tag => {
@@ -284,6 +301,7 @@ export default class NoteDetail extends Component {
           if (lastDate[0]) {
             lastDate = new Date(JSON.parse(lastDate[0]).date);
             selectedDate = lastDate;
+            this.setState({displayDate: selectedDate})
           }
         }
         const allLogDays = [...allDates].map(
@@ -343,6 +361,20 @@ export default class NoteDetail extends Component {
                 <button className={`detailBoxTitleButton ${themeBack} ${themeHover}`} onClick={() => this.showTagChange('')}>
                   Hide
                 </button>
+                <div className="day-forward-back">
+                  <button
+                    className={`forward-back-button ${themeBack} ${themeHover}`}
+                    onClick={() => this.dateBackForward( 'back' )}
+                  >
+                    <i className="fas fa-arrow-left" />
+                  </button>
+                  <button
+                    className={`forward-back-button ${themeBack} ${themeHover}`}
+                    onClick={() => this.dateBackForward( 'forward' )}
+                  >
+                    <i className="fas fa-arrow-right" />
+                  </button>
+                </div>
                 <button
                   className={`editButtons continue-button ${themeBack} ${themeHover}`}
                   onClick={() => this.continueLog({ cont: this.state.continueData })}
