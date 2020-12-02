@@ -36,7 +36,8 @@ export default class App extends Component {
       notesInitialLoad: false,
       noteNames: null,
       theme: 'Red',
-      searchTerm: ''
+      searchTerm: '',
+      freshData: false
     };
     this.addNewNote = this.addNewNote.bind(this);
     this.updateNote = this.updateNote.bind(this);
@@ -87,13 +88,17 @@ export default class App extends Component {
       if (data && data[0] && data.length > 0) {
         const pdata = JSON.parse(data);
         if (this.state.notes !== pdata) {
-          this.setState({ notes: pdata, filteredNotes: pdata });
+          this.setState({ notes: pdata, filteredNotes: pdata, freshData:false });
+        } else {
+          this.setState({ freshData:false });
         }
       }
 
       getMyNotesRec(user, res => {
         if (res.length > 0) {
           res.sort(compareSort);
+          console.log('Fresh Data')
+          this.setState({ freshData:true });
         }
 
         const stateNotes = this.state.notes;
@@ -210,11 +215,19 @@ export default class App extends Component {
   }
 
   render() {
-    const { theme, notes, user, searchTerm, filteredNotes, loginKey } = this.state;
+    const { theme, notes, user, searchTerm, filteredNotes, loginKey, freshData } = this.state;
 
     const { noteNames } = this.state;
     const themeBack = `${theme.toLowerCase()}-back`;
 
+    let menuButton = document.getElementById('menuButton');
+    if(menuButton){
+      if(freshData){
+        menuButton.style.color = '#ffffff';
+      } else {
+        menuButton.style.color = '#ffa500';
+      }
+    }
     if (!document.location.pathname.includes('note-names') && isMobileDevice()) {
       // document.documentElement.webkitRequestFullscreen();
     }
