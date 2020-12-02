@@ -94,7 +94,8 @@ export default class NoteDetail extends Component {
 
   refreshItems = person => {
     if (person) {
-      let sessionShowTag = sessionStorage.getItem('showTag')
+      let sessionShowTag = sessionStorage.getItem('showTag');
+      console.log('sessionShowTag',sessionShowTag)
       const { showTag } = this.state;
       let tag = sessionShowTag  ? sessionShowTag: showTag;
       const tags = this.getNoteByTag(person.dataLable, tag);
