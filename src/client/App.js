@@ -101,7 +101,7 @@ export default class App extends Component {
         if (reRender && res.length > 0) {
           localStorage.setItem(user, JSON.stringify(res));
           this.setState({ notes: res, filteredNotes: res });
-          this.setRedirect();
+          // this.setRedirect();
         }
       });
     } else {

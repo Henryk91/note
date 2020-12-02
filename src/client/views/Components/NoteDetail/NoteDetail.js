@@ -94,9 +94,11 @@ export default class NoteDetail extends Component {
 
   refreshItems = person => {
     if (person) {
+      let sessionShowTag = sessionStorage.getItem('showTag')
       const { showTag } = this.state;
-      const tags = this.getNoteByTag(person.dataLable, showTag);
-      this.setState({ person, tags, showTag });
+      let tag = sessionShowTag  ? sessionShowTag: showTag;
+      const tags = this.getNoteByTag(person.dataLable, tag);
+      this.setState({ person, tags, showTag: tag });
       if (showTag) window.scrollBy(0, document.body.scrollHeight);
     }
   };
@@ -188,6 +190,7 @@ export default class NoteDetail extends Component {
   showTagChange = tagName => {
     const { person } = this.state;
     const tags = this.getNoteByTag(person.dataLable, tagName);
+    sessionStorage.setItem('showTag', tagName)
     this.setState({ showTag: tagName, person, tags });
   };
 
