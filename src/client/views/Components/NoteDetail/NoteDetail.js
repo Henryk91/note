@@ -394,7 +394,7 @@ export default class NoteDetail extends Component {
           <div className="detailTitleBox dark-hover" onClick={() => this.showHideBox(showTag, prop)}>
             <div className={`listCountBox white-color ${themeBorder}`} onClick={() => this.showLogDays()}>
               <span className="list-count-item">
-                {' '}{isLink? (<span> L </span>): bunch.length}
+                {' '}{isLink? ( 'L' ): bunch.length}
                 {' '}
               </span>
             </div>
