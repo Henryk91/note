@@ -190,9 +190,21 @@ export default class NoteDetail extends Component {
 
   showTagChange = tagName => {
     const { person } = this.state;
-    const tags = this.getNoteByTag(person.dataLable, tagName);
-    localStorage.setItem('showTag', tagName)
-    this.setState({ showTag: tagName, person, tags });
+
+    const tagData = person.dataLable.find(note => note.tag === tagName);
+    if(tagData && tagData.data && tagData.data.startsWith('href:')){
+      // Is link
+      const noteId = tagData.data.substring(5)
+      const { notes } = this.props;
+      let person = notes && notes[0] ? notes.find(note => note.id === noteId) : null;
+      this.refreshItems(person);
+    } else {
+
+      const tags = this.getNoteByTag(person.dataLable, tagName);
+      localStorage.setItem('showTag', tagName)
+      this.setState({ showTag: tagName, person, tags });
+    }
+
   };
 
   showNoteNames = names => {
