@@ -383,6 +383,7 @@ export default class NoteDetail extends Component {
       if(showTag === prop && showTag !== '' && prop !== 'Log') animate = 'grow'
       if(showTag === prop && showTag !== '' && prop === 'Log') animate = 'growb'
       const bunch = this.createNoteItemBunch(allDates, prop, selectedDate, showButton);
+      const linkBorder = isLink? 'link-border': '';
       const themeBorder = `${Theme.toLowerCase()}-border-thick`;
       const themeHover = `${Theme.toLowerCase()}-hover`;
 
@@ -391,7 +392,7 @@ export default class NoteDetail extends Component {
       return (
         // <div className="detailedBox" key={prop + i} onClick={() => (showTag !== prop && prop !== 'Log' ? this.showTagChange(prop) : null)}>
         <div className="detailedBox" key={prop + i} >
-          <div className="detailTitleBox dark-hover" onClick={() => this.showHideBox(showTag, prop)}>
+          <div className={`detailTitleBox dark-hover ${linkBorder}`} onClick={() => this.showHideBox(showTag, prop)}>
             <div className={`listCountBox white-color ${themeBorder}`} onClick={() => this.showLogDays()}>
               <span className="list-count-item">
                 {' '}{isLink? ( 'L' ): bunch.length}

@@ -93,3 +93,6 @@ input[type="date"]::-webkit-inner-spin-button{
   margin-right: 15px;
   margin-left: 15px;
 }
+.link-border{
+  border-bottom: 1px solid;
+}
