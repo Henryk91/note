@@ -281,7 +281,16 @@ export default class NoteDetail extends Component {
       propertyArray.unshift('Log');
     }
 
-    const all = propertyArray.map((prop, i) => {
+    let linkProps = []
+    propertyArray = propertyArray.filter(prop => {
+      const isLink = sort[prop] && sort[prop][0] && sort[prop][0].startsWith('href:')
+      if(isLink){
+        linkProps.push(prop)
+      }
+      return !isLink
+    })
+    
+    const all = [...linkProps,...propertyArray].map((prop, i) => {
       const { Theme } = this.props;
       const { displayDate, searchTerm } = this.state;
       const themeBack = `${Theme.toLowerCase()}-back`;
