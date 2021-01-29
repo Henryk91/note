@@ -11,8 +11,7 @@ const onlyUnique = (value, index, self) => self.indexOf(value) === index;
 const createList = (notes, theme) => {
   let list = null;
 
-  const themeBorder = `${theme.toLowerCase()}-border-thick`;
-  console.log('notes',notes);
+  const themeBorder = `${theme.toLowerCase()}-border-thick`;  
   let subs = [];
   notes = notes.filter(note => {
     if(note.heading.startsWith('Sub ')){

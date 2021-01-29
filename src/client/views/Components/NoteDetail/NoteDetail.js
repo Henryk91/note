@@ -215,12 +215,8 @@ export default class NoteDetail extends Component {
       const noteId = tagData.data.substring(5)
       const { notes } = this.props;
       let personNext = notes && notes[0] ? notes.find(note => note.id === noteId) : null;
-      document.location.href = `/notes/${personNext.id}`;
-      if(person.id === 'subs'){
-        
-      } else {
-        this.refreshItems(personNext);
-      }
+      window.history.pushState(personNext.heading, "Sub Dir", `/notes/${personNext.id}`);
+      this.refreshItems(personNext);
       
     } else {
 
@@ -393,7 +389,8 @@ export default class NoteDetail extends Component {
       if (bunch.length === 0) return;
 
       return (
-        <div className="detailedBox" key={prop + i} onClick={() => (showTag !== prop && prop !== 'Log' ? this.showTagChange(prop) : null)}>
+        // <div className="detailedBox" key={prop + i} onClick={() => (showTag !== prop && prop !== 'Log' ? this.showTagChange(prop) : null)}>
+        <div className="detailedBox" key={prop + i} >
           <div className="detailTitleBox dark-hover" onClick={() => this.showHideBox(showTag, prop)}>
             <div className={`listCountBox white-color ${themeBorder}`} onClick={() => this.showLogDays()}>
               <span className="list-count-item">
