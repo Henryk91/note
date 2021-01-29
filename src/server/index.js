@@ -25,11 +25,6 @@ sendEmail(app);
 
 userCheck(app);
 
-app.get('/notes/*', (req, res) => {
-  console.log('res',req.url);
-  res.redirect(req.url);
-});
-
 app.get('/*', (req, res) => {
   console.log('res',req.url);
   res.redirect('/');
