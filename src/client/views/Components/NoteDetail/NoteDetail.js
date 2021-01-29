@@ -158,10 +158,11 @@ export default class NoteDetail extends Component {
     e.preventDefault();
     const heading = e.target.heading.value;
     const { person } = this.state;
-    person.heading = heading;
-
+    if(person.heading !== heading){
+      person.heading = heading;
+      this.props.set({ person });
+    }
     this.setState({ person, editName: false });
-    this.props.set({ person });
   };
 
   changeDate = e => {
@@ -189,10 +190,10 @@ export default class NoteDetail extends Component {
   };
 
   showTagChange = tagName => {
-    const { person } = this.state;
+    const { person, editName } = this.state;
 
     const tagData = person.dataLable.find(note => note.tag === tagName);
-    if(tagData && tagData.data && tagData.data.startsWith('href:')){
+    if(tagData && tagData.data && tagData.data.startsWith('href:') && editName === false){
       // Is link
       const noteId = tagData.data.substring(5)
       const { notes } = this.props;
@@ -348,6 +349,8 @@ export default class NoteDetail extends Component {
         }
       }
 
+      const isLink = sort[prop] && sort[prop][0] && sort[prop][0].startsWith('href:')
+      
       let animate = '';
       if(showTag === prop && showTag !== '' && prop !== 'Log') animate = 'grow'
       if(showTag === prop && showTag !== '' && prop === 'Log') animate = 'growb'
@@ -362,8 +365,8 @@ export default class NoteDetail extends Component {
           <div className="detailTitleBox dark-hover" onClick={() => this.showHideBox(showTag, prop)}>
             <div className={`listCountBox white-color ${themeBorder}`} onClick={() => this.showLogDays()}>
               <span className="list-count-item">
+                {' '}{isLink? (<span> L </span>): bunch.length}
                 {' '}
-                {bunch.length}{' '}
               </span>
             </div>
             <h3 className="detailBoxTitle white-color">{prop} </h3>
