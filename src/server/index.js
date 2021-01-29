@@ -26,6 +26,7 @@ sendEmail(app);
 userCheck(app);
 
 app.get('/*', (req, res) => {
+  console.log('res',req.url);
   res.redirect('/');
 });
 

@@ -156,7 +156,8 @@ export default class App extends Component {
 
     if (searchTerm === '') {
       console.log(update);
-      updateOneNoteRec({ person: update.updateData, delete: update.delete }, () => {
+      const person = update.updateData? update.updateData: update;
+      updateOneNoteRec({ person: person, delete: update.delete }, () => {
         if (update.delete) {
           const noteUser = localStorage.getItem('user');
           this.getMyNotes(noteUser);

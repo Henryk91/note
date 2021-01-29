@@ -12,6 +12,23 @@ const createList = (notes, theme) => {
   let list = null;
 
   const themeBorder = `${theme.toLowerCase()}-border-thick`;
+  console.log('notes',notes);
+  let subs = [];
+  notes = notes.filter(note => {
+    if(note.heading.startsWith('Sub ')){
+      subs.push(note)
+      return false
+    } 
+    return true
+  })
+
+  if(subs.length > 0){
+    const headings = subs.map(sub => {
+      return {tag: sub.heading, data: `href:${sub.id}`}
+    })
+    const subItems = {createdBy: subs[0].createdBy, dataLable: headings, heading: "Sub Directories", id: "subs"}
+    if (notes) notes.push(subItems)
+  }
   if (notes) {
     list = notes.map(person => {
       const dataLable = [...person.dataLable].map(dataL => (dataL = dataL.tag));

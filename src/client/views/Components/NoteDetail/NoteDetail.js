@@ -65,8 +65,25 @@ export default class NoteDetail extends Component {
     const { match, notes } = this.props;
     if (match) {
       // this.getSingleNote(this.props.match.params.id);
-      person = getPerson(notes, match);
+      if(match.url.includes('subs')){
+        person = this.getSubs(notes)
+      } else {
+        person = getPerson(notes, match);
+      }
       this.refreshItems(person);
+    }
+  }
+
+  getSubs(notes){
+    let subs = notes.filter(note => {
+      return note.heading.startsWith('Sub ')
+    })
+
+    if(subs.length > 0){
+      const headings = subs.map(sub => {
+        return {tag: sub.heading, data: `href:${sub.id}`}
+      })
+      return {createdBy: subs[0].createdBy, dataLable: headings, heading: "Sub Directories", id: "subs"}
     }
   }
 
@@ -197,8 +214,14 @@ export default class NoteDetail extends Component {
       // Is link
       const noteId = tagData.data.substring(5)
       const { notes } = this.props;
-      let person = notes && notes[0] ? notes.find(note => note.id === noteId) : null;
-      this.refreshItems(person);
+      let personNext = notes && notes[0] ? notes.find(note => note.id === noteId) : null;
+      document.location.href = `/notes/${personNext.id}`;
+      if(person.id === 'subs'){
+        
+      } else {
+        this.refreshItems(personNext);
+      }
+      
     } else {
 
       const tags = this.getNoteByTag(person.dataLable, tagName);
@@ -289,7 +312,7 @@ export default class NoteDetail extends Component {
       }
       return !isLink
     })
-    
+
     const all = [...linkProps,...propertyArray].map((prop, i) => {
       const { Theme } = this.props;
       const { displayDate, searchTerm } = this.state;
