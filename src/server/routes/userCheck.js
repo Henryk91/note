@@ -13,6 +13,8 @@ module.exports = function (app) {
       console.log('Db Trying to log in res',dbResp);
       if (docId.indexOf('Login') < 0) {
         res.json({ id: docId });
+      } else {
+        res.json({ status: dbResp });
       }
     });
   });
