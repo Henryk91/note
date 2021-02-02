@@ -308,7 +308,9 @@ h2 {
   from {max-width: 0px;}
   to {max-width: 1000px;}
 }
-
+.grow > .detailedBox{
+  margin-left: -0px;
+}
 .grow{
   animation-name: grow;
   animation-duration: 1s;

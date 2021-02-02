@@ -42,7 +42,8 @@ export default class NoteDetail extends Component {
       displayDate: null,
       continueData: null,
       showLogDaysBunch: false,
-      searchTerm: ''
+      searchTerm: '',
+      showLink: ['']
     };
     this.addItem = this.addItem.bind(this);
     this.submitNewItem = this.submitNewItem.bind(this);
@@ -112,7 +113,6 @@ export default class NoteDetail extends Component {
   refreshItems = person => {
     if (person) {
       let sessionShowTag = localStorage.getItem('showTag');
-      console.log('sessionShowTag',sessionShowTag)
       const { showTag } = this.state;
       let tag = sessionShowTag  ? sessionShowTag: showTag;
       const tags = this.getNoteByTag(person.dataLable, tag);
@@ -207,20 +207,38 @@ export default class NoteDetail extends Component {
   };
 
   showTagChange = tagName => {
-    const { person, editName } = this.state;
+    const { person, editName, showTag, showLink } = this.state;
+    let lastLink = showLink.length > 1? showLink[showLink.length -1] : null;
+    const { notes } = this.props;
+    let nextPerson = lastLink? notes.find(note => note.id === lastLink): null
+    const tagData = lastLink? nextPerson.dataLable.find(note => note.tag === tagName): person.dataLable.find(note => note.tag === tagName);
 
-    const tagData = person.dataLable.find(note => note.tag === tagName);
     if(tagData && tagData.data && tagData.data.startsWith('href:') && editName === false){
       // Is link
       const noteId = tagData.data.substring(5)
       const { notes } = this.props;
       let personNext = notes && notes[0] ? notes.find(note => note.id === noteId) : null;
-      window.history.pushState(personNext.heading, "Sub Dir", `/notes/${personNext.id}`);
-      this.refreshItems(personNext);
-      
-    } else {
 
-      const tags = this.getNoteByTag(person.dataLable, tagName);
+      const tags = this.getNoteByTag(person.dataLable, tagName)
+      localStorage.setItem('showTag', tagName)
+      if(showLink.length > 1){
+        window.history.pushState(personNext.heading, "Sub Dir", `/notes/${personNext.id}`);
+        this.setState({ showLink: [''] });
+        this.refreshItems(personNext);
+      } else{
+        const linkArray = lastLink !== noteId?  showLink.includes(noteId)? showLink.slice(0,showLink.indexOf(noteId)): [...showLink,noteId]: showLink
+        this.setState({ showTag: tagName, person, tags, showLink: linkArray });
+      }
+    } else if(nextPerson && tagData !== undefined) {
+
+      console.log('Should open sub list here',showLink[1])
+      window.history.pushState(nextPerson.heading, "Sub Dir", `/notes/${nextPerson.id}`);
+      localStorage.setItem('showTag', tagName)
+      this.setState({ showTag: tagName, showLink: [''] });
+      this.refreshItems(nextPerson);
+    } else {
+      const showPerson = nextPerson? person: person;
+      const tags = this.getNoteByTag(showPerson.dataLable, tagName);
       localStorage.setItem('showTag', tagName)
       this.setState({ showTag: tagName, person, tags });
     }
@@ -382,7 +400,21 @@ export default class NoteDetail extends Component {
       let animate = '';
       if(showTag === prop && showTag !== '' && prop !== 'Log') animate = 'grow'
       if(showTag === prop && showTag !== '' && prop === 'Log') animate = 'growb'
-      const bunch = this.createNoteItemBunch(allDates, prop, selectedDate, showButton);
+
+      let bunch = this.createNoteItemBunch(allDates, prop, selectedDate, showButton);
+
+      if(animate === 'grow' && isLink){
+
+        if(allDates && allDates[0] && allDates[0].startsWith('href:')){
+          // Is link
+          const noteId = allDates[0].substring(5)
+          const { notes } = this.props;
+          let noteHeadings = notes && notes[0] ? notes.find(note => note.id === noteId) : null;
+          let buttons = this.getNoteByTag(noteHeadings.dataLable, '')
+          bunch = buttons
+        }
+      }
+
       const linkBorder = isLink? 'link-border': '';
       const themeBorder = `${Theme.toLowerCase()}-border-thick`;
       const themeHover = `${Theme.toLowerCase()}-hover`;
@@ -393,7 +425,7 @@ export default class NoteDetail extends Component {
         // <div className="detailedBox" key={prop + i} onClick={() => (showTag !== prop && prop !== 'Log' ? this.showTagChange(prop) : null)}>
         <div className="detailedBox" key={prop + i} >
           <div className={`detailTitleBox dark-hover ${linkBorder}`} onClick={() => this.showHideBox(showTag, prop)}>
-            <div className={`listCountBox white-color ${themeBorder}`} onClick={() => this.showLogDays()}>
+            <div className={`listCountBox white-color ${themeBorder}`} onClick={() => this.showLogDays(prop)}>
               <span className="list-count-item">
                 {' '}{isLink? ( 'L' ): bunch.length}
                 {' '}
@@ -452,9 +484,9 @@ export default class NoteDetail extends Component {
     return all;
   };
 
-  showLogDays() {
+  showLogDays(showTag) {
     const { showLogDaysBunch, person } = this.state;
-    if (person) {
+    if (person && showTag === 'Log') {
       this.setState({ showLogDaysBunch: !showLogDaysBunch });
       const self = this;
       setTimeout(() => {
