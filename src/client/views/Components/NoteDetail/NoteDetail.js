@@ -22,7 +22,7 @@ const getPerson = (notes, propForId) => {
   if (propForId === 'note-name') {
     return this.props.noteNames;
   }
-  return notes && notes[0] ? notes.filter(val => val.id === propForId.params.id)[0] : null;
+  return notes && notes[0] ? notes.filter((val) => val.id === propForId.params.id)[0] : null;
 };
 
 function isMobileDevice() {
@@ -43,7 +43,7 @@ export default class NoteDetail extends Component {
       continueData: null,
       showLogDaysBunch: false,
       searchTerm: '',
-      showLink: ['']
+      showLink: [''],
     };
     this.addItem = this.addItem.bind(this);
     this.submitNewItem = this.submitNewItem.bind(this);
@@ -66,8 +66,8 @@ export default class NoteDetail extends Component {
     const { match, notes } = this.props;
     if (match) {
       // this.getSingleNote(this.props.match.params.id);
-      if(match.url.includes('subs')){
-        person = this.getSubs(notes)
+      if (match.url.includes('subs')) {
+        person = this.getSubs(notes);
       } else {
         person = getPerson(notes, match);
       }
@@ -75,16 +75,16 @@ export default class NoteDetail extends Component {
     }
   }
 
-  getSubs(notes){
-    let subs = notes.filter(note => {
-      return note.heading.startsWith('Sub ')
-    })
+  getSubs(notes) {
+    let subs = notes.filter((note) => {
+      return note.heading.startsWith('Sub ');
+    });
 
-    if(subs.length > 0){
-      const headings = subs.map(sub => {
-        return {tag: sub.heading, data: `href:${sub.id}`}
-      })
-      return {createdBy: subs[0].createdBy, dataLable: headings, heading: "Sub Directories", id: "subs"}
+    if (subs.length > 0) {
+      const headings = subs.map((sub) => {
+        return { tag: sub.heading, data: `href:${sub.id}` };
+      });
+      return { createdBy: subs[0].createdBy, dataLable: headings, heading: 'Sub Directories', id: 'subs' };
     }
   }
 
@@ -100,7 +100,7 @@ export default class NoteDetail extends Component {
   getSingleNote(noteHeading) {
     const user = localStorage.getItem('user');
     if (user !== '') {
-      getNote(user, noteHeading, res => {
+      getNote(user, noteHeading, (res) => {
         if (res.length > 0) {
           this.refreshItems(res[0]);
         }
@@ -110,18 +110,18 @@ export default class NoteDetail extends Component {
     }
   }
 
-  refreshItems = person => {
+  refreshItems = (person) => {
     if (person) {
       let sessionShowTag = localStorage.getItem('showTag');
       const { showTag } = this.state;
-      let tag = sessionShowTag  ? sessionShowTag: showTag;
+      let tag = sessionShowTag ? sessionShowTag : showTag;
       const tags = this.getNoteByTag(person.dataLable, tag);
       this.setState({ person, tags, showTag: tag });
       if (showTag) window.scrollBy(0, document.body.scrollHeight);
     }
   };
 
-  submitNewItem = event => {
+  submitNewItem = (event) => {
     event.preventDefault();
     const { person } = this.state;
 
@@ -155,7 +155,7 @@ export default class NoteDetail extends Component {
     event.target.tagTypeText.value = '';
   };
 
-  updateNoteItem = val => {
+  updateNoteItem = (val) => {
     const { person } = this.state;
     const updateData = JSON.parse(JSON.stringify(person));
     updateData.dataLable = [{ tag: val.type, data: val.oldItem, edit: val.item }];
@@ -166,23 +166,23 @@ export default class NoteDetail extends Component {
     }
   };
 
-  continueLog = val => {
+  continueLog = (val) => {
     this.setState({ addLable: val.cont });
     this.showAddItemSet(true);
   };
 
-  submitNameChange = e => {
+  submitNameChange = (e) => {
     e.preventDefault();
     const heading = e.target.heading.value;
     const { person } = this.state;
-    if(person.heading !== heading){
+    if (person.heading !== heading) {
       person.heading = heading;
       this.props.set({ person });
     }
     this.setState({ person, editName: false });
   };
 
-  changeDate = e => {
+  changeDate = (e) => {
     e.preventDefault();
     const selectedDate = e.target.value;
     this.setState({ displayDate: selectedDate });
@@ -206,49 +206,54 @@ export default class NoteDetail extends Component {
     }
   };
 
-  showTagChange = tagName => {
+  showTagChange = (tagName) => {
     const { person, editName, showTag, showLink } = this.state;
-    let lastLink = showLink.length > 1? showLink[showLink.length -1] : null;
+    let lastLink = showLink.length > 1 ? showLink[showLink.length - 1] : null;
     const { notes } = this.props;
-    let nextPerson = lastLink? notes.find(note => note.id === lastLink): null
-    const tagData = lastLink? nextPerson.dataLable.find(note => note.tag === tagName): person.dataLable.find(note => note.tag === tagName);
+    let nextPerson = lastLink ? notes.find((note) => note.id === lastLink) : null;
+    const tagData = lastLink
+      ? nextPerson.dataLable.find((note) => note.tag === tagName)
+      : person.dataLable.find((note) => note.tag === tagName);
 
-    if(tagData && tagData.data && tagData.data.startsWith('href:') && editName === false){
+    if (tagData && tagData.data && tagData.data.startsWith('href:') && editName === false) {
       // Is link
-      const noteId = tagData.data.substring(5)
+      const noteId = tagData.data.substring(5);
       const { notes } = this.props;
-      let personNext = notes && notes[0] ? notes.find(note => note.id === noteId) : null;
+      let personNext = notes && notes[0] ? notes.find((note) => note.id === noteId) : null;
 
-      const tags = this.getNoteByTag(person.dataLable, tagName)
-      localStorage.setItem('showTag', tagName)
-      if(showLink.length > 1){
-        window.history.pushState(personNext.heading, "Sub Dir", `/notes/${personNext.id}`);
+      const tags = this.getNoteByTag(person.dataLable, tagName);
+      localStorage.setItem('showTag', tagName);
+      if (showLink.length > 1) {
+        window.history.pushState(personNext.heading, 'Sub Dir', `/notes/${personNext.id}`);
         this.setState({ showLink: [''] });
         this.refreshItems(personNext);
-      } else{
-        const linkArray = lastLink !== noteId?  showLink.includes(noteId)? showLink.slice(0,showLink.indexOf(noteId)): [...showLink,noteId]: showLink
+      } else {
+        const linkArray =
+          lastLink !== noteId
+            ? showLink.includes(noteId)
+              ? showLink.slice(0, showLink.indexOf(noteId))
+              : [...showLink, noteId]
+            : showLink;
         this.setState({ showTag: tagName, person, tags, showLink: linkArray });
       }
-    } else if(nextPerson && tagData !== undefined) {
-
-      console.log('Should open sub list here',showLink[1])
-      window.history.pushState(nextPerson.heading, "Sub Dir", `/notes/${nextPerson.id}`);
-      localStorage.setItem('showTag', tagName)
+    } else if (nextPerson && tagData !== undefined) {
+      console.log('Should open sub list here', showLink[1]);
+      window.history.pushState(nextPerson.heading, 'Sub Dir', `/notes/${nextPerson.id}`);
+      localStorage.setItem('showTag', tagName);
       this.setState({ showTag: tagName, showLink: [''] });
       this.refreshItems(nextPerson);
     } else {
-      const showPerson = nextPerson? person: person;
+      const showPerson = nextPerson ? person : person;
       const tags = this.getNoteByTag(showPerson.dataLable, tagName);
-      localStorage.setItem('showTag', tagName)
+      localStorage.setItem('showTag', tagName);
       this.setState({ showTag: tagName, person, tags });
     }
-
   };
 
-  showNoteNames = names => {
+  showNoteNames = (names) => {
     if (!names) return;
 
-    return names.map(name => (
+    return names.map((name) => (
       <Link key={name} style={{ textDecoration: 'none' }} to="/" title="Note List">
         <div className="listNameButton" onClick={() => this.props.set({ noteName: name })}>
           <h3> {name} </h3>
@@ -257,13 +262,13 @@ export default class NoteDetail extends Component {
     ));
   };
 
-  setNoteTheme = name => {
+  setNoteTheme = (name) => {
     this.props.set({ noteTheme: name });
     localStorage.setItem('theme', name);
   };
 
-  showNoteThemes = names =>
-    names.map(name => (
+  showNoteThemes = (names) =>
+    names.map((name) => (
       <Link key={name} style={{ textDecoration: 'none' }} to="/" title="Note List">
         <div className="listNameButton" onClick={() => this.setNoteTheme(name)}>
           <h3> {name} Theme </h3>
@@ -279,55 +284,54 @@ export default class NoteDetail extends Component {
     }
   };
 
-  editNameSet = bVal => {
+  editNameSet = (bVal) => {
     this.setState({ editName: bVal });
   };
 
-  showAddItemSet = bVal => {
+  showAddItemSet = (bVal) => {
     this.setState({ showAddItem: bVal });
     if (bVal) window.scrollTo(0, 0);
   };
 
   dateBackForward = (direction) => {
     let { displayDate } = this.state;
-    if(displayDate){ 
-      
+    if (displayDate) {
       var dateObj = new Date(displayDate);
-      if(direction === 'back'){
+      if (direction === 'back') {
         dateObj.setDate(dateObj.getDate() - 1);
       } else {
         dateObj.setDate(dateObj.getDate() + 1);
       }
-      
+
       let dateToChangeTo = dateObj + '';
-      dateToChangeTo = dateToChangeTo.substring(0, 16).trim()
-      this.setDate('Log Days', dateToChangeTo)
+      dateToChangeTo = dateToChangeTo.substring(0, 16).trim();
+      this.setDate('Log Days', dateToChangeTo);
     }
-  }
+  };
 
   getNoteByTag = (items, showTag) => {
     const sort = {};
-    items.forEach(tag => {
+    items.forEach((tag) => {
       sort[tag.tag] ? sort[tag.tag].push(tag.data) : (sort[tag.tag] = [tag.data]);
     });
 
     let propertyArray = Object.keys(sort).sort();
 
     if (propertyArray.includes('Log')) {
-      propertyArray = propertyArray.filter(prop => prop !== 'Log');
+      propertyArray = propertyArray.filter((prop) => prop !== 'Log');
       propertyArray.unshift('Log');
     }
 
-    let linkProps = []
-    propertyArray = propertyArray.filter(prop => {
-      const isLink = sort[prop] && sort[prop][0] && sort[prop][0].startsWith('href:')
-      if(isLink){
-        linkProps.push(prop)
+    let linkProps = [];
+    propertyArray = propertyArray.filter((prop) => {
+      const isLink = sort[prop] && sort[prop][0] && sort[prop][0].startsWith('href:');
+      if (isLink) {
+        linkProps.push(prop);
       }
-      return !isLink
-    })
+      return !isLink;
+    });
 
-    const all = [...linkProps,...propertyArray].map((prop, i) => {
+    const all = [...linkProps, ...propertyArray].map((prop, i) => {
       const { Theme } = this.props;
       const { displayDate, searchTerm } = this.state;
       const themeBack = `${Theme.toLowerCase()}-back`;
@@ -350,11 +354,7 @@ export default class NoteDetail extends Component {
       });
 
       if (searchTerm) {
-        allDates = allDates.filter(item =>
-          JSON.stringify(item)
-            .toLowerCase()
-            .includes(searchTerm)
-        );
+        allDates = allDates.filter((item) => JSON.stringify(item).toLowerCase().includes(searchTerm));
       }
 
       let logDaysBunch = null;
@@ -364,20 +364,15 @@ export default class NoteDetail extends Component {
           if (lastDate[0]) {
             lastDate = new Date(JSON.parse(lastDate[0]).date);
             selectedDate = lastDate;
-            this.setState({displayDate: selectedDate})
+            this.setState({ displayDate: selectedDate });
           }
         }
-        const allLogDays = [...allDates].map(
-          day =>
-            (day = JSON.parse(day)
-              .date.substring(0, 15)
-              .trim())
-        );
+        const allLogDays = [...allDates].map((day) => (day = JSON.parse(day).date.substring(0, 15).trim()));
 
         const logDaysTemp = [...allLogDays].filter((v, ind, s) => s.indexOf(v) === ind);
 
-        const logDays = [...logDaysTemp].map(day => {
-          const total = allLogDays.filter(allDay => allDay === day).length;
+        const logDays = [...logDaysTemp].map((day) => {
+          const total = allLogDays.filter((allDay) => allDay === day).length;
 
           return { date: day, count: total };
         });
@@ -387,7 +382,7 @@ export default class NoteDetail extends Component {
 
         logDaysBunch = this.createNoteItemBunch(logDays.reverse(), 'Log Days', selectedDate, this.state.showLogDaysBunch);
 
-        let selDates = [...allDates].filter(val => val.includes(selDate));
+        let selDates = [...allDates].filter((val) => val.includes(selDate));
         if (selDates.length > 0) {
           selDates = selDates.slice(selDates.length - 2);
           const contData = JSON.parse(selDates[0]).data;
@@ -395,27 +390,26 @@ export default class NoteDetail extends Component {
         }
       }
 
-      const isLink = sort[prop] && sort[prop][0] && sort[prop][0].startsWith('href:')
-      
+      const isLink = sort[prop] && sort[prop][0] && sort[prop][0].startsWith('href:');
+
       let animate = '';
-      if(showTag === prop && showTag !== '' && prop !== 'Log') animate = 'grow'
-      if(showTag === prop && showTag !== '' && prop === 'Log') animate = 'growb'
+      if (showTag === prop && showTag !== '' && prop !== 'Log') animate = 'grow';
+      if (showTag === prop && showTag !== '' && prop === 'Log') animate = 'growb';
 
       let bunch = this.createNoteItemBunch(allDates, prop, selectedDate, showButton);
 
-      if(animate === 'grow' && isLink){
-
-        if(allDates && allDates[0] && allDates[0].startsWith('href:')){
+      if (animate === 'grow' && isLink) {
+        if (allDates && allDates[0] && allDates[0].startsWith('href:')) {
           // Is link
-          const noteId = allDates[0].substring(5)
+          const noteId = allDates[0].substring(5);
           const { notes } = this.props;
-          let noteHeadings = notes && notes[0] ? notes.find(note => note.id === noteId) : null;
-          let buttons = this.getNoteByTag(noteHeadings.dataLable, '')
-          bunch = buttons
+          let noteHeadings = notes && notes[0] ? notes.find((note) => note.id === noteId) : null;
+          let buttons = this.getNoteByTag(noteHeadings.dataLable, '');
+          bunch = buttons;
         }
       }
 
-      const linkBorder = isLink? 'link-border': '';
+      const linkBorder = isLink ? 'link-border' : '';
       const themeBorder = `${Theme.toLowerCase()}-border-thick`;
       const themeHover = `${Theme.toLowerCase()}-hover`;
 
@@ -423,13 +417,10 @@ export default class NoteDetail extends Component {
 
       return (
         // <div className="detailedBox" key={prop + i} onClick={() => (showTag !== prop && prop !== 'Log' ? this.showTagChange(prop) : null)}>
-        <div className="detailedBox" key={prop + i} >
+        <div className="detailedBox" key={prop + i}>
           <div className={`detailTitleBox dark-hover ${linkBorder}`} onClick={() => this.showHideBox(showTag, prop)}>
             <div className={`listCountBox white-color ${themeBorder}`} onClick={() => this.showLogDays(prop)}>
-              <span className="list-count-item">
-                {' '}{isLink? ( 'L' ): bunch.length}
-                {' '}
-              </span>
+              <span className="list-count-item"> {isLink ? 'L' : bunch.length} </span>
             </div>
             <h3 className="detailBoxTitle white-color">{prop} </h3>
             {showDateSelector ? (
@@ -445,16 +436,10 @@ export default class NoteDetail extends Component {
                   Hide
                 </button>
                 <div className="day-forward-back">
-                  <button
-                    className={`forward-back-button ${themeBack} ${themeHover}`}
-                    onClick={() => this.dateBackForward( 'back' )}
-                  >
+                  <button className={`forward-back-button ${themeBack} ${themeHover}`} onClick={() => this.dateBackForward('back')}>
                     <i className="fas fa-arrow-left" />
                   </button>
-                  <button
-                    className={`forward-back-button ${themeBack} ${themeHover}`}
-                    onClick={() => this.dateBackForward( 'forward' )}
-                  >
+                  <button className={`forward-back-button ${themeBack} ${themeHover}`} onClick={() => this.dateBackForward('forward')}>
                     <i className="fas fa-arrow-right" />
                   </button>
                 </div>
@@ -464,7 +449,7 @@ export default class NoteDetail extends Component {
                 >
                   Continue Previous Task
                 </button>
-                <br/>
+                <br />
               </div>
             ) : prop === 'Log' ? (
               <div>
@@ -475,8 +460,8 @@ export default class NoteDetail extends Component {
             ) : null}
           </div>
           <div className={`${animate}`}>
-          {logDaysBunch}
-          {bunch}
+            {logDaysBunch}
+            {bunch}
           </div>
         </div>
       );
@@ -558,9 +543,10 @@ export default class NoteDetail extends Component {
         <button className={`submit-button ${themeHover} ${themeBack}`} type="submit">
           <i className="fas fa-check" />
         </button>
-        <button 
-          className={`submit-button ${themeHover} ${themeBack}`} 
-          onClick={() => this.setState({ showAddItem: false, addLable: null })}>
+        <button
+          className={`submit-button ${themeHover} ${themeBack}`}
+          onClick={() => this.setState({ showAddItem: false, addLable: null })}
+        >
           {' '}
           <i className="fas fa-times" />{' '}
         </button>
@@ -593,9 +579,14 @@ export default class NoteDetail extends Component {
     const themeHover = `${Theme.toLowerCase()}-hover`;
     return (
       <div className="slide-in">
-        <Link className={`backButton ${themeBack}`} style={{ textDecoration: 'none' }} to="/" title="Note List">
+        <button
+          className={`backButton ${themeBack}`}
+          onClick={() => {
+            window.history.back()
+          }}
+        >
           <i className="fas fa-arrow-left" />
-        </Link>
+        </button>
         {isNoteNames ? (
           <div>
             <br />
@@ -604,7 +595,9 @@ export default class NoteDetail extends Component {
             <br />
             <h3>Apps</h3>
             <Link key="pomodoro" style={{ textDecoration: 'none' }} to="/pomodoro" title="Note List">
-              <div className="listNameButton" > {/*onClick={() => this.props.set({ noteName: name })}>*/}
+              <div className="listNameButton">
+                {' '}
+                {/*onClick={() => this.props.set({ noteName: name })}>*/}
                 <h3> Pomodoro </h3>
               </div>
             </Link>
@@ -647,7 +640,7 @@ export default class NoteDetail extends Component {
                 window.scrollTo(0, 0);
               }}
             >
-              <i className="fas fa-arrow-up"/>
+              <i className="fas fa-arrow-up" />
             </div>
             <div
               className={`detailUpButton ${themeHover} ${themeBack}`}
@@ -655,7 +648,7 @@ export default class NoteDetail extends Component {
                 window.scrollBy(0, document.body.scrollHeight);
               }}
             >
-              <i className="fas fa-arrow-down"/>
+              <i className="fas fa-arrow-down" />
             </div>
             <div
               className={`detailAddButton ${themeHover} ${themeBack}`}
