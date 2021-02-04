@@ -24,11 +24,6 @@ const getPerson = (notes, propForId) => {
   }
   return notes && notes[0] ? notes.filter((val) => val.id === propForId.params.id)[0] : null;
 };
-
-function isMobileDevice() {
-  return typeof window.orientation !== 'undefined' || navigator.userAgent.indexOf('IEMobile') !== -1;
-}
-
 export default class NoteDetail extends Component {
   constructor(props) {
     super(props);
@@ -127,7 +122,6 @@ export default class NoteDetail extends Component {
 
     let number = event.target.number.value;
     let tag = event.target.tagType.value;
-
     const textTag = event.target.tagTypeText.value;
 
     tag === 'Note' || tag === 'Upload' ? (tag = textTag) : tag;
@@ -217,36 +211,11 @@ export default class NoteDetail extends Component {
 
     if (tagData && tagData.data && tagData.data.startsWith('href:') && editName === false) {
       // Is link
-      const noteId = tagData.data.substring(5);
-      const { notes } = this.props;
-      let personNext = notes && notes[0] ? notes.find((note) => note.id === noteId) : null;
-
-      const tags = this.getNoteByTag(person.dataLable, tagName);
-      localStorage.setItem('showTag', tagName);
-      if (showLink.length > 1) {
-        window.history.pushState(personNext.heading, 'Sub Dir', `/notes/${personNext.id}`);
-        this.setState({ showLink: [''] });
-        this.refreshItems(personNext);
-      } else {
-        const linkArray =
-          lastLink !== noteId
-            ? showLink.includes(noteId)
-              ? showLink.slice(0, showLink.indexOf(noteId))
-              : [...showLink, noteId]
-            : showLink;
-        this.setState({ showTag: tagName, person, tags, showLink: linkArray });
-      }
+      this.handleLinkClick(tagData, person, tagName, showLink, lastLink);
     } else if (nextPerson && tagData !== undefined) {
-      console.log('Should open sub list here', showLink[1]);
-      window.history.pushState(nextPerson.heading, 'Sub Dir', `/notes/${nextPerson.id}`);
-      localStorage.setItem('showTag', tagName);
-      this.setState({ showTag: tagName, showLink: [''] });
-      this.refreshItems(nextPerson);
+      this.handleLinkInLinkClick(showLink, nextPerson, tagName);
     } else {
-      const showPerson = nextPerson ? person : person;
-      const tags = this.getNoteByTag(showPerson.dataLable, tagName);
-      localStorage.setItem('showTag', tagName);
-      this.setState({ showTag: tagName, person, tags });
+      this.noteDetailItemClick(nextPerson, person, tagName);
     }
   };
 
@@ -315,6 +284,100 @@ export default class NoteDetail extends Component {
       sort[tag.tag] ? sort[tag.tag].push(tag.data) : (sort[tag.tag] = [tag.data]);
     });
 
+    let { linkProps, propertyArray } = this.setLogAndLinksAtTop(sort);
+
+    const all = [...linkProps, ...propertyArray].map((prop, i) => {
+      const { Theme } = this.props;
+      const { displayDate, searchTerm } = this.state;
+
+      let showDateSelector = prop === 'Log' ? true : false;
+
+      let showButton = showTag === prop ? true : false;
+
+      let allDates = this.getAllDatesSorted(sort, prop, searchTerm);
+
+      let { selectedDate, logDaysBunch } = this.logDayBunchLogic(prop, displayDate, allDates, logDaysBunch);
+
+      const isLink = this.isLinkCheck(sort, prop);
+
+      let animate = this.enableAnimationCheck(showTag, prop);
+
+      let bunch = this.createNoteItemBunch(allDates, prop, selectedDate, showButton);
+
+      bunch = this.handleLinkButtons(animate, isLink, allDates, bunch);
+
+      const linkBorder = isLink ? 'link-border' : '';
+      const themeBack = `${Theme.toLowerCase()}-back`;
+      const themeBorder = `${Theme.toLowerCase()}-border-thick`;
+      const themeHover = `${Theme.toLowerCase()}-hover`;
+
+      if (bunch.length === 0) return;
+
+      return (
+        // <div className="detailedBox" key={prop + i} onClick={() => (showTag !== prop && prop !== 'Log' ? this.showTagChange(prop) : null)}>
+        <div className="detailedBox" key={prop + i}>
+          {this.noteDetailListItem(linkBorder, showTag, prop, themeBorder, isLink, bunch, showDateSelector, themeBack, themeHover)}
+          {this.noteItemsBunch(animate, logDaysBunch, bunch)}
+        </div>
+      );
+    });
+    return all;
+  };
+
+  noteDetailItemClick(nextPerson, person, tagName) {
+    const showPerson = nextPerson ? person : person;
+    const tags = this.getNoteByTag(showPerson.dataLable, tagName);
+    localStorage.setItem('showTag', tagName);
+    this.setState({ showTag: tagName, person, tags });
+  }
+
+  handleLinkInLinkClick(showLink, nextPerson, tagName) {
+    console.log('Should open sub list here', showLink[1]);
+    window.history.pushState(nextPerson.heading, 'Sub Dir', `/notes/${nextPerson.id}`);
+    localStorage.setItem('showTag', tagName);
+    this.setState({ showTag: tagName, showLink: [''] });
+    this.refreshItems(nextPerson);
+  }
+
+  handleLinkClick(tagData, person, tagName, showLink, lastLink) {
+    const noteId = tagData.data.substring(5);
+    const { notes } = this.props;
+    let personNext = notes && notes[0] ? notes.find((note) => note.id === noteId) : null;
+
+    const tags = this.getNoteByTag(person.dataLable, tagName);
+    localStorage.setItem('showTag', tagName);
+    if (showLink.length > 1) {
+      window.history.pushState(personNext.heading, 'Sub Dir', `/notes/${personNext.id}`);
+      this.setState({ showLink: [''] });
+      this.refreshItems(personNext);
+    } else {
+      const linkArray =
+        lastLink !== noteId ? (showLink.includes(noteId) ? showLink.slice(0, showLink.indexOf(noteId)) : [...showLink, noteId]) : showLink;
+      this.setState({ showTag: tagName, person, tags, showLink: linkArray });
+    }
+  }
+
+  noteItemsBunch(animate, logDaysBunch, bunch) {
+    return (
+      <div className={`${animate}`}>
+        {logDaysBunch}
+        {bunch}
+      </div>
+    );
+  }
+
+  enableAnimationCheck(showTag, prop) {
+    let animate = '';
+    if (showTag === prop && showTag !== '' && prop !== 'Log') animate = 'grow';
+    if (showTag === prop && showTag !== '' && prop === 'Log') animate = 'growb';
+    return animate;
+  }
+
+  isLinkCheck(sort, prop) {
+    return sort[prop] && sort[prop][0] && sort[prop][0].startsWith('href:');
+  }
+
+  setLogAndLinksAtTop(sort) {
     let propertyArray = Object.keys(sort).sort();
 
     if (propertyArray.includes('Log')) {
@@ -330,144 +393,124 @@ export default class NoteDetail extends Component {
       }
       return !isLink;
     });
+    return { linkProps, propertyArray };
+  }
 
-    const all = [...linkProps, ...propertyArray].map((prop, i) => {
-      const { Theme } = this.props;
-      const { displayDate, searchTerm } = this.state;
-      const themeBack = `${Theme.toLowerCase()}-back`;
-      let showButton = false;
-      let showDateSelector = false;
-
-      if (prop === 'Log') showDateSelector = true;
-
-      let selectedDate = displayDate;
-
-      if (showTag === prop) {
-        showButton = true;
+  handleLinkButtons(animate, isLink, allDates, bunch) {
+    if (animate === 'grow' && isLink) {
+      if (allDates && allDates[0] && allDates[0].startsWith('href:')) {
+        // Is link
+        const noteId = allDates[0].substring(5);
+        const { notes } = this.props;
+        let noteHeadings = notes && notes[0] ? notes.find((note) => note.id === noteId) : null;
+        let buttons = this.getNoteByTag(noteHeadings.dataLable, '');
+        bunch = buttons;
       }
-      let allDates = [...sort[prop]];
+    }
+    return bunch;
+  }
 
-      allDates = allDates.sort((a, b) => {
-        if (a.includes('"json":true')) {
-          return new Date(JSON.parse(a).date) - new Date(JSON.parse(b).date);
+  getAllDatesSorted(sort, prop, searchTerm) {
+    let allDates = [...sort[prop]];
+
+    allDates = allDates.sort((a, b) => {
+      if (a.includes('"json":true')) {
+        return new Date(JSON.parse(a).date) - new Date(JSON.parse(b).date);
+      }
+    });
+
+    if (searchTerm) {
+      allDates = allDates.filter((item) => JSON.stringify(item).toLowerCase().includes(searchTerm));
+    }
+    return allDates;
+  }
+
+  logDayBunchLogic(prop, selectedDate, allDates, logDaysBunch) {
+    if (prop === 'Log') {
+      if (selectedDate === null) {
+        let lastDate = [...allDates].slice(allDates.length - 1);
+        if (lastDate[0]) {
+          lastDate = new Date(JSON.parse(lastDate[0]).date);
+          selectedDate = lastDate;
+          this.setState({ displayDate: selectedDate });
         }
+      }
+      const allLogDays = [...allDates].map((day) => (day = JSON.parse(day).date.substring(0, 15).trim()));
+
+      const logDaysTemp = [...allLogDays].filter((v, ind, s) => s.indexOf(v) === ind);
+
+      const logDays = [...logDaysTemp].map((day) => {
+        const total = allLogDays.filter((allDay) => allDay === day).length;
+
+        return { date: day, count: total };
       });
 
-      if (searchTerm) {
-        allDates = allDates.filter((item) => JSON.stringify(item).toLowerCase().includes(searchTerm));
+      let selDate = `${new Date(selectedDate)}`;
+      selDate = selDate.substring(0, 15).trim();
+
+      logDaysBunch = this.createNoteItemBunch(logDays.reverse(), 'Log Days', selectedDate, this.state.showLogDaysBunch);
+
+      let selDates = [...allDates].filter((val) => val.includes(selDate));
+      if (selDates.length > 0) {
+        selDates = selDates.slice(selDates.length - 2);
+        const contData = JSON.parse(selDates[0]).data;
+        this.setState({ continueData: contData });
       }
+    }
+    return { selectedDate, logDaysBunch };
+  }
 
-      let logDaysBunch = null;
-      if (prop === 'Log') {
-        if (selectedDate === null) {
-          let lastDate = [...allDates].slice(allDates.length - 1);
-          if (lastDate[0]) {
-            lastDate = new Date(JSON.parse(lastDate[0]).date);
-            selectedDate = lastDate;
-            this.setState({ displayDate: selectedDate });
-          }
-        }
-        const allLogDays = [...allDates].map((day) => (day = JSON.parse(day).date.substring(0, 15).trim()));
-
-        const logDaysTemp = [...allLogDays].filter((v, ind, s) => s.indexOf(v) === ind);
-
-        const logDays = [...logDaysTemp].map((day) => {
-          const total = allLogDays.filter((allDay) => allDay === day).length;
-
-          return { date: day, count: total };
-        });
-
-        let selDate = `${new Date(selectedDate)}`;
-        selDate = selDate.substring(0, 15).trim();
-
-        logDaysBunch = this.createNoteItemBunch(logDays.reverse(), 'Log Days', selectedDate, this.state.showLogDaysBunch);
-
-        let selDates = [...allDates].filter((val) => val.includes(selDate));
-        if (selDates.length > 0) {
-          selDates = selDates.slice(selDates.length - 2);
-          const contData = JSON.parse(selDates[0]).data;
-          this.setState({ continueData: contData });
-        }
-      }
-
-      const isLink = sort[prop] && sort[prop][0] && sort[prop][0].startsWith('href:');
-
-      let animate = '';
-      if (showTag === prop && showTag !== '' && prop !== 'Log') animate = 'grow';
-      if (showTag === prop && showTag !== '' && prop === 'Log') animate = 'growb';
-
-      let bunch = this.createNoteItemBunch(allDates, prop, selectedDate, showButton);
-
-      if (animate === 'grow' && isLink) {
-        if (allDates && allDates[0] && allDates[0].startsWith('href:')) {
-          // Is link
-          const noteId = allDates[0].substring(5);
-          const { notes } = this.props;
-          let noteHeadings = notes && notes[0] ? notes.find((note) => note.id === noteId) : null;
-          let buttons = this.getNoteByTag(noteHeadings.dataLable, '');
-          bunch = buttons;
-        }
-      }
-
-      const linkBorder = isLink ? 'link-border' : '';
-      const themeBorder = `${Theme.toLowerCase()}-border-thick`;
-      const themeHover = `${Theme.toLowerCase()}-hover`;
-
-      if (bunch.length === 0) return;
-
-      return (
-        // <div className="detailedBox" key={prop + i} onClick={() => (showTag !== prop && prop !== 'Log' ? this.showTagChange(prop) : null)}>
-        <div className="detailedBox" key={prop + i}>
-          <div className={`detailTitleBox dark-hover ${linkBorder}`} onClick={() => this.showHideBox(showTag, prop)}>
-            <div className={`listCountBox white-color ${themeBorder}`} onClick={() => this.showLogDays(prop)}>
-              <span className="list-count-item"> {isLink ? 'L' : bunch.length} </span>
-            </div>
-            <h3 className="detailBoxTitle white-color">{prop} </h3>
-            {showDateSelector ? (
-              <form className="detailBoxTitle dateSelector" onSubmit={this.changeDate}>
-                <input id="note-detail-date" onChange={this.changeDate} className={themeBack} type="date" name="dateSelector" />
-              </form>
-            ) : (
-              ''
-            )}
-            {showTag === 'Log' && prop === 'Log' ? (
-              <div>
-                <button className={`detailBoxTitleButton ${themeBack} ${themeHover}`} onClick={() => this.showTagChange('')}>
-                  Hide
-                </button>
-                <div className="day-forward-back">
-                  <button className={`forward-back-button ${themeBack} ${themeHover}`} onClick={() => this.dateBackForward('back')}>
-                    <i className="fas fa-arrow-left" />
-                  </button>
-                  <button className={`forward-back-button ${themeBack} ${themeHover}`} onClick={() => this.dateBackForward('forward')}>
-                    <i className="fas fa-arrow-right" />
-                  </button>
-                </div>
-                <button
-                  className={`editButtons continue-button ${themeBack} ${themeHover}`}
-                  onClick={() => this.continueLog({ cont: this.state.continueData })}
-                >
-                  Continue Previous Task
-                </button>
-                <br />
-              </div>
-            ) : prop === 'Log' ? (
-              <div>
-                <button className={`detailBoxTitleButton ${themeBack} ${themeHover}`} onClick={() => this.showTagChange(prop)}>
-                  Show
-                </button>
-              </div>
-            ) : null}
-          </div>
-          <div className={`${animate}`}>
-            {logDaysBunch}
-            {bunch}
-          </div>
+  noteDetailListItem(linkBorder, showTag, prop, themeBorder, isLink, bunch, showDateSelector, themeBack, themeHover) {
+    return (
+      <div className={`detailTitleBox dark-hover ${linkBorder}`} onClick={() => this.showHideBox(showTag, prop)}>
+        <div className={`listCountBox white-color ${themeBorder}`} onClick={() => this.showLogDays(prop)}>
+          <span className="list-count-item"> {isLink ? 'L' : bunch.length} </span>
         </div>
-      );
-    });
-    return all;
-  };
+        <h3 className="detailBoxTitle white-color">{prop} </h3>
+        {showDateSelector ? (
+          <form className="detailBoxTitle dateSelector" onSubmit={this.changeDate}>
+            <input id="note-detail-date" onChange={this.changeDate} className={themeBack} type="date" name="dateSelector" />
+          </form>
+        ) : (
+          ''
+        )}
+        {showTag === 'Log' && prop === 'Log' ? (
+          this.logHeader(themeBack, themeHover)
+        ) : prop === 'Log' ? (
+          <div>
+            <button className={`detailBoxTitleButton ${themeBack} ${themeHover}`} onClick={() => this.showTagChange(prop)}>
+              Show
+            </button>
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
+  logHeader(themeBack, themeHover) {
+    return (
+      <div>
+        <button className={`detailBoxTitleButton ${themeBack} ${themeHover}`} onClick={() => this.showTagChange('')}>
+          Hide
+        </button>
+        <div className="day-forward-back">
+          <button className={`forward-back-button ${themeBack} ${themeHover}`} onClick={() => this.dateBackForward('back')}>
+            <i className="fas fa-arrow-left" />
+          </button>
+          <button className={`forward-back-button ${themeBack} ${themeHover}`} onClick={() => this.dateBackForward('forward')}>
+            <i className="fas fa-arrow-right" />
+          </button>
+        </div>
+        <button
+          className={`editButtons continue-button ${themeBack} ${themeHover}`}
+          onClick={() => this.continueLog({ cont: this.state.continueData })}
+        >
+          Continue Previous Task
+        </button>
+        <br />
+      </div>
+    );
+  }
 
   showLogDays(showTag) {
     const { showLogDaysBunch, person } = this.state;
@@ -560,115 +603,122 @@ export default class NoteDetail extends Component {
     const { showAddItem, tags, editName } = this.state;
     const { match, noteNames, Theme } = this.props;
 
-    let editNameB = null;
-
-    person ? (editNameB = this.editNameBox(person.heading)) : (editNameB = null);
+    const editNameB = person ? this.editNameBox(person.heading) : null;
 
     const isNoteNames = match.url === '/notes/note-names';
-    let noteNameBlock = null;
-    let noteThemeBlock = null;
-    if (isNoteNames) {
-      document.webkitExitFullscreen();
-      noteNameBlock = this.showNoteNames(noteNames);
-      noteThemeBlock = this.showNoteThemes(['Red', 'Ocean', 'Dark', 'Night']);
-      person = null;
-    } else if (isMobileDevice()) {
-      // document.documentElement.webkitRequestFullscreen();
-    }
+    if (isNoteNames) person = null;
+
     const themeBack = `${Theme.toLowerCase()}-back`;
     const themeHover = `${Theme.toLowerCase()}-hover`;
     return (
       <div className="slide-in">
-        <button
-          className={`backButton ${themeBack}`}
+        {this.backButton(themeBack)}
+        {isNoteNames ? this.sidebarPage(noteNames) : null}
+        {person ? this.pageContent(person, editName, editNameB, showAddItem, themeHover, themeBack, tags) : null}
+        {editName ? '' : this.scrollButtons(themeHover, themeBack, showAddItem)}
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+      </div>
+    );
+  }
+
+  backButton(themeBack) {
+    return (
+      <button
+        className={`backButton ${themeBack}`}
+        onClick={() => {
+          window.history.back();
+        }}
+      >
+        <i className="fas fa-arrow-left" />
+      </button>
+    );
+  }
+
+  scrollButtons(themeHover, themeBack, showAddItem) {
+    return (
+      <div className="detail-scroll">
+        <div
+          className={`detailUpButton ${themeHover} ${themeBack}`}
           onClick={() => {
-            window.history.back()
+            window.scrollTo(0, 0);
           }}
         >
-          <i className="fas fa-arrow-left" />
-        </button>
-        {isNoteNames ? (
-          <div>
-            <br />
-            <h3>Note Book Names</h3>
-            {noteNameBlock}
-            <br />
-            <h3>Apps</h3>
-            <Link key="pomodoro" style={{ textDecoration: 'none' }} to="/pomodoro" title="Note List">
-              <div className="listNameButton">
-                {' '}
-                {/*onClick={() => this.props.set({ noteName: name })}>*/}
-                <h3> Pomodoro </h3>
-              </div>
-            </Link>
-            <br />
-            <h3>Themes</h3>
-            {noteThemeBlock}
-          </div>
-        ) : null}
-        {person ? (
-          <div key={person.id}>
-            {editName ? (
-              <div>{editNameB}</div>
+          <i className="fas fa-arrow-up" />
+        </div>
+        <div
+          className={`detailUpButton ${themeHover} ${themeBack}`}
+          onClick={() => {
+            window.scrollBy(0, document.body.scrollHeight);
+          }}
+        >
+          <i className="fas fa-arrow-down" />
+        </div>
+        <div
+          className={`detailAddButton ${themeHover} ${themeBack}`}
+          onClick={() => {
+            showAddItem ? this.showAddItemSet(false) : this.showAddItemSet(true);
+          }}
+        >
+          <i className="fas fa-plus" />
+        </div>
+      </div>
+    );
+  }
+
+  pageContent(person, editName, editNameB, showAddItem, themeHover, themeBack, tags) {
+    return (
+      <div className="note-detail-item" key={person.id}>
+        {editName ? (
+          <div>{editNameB}</div>
+        ) : (
+          <div id="personContainer">
+            <h1 id="personHead" className="nameBox">
+              {person.heading}
+            </h1>
+            {showAddItem ? (
+              ''
             ) : (
-              <div id="personContainer">
-                <h1 id="personHead" className="nameBox">
-                  {person.heading}
-                </h1>
-                {showAddItem ? (
-                  ''
-                ) : (
-                  <div className={`nameBox ${themeHover} ${themeBack}`} id="nameBoxButton" onClick={() => this.editNameSet(true)}>
-                    <i className="fas fa-pen" />
-                  </div>
-                )}
+              <div className={`nameBox ${themeHover} ${themeBack}`} id="nameBoxButton" onClick={() => this.editNameSet(true)}>
+                <i className="fas fa-pen" />
               </div>
             )}
-
-            {showAddItem ? <div> {this.addItem()}</div> : null}
-            {tags ? <div> {tags} </div> : null}
-            <br />
-          </div>
-        ) : null}
-        {editName ? (
-          ''
-        ) : (
-          <div className="detail-scroll">
-            <div
-              className={`detailUpButton ${themeHover} ${themeBack}`}
-              onClick={() => {
-                window.scrollTo(0, 0);
-              }}
-            >
-              <i className="fas fa-arrow-up" />
-            </div>
-            <div
-              className={`detailUpButton ${themeHover} ${themeBack}`}
-              onClick={() => {
-                window.scrollBy(0, document.body.scrollHeight);
-              }}
-            >
-              <i className="fas fa-arrow-down" />
-            </div>
-            <div
-              className={`detailAddButton ${themeHover} ${themeBack}`}
-              onClick={() => {
-                showAddItem ? this.showAddItemSet(false) : this.showAddItemSet(true);
-              }}
-            >
-              <i className="fas fa-plus" />
-            </div>
           </div>
         )}
+
+        {showAddItem ? <div> {this.addItem()}</div> : null}
+        {tags ? <div> {tags} </div> : null}
         <br />
+      </div>
+    );
+  }
+
+  sidebarPage(noteNames) {
+    const noteNameBlock = this.showNoteNames(noteNames);
+    const noteThemeBlock = this.showNoteThemes(['Red', 'Ocean', 'Dark', 'Night']);
+    return (
+      <div>
         <br />
+        <h3>Note Book Names</h3>
+        {noteNameBlock}
         <br />
+        <h3>Apps</h3>
+        <Link key="pomodoro" style={{ textDecoration: 'none' }} to="/pomodoro" title="Note List">
+          <div className="listNameButton">
+            {' '}
+            <h3> Pomodoro </h3>
+          </div>
+        </Link>
         <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
+        <h3>Themes</h3>
+        {noteThemeBlock}
       </div>
     );
   }
