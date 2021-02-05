@@ -122,6 +122,11 @@ export default class NoteDetail extends Component {
   }
   initPage3(self) {
     if (self.props.initShowtag) {
+      if (self.props.match.url.includes('subs')) {
+        const person = this.getSubs(self.props.notes);
+        this.refreshItems(person);
+        return
+      }
       const person = getPerson(self.props.notes, self.props.initShowtag);
       if (person) {
         this.refreshItems(person);
@@ -439,7 +444,8 @@ export default class NoteDetail extends Component {
   }
 
   handleLinkButtons(animate, isLink, allDates, bunch) {
-    if (animate === 'grow' && isLink) {
+    const { editName } = this.state
+    if (animate === 'grow' && isLink && !editName) {
       if (allDates && allDates[0] && allDates[0].startsWith('href:')) {
         // Is link
         const noteId = allDates[0].substring(5);
