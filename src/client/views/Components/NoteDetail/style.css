@@ -1,4 +1,7 @@
 
+.detailedBox-override{
+  margin-left: 0vw !important;
+}
 .detailedBox{
     /* background: rgb(241, 241, 241); */
     /* border: 1px solid rgb(185, 185, 185); */
@@ -95,4 +98,9 @@ input[type="date"]::-webkit-inner-spin-button{
 }
 .link-border{
   border-bottom: 1px solid;
+}
+#multiple-pages{
+  display: flex;
+  flex-direction: row;
+  overflow: scroll;
 }

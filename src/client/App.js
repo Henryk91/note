@@ -5,7 +5,7 @@
 /* eslint-disable no-unused-expressions */
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
-import { Home, SearchBar, NoteDetail, NewNote, Login, Pomodoro } from './views/Components/index';
+import { Home, SearchBar, NoteDetail, NoteDetailPage, NewNote, Login, Pomodoro } from './views/Components/index';
 import { getMyNotesRec, saveNewNote, updateOneNoteRec, getAllNotes, getNoteNames } from './views/Helpers/requests';
 
 const compareSort = (a, b) => {
@@ -272,7 +272,7 @@ export default class App extends Component {
               exact
               path="/notes/:id"
               render={props => (
-                <NoteDetail SearchTerm={searchTerm} noteNames={noteNames} Theme={theme} {...props} set={this.noteDetailSet} notes={notes} />
+                <NoteDetailPage SearchTerm={searchTerm} noteNames={noteNames} Theme={theme} {...props} set={this.noteDetailSet} notes={notes} />
               )}
             />
             <Route exact path="/new-note" component={() => <NewNote Theme={theme} set={this.addNewNote} />} />

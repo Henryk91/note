@@ -303,6 +303,7 @@ h2 {
   animation-name: slide;
   animation-duration: 1s;
   overflow: hidden;
+  /* width: fit-content; */
 }
 @keyframes slide {
   from {max-width: 0px;}

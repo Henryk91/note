@@ -46,7 +46,6 @@ export default class NoteDetail extends Component {
     this.editNameBox = this.editNameBox.bind(this);
     this.showTagChange = this.showTagChange.bind(this);
     this.showHideBox = this.showHideBox.bind(this);
-    this.showNoteNames = this.showNoteNames.bind(this);
     this.showNoteThemes = this.showNoteThemes.bind(this);
     this.getSingleNote = this.getSingleNote.bind(this);
     this.editNameSet = this.editNameSet.bind(this);
@@ -57,16 +56,29 @@ export default class NoteDetail extends Component {
   }
 
   componentDidMount() {
+    // this.initPage2(this);
+    this.initPage3(this);
+  }
+
+  initPage2(self) {
     let person = null;
-    const { match, notes } = this.props;
-    if (match) {
-      // this.getSingleNote(this.props.match.params.id);
+    const { match, notes, initShowtag } = self.props;
+    if (initShowtag) {
+      person = getPerson(notes, initShowtag);
+      if (person) {
+        this.refreshItems(person);
+      } else if (match) {
+        person = getPerson(notes, match);
+        this.refreshItems(person);
+      }
+    } else if (match) {
       if (match.url.includes('subs')) {
         person = this.getSubs(notes);
+        this.refreshItems(person);
       } else {
         person = getPerson(notes, match);
+        this.refreshItems(person);
       }
-      this.refreshItems(person);
     }
   }
 
@@ -87,9 +99,47 @@ export default class NoteDetail extends Component {
     this.setState({ searchTerm: nextProps.SearchTerm });
     const self = this;
     setTimeout(() => {
+      this.initPage(nextProps, self);
+    }, 100);
+  }
+
+  initPage(nextProps, self) {
+    if (self.props.initShowtag) {
+      const person = getPerson(self.props.notes, self.props.initShowtag);
+      if (person) {
+        this.refreshItems(person);
+      } else {
+        const person = getPerson(self.props.notes, self.props.match);
+        this.props.openPage({ personNext: person });
+        self.refreshItems(person);
+      }
+    } else {
       const person = getPerson(self.props.notes, self.props.match);
       self.refreshItems(person);
-    }, 200);
+    }
+    let noteDetailPage = document.getElementById('multiple-pages');
+    if (noteDetailPage) noteDetailPage.scrollBy(noteDetailPage.scrollWidth * 2, 0);
+  }
+  initPage3(self) {
+    if (self.props.initShowtag) {
+      const person = getPerson(self.props.notes, self.props.initShowtag);
+      if (person) {
+        this.refreshItems(person);
+      } else {
+        const person = getPerson(self.props.notes, self.props.match);
+        this.props.openPage({ personNext: person });
+        self.refreshItems(person);
+      }
+    } else {
+      const person = getPerson(self.props.notes, self.props.match);
+      self.refreshItems(person);
+    }
+    let noteDetailPage = document.getElementById('multiple-pages');
+    if (noteDetailPage)
+      setTimeout(() => {
+        let noteDetailPage = document.getElementById('multiple-pages');
+        noteDetailPage.scrollBy(noteDetailPage.scrollWidth * 5, 0);
+      }, 300);
   }
 
   getSingleNote(noteHeading) {
@@ -112,7 +162,6 @@ export default class NoteDetail extends Component {
       let tag = sessionShowTag ? sessionShowTag : showTag;
       const tags = this.getNoteByTag(person.dataLable, tag);
       this.setState({ person, tags, showTag: tag });
-      if (showTag) window.scrollBy(0, document.body.scrollHeight);
     }
   };
 
@@ -219,18 +268,6 @@ export default class NoteDetail extends Component {
     }
   };
 
-  showNoteNames = (names) => {
-    if (!names) return;
-
-    return names.map((name) => (
-      <Link key={name} style={{ textDecoration: 'none' }} to="/" title="Note List">
-        <div className="listNameButton" onClick={() => this.props.set({ noteName: name })}>
-          <h3> {name} </h3>
-        </div>
-      </Link>
-    ));
-  };
-
   setNoteTheme = (name) => {
     this.props.set({ noteTheme: name });
     localStorage.setItem('theme', name);
@@ -312,10 +349,10 @@ export default class NoteDetail extends Component {
       const themeHover = `${Theme.toLowerCase()}-hover`;
 
       if (bunch.length === 0) return;
-
+      const { index } = this.props;
+      const className = index > 0 ? 'detailedBox  detailedBox-override' : 'detailedBox';
       return (
-        // <div className="detailedBox" key={prop + i} onClick={() => (showTag !== prop && prop !== 'Log' ? this.showTagChange(prop) : null)}>
-        <div className="detailedBox" key={prop + i}>
+        <div className={className} key={prop + i}>
           {this.noteDetailListItem(linkBorder, showTag, prop, themeBorder, isLink, bunch, showDateSelector, themeBack, themeHover)}
           {this.noteItemsBunch(animate, logDaysBunch, bunch)}
         </div>
@@ -344,6 +381,11 @@ export default class NoteDetail extends Component {
     const { notes } = this.props;
     let personNext = notes && notes[0] ? notes.find((note) => note.id === noteId) : null;
 
+    const parentId = person.id;
+    console.log('parentId', parentId);
+    this.props.openPage({ personNext, parentId: parentId });
+    // this.props.openPage({ personNext,  parentId: person.id});
+    return;
     const tags = this.getNoteByTag(person.dataLable, tagName);
     localStorage.setItem('showTag', tagName);
     if (showLink.length > 1) {
@@ -472,8 +514,8 @@ export default class NoteDetail extends Component {
             <input id="note-detail-date" onChange={this.changeDate} className={themeBack} type="date" name="dateSelector" />
           </form>
         ) : (
-          ''
-        )}
+            ''
+          )}
         {showTag === 'Log' && prop === 'Log' ? (
           this.logHeader(themeBack, themeHover)
         ) : prop === 'Log' ? (
@@ -552,7 +594,10 @@ export default class NoteDetail extends Component {
       );
     });
   }
-
+  cancelAddItemEdit() {
+    this.props.hideAddItem({ show: false });
+    this.setState({ showAddItem: false, addLable: null });
+  }
   editNameBox(heading) {
     const themeBack = `${this.props.Theme.toLowerCase()}-back`;
     const themeHover = `${this.props.Theme.toLowerCase()}-hover`;
@@ -586,10 +631,8 @@ export default class NoteDetail extends Component {
         <button className={`submit-button ${themeHover} ${themeBack}`} type="submit">
           <i className="fas fa-check" />
         </button>
-        <button
-          className={`submit-button ${themeHover} ${themeBack}`}
-          onClick={() => this.setState({ showAddItem: false, addLable: null })}
-        >
+
+        <button type="reset" className={`submit-button ${themeHover} ${themeBack}`} onClick={() => this.cancelAddItemEdit()}>
           {' '}
           <i className="fas fa-times" />{' '}
         </button>
@@ -600,125 +643,41 @@ export default class NoteDetail extends Component {
 
   render() {
     let { person } = this.state;
-    const { showAddItem, tags, editName } = this.state;
-    const { match, noteNames, Theme } = this.props;
-
+    const { tags, editName } = this.state;
+    const { match, Theme, showAddItem } = this.props;
     const editNameB = person ? this.editNameBox(person.heading) : null;
 
     const isNoteNames = match.url === '/notes/note-names';
     if (isNoteNames) person = null;
 
+    return <div className="slide-in">{person ? this.pageContent(person, editName, editNameB, showAddItem, Theme, tags) : null}</div>;
+  }
+
+  pageContent(person, editName, editNameB, showAddItem, Theme, tags) {
     const themeBack = `${Theme.toLowerCase()}-back`;
     const themeHover = `${Theme.toLowerCase()}-hover`;
-    return (
-      <div className="slide-in">
-        {this.backButton(themeBack)}
-        {isNoteNames ? this.sidebarPage(noteNames) : null}
-        {person ? this.pageContent(person, editName, editNameB, showAddItem, themeHover, themeBack, tags) : null}
-        {editName ? '' : this.scrollButtons(themeHover, themeBack, showAddItem)}
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-      </div>
-    );
-  }
-
-  backButton(themeBack) {
-    return (
-      <button
-        className={`backButton ${themeBack}`}
-        onClick={() => {
-          window.history.back();
-        }}
-      >
-        <i className="fas fa-arrow-left" />
-      </button>
-    );
-  }
-
-  scrollButtons(themeHover, themeBack, showAddItem) {
-    return (
-      <div className="detail-scroll">
-        <div
-          className={`detailUpButton ${themeHover} ${themeBack}`}
-          onClick={() => {
-            window.scrollTo(0, 0);
-          }}
-        >
-          <i className="fas fa-arrow-up" />
-        </div>
-        <div
-          className={`detailUpButton ${themeHover} ${themeBack}`}
-          onClick={() => {
-            window.scrollBy(0, document.body.scrollHeight);
-          }}
-        >
-          <i className="fas fa-arrow-down" />
-        </div>
-        <div
-          className={`detailAddButton ${themeHover} ${themeBack}`}
-          onClick={() => {
-            showAddItem ? this.showAddItemSet(false) : this.showAddItemSet(true);
-          }}
-        >
-          <i className="fas fa-plus" />
-        </div>
-      </div>
-    );
-  }
-
-  pageContent(person, editName, editNameB, showAddItem, themeHover, themeBack, tags) {
     return (
       <div className="note-detail-item" key={person.id}>
         {editName ? (
           <div>{editNameB}</div>
         ) : (
-          <div id="personContainer">
-            <h1 id="personHead" className="nameBox">
-              {person.heading}
-            </h1>
-            {showAddItem ? (
-              ''
-            ) : (
-              <div className={`nameBox ${themeHover} ${themeBack}`} id="nameBoxButton" onClick={() => this.editNameSet(true)}>
-                <i className="fas fa-pen" />
-              </div>
-            )}
-          </div>
-        )}
+            <div id="personContainer">
+              <h1 id="personHead" className="nameBox">
+                {person.heading}
+              </h1>
+              {showAddItem ? (
+                ''
+              ) : (
+                  <div className={`nameBox ${themeHover} ${themeBack}`} id="nameBoxButton" onClick={() => this.editNameSet(true)}>
+                    <i className="fas fa-pen" />
+                  </div>
+                )}
+            </div>
+          )}
 
         {showAddItem ? <div> {this.addItem()}</div> : null}
         {tags ? <div> {tags} </div> : null}
         <br />
-      </div>
-    );
-  }
-
-  sidebarPage(noteNames) {
-    const noteNameBlock = this.showNoteNames(noteNames);
-    const noteThemeBlock = this.showNoteThemes(['Red', 'Ocean', 'Dark', 'Night']);
-    return (
-      <div>
-        <br />
-        <h3>Note Book Names</h3>
-        {noteNameBlock}
-        <br />
-        <h3>Apps</h3>
-        <Link key="pomodoro" style={{ textDecoration: 'none' }} to="/pomodoro" title="Note List">
-          <div className="listNameButton">
-            {' '}
-            <h3> Pomodoro </h3>
-          </div>
-        </Link>
-        <br />
-        <h3>Themes</h3>
-        {noteThemeBlock}
       </div>
     );
   }
