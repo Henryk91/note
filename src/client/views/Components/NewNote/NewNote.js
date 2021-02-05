@@ -24,13 +24,16 @@ export default class NewNote extends Component {
   addNewUser = event => {
     event.preventDefault();
     const heading = event.target.heading.value;
-    // let lastName = event.target.lastName.value
-    const number = event.target.number.value;
+    let number = event.target.number.value;
     let tag = event.target.tagType.value;
 
     tag === 'Note' ? (tag = event.target.tagTypeText.value) : tag;
     const loginKey = localStorage.getItem('loginKey');
     const uniqueId = docId();
+    const textTag = event.target.tagTypeText.value;
+    if (tag === 'Log') {
+      number = JSON.stringify({ json: true, date: textTag, data: number });
+    }
 
     const note = {
       id: uniqueId,
