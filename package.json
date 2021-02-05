@@ -34,7 +34,7 @@
     "file-loader": "^3.0.0",
     "marked": "^0.6.3",
     "mongodb": "^3.1.13",
-    "mongoose": "^5.4.19",
+    "mongoose": "^5.7.5",
     "node-fetch": "^2.3.0",
     "react": "^16.5.2",
     "react-animated-weather": "^2.0.0",
