@@ -176,7 +176,7 @@ export default class NoteDetail extends Component {
 
     let number = event.target.number.value;
     let tag = event.target.tagType.value;
-    const textTag = event.target.tagTypeText.value;
+    const textTag = event.target.tagTypeText? event.target.tagTypeText.value : '';
 
     tag === 'Note' || tag === 'Upload' ? (tag = textTag) : tag;
 
@@ -190,6 +190,15 @@ export default class NoteDetail extends Component {
       number = `${window.atob(b64)}<br />${number}`;
     }
 
+    if(tag === 'Link'){
+      const { notes } = this.props
+      let link = event.target.links.value;
+      console.log('link',link);
+      number = 'href:' + link
+      const tagName = notes.find(note => note.id === link)
+      tag = tagName.heading.startsWith('Sub ') ? tagName.heading.slice(3).trim(): tagName.heading
+    }
+
     person.dataLable.push({ tag, data: number });
 
     const updateData = JSON.parse(JSON.stringify(person));
@@ -198,9 +207,12 @@ export default class NoteDetail extends Component {
 
     this.refreshItems(person);
     this.setState({ showAddItem: false });
+    this.props.hideAddItem({ show: false });
 
-    event.target.number.value = '';
-    event.target.tagTypeText.value = '';
+    if(!number.includes('href:')) {
+      event.target.number.value = '';
+      event.target.tagTypeText.value = '';
+    }
   };
 
   updateNoteItem = (val) => {
@@ -632,7 +644,7 @@ export default class NoteDetail extends Component {
     const themeHover = `${this.props.Theme.toLowerCase()}-hover`;
     return (
       <form onSubmit={this.submitNewItem}>
-        <EditNoteCheck Theme={this.props.Theme} showTag={this.state.showTag} lable={this.state.addLable} />
+        <EditNoteCheck Theme={this.props.Theme} showTag={this.state.showTag} lable={this.state.addLable} allNotes={this.props.notes} />
         <br />
         <button className={`submit-button ${themeHover} ${themeBack}`} type="submit">
           <i className="fas fa-check" />
