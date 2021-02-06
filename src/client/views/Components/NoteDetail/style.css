@@ -26,18 +26,25 @@
 @media(min-width: 1000px){
     .detailedBox{
       width: 40vw;
-      margin-left: 25vw;
+      /* margin-left: 25vw; */
     }
     .personContainer{
       width: 40vw;
       margin-left: 25vw;
     }
+    #personContainer:first-child{
+      /* margin-left: 25vw; */
+    }
 
     .add-item-comp{
-      width: 40vw;
-      margin-left: 30vw;
+      /* width: 80%; */
+      /* width: 40vw; */
+      /* margin-left: 30vw; */
     }
     #personContainer{
+      /* margin-left: 25vw; */
+    }
+    .first-note-detail-item{
       margin-left: 25vw;
     }
   }
@@ -127,6 +134,7 @@ input[type="date"]::-webkit-inner-spin-button{
   justify-content: center;
   /* margin-left: 25vw; */
 }
+
 #personContainer{
   /* margin-left: 25vw; */
 }
