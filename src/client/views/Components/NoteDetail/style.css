@@ -27,6 +27,8 @@
     .detailedBox{
       width: 40vw;
       /* margin-left: 25vw; */
+      padding-left: 1vw;
+      padding-right: 1vw;
     }
     .personContainer{
       width: 40vw;
@@ -34,6 +36,7 @@
     }
     #personContainer:first-child{
       /* margin-left: 25vw; */
+      /* width: 40vw; */
     }
 
     .add-item-comp{

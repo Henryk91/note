@@ -300,9 +300,9 @@ h2 {
   flex-direction: column;
 }
 .slide-in{
-  animation-name: slide;
+  /* animation-name: slide;
   animation-duration: 1s;
-  overflow: hidden;
+  overflow: hidden; */
   /* width: fit-content; */
 }
 @keyframes slide {
