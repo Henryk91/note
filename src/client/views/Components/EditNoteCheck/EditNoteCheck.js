@@ -91,7 +91,7 @@ export default class EditNoteCheck extends Component {
   render() {
     let { radioType, displayDate, inputDisplayDate } = this.state;
     const { upload } = this.state;
-    const { showTag, Theme, lable } = this.props;
+    const { showTag, Theme, lable, allNotes } = this.props;
     let defaultNote = true;
     let defaultLog = false;
     if (showTag === 'Log') {
@@ -106,12 +106,13 @@ export default class EditNoteCheck extends Component {
         <div className="radioBox">
           <label>Note</label>
           <label>Log</label>
+          <label>Link</label>
           <label>Upload</label>
           <br />
           <input onClick={() => this.setRadioType('Note')} type="radio" name="tagType" value="Note" defaultChecked={defaultNote} />
           <input onClick={() => this.setRadioType('Log')} type="radio" name="tagType" value="Log" defaultChecked={defaultLog} />
-          <input onClick={() => this.setRadioType('Upload')} type="radio" name="tagType" value="Upload" />
           <input onClick={() => this.setRadioType('Link')} type="radio" name="tagType" value="Link" />
+          <input onClick={() => this.setRadioType('Upload')} type="radio" name="tagType" value="Upload" />
         </div>
 
         {radioType === 'Note' ? (
@@ -119,6 +120,9 @@ export default class EditNoteCheck extends Component {
         ) : null}
         {radioType === 'Log' ? (
           this.newLog(inputDisplayDate, themeBack, displayDate, lable)
+        ) : null}
+        {radioType === 'Link' ? (
+          this.newLink(themeBack, allNotes)
         ) : null}
         {radioType === 'Upload' ? (
           this.newUpload(themeBack, showTag, upload)
@@ -141,6 +145,25 @@ export default class EditNoteCheck extends Component {
       {upload !== null ? (
         <input style={{ visibility: 'hidden', height: '0px', width: '0px' }} name="number" type="text" defaultValue={upload} />
       ) : null}
+      <br />
+    </div>;
+  }
+  getAllNoteHeadingsWithIds(notes){
+    if(notes === undefined) return []
+    return notes.map(note => {
+      return {
+        heading: note.heading,
+        id: note.id
+      }
+    })
+  }
+  newLink(themeBack, notes) {
+    const headings = this.getAllNoteHeadingsWithIds(notes);
+    const options = headings.map((item, index) => <option key={index} value={item.id}>{item.heading}</option>);
+    return <div>
+      <select className={themeBack} name="number" id="links">
+        {options}
+      </select>
       <br />
     </div>;
   }
