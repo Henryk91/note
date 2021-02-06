@@ -529,9 +529,9 @@ export default class NoteDetail extends Component {
         <div className={`listCountBox white-color ${themeBorder}`} onClick={() => this.showLogDays(prop)}>
           <span className="list-count-item"> {isLink ?  <i className="fas fa-folder" /> : bunch.length} </span>
         </div>
-        <h3 className="detailBoxTitle white-color">{prop} </h3>
+        <h3 className={`${className} white-color`}>{prop} </h3>
         {showDateSelector ? (
-          <form className="detailBoxTitle dateSelector" onSubmit={this.changeDate}>
+          <form className={`${className} dateSelector`} onSubmit={this.changeDate}>
             <input id="note-detail-date" onChange={this.changeDate} className={themeBack} type="date" name="dateSelector" />
           </form>
         ) : (
