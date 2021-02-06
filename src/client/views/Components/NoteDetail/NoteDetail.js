@@ -694,7 +694,7 @@ export default class NoteDetail extends Component {
             </div>
           )}
 
-        {showAddItem ? <div> {this.addItem()}</div> : null}
+        {showAddItem ? <div className="add-item-comp"> {this.addItem()}</div> : null}
         {tags ? <div> {tags} </div> : null}
         <br />
       </div>
