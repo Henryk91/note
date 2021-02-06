@@ -96,7 +96,7 @@ export default class NoteDetail extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.setState({ searchTerm: nextProps.SearchTerm });
+    this.setState({ searchTerm: nextProps.SearchTerm, editName: nextProps.editName });
     const self = this;
     setTimeout(() => {
       this.initPage(nextProps, self);
@@ -238,6 +238,8 @@ export default class NoteDetail extends Component {
     if (person.heading !== heading) {
       person.heading = heading;
       this.props.set({ person });
+    } else {
+      this.props.set({forParent: true, editName: false })
     }
     this.setState({ person, editName: false });
   };
@@ -366,8 +368,8 @@ export default class NoteDetail extends Component {
       const themeHover = `${Theme.toLowerCase()}-hover`;
 
       if (bunch.length === 0) return;
-      const { index } = this.props;
-      const className = index > 0 ? 'detailedBox  detailedBox-override' : 'detailedBox';
+
+      const className = 'detailedBox';
       return (
         <div className={className} key={prop + i}>
           {this.noteDetailListItem(linkBorder, showTag, prop, themeBorder, isLink, bunch, showDateSelector, themeBack, themeHover)}
@@ -675,8 +677,9 @@ export default class NoteDetail extends Component {
   pageContent(person, editName, editNameB, showAddItem, Theme, tags) {
     const themeBack = `${Theme.toLowerCase()}-back`;
     const themeHover = `${Theme.toLowerCase()}-hover`;
+    const className = this.props.index === 0 ? "note-detail-item first-note-detail-item": "note-detail-item"
     return (
-      <div className="note-detail-item" key={person.id}>
+      <div className={className} key={person.id}>
         {editName ? (
           <div>{editNameB}</div>
         ) : (
@@ -684,7 +687,7 @@ export default class NoteDetail extends Component {
               <h1 id="personHead" className="nameBox">
                 {person.heading}
               </h1>
-              {showAddItem ? (
+              {true ? (
                 ''
               ) : (
                   <div className={`nameBox ${themeHover} ${themeBack}`} id="nameBoxButton" onClick={() => this.editNameSet(true)}>

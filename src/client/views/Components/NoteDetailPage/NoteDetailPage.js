@@ -26,6 +26,7 @@ export default class NoteDetailPage extends Component {
     this.showAddItemSet = this.showAddItemSet.bind(this);
     this.hideAddItem = this.hideAddItem.bind(this);
     this.setNoteTheme = this.setNoteTheme.bind(this);
+    this.editNameSet = this.editNameSet.bind(this);
   }
 
   componentDidMount(){
@@ -52,7 +53,13 @@ export default class NoteDetailPage extends Component {
     ));
 
   noteDetailSet = (msg) => {
-    this.props.set(msg);
+    if(msg.forParent){
+     delete msg.forParent
+     this.setState({...msg})
+    } else {
+      this.props.set(msg);
+    }
+    
   };
   openPage = (msg) => {
     if (!msg.personNext) return;
@@ -99,14 +106,14 @@ export default class NoteDetailPage extends Component {
 
     const { pages } = this.state;
     const pagesCont = pages.map((pageLink, index) => {
-      return this.createNoteDetailPage(searchTerm, noteNames, Theme, notes, pageLink, showAddItem, index);
+      return this.createNoteDetailPage(searchTerm, noteNames, Theme, notes, pageLink, showAddItem, index, editName);
     });
     return (
       <div className="slide-in" key={match.urls}>
         {this.backButton(Theme)}
         {isNoteNames ? this.sidebarPage(noteNames) : null}
         <div id="multiple-pages">{pagesCont}</div>
-        {editName ? '' : this.scrollButtons(Theme, showAddItem)}
+        {false ? '' : this.scrollButtons(Theme, showAddItem)}
         <br />
         <br />
         <br />
@@ -120,7 +127,7 @@ export default class NoteDetailPage extends Component {
     );
   }
 
-  createNoteDetailPage(searchTerm, noteNames, Theme, notes, pageLink, showAddItem, index) {
+  createNoteDetailPage(searchTerm, noteNames, Theme, notes, pageLink, showAddItem, index, editName) {
     const key = pageLink && pageLink.params && pageLink.params.id ? pageLink.params.id : 'first';
     return (
       <div id="multiple-pages1" key={key}>
@@ -136,6 +143,7 @@ export default class NoteDetailPage extends Component {
           initShowtag={pageLink}
           index={index}
           showAddItem={showAddItem}
+          editName={editName}
         />
       </div>
     );
@@ -155,11 +163,20 @@ export default class NoteDetailPage extends Component {
     );
   }
 
+  editNameSet = () => {
+    window.scrollTo(0, 0);
+    const { editName } = this.state;
+    this.setState({ editName: !editName });
+  };
+
   scrollButtons(Theme, showAddItem) {
     const themeBack = `${Theme.toLowerCase()}-back`;
     const themeHover = `${Theme.toLowerCase()}-hover`;
     return (
       <div className="detail-scroll">
+        <button className={`editButtons1 detailUpButton ${themeHover} ${themeBack}`} onClick={() => this.editNameSet()}>
+          <i className="fas fa-pen" />
+        </button>
         <div
           className={`detailUpButton ${themeHover} ${themeBack}`}
           onClick={() => {
