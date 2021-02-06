@@ -84,7 +84,7 @@ export default class NoteDetail extends Component {
 
   getSubs(notes) {
     let subs = notes.filter((note) => {
-      return note.heading.startsWith('Sub ');
+      return note.heading.startsWith('Sub: ');
     });
 
     if (subs.length > 0) {
@@ -196,7 +196,7 @@ export default class NoteDetail extends Component {
       console.log('link',link);
       number = 'href:' + link
       const tagName = notes.find(note => note.id === link)
-      tag = tagName.heading.startsWith('Sub ') ? tagName.heading.slice(3).trim(): tagName.heading
+      tag = tagName.heading.startsWith('Sub: ') ? tagName.heading.slice(3).trim(): tagName.heading
     }
 
     person.dataLable.push({ tag, data: number });

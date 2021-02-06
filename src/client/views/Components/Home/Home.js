@@ -14,7 +14,7 @@ const createList = (notes, theme) => {
   const themeBorder = `${theme.toLowerCase()}-border-thick`;  
   let subs = [];
   notes = notes.filter(note => {
-    if(note.heading.startsWith('Sub ')){
+    if(note.heading.startsWith('Sub: ')){
       subs.push(note)
       return false
     } 
