@@ -58,6 +58,10 @@
   vertical-align: middle !important;
   width:79%
 }
+.detailLogBoxTitle{
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
 
 .detailBoxTitleButton{
   position: relative;
