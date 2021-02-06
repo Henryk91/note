@@ -28,6 +28,18 @@
       width: 40vw;
       margin-left: 25vw;
     }
+    .personContainer{
+      width: 40vw;
+      margin-left: 25vw;
+    }
+
+    .add-item-comp{
+      width: 40vw;
+      margin-left: 30vw;
+    }
+    #personContainer{
+      margin-left: 25vw;
+    }
   }
 
 
@@ -99,8 +111,22 @@ input[type="date"]::-webkit-inner-spin-button{
 .link-border{
   border-bottom: 1px solid;
 }
+#multiple-pages1{
+  /* margin-left: 25vw; */
+}
 #multiple-pages{
   display: flex;
   flex-direction: row;
   overflow: scroll;
+  /* margin-left: 25vw; */
+  /* padding-left: 25vw; */
+      /* align-items: center; */
+  /* justify-content: center; */
+}
+.note-detail-item{
+  justify-content: center;
+  /* margin-left: 25vw; */
+}
+#personContainer{
+  /* margin-left: 25vw; */
 }

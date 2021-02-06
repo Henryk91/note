@@ -14,8 +14,8 @@ editNoteTextArea{
     width: 10vw; 
   }
   #div-text-area {
-    margin-left: 20vw;
-    width: 60vw;
+    /* margin-left: 20vw;
+    width: 60vw; */
   }
 }
 
@@ -36,8 +36,8 @@ editNoteTextArea{
   border: none !important;
   border-radius: 2px !important;
   margin-top: 5px !important;
-  width: 80vw;
-  margin-left: 10vw;
+  /* width: 80vw;
+  margin-left: 10vw; */
   font-size: 18px !important;
   padding : 2px;
   min-height: 50px;
