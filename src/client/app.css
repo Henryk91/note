@@ -240,6 +240,19 @@ h2 {
 .ocean-hover:hover{
   background: rgba(56, 205, 184, 0.7);
 }
+/* Green Theme */
+.green-back{
+  background: rgb(57, 203, 125);
+}
+.green-back-back{
+  background: rgba(16,55,98)
+}
+.green-border-thick{
+  border: 2px solid rgb(57, 203, 125);
+}
+.green-hover:hover{
+  background: rgba(57, 203, 125, 0.7);
+}
 /* Dark Theme */
 .dark-back{
   background: rgb(0, 144, 200);

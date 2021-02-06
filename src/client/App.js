@@ -231,6 +231,11 @@ export default class App extends Component {
     if (!document.location.pathname.includes('note-names') && isMobileDevice()) {
       // document.documentElement.webkitRequestFullscreen();
     }
+    console.log('theme',theme);
+    if (theme === 'Green') {
+      document.body.style.backgroundColor = '#103762';
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#103762');
+    }
     if (theme === 'Red') {
       document.body.style.backgroundColor = '#030303';
       document.querySelector('meta[name="theme-color"]').setAttribute('content', '#d00000');

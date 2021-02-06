@@ -219,7 +219,7 @@ export default class NoteDetailPage extends Component {
 
   sidebarPage(noteNames) {
     const noteNameBlock = this.showNoteNames(noteNames);
-    const noteThemeBlock = this.showNoteThemes(['Red', 'Ocean', 'Dark', 'Night']);
+    const noteThemeBlock = this.showNoteThemes(['Red', 'Ocean', 'Green', 'Dark', 'Night']);
     return (
       <div>
         <br />
