@@ -111,61 +111,82 @@ export default class EditNoteCheck extends Component {
           <input onClick={() => this.setRadioType('Note')} type="radio" name="tagType" value="Note" defaultChecked={defaultNote} />
           <input onClick={() => this.setRadioType('Log')} type="radio" name="tagType" value="Log" defaultChecked={defaultLog} />
           <input onClick={() => this.setRadioType('Upload')} type="radio" name="tagType" value="Upload" />
+          <input onClick={() => this.setRadioType('Link')} type="radio" name="tagType" value="Link" />
         </div>
 
         {radioType === 'Note' ? (
-          <div>
-            <input className={themeBack} name="tagTypeText" type="text" placeholder="Sub Heading" defaultValue={showTag} />
-            <br />
-            <textarea id="input-div-text-area" className={`editNoteTextarea ${themeBack}`} onChange={this.handleChange} name="number" type="text" placeholder="eg: Company, Note" />
-            <div id="div-text-area" contentEditable className={`hidden ${themeBack}`} onInput={ this.onTextChange } name="number" type="text" placeholder="Info" />
-            <br />
-          </div>
+          this.newNote(themeBack, showTag)
         ) : null}
         {radioType === 'Log' ? (
-          <div>
-            <input onChange={this.changeDate} value={inputDisplayDate} className={themeBack} type="date" name="dateSelector" />
-            <br />
-            <input id="text-date" className={themeBack} name="tagTypeText" type="text" defaultValue={displayDate} onChange={e => this.onTodoChange(e.target.value)}/>
-            <br />
-            {lable ? (
-              <input className={themeBack} name="number" type="text" defaultValue={lable} />
-            ) : (
-              <div>
-                <input id="input-div-text-area" className={themeBack} onChange={this.handleChange} name="number" type="text" placeholder="Info" />
-                <div id="div-text-area" contentEditable className={`hidden ${themeBack}`} onInput={ this.onTextChange } name="number" type="text" placeholder="Info" />
-              </div>
-            )}
-            <br />
-          </div>
+          this.newLog(inputDisplayDate, themeBack, displayDate, lable)
         ) : null}
         {radioType === 'Upload' ? (
-          <div>
-            <input className={themeBack} name="tagTypeText" type="text" placeholder="Sub Heading" defaultValue={showTag} />
-            <br />
-            <input onChange={e => this.handleChangeFile(e)} className={themeBack} name="upload" type="file" />
-            {upload !== null ? (
-              <input style={{ visibility: 'hidden', height: '0px', width: '0px' }} name="number" type="text" defaultValue={upload} />
-            ) : null}
-            <br />
-          </div>
+          this.newUpload(themeBack, showTag, upload)
         ) : null}
         {radioType === 'Number' ? (
-          <div>
-            <input className={themeBack} name="number" type="number" placeholder="Add Number" />
-            <br />
-            <br />
-          </div>
+          this.newNumber(themeBack)
         ) : null}
         {radioType === 'Email' ? (
-          <div>
-            {' '}
-            <input className={themeBack} name="number" type="email" placeholder="Add Email" />
-            <br />
-            <br />
-          </div>
+          this.newEmail(themeBack)
         ) : null}
       </div>
     );
+  }
+
+  newUpload(themeBack, showTag, upload) {
+    return <div>
+      <input className={themeBack} name="tagTypeText" type="text" placeholder="Sub Heading" defaultValue={showTag} />
+      <br />
+      <input onChange={e => this.handleChangeFile(e)} className={themeBack} name="upload" type="file" />
+      {upload !== null ? (
+        <input style={{ visibility: 'hidden', height: '0px', width: '0px' }} name="number" type="text" defaultValue={upload} />
+      ) : null}
+      <br />
+    </div>;
+  }
+
+  newEmail(themeBack) {
+    return <div>
+      {' '}
+      <input className={themeBack} name="number" type="email" placeholder="Add Email" />
+      <br />
+      <br />
+    </div>;
+  }
+
+  newNumber(themeBack) {
+    return <div>
+      <input className={themeBack} name="number" type="number" placeholder="Add Number" />
+      <br />
+      <br />
+    </div>;
+  }
+
+  newLog(inputDisplayDate, themeBack, displayDate, lable) {
+    return <div>
+      <input onChange={this.changeDate} value={inputDisplayDate} className={themeBack} type="date" name="dateSelector" />
+      <br />
+      <input id="text-date" className={themeBack} name="tagTypeText" type="text" defaultValue={displayDate} onChange={e => this.onTodoChange(e.target.value)} />
+      <br />
+      {lable ? (
+        <input className={themeBack} name="number" type="text" defaultValue={lable} />
+      ) : (
+          <div>
+            <input id="input-div-text-area" className={themeBack} onChange={this.handleChange} name="number" type="text" placeholder="Info" />
+            <div id="div-text-area" contentEditable className={`hidden ${themeBack}`} onInput={this.onTextChange} name="number" type="text" placeholder="Info" />
+          </div>
+        )}
+      <br />
+    </div>;
+  }
+
+  newNote(themeBack, showTag) {
+    return <div>
+      <input className={themeBack} name="tagTypeText" type="text" placeholder="Sub Heading" defaultValue={showTag} />
+      <br />
+      <textarea id="input-div-text-area" className={`editNoteTextarea ${themeBack}`} onChange={this.handleChange} name="number" type="text" placeholder="eg: Company, Note" />
+      <div id="div-text-area" contentEditable className={`hidden ${themeBack}`} onInput={this.onTextChange} name="number" type="text" placeholder="Info" />
+      <br />
+    </div>;
   }
 }
