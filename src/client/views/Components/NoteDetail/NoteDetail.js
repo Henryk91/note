@@ -196,7 +196,7 @@ export default class NoteDetail extends Component {
       console.log('link',link);
       number = 'href:' + link
       const tagName = notes.find(note => note.id === link)
-      tag = tagName.heading.startsWith('Sub: ') ? tagName.heading.slice(3).trim(): tagName.heading
+      tag = tagName.heading.startsWith('Sub: ') ? tagName.heading.slice(4).trim(): tagName.heading
     }
 
     person.dataLable.push({ tag, data: number });
@@ -524,7 +524,7 @@ export default class NoteDetail extends Component {
     return (
       <div className={`detailTitleBox dark-hover ${linkBorder}`} onClick={() => this.showHideBox(showTag, prop)}>
         <div className={`listCountBox white-color ${themeBorder}`} onClick={() => this.showLogDays(prop)}>
-          <span className="list-count-item"> {isLink ? 'L' : bunch.length} </span>
+          <span className="list-count-item"> {isLink ?  <i className="fas fa-folder" /> : bunch.length} </span>
         </div>
         <h3 className="detailBoxTitle white-color">{prop} </h3>
         {showDateSelector ? (
