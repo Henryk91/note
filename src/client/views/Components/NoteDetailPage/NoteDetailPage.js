@@ -25,7 +25,13 @@ export default class NoteDetailPage extends Component {
     this.showNoteThemes = this.showNoteThemes.bind(this);
     this.showAddItemSet = this.showAddItemSet.bind(this);
     this.hideAddItem = this.hideAddItem.bind(this);
+    this.setNoteTheme = this.setNoteTheme.bind(this);
   }
+
+  setNoteTheme = (name) => {
+    this.props.set({ noteTheme: name });
+    localStorage.setItem('theme', name);
+  };
 
   showNoteThemes = (names) =>
     names.map((name) => (
