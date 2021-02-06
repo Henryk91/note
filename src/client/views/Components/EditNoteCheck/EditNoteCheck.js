@@ -102,7 +102,7 @@ export default class EditNoteCheck extends Component {
     const themeBack = `${Theme.toLowerCase()}-back`;
 
     return (
-      <div className="slide-in">
+      <div className="slide-in1">
         <div className="radioBox">
           <label>Note</label>
           <label>Log</label>
@@ -157,10 +157,20 @@ export default class EditNoteCheck extends Component {
       }
     })
   }
+
+  toNewNote(){
+    window.location.pathname = '/new-note/'
+    localStorage.setItem('new-folder-edit',true)
+  }
   newLink(themeBack, notes) {
     const headings = this.getAllNoteHeadingsWithIds(notes);
     const options = headings.map((item, index) => <option key={index} value={item.id}>{item.heading}</option>);
     return <div>
+      <br />
+      <button className={themeBack} onClick={() => { this.toNewNote();}}>
+          New Folder
+      </button>
+      <br />
       <select className={themeBack} name="number" id="links">
         {options}
       </select>

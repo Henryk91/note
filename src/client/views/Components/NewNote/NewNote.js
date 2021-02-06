@@ -44,6 +44,7 @@ export default class NewNote extends Component {
     };
     this.setState({ showAddItem: false });
     this.props.set({ note });
+    window.history.back()
   };
 
   setRadioType(type) {

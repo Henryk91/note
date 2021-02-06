@@ -615,6 +615,7 @@ export default class NoteDetail extends Component {
   cancelAddItemEdit() {
     this.props.hideAddItem({ show: false });
     this.setState({ showAddItem: false, addLable: null });
+    localStorage.removeItem('new-folder-edit')
   }
   editNameBox(heading) {
     const themeBack = `${this.props.Theme.toLowerCase()}-back`;

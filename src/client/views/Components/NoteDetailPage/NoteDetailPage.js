@@ -28,6 +28,15 @@ export default class NoteDetailPage extends Component {
     this.setNoteTheme = this.setNoteTheme.bind(this);
   }
 
+  componentDidMount(){
+    const isEditing = localStorage.getItem('new-folder-edit');
+  
+    console.log('isEditing',isEditing);
+    if(isEditing){
+      this.setState({showAddItem: true})
+      localStorage.removeItem('new-folder-edit')
+    }
+  }
   setNoteTheme = (name) => {
     this.props.set({ noteTheme: name });
     localStorage.setItem('theme', name);
