@@ -33,6 +33,14 @@ export default class EditNoteCheck extends Component {
     this.setState({ displayDate: date, inputDisplayDate: date.toISOString().split('T')[0] });
     document.getElementById('text-date').value = date;
   };
+  
+  changeLink = e => {
+    e.preventDefault();
+    const { allNotes } = this.props;
+    const headings = this.getAllNoteHeadingsWithIds(allNotes);
+    const selected = headings.find(heading => heading.id === e.target.value)
+    document.getElementById('link-text').value = selected.heading;
+  };
 
   onTodoChange = (value) => {
     this.setState({ displayDate: value });
@@ -171,9 +179,11 @@ export default class EditNoteCheck extends Component {
           New Folder
       </button>
       <br />
-      <select className={themeBack} name="number" id="links">
+      <select onChange={this.changeLink} className={themeBack} name="number" id="links">
         {options}
       </select>
+      <br />
+      <input id="link-text" className={themeBack} name="tagTypeText" type="text" />
       <br />
     </div>;
   }

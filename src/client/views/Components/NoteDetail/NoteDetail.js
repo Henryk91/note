@@ -191,12 +191,10 @@ export default class NoteDetail extends Component {
     }
 
     if(tag === 'Link'){
-      const { notes } = this.props
       let link = event.target.links.value;
-      console.log('link',link);
       number = 'href:' + link
-      const tagName = notes.find(note => note.id === link)
-      tag = tagName.heading.startsWith('Sub: ') ? tagName.heading.slice(4).trim(): tagName.heading
+      const linkHeading = document.getElementById('link-text').value;
+      tag = linkHeading.startsWith('Sub: ') ? linkHeading.slice(4).trim(): linkHeading
     }
 
     person.dataLable.push({ tag, data: number });
