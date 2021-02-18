@@ -204,7 +204,7 @@ export default class NoteDetail extends Component {
     this.props.set({ updateData });
 
     this.refreshItems(person);
-    this.setState({ showAddItem: false });
+    this.setState({ showAddItem: false, addLable: null });
     this.props.hideAddItem({ show: false });
 
     if(!number.includes('href:')) {
@@ -226,6 +226,7 @@ export default class NoteDetail extends Component {
 
   continueLog = (val) => {
     this.setState({ addLable: val.cont });
+    this.props.set({forParent: true, showAddItem: true });
     this.showAddItemSet(true);
   };
 
