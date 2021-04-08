@@ -269,7 +269,10 @@ export default class App extends Component {
               exact
               path="/"
               component={props => (
+                <span>
+                <p>1</p>
                 <Home SearchTerm={searchTerm} noteNames={noteNames} User={user} Theme={theme} {...props} notes={filteredNotes} />
+                </span>
               )}
             />
             <Route
