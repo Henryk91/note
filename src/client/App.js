@@ -267,12 +267,16 @@ export default class App extends Component {
             <Route exact path="/all" component={props => <Home {...props} SearchTerm={searchTerm} Theme={theme} notes={notes} />} />
             <Route
               exact
+              path="/index.html"
+              component={props => (
+                <Home SearchTerm={searchTerm} noteNames={noteNames} User={user} Theme={theme} {...props} notes={filteredNotes} />
+              )}
+            />
+            <Route
+              exact
               path="/"
               component={props => (
-                <span>
-                <p>1</p>
                 <Home SearchTerm={searchTerm} noteNames={noteNames} User={user} Theme={theme} {...props} notes={filteredNotes} />
-                </span>
               )}
             />
             <Route
