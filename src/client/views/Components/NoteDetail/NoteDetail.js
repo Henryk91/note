@@ -649,7 +649,7 @@ export default class NoteDetail extends Component {
       <form onSubmit={this.submitNewItem}>
         <EditNoteCheck Theme={this.props.Theme} showTag={this.state.showTag} lable={this.state.addLable} allNotes={this.props.notes} />
         <br />
-        <button className={`submit-button ${themeHover} ${themeBack}`} type="submit">
+        <button className={`submit-button ${themeHover} ${themeBack}`} type="submit" id="submit-new-note">
           <i className="fas fa-check" />
         </button>
 

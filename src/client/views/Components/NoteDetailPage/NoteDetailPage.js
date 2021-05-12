@@ -31,11 +31,10 @@ export default class NoteDetailPage extends Component {
 
   componentDidMount(){
     const isEditing = localStorage.getItem('new-folder-edit');
-  
-    console.log('isEditing',isEditing);
     if(isEditing){
       this.setState({showAddItem: true})
       localStorage.removeItem('new-folder-edit')
+      localStorage.setItem('was-new-folder-edit',true)
     }
   }
   setNoteTheme = (name) => {

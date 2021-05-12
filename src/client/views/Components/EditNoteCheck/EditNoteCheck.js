@@ -104,6 +104,7 @@ export default class EditNoteCheck extends Component {
     const { showTag, Theme, lable, allNotes } = this.props;
     let defaultNote = true;
     let defaultLog = false;
+    let defaultLink = false;
     if (showTag === 'Log') {
       radioType = 'Log';
       defaultLog = true;
@@ -111,6 +112,19 @@ export default class EditNoteCheck extends Component {
     }
     const themeBack = `${Theme.toLowerCase()}-back`;
     const themeHover = `${Theme.toLowerCase()}-hover`;
+
+    const wasEditing = localStorage.getItem('was-new-folder-edit');
+    if(wasEditing){
+      radioType = 'Link';
+      defaultLink = true;
+      defaultLog = false;
+      defaultNote = false;
+      localStorage.removeItem('was-new-folder-edit')
+      setTimeout(() => {
+        const el = document.getElementById('submit-new-note');
+        if(el) el.click();
+      }, 100);
+    }
 
     return (
       <div className="slide-in1">
@@ -122,7 +136,7 @@ export default class EditNoteCheck extends Component {
           <br />
           <input onClick={() => this.setRadioType('Note')} type="radio" name="tagType" value="Note" defaultChecked={defaultNote} />
           <input onClick={() => this.setRadioType('Log')} type="radio" name="tagType" value="Log" defaultChecked={defaultLog} />
-          <input onClick={() => this.setRadioType('Link')} type="radio" name="tagType" value="Link" />
+          <input onClick={() => this.setRadioType('Link')} type="radio" name="tagType" value="Link" id="linkRadio" defaultChecked={defaultLink}/>
           <input onClick={() => this.setRadioType('Upload')} type="radio" name="tagType" value="Upload" />
         </div>
 
@@ -174,7 +188,12 @@ export default class EditNoteCheck extends Component {
   }
   newLink(themeBack, themeHover, notes) {
     const headings = this.getAllNoteHeadingsWithIds(notes);
-    const options = headings.map((item, index) => <option key={index} value={item.id}>{item.heading}</option>);
+    const options = headings.map((item, index) => {
+      if(index === (headings.length -1)) return <option key={index} value={item.id} selected>{item.heading}</option>
+      return <option key={index} value={item.id}>{item.heading}</option>
+    });
+
+    const defaultVal = headings && headings.length ? (headings[headings.length -1].heading).replace('Sub: ',''): ''
     return <div>
       <br />
       <Link style={{ textDecoration: 'none', color: 'white' }} className={`${themeHover} ${themeBack}`} to="/new-note/" onClick={this.toNewNote}>
@@ -185,7 +204,7 @@ export default class EditNoteCheck extends Component {
         {options}
       </select>
       <br />
-      <input id="link-text" className={themeBack} name="tagTypeText" type="text" />
+      <input id="link-text" className={themeBack} name="tagTypeText" type="text" defaultValue={defaultVal}/>
       <br />
     </div>;
   }
@@ -226,10 +245,16 @@ export default class EditNoteCheck extends Component {
   }
 
   newNote(themeBack, showTag) {
+    const creatingNewFolder = localStorage.getItem('new-folder-edit');
+    let defaultVal = '';
+    if(creatingNewFolder) {
+      showTag = 'Note'
+      defaultVal = '1.'
+    }
     return <div>
       <input className={themeBack} name="tagTypeText" type="text" placeholder="Sub Heading" defaultValue={showTag} />
       <br />
-      <textarea id="input-div-text-area" className={`editNoteTextarea ${themeBack}`} onChange={this.handleChange} name="number" type="text" placeholder="eg: Company, Note" />
+      <textarea id="input-div-text-area" className={`editNoteTextarea ${themeBack}`} onChange={this.handleChange} name="number" type="text" placeholder="eg: Company, Note" defaultValue={defaultVal}/>
       <div id="div-text-area" contentEditable className={`hidden ${themeBack}`} onInput={this.onTextChange} name="number" type="text" placeholder="Info" />
       <br />
     </div>;

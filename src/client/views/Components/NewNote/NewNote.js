@@ -23,7 +23,8 @@ export default class NewNote extends Component {
 
   addNewUser = event => {
     event.preventDefault();
-    const heading = event.target.heading.value;
+    const isEditing = localStorage.getItem('new-folder-edit');
+    const heading = (isEditing? 'Sub: ': '') + event.target.heading.value;
     let number = event.target.number.value;
     let tag = event.target.tagType.value;
 
@@ -55,6 +56,11 @@ export default class NewNote extends Component {
     const { Theme } = this.props
     const themeBack = `${Theme.toLowerCase()}-back`;
     const themeHover = `${Theme.toLowerCase()}-hover`;
+
+    setTimeout(() => {
+      const el = document.getElementById('heading');
+      if(el) el.focus()
+    }, 100);
     
     return (
       <div>
@@ -63,7 +69,7 @@ export default class NewNote extends Component {
         </Link>
         <form onSubmit={this.addNewUser}>
           <br />
-          <input className={themeBack}  name="heading" type="text" placeholder="Heading" required="required" />
+          <input className={themeBack}  name="heading" type="text" placeholder="Headings" required="required" id="heading" />
           <br />
           <EditNoteCheck Theme={this.props.Theme} />
           <button className={`submit-button ${themeHover} ${themeBack}`} type="submit">
