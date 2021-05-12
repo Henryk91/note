@@ -2,6 +2,8 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable react/prop-types */
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
+
 
 export default class EditNoteCheck extends Component {
   constructor(props) {
@@ -108,6 +110,7 @@ export default class EditNoteCheck extends Component {
       defaultNote = false;
     }
     const themeBack = `${Theme.toLowerCase()}-back`;
+    const themeHover = `${Theme.toLowerCase()}-hover`;
 
     return (
       <div className="slide-in1">
@@ -130,7 +133,7 @@ export default class EditNoteCheck extends Component {
           this.newLog(inputDisplayDate, themeBack, displayDate, lable)
         ) : null}
         {radioType === 'Link' ? (
-          this.newLink(themeBack, allNotes)
+          this.newLink(themeBack, themeHover, allNotes)
         ) : null}
         {radioType === 'Upload' ? (
           this.newUpload(themeBack, showTag, upload)
@@ -167,17 +170,16 @@ export default class EditNoteCheck extends Component {
   }
 
   toNewNote(){
-    window.location.pathname = '/new-note/'
     localStorage.setItem('new-folder-edit',true)
   }
-  newLink(themeBack, notes) {
+  newLink(themeBack, themeHover, notes) {
     const headings = this.getAllNoteHeadingsWithIds(notes);
     const options = headings.map((item, index) => <option key={index} value={item.id}>{item.heading}</option>);
     return <div>
       <br />
-      <button className={themeBack} onClick={() => { this.toNewNote();}}>
+      <Link style={{ textDecoration: 'none', color: 'white' }} className={`${themeHover} ${themeBack}`} to="/new-note/" onClick={this.toNewNote}>
           New Folder
-      </button>
+      </Link>
       <br />
       <select onChange={this.changeLink} className={themeBack} name="number" id="links">
         {options}
