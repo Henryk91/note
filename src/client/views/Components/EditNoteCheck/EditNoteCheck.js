@@ -119,10 +119,10 @@ export default class EditNoteCheck extends Component {
       defaultLink = true;
       defaultLog = false;
       defaultNote = false;
-      localStorage.removeItem('was-new-folder-edit')
       setTimeout(() => {
         const el = document.getElementById('submit-new-note');
         if(el) el.click();
+        localStorage.removeItem('was-new-folder-edit')
       }, 100);
     }
 

@@ -29,6 +29,10 @@ export default class NoteDetailPage extends Component {
     this.editNameSet = this.editNameSet.bind(this);
   }
 
+  componentWillMount(){
+    const localPages = localStorage.getItem('saved-pages')
+    if(localPages)this.setState({pages: JSON.parse(localPages)})
+  }
   componentDidMount(){
     const isEditing = localStorage.getItem('new-folder-edit');
     if(isEditing){
@@ -94,18 +98,24 @@ export default class NoteDetailPage extends Component {
   };
 
   render() {
-    let { person } = this.state;
+    let { person, pages } = this.state;
     const { showAddItem, tags, editName } = this.state;
     const { match, noteNames, Theme, searchTerm, notes } = this.props;
 
     const editNameB = person ? this.editNameBox(person.heading) : null;
 
     const isNoteNames = match.url === '/notes/note-names';
-    if (isNoteNames) person = null;
-
-    const { pages } = this.state;
+    if (isNoteNames) {
+      person = null;
+      pages = [{ params: { id: '' } }]
+      localStorage.removeItem('saved-pages')
+    }
+    
+    const clone = JSON.parse(JSON.stringify(pages))
+    localStorage.setItem('saved-pages', JSON.stringify(clone))
     const pagesCont = pages.map((pageLink, index) => {
-      return this.createNoteDetailPage(searchTerm, noteNames, Theme, notes, pageLink, showAddItem, index, editName);
+      const lastPageShowAddItem = showAddItem && index === (pages.length - 1);
+      return this.createNoteDetailPage(searchTerm, noteNames, Theme, notes, pageLink, lastPageShowAddItem, index, editName);
     });
     return (
       <div className="slide-in" key={match.urls}>
