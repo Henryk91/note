@@ -1,16 +1,11 @@
 const https = require('https');
+const calcTimeNowOffset = require('./utils.js');
 
 let isRunning = false;
-function calcTime(offset) {
-  const d = new Date();
-  const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
-  const nd = new Date(utc + (3600000 * offset));
-  return nd.getHours();
-}
 
 function refresh(url, startHour, endHour, minuteInterval) {
-  const timeNow = calcTime('+2');
-  console.log('Time Now', timeNow, (timeNow > startHour), (timeNow < endHour));
+  const time = calcTimeNowOffset('+2');
+  const timeNow = time.getHours();
   if (timeNow > startHour && timeNow < endHour) {
     console.log('Calling KeepUp!', new Date().toLocaleString());
     https.get(url, (resp) => {
