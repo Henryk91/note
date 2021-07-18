@@ -64,10 +64,10 @@
 }
 
 .detailBoxTitleButton{
-  position: relative;
+  /* position: relative;
   float:right;
   margin-right: 0px;
-  margin-top: -43px;
+  margin-top: -43px; */
 }
 
 .dateSelector{
@@ -91,6 +91,10 @@
 }
 .detailTitleBox{
   padding-left: 10px !important;
+  display: flex;
+  flex-direction: row;
+  /* justify-content: center; */
+  align-items: baseline;
 }
 #nameBoxButton:hover{
   /* background: rgba(187, 59, 0, 0.7); */
