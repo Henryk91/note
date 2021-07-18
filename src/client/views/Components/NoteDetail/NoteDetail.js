@@ -524,6 +524,7 @@ export default class NoteDetail extends Component {
   noteDetailListItem(linkBorder, showTag, prop, themeBorder, isLink, bunch, showDateSelector, themeBack, themeHover) {
     const className = showDateSelector? 'detailLogBoxTitle': 'detailBoxTitle';
     return (
+      <>
       <div className={`detailTitleBox dark-hover ${linkBorder}`} onClick={() => this.showHideBox(showTag, prop)}>
         <div className={`listCountBox white-color ${themeBorder}`} onClick={() => this.showLogDays(prop)}>
           <span className="list-count-item"> {isLink ?  <i className="fas fa-folder" /> : bunch.length} </span>
@@ -537,7 +538,9 @@ export default class NoteDetail extends Component {
             ''
           )}
         {showTag === 'Log' && prop === 'Log' ? (
-          this.logHeader(themeBack, themeHover)
+          (<button className={`detailBoxTitleButton ${themeBack} ${themeHover}`} onClick={() => this.showTagChange('')}>
+          Hide
+        </button>)
         ) : prop === 'Log' ? (
           <div>
             <button className={`detailBoxTitleButton ${themeBack} ${themeHover}`} onClick={() => this.showTagChange(prop)}>
@@ -546,15 +549,18 @@ export default class NoteDetail extends Component {
           </div>
         ) : null}
       </div>
+      <div className={`logToggleHeader detailTitleBox dark-hover ${linkBorder}`}>
+      {showTag === 'Log' && prop === 'Log' ? (
+          this.logHeader(themeBack, themeHover)
+        ): null}
+      </div>
+      </>
     );
   }
 
   logHeader(themeBack, themeHover) {
     return (
       <div>
-        <button className={`detailBoxTitleButton ${themeBack} ${themeHover}`} onClick={() => this.showTagChange('')}>
-          Hide
-        </button>
         <div className="day-forward-back">
           <button className={`forward-back-button ${themeBack} ${themeHover}`} onClick={() => this.dateBackForward('back')}>
             <i className="fas fa-arrow-left" />

@@ -256,9 +256,11 @@ h2 {
 /* Dark Theme */
 .dark-back{
   background: rgb(0, 144, 200);
+  background-color: rgb(0, 144, 200);
 }
 .dark-back-back{
   background: rgb(6, 31, 47);
+  background-color: rgb(6, 31, 47);
 }
 .dark-border-thick{
   border: 2px solid rgb(0, 144, 200);

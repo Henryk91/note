@@ -71,7 +71,8 @@
 }
 
 .dateSelector{
-  margin-left: 20px;
+  margin-left: 10px;
+  
 }
 
 .nameBox{
@@ -149,4 +150,8 @@ input[type="date"]::-webkit-inner-spin-button{
 
 #personContainer{
   /* margin-left: 25vw; */
+}
+.logToggleHeader{
+  border: 1px solid;
+  justify-content: center;
 }
