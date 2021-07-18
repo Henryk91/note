@@ -3,6 +3,7 @@
 /* eslint-disable prefer-destructuring */
 /* eslint-disable no-param-reassign */
 /* eslint-disable func-names */
+const calcTimeNowOffset = require('../utils.js');
 require('dotenv').config();
 
 const mongoose = require('mongoose');
@@ -313,7 +314,7 @@ module.exports = function () {
         if (doc.dataLable) {
             const referer = req.headers.referer;
             const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-            const data = `Referer: ${referer}\nIp: ${ip}\nDate: ${new Date()}\n https://ipapi.co/${ip}/`;
+            const data = `Referer: ${referer}\nIp: ${ip}\n SA Date: ${calcTimeNowOffset('+2')}\n https://ipapi.co/${ip}/`;
             let siteTag = 'Site one';
             if(referer){
               let siteName = referer.replace('http://','').replace('https://','')+"";
