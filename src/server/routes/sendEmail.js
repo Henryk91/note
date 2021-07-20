@@ -52,11 +52,16 @@ module.exports = function (app) {
             pass: pass
         }
     });
-    console.log('req.body',req.body);
-    const info = req.body && req.body.text ? req.body.text : 'Message missing.'
-    const msgFrom = req.body && req.body.from ? req.body.from : 'mail@henryk.co.za'
-    const msgTo = req.body && req.body.to ? req.body.to : 'heinrichk91@gmail.com'
-    const subject = req.body && req.body.subject ? req.body.subject : 'From Website'
+
+    let body = JSON.parse(JSON.stringify(req.body));
+    let keys = Object.keys(body)
+    body = JSON.parse(keys[0]);
+    console.log('Body',body);
+
+    const info = body && body.text ? body.text : 'Message missing.'
+    const msgFrom = body && body.from ? body.from : 'mail@henryk.co.za'
+    const msgTo = body && body.to ? body.to : 'heinrichk91@gmail.com'
+    const subject = body && body.subject ? body.subject : 'From Website'
     const message = {
         from: msgFrom, // Sender address
         to: msgTo,         // List of recipients
