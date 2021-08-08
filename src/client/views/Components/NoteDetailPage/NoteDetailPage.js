@@ -236,6 +236,12 @@ export default class NoteDetailPage extends Component {
         {noteNameBlock}
         <br />
         <h3>Apps</h3>
+        <Link key="memento" style={{ textDecoration: 'none' }} to="/memento" title="Note List">
+          <div className="listNameButton">
+            {' '}
+            <h3> Memento </h3>
+          </div>
+        </Link>
         <Link key="pomodoro" style={{ textDecoration: 'none' }} to="/pomodoro" title="Note List">
           <div className="listNameButton">
             {' '}

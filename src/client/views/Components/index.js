@@ -7,5 +7,6 @@ import { default as NewNote } from './NewNote/NewNote'
 import { default as EditNoteCheck } from './EditNoteCheck/EditNoteCheck'
 import { default as Login } from './Login/Login'
 import { default as Pomodoro } from './Pomodoro/Pomodoro'
+import { default as Memento } from './Memento/Memento'
 import { default as NoteDetailPage } from './NoteDetailPage/NoteDetailPage'
-export { SearchBar , Home , NoteDetail ,NoteItem , NewNote , EditNoteCheck ,Login, Pomodoro , NoteDetailPage};
+export { SearchBar , Home , NoteDetail ,NoteItem , NewNote , EditNoteCheck ,Login, Pomodoro , NoteDetailPage, Memento};
