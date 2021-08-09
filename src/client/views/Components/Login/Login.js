@@ -90,6 +90,7 @@ export default class Login extends Component {
     const { signUp } = this.state;
     const { Theme } = this.props;
     const themeBack = `${Theme.toLowerCase()}-back`;
+    const themeHover = `${Theme.toLowerCase()}-hover`;
     return (
       <div>
         {signUp ? (
@@ -106,12 +107,12 @@ export default class Login extends Component {
               <br />
               <input className={themeBack} name="password2" type="password" placeholder="Password" required="required" />
               <br />
-              <button className={themeBack} type="submit">
+              <button className={themeBack + " " + themeHover} type="submit">
                 Submit
               </button>
             </form>
             <br />
-            <button className={themeBack} onClick={() => this.loginState(false)}>
+            <button className={themeBack + " " + themeHover} onClick={() => this.loginState(false)}>
               {' '}
               Login{' '}
             </button>
@@ -124,12 +125,12 @@ export default class Login extends Component {
               <br />
               <input className={themeBack} name="password" type="password" placeholder="Password" required="required" />
               <br />
-              <button className={themeBack} type="submit">
+              <button className={themeBack + " " + themeHover} type="submit">
                 Submit
               </button>
             </form>
             <br />
-            <button className={themeBack} onClick={() => this.loginState(true)}>
+            <button className={themeBack + " " + themeHover} onClick={() => this.loginState(true)}>
               {' '}
               Sign Up{' '}
             </button>
