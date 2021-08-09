@@ -72,6 +72,10 @@
 #quote-break{
     display: unset;
 }
+.year-count::before {
+    content: unset;
+    white-space: unset;
+}
 @media  only screen and (max-width: 600px) {
     .week-box {
         border: 1px solid black;
@@ -90,6 +94,7 @@
         font-size: 6px;
         margin-left: 3px;
         font-weight: bold;
+        margin-top: -1px;
     }
     #author{
         margin: 5px;
