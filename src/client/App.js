@@ -50,7 +50,7 @@ export default class App extends Component {
     this.checkLoginState = this.checkLoginState.bind(this);
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.checkLoginState();
   }
 
@@ -214,6 +214,14 @@ export default class App extends Component {
     }
   }
 
+  menuButton(event) {
+    if(document.location.pathname.includes('note-names')){
+      event.preventDefault();
+      window.history.back();
+      this.checkLoginState();
+    } 
+  }
+
   render() {
     const { theme, notes, user, searchTerm, filteredNotes, loginKey, freshData } = this.state;
 
@@ -231,7 +239,7 @@ export default class App extends Component {
     if (!document.location.pathname.includes('note-names') && isMobileDevice()) {
       // document.documentElement.webkitRequestFullscreen();
     }
-    console.log('theme',theme);
+
     if (theme === 'Green') {
       document.body.style.backgroundColor = '#103762';
       document.querySelector('meta[name="theme-color"]').setAttribute('content', '#103762');
@@ -259,7 +267,7 @@ export default class App extends Component {
             <header>
               <SearchBar set={this.setFilterNote} noteName={user} Theme={theme} notes={notes} />
               <nav className="bigScreen" id="links">
-                <Link style={{ textDecoration: 'none' }} className={`dark-hover ${themeBack}`} id="menuButton" to="/notes/note-names">
+                <Link style={{ textDecoration: 'none' }} className={`dark-hover ${themeBack}`} onClick={(e) => {this.menuButton(e)}} id="menuButton" to="/notes/note-names">
                   <i className="fas fa-bars " />
                 </Link>
               </nav>
