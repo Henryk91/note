@@ -593,9 +593,10 @@ export default class NoteDetail extends Component {
 
   createNoteItemBunch(items, prop, selectedDate, showButton) {
     const showEdit = prop !== 'Log Days';
-
+    const max = items.length
     return items.map((item, ind) => {
       const prevItem = ind > -1 ? items[ind - 1] : null;
+      const nextItem = ind < max ? items[ind + 1] : null;
       let count = 0;
       if (prop === 'Log Days') {
         count = item.count;
@@ -604,6 +605,7 @@ export default class NoteDetail extends Component {
       return (
         <div onClick={() => this.setDate(prop, item)} key={item + prop + ind}>
           <NoteItem
+            nextItem={nextItem}
             prevItem={prevItem}
             item={item}
             date={selectedDate}

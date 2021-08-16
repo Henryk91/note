@@ -143,7 +143,7 @@ export default class NoteItem extends Component {
   }
 
   displayLogItemBox(item) {
-    const { show, date, Theme, prevItem } = this.props;
+    const { show, date, Theme, prevItem, nextItem } = this.props;
     const parsedItem = JSON.parse(item);
 
     let showItem = show;
@@ -171,13 +171,16 @@ export default class NoteItem extends Component {
     if (prevItem !== null && prevItem !== undefined) {
       prevData = JSON.parse(prevItem).data;
     }
+    let duration = showItem? getLogDuration(nextItem, parsedItem, checkIsToday(newDate)): '';
+
+    if(!showItem)  duration = '';
 
     return (
       <div className="noteItemBox">
         {showItem ? (
           <div>
             <div>
-              <p className="noteItem white-color">{newDate}</p>
+              <p className="noteItem white-color">{newDate} {duration}</p>
               <p className={`noteItem ${hasBreak}`}>{parsedItem.data}</p>
               <button className={`editButtons ${themeBack} ${themeBackHover}`} onClick={() => this.setState({ editingItem: true })}>
                 <i className="fas fa-pen" />
@@ -221,3 +224,41 @@ export default class NoteItem extends Component {
     );
   }
 }
+
+const checkIsToday = (someDate) => {
+  const today = new Date();
+  someDate = new Date(someDate);
+  return someDate.getDate() == today.getDate() &&
+    someDate.getMonth() == today.getMonth() &&
+    someDate.getFullYear() == today.getFullYear();
+};
+
+function getLogDuration(nextItem, parsedItem, isToday) {
+  const parsedNextItem = nextItem ? JSON.parse(nextItem) : null;
+
+  const getTimeDifference = (start, end) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const duration = (endDate.getTime() - startDate.getTime());
+    let minutes = Math.floor((duration / (1000 * 60)) % 60);
+    let hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
+
+    hours = (hours < 10) ? "0" + hours : hours;
+    minutes = (minutes < 10) ? "0" + minutes : minutes;
+
+    return hours + ":" + minutes;
+  };
+
+  let nextDate = parsedNextItem ? parsedNextItem.date : null;
+
+  if (!nextDate) {
+    
+    if (checkIsToday(parsedItem.date)) {
+      nextDate = new Date() + "";
+    }
+  }
+
+  const duration = nextDate ? "(" + getTimeDifference(parsedItem.date, nextDate) + ")" : '';
+  return duration;
+}
+
