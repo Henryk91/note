@@ -14,15 +14,12 @@
 .noteItemHasCount{
   overflow: hidden;
   margin-right: 0px;
-  margin-left: 55px;
   width: 85%;
   display: inline-block !important;
 }
 .noteItemCount{
-  position: absolute;
   color: white;
   margin-left: 10px !important;
-  margin-top: 14px !important;
 }
 .logNoteItem{
   width: 60%;
@@ -110,4 +107,9 @@
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
+}
+.logLine{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 }

@@ -125,7 +125,7 @@ export default class NoteItem extends Component {
     return (
       <div className="noteItemBox">
         {show ? (
-          <div>
+          <div className="logLine">
             {showEdit ? null : <div className={`listCountBox noteItemCount ${themeBorder}`}> <span className="list-count-item">{count}</span> </div>}
             <div className={`${noteItemClass} white-color`} dangerouslySetInnerHTML={this.getMarkdownText(item)} />
             {showEdit ? (
@@ -133,11 +133,12 @@ export default class NoteItem extends Component {
                 <i className="fas fa-pen" />
               </div>
             ) : null}
-            <hr />
+            
           </div>
         ) : (
           ''
         )}
+       {show ? ( <hr />) : null}
       </div>
     );
   }
