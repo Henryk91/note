@@ -32,12 +32,12 @@ export default class Memento extends Component {
     }
         
     render() {
-
+        const year=1991
+        const month=10
+        const day=6
         let years = []
-        const birthDay = new Date(1991, 10, 6)
-        let weeks = this.weeksBetween(new Date(), birthDay);
         for(let i = 0; i < 80; i++){
-            years.push(<Year count={(i )} key={i} weeks={weeks} birthDayMilli={birthDay.getTime()} /> )
+            years.push(<Year count={(i )} key={i} year={year} month={month} day={day} /> )
         }
         const themeBorderColor = `${this.props.Theme.toLowerCase()}-border-color`;
         return (
@@ -65,14 +65,11 @@ function Year(props) {
     let year = []
     for(let i = 0; i < 52; i++){
 
-        const week = (props.count * 52 + i + 1)
-        let filled = (week <= props.weeks)? true: false;
+        const week = (props.count * 52 + i + 1);
+        let startOfYear = new Date(props.year+props.count, props.month, props.day).getTime()
+        const date = (i * (1000 * 60 * 60 * 24 * 7)) + startOfYear;
 
-        const milliWeek = (1000 * 60 * 60 * 24 * 7)
-        const date = (week * milliWeek) + props.birthDayMilli - milliWeek
-        const dateEnd = (week * milliWeek) + props.birthDayMilli 
-
-        year.push(<Week name="Sara" filled={filled} key={week} week={week} weekStartMilli={date} weekEndMilli={dateEnd} />)
+        year.push(<Week name="Sara" key={week} week={week} dateMilli={date} woy={i} />)
     }
     let count = (((props.count + 1) % 5) === 0 ) ? (props.count + 1) : null;
     return (
@@ -85,12 +82,14 @@ function Year(props) {
 
 function Week(props) {
 
-    const className = props.filled ? 'week-box filled tooltip': 'week-box tooltip';
-    const start = new Date(props.weekStartMilli).toDateString()
-    const end = new Date(props.weekEndMilli).toDateString()
+    const nowMili = new Date().getTime()
+    const className = props.dateMilli <= nowMili ? 'week-box filled tooltip': 'week-box tooltip';
+    const tooltiptextClass = props.woy > 25 ? 'right tooltiptext': 'left tooltiptext';
+    const start = new Date(props.dateMilli).toDateString()
+    const end = new Date(props.dateMilli + (1000 * 60 * 60 * 24 * 7)).toDateString()
     return (
         <span className={className}>
-            <span className="tooltiptext">
+            <span className={tooltiptextClass}>
                 Week: {props.week} <br />
                 {start} - {end}
             </span>

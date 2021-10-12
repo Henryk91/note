@@ -112,7 +112,12 @@
 .year:nth-child(10n+0) {
     margin-bottom: 3px;
 }
-
+.left {
+    left: 20px
+}
+.right {
+    right: 20px
+}
 .tooltip {
     position: relative;
     display: inline-block;
