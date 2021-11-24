@@ -232,7 +232,7 @@ export default class NoteDetailPage extends Component {
     return (
       <div>
         <br />
-        <h3>Note Book Names</h3>
+        <h3 className="page-content-top">Note Book Names</h3>
         {noteNameBlock}
         <br />
         <h3>Apps</h3>

@@ -39,6 +39,8 @@ export default class NoteDetail extends Component {
       showLogDaysBunch: false,
       searchTerm: '',
       showLink: [''],
+      oldLogDaysBunch: null,
+      allDatesSaved: null,
     };
     this.addItem = this.addItem.bind(this);
     this.submitNewItem = this.submitNewItem.bind(this);
@@ -252,18 +254,18 @@ export default class NoteDetail extends Component {
 
     setTimeout(() => {
       self.showTagChange('Log');
-    }, 200);
+    }, 10);
   };
 
   setDate = (prop, date) => {
     if (prop === 'Log Days') {
       this.setState({ displayDate: date, showLogDaysBunch: false });
-      this.showTagChange('');
+      // this.showTagChange('');
       const self = this;
       setTimeout(() => {
         window.scrollTo(0, 0);
         self.showTagChange('Log');
-      }, 200);
+      }, 10);
     }
   };
 
@@ -343,19 +345,23 @@ export default class NoteDetail extends Component {
 
     const all = [...linkProps, ...propertyArray].map((prop, i) => {
       const { Theme } = this.props;
-      const { displayDate, searchTerm } = this.state;
+      const { displayDate, searchTerm, showLogDaysBunch } = this.state;
 
       let showDateSelector = prop === 'Log' ? true : false;
 
       let showButton = showTag === prop ? true : false;
 
       let allDates = this.getAllDatesSorted(sort, prop, searchTerm);
-
       let { selectedDate, logDaysBunch } = this.logDayBunchLogic(prop, displayDate, allDates, logDaysBunch);
 
       const isLink = this.isLinkCheck(sort, prop);
 
       let animate = this.enableAnimationCheck(showTag, prop);
+
+      if(showTag === 'Log' && !showLogDaysBunch){
+        const checkSate = (selectedDate + "").substring(0, 15).trim()
+        allDates = allDates.filter(item => item.includes(checkSate));
+      }
 
       let bunch = this.createNoteItemBunch(allDates, prop, selectedDate, showButton);
 
@@ -366,13 +372,13 @@ export default class NoteDetail extends Component {
       const themeBorder = `${Theme.toLowerCase()}-border-thick`;
       const themeHover = `${Theme.toLowerCase()}-hover`;
 
-      if (bunch.length === 0) return;
-
+      // if (bunch.length === 0) return;
+      
       const className = 'detailedBox';
       return (
         <div className={className} key={prop + i}>
           {this.noteDetailListItem(linkBorder, showTag, prop, themeBorder, isLink, bunch, showDateSelector, themeBack, themeHover)}
-          {this.noteItemsBunch(animate, logDaysBunch, bunch)}
+          {this.noteItemsBunch(animate, logDaysBunch, bunch, showLogDaysBunch)}
         </div>
       );
     });
@@ -417,11 +423,11 @@ export default class NoteDetail extends Component {
     }
   }
 
-  noteItemsBunch(animate, logDaysBunch, bunch) {
+  noteItemsBunch(animate, logDaysBunch, bunch, showLogDaysBunch) {
     return (
       <div className={`${animate}`}>
-        {logDaysBunch}
-        {bunch}
+        {showLogDaysBunch? logDaysBunch: null}
+        {showLogDaysBunch? null: bunch}
       </div>
     );
   }
@@ -526,6 +532,7 @@ export default class NoteDetail extends Component {
     return (
       <>
       <div className={`detailTitleBox dark-hover ${linkBorder}`} onClick={() => this.showHideBox(showTag, prop)}>
+
         <div className={`listCountBox white-color ${themeBorder}`} onClick={() => this.showLogDays(prop)}>
           <span className="list-count-item"> {isLink ?  <i className="fas fa-folder" /> : bunch.length} </span>
         </div>
@@ -587,7 +594,7 @@ export default class NoteDetail extends Component {
       const self = this;
       setTimeout(() => {
         self.showTagChange('');
-      }, 200);
+      }, 10);
     }
   }
 
@@ -678,7 +685,7 @@ export default class NoteDetail extends Component {
 
     const isNoteNames = match.url === '/notes/note-names';
     if (isNoteNames) person = null;
-
+    
     return <div className="slide-in">{person ? this.pageContent(person, editName, editNameB, showAddItem, Theme, tags) : null}</div>;
   }
 
@@ -691,7 +698,7 @@ export default class NoteDetail extends Component {
         {editName ? (
           <div>{editNameB}</div>
         ) : (
-            <div id="personContainer">
+            <div id="personContainer" className="page-content-top">
               <h1 id="personHead" className="nameBox">
                 {person.heading}
               </h1>

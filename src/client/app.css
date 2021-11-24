@@ -2,6 +2,9 @@
 
 header {
   padding-bottom: 1px;
+  position: fixed;
+  width: 100vw;
+  top: 0px;
 }
 
 body {
@@ -126,9 +129,9 @@ h2 {
 @import url('./views/Components/EditNoteCheck/style.css');
 
 .backButton {
-  position: absolute;
+  position: fixed;
   font-size: 30px;
-  top: 5vh;
+  top: 3vh;
   left: 2.5vw;
   min-width: 30px;
   color: white;
@@ -175,7 +178,7 @@ h2 {
 
 #menuButton {
   position: absolute;
-  top: 5vh;
+  top: 3vh;
   right: 4vw;
   font-size: 30px;
   color: #ffa500;

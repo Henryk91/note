@@ -155,3 +155,6 @@ input[type="date"]::-webkit-inner-spin-button{
   border: 1px solid;
   justify-content: center;
 }
+.page-content-top{
+  margin-top: 15vh;
+}

@@ -81,7 +81,7 @@ export default class Home extends Component {
         ) : null}
         {notes ? (
           <div className="slide-in">
-            <br />
+            <div key="page-content-top" className="page-content-top" ></div>
             {createList(notes, Theme)}
             <br />
           </div>

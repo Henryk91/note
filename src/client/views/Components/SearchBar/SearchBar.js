@@ -66,7 +66,6 @@ export default class SearchBar extends Component {
           </div> : null}
         </div>
         <br />
-        <br />
       </header>
     );
   }
