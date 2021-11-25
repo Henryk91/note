@@ -41,6 +41,8 @@ export default class NoteDetail extends Component {
       showLink: [''],
       oldLogDaysBunch: null,
       allDatesSaved: null,
+      prevDate: null,
+      nextDate: null
     };
     this.addItem = this.addItem.bind(this);
     this.submitNewItem = this.submitNewItem.bind(this);
@@ -320,13 +322,21 @@ export default class NoteDetail extends Component {
   };
 
   dateBackForward = (direction) => {
-    let { displayDate } = this.state;
+    let { displayDate, prevDate, nextDate } = this.state;
     if (displayDate) {
       var dateObj = new Date(displayDate);
       if (direction === 'back') {
-        dateObj.setDate(dateObj.getDate() - 1);
+        if( nextDate) {
+          dateObj = new Date(nextDate);
+        } else {
+          dateObj.setDate(dateObj.getDate() - 1);
+        }
       } else {
-        dateObj.setDate(dateObj.getDate() + 1);
+        if(prevDate) {
+          dateObj = new Date(prevDate);
+        } else {
+          dateObj.setDate(dateObj.getDate() + 1);
+        }
       }
 
       let dateToChangeTo = dateObj + '';
@@ -601,10 +611,14 @@ export default class NoteDetail extends Component {
 
   createNoteItemBunch(items, prop, selectedDate, showButton) {
     const showEdit = prop !== 'Log Days';
-    const max = items.length
+    const max = items.length;
+    const selectedDateString = (selectedDate + "").substring(0, 15).trim()
     return items.map((item, ind) => {
       const prevItem = ind > -1 ? items[ind - 1] : null;
       const nextItem = ind < max ? items[ind + 1] : null;
+      
+      if(item.date === selectedDateString) this.setState({prevDate: prevItem?.date, nextDate: nextItem?.date})
+      
       let count = 0;
       if (prop === 'Log Days') {
         count = item.count;
