@@ -7,13 +7,15 @@ import React, { Component } from 'react';
 export default class SearchBar extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {showSearch: false, title2: '', title: ''};
     this.search = this.search.bind(this);
     this.clearSearch = this.clearSearch.bind(this)
+    this.toggleSearch = this.toggleSearch.bind(this)
   }
 
   search = () => {
     let { notes } = this.props;
+    let { title2 } = this.state;
     if (notes) {
       const searchTerm = this.title.value;
       notes = notes.filter(val => {
@@ -22,17 +24,32 @@ export default class SearchBar extends Component {
         return firtName.includes(term);
       });
     }
-    localStorage.setItem('user', this.title2.value);
-    this.props.set({ filteredNotes: notes, user: this.title2.value, searchTerm: this.title.value.toLowerCase() });
+    if(this.title2) localStorage.setItem('user', this.title2.value);
+    this.props.set({ filteredNotes: notes, user: this.title2?.value? this.title2?.value: title2, searchTerm: this.title.value.toLowerCase() });
   };
   clearSearch = () => {
     let { notes } = this.props;
+    let { title2 } = this.state;
     this.title.value = null;
-    this.props.set({ filteredNotes: notes, user: this.title2.value, searchTerm: null });
+    this.props.set({ filteredNotes: notes, user: this.title2?.value? this.title2?.value: title2, searchTerm: null });
+  }
+  toggleSearch = () => {
+    const { showSearch } = this.state;
+    let save = {showSearch: showSearch? false: true}
+    if(this.title2) save['title2'] = this.title2.value
+    if(this.title) save['title'] = this.title.value
+    this.setState({...save})
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.noteName !== this.props.noteName) {
+      this.setState({title2: this.props.noteName})
+    }
   }
 
   render() {
     const { noteName, Theme } = this.props;
+    const { showSearch } = this.state;
     const themeBack = `${Theme.toLowerCase()}-back`;
     let searching = this.title && this.title.value ? true: false;
     if (noteName && this.title2) {
@@ -40,32 +57,38 @@ export default class SearchBar extends Component {
     }
     return (
       <header className={themeBack}>
-        <input
-          className={themeBack}
-          id="userNameBox"
-          type="text"
-          ref={c => (this.title2 = c)}
-          aria-label="User Name"
-          onKeyUp={this.search}
-          defaultValue={noteName}
-          placeholder="Add Note Name"
-        />
-        <br />
+        {showSearch === false ?
+          <input
+            className={themeBack}
+            id="userNameBox"
+            type="text"
+            ref={c => (this.title2 = c)}
+            aria-label="User Name"
+            onKeyUp={this.search}
+            defaultValue={noteName}
+            placeholder="Add Note Name"
+          />
+        :
         <div className="search-box">
-        <input
-          className={themeBack}
-          id="searchBox"
-          aria-label="Search Name"
-          onKeyUp={this.search}
-          type="text"
-          ref={c => (this.title = c)}
-          placeholder="Search..."
-        />
-          {searching ? <div  className="search-clear" onClick={() => this.clearSearch()}>
-            <i className="fas fa-times" />
-          </div> : null}
+          <input
+            className={themeBack}
+            id="searchBox"
+            aria-label="Search Name"
+            onKeyUp={this.search}
+            type="text"
+            ref={c => (this.title = c)}
+            placeholder="Search..."
+          />
         </div>
-        <br />
+        } 
+        {searching ? 
+          <div  className="search-clear" onClick={() => this.clearSearch()}>
+            <i className="fas fa-times" />
+          </div> : 
+          <div  className="search-clear" onClick={() => this.toggleSearch()}>
+            <i className="fas fa-search" />
+          </div>
+        }
       </header>
     );
   }

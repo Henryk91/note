@@ -321,7 +321,8 @@ export default class NoteDetail extends Component {
     if (bVal) window.scrollTo(0, 0);
   };
 
-  dateBackForward = (direction) => {
+  dateBackForward = (event, direction) => {
+    event.preventDefault();
     let { displayDate, prevDate, nextDate } = this.state;
     if (displayDate) {
       var dateObj = new Date(displayDate);
@@ -580,10 +581,10 @@ export default class NoteDetail extends Component {
     return (
       <div>
         <div className="day-forward-back">
-          <button className={`forward-back-button ${themeBack} ${themeHover}`} onClick={() => this.dateBackForward('back')}>
+          <button className={`forward-back-button ${themeBack} ${themeHover}`} onClick={(event) => this.dateBackForward(event, 'back')}>
             <i className="fas fa-arrow-left" />
           </button>
-          <button className={`forward-back-button ${themeBack} ${themeHover}`} onClick={() => this.dateBackForward('forward')}>
+          <button className={`forward-back-button ${themeBack} ${themeHover}`} onClick={(event) => this.dateBackForward(event, 'forward')}>
             <i className="fas fa-arrow-right" />
           </button>
         </div>
