@@ -529,11 +529,12 @@ export default class NoteDetail extends Component {
 
   noteDetailListItem(linkBorder, showTag, prop, themeBorder, isLink, bunch, showDateSelector, themeBack, themeHover) {
     const className = showDateSelector? 'detailLogBoxTitle': 'detailBoxTitle';
+    const dateCounterId = showDateSelector? 'date-selector-counter': '';
     return (
       <>
       <div className={`detailTitleBox dark-hover ${linkBorder}`} onClick={() => this.showHideBox(showTag, prop)}>
 
-        <div className={`listCountBox white-color ${themeBorder}`} onClick={() => this.showLogDays(prop)}>
+        <div id={`${dateCounterId}`}  className={`listCountBox white-color ${themeBorder}`} onClick={() => this.showLogDays(prop)}>
           <span className="list-count-item"> {isLink ?  <i className="fas fa-folder" /> : bunch.length} </span>
         </div>
         <h3 className={`${className} white-color`}>{prop} </h3>

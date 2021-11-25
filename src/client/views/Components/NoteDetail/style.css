@@ -71,10 +71,12 @@
 }
 
 .dateSelector{
-  margin-left: 10px;
+  /* margin-left: 10px; */
   
 }
-
+#date-selector-counter{
+  margin-right: unset;
+}
 .nameBox{
   color: white !important;
 }
@@ -94,8 +96,8 @@
   padding-left: 10px !important;
   display: flex;
   flex-direction: row;
-  /* justify-content: center; */
-  align-items: baseline;
+  justify-content: space-evenly;
+  align-items: center;
 }
 #nameBoxButton:hover{
   /* background: rgba(187, 59, 0, 0.7); */
@@ -107,7 +109,8 @@
 }
 
 #note-detail-date{
-  width: 130px
+  width: 130px;
+  margin-top: 0px;
 }
 
 input[type="date"]::-webkit-inner-spin-button{
