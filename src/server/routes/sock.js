@@ -63,14 +63,15 @@ module.exports = function (app) {
   }
 
   const INDEX = '/index.html';
-  const PORT = process.env.PORT || 8090;
+  // const PORT = process.env.PORT || 8090;
+  const PORT = 8090;
   const server = express()
     .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
     .listen(PORT, () => console.log(`Listening on ${PORT}`));
 
   const socketIO = require('socket.io');
   const io = socketIO(server);
-  
+
   io.on('connection', (socket) => {
     console.log('Client connected');
     socket.on('disconnect', () => console.log('Client disconnected'));
