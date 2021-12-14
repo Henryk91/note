@@ -64,7 +64,7 @@ export default class App extends Component {
         self.checkLoginState();
       }
       if((lastRefresh + minTimeout) > now){
-        console.log('Refresh in ', lastRefresh? ((now - lastRefresh)/1000) : (minTimeout/1000), "seconds");
+        console.log('Refresh in ', lastRefresh? ((lastRefresh + minTimeout) - now)/1000 : (minTimeout/1000), "seconds");
       }
       if(!lastRefresh){
         self.setState({lastRefresh: now})
