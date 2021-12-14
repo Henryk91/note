@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const Handler = require('../controllers/handlers.js');
 const KeepUp = require('../keepUp.js');
+const ChatServer = require('../chat-server.js');
 
 const dbHandler = new Handler();
 
@@ -29,5 +30,5 @@ router.get('/', (req, res) => {
   // res.json(noteDummy)
 });
 
-
+ChatServer();
 module.exports = router;
