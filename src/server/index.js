@@ -7,8 +7,11 @@ const updateNotes = require('./routes/updateNotes');
 const userCheck = require('./routes/userCheck');
 const getDashData = require('./routes/getDashData');
 const sendEmail = require('./routes/sendEmail');
+const sock = require('./routes/sock');
 
 const app = express();
+
+sock(app)
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
