@@ -37,7 +37,8 @@ export default class App extends Component {
       noteNames: null,
       theme: 'Dark',
       searchTerm: '',
-      freshData: false
+      freshData: false,
+      lastRefresh: null
     };
     this.addNewNote = this.addNewNote.bind(this);
     this.updateNote = this.updateNote.bind(this);
@@ -52,6 +53,20 @@ export default class App extends Component {
 
   componentDidMount() {
     this.checkLoginState();
+    const self = this;
+    window.onfocus = function() {
+      const {lastRefresh} = self.state;
+      const now = new Date().getTime();
+      const minTimeout = 1000 * 60 * 5;
+      if((lastRefresh + minTimeout) < now && lastRefresh){
+        console.log('Refresh', new Date());
+        self.setState({lastRefresh: now})
+        self.checkLoginState();
+      }
+      if(!lastRefresh){
+        self.setState({lastRefresh: now})
+      } 
+     };
   }
 
   setRedirect = () => {
@@ -199,6 +214,7 @@ export default class App extends Component {
   };
 
   checkLoginState() {
+    console.log('checkLoginState');
     const loginKey = localStorage.getItem('loginKey');
     const user = localStorage.getItem('user');
     user !== null ? this.setState({ user }) : null;
