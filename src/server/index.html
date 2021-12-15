@@ -1,0 +1,24 @@
+<html>
+  <head>
+    <!-- <script src="https://henryk91-note.herokuapp.com/socket.io/socket.io.js"></script> -->
+    <!-- <script src="https://henryk91-note.herokuapp.com/sock/socket.io/socket.io.js"></script> -->
+    <script src="/sock/socket.io/socket.io.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      let socket = io();
+      let el;
+
+      socket.on('time', (timeString) => {
+        console.log('timeString');
+        el = document.getElementById('server-time');
+        el.innerHTML = 'Server time: ' + timeString;
+        el.innerHTML = 'Server time: ' + timeString;
+        
+      });
+    </script>
+  </head>
+  <body>
+    <p>Is Up?</p>
+    <p id="server-time"></p>
+  </body>
+</html>
