@@ -158,6 +158,26 @@ export default class NoteDetailPage extends Component {
     );
   }
 
+  scrollPageBack() {
+    const { pages } = this.state;
+    if(pages && pages.length > 1){
+      const pageCount = pages.length;
+      let noteDetailPage = document.getElementById('multiple-pages');
+      if (noteDetailPage) {
+        let scrollAmount = (noteDetailPage.scrollWidth / pageCount)*-1;
+        noteDetailPage.scrollBy({
+          top: 0,
+          left: scrollAmount,
+          behavior: 'smooth'
+        });
+      }
+      setTimeout(() => {
+        let remainingPages = pages.slice(0, pageCount -1);
+        this.setState({ pages: remainingPages });
+      }, 500);
+    }
+  }
+
   backButton(Theme) {
     const themeBack = `${Theme.toLowerCase()}-back`;
     return (
@@ -185,6 +205,9 @@ export default class NoteDetailPage extends Component {
       <div className="detail-scroll">
         <button className={`editButtons1 detailUpButton ${themeHover} ${themeBack}`} onClick={() => this.editNameSet()}>
           <i className="fas fa-pen" />
+        </button>
+        <button className={`detailUpButton ${themeHover} ${themeBack}`} onClick={() => this.scrollPageBack()}>
+          <i className="fas fa-arrow-left" />
         </button>
         <div
           className={`detailUpButton ${themeHover} ${themeBack}`}
