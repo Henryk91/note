@@ -22,7 +22,12 @@ const getPerson = (notes, propForId) => {
   if (propForId === 'note-name') {
     return this.props.noteNames;
   }
-  return notes && notes[0] ? notes.filter((val) => val.id === propForId.params.id)[0] : null;
+  let person = notes && notes[0] ? notes.filter((val) => val.id === propForId.params.id)[0] : null
+
+  if(person && person.id === 'main') {
+    person.dataLable = person.dataLable.filter(note => !note.tag.startsWith("Sub: "))
+  }
+  return person;
 };
 export default class NoteDetail extends Component {
   constructor(props) {
@@ -122,7 +127,12 @@ export default class NoteDetail extends Component {
       self.refreshItems(person);
     }
     let noteDetailPage = document.getElementById('multiple-pages');
-    if (noteDetailPage) noteDetailPage.scrollBy(noteDetailPage.scrollWidth * 2, 0);
+    
+    if (noteDetailPage) noteDetailPage.scrollBy({
+        top: 0,
+        left: noteDetailPage.scrollWidth * 2,
+        behavior: 'smooth'
+      });
   }
   initPage3(self) {
     if (self.props.initShowtag) {
@@ -147,7 +157,11 @@ export default class NoteDetail extends Component {
     if (noteDetailPage)
       setTimeout(() => {
         let noteDetailPage = document.getElementById('multiple-pages');
-        noteDetailPage.scrollBy(noteDetailPage.scrollWidth * 5, 0);
+        noteDetailPage.scrollBy({
+          top: 0,
+          left: noteDetailPage.scrollWidth * 5,
+          behavior: 'smooth'
+        });
       }, 300);
   }
 
@@ -286,6 +300,7 @@ export default class NoteDetail extends Component {
     } else if (nextPerson && tagData !== undefined) {
       this.handleLinkInLinkClick(showLink, nextPerson, tagName);
     } else {
+      // this.openDetailOnNewPage(tagData, person);
       this.noteDetailItemClick(nextPerson, person, tagName);
     }
   };
@@ -384,7 +399,6 @@ export default class NoteDetail extends Component {
       const themeHover = `${Theme.toLowerCase()}-hover`;
 
       // if (bunch.length === 0) return;
-      
       const className = 'detailedBox';
       return (
         <div className={className} key={prop + i}>
@@ -411,7 +425,19 @@ export default class NoteDetail extends Component {
     this.refreshItems(nextPerson);
   }
 
+  openDetailOnNewPage(tagData, person) {
+
+    // const noteId = tagData.data.substring(5);
+    // const { notes } = this.props;
+    // let personNext = notes && notes[0] ? notes.find((note) => note.id === noteId) : null;
+
+    const parentId = person.id;
+    this.props.openPage({ personNext:person, parentId: parentId });
+    // this.props.openPage({ personNext,  parentId: person.id});
+    return;
+  }
   handleLinkClick(tagData, person, tagName, showLink, lastLink) {
+
     const noteId = tagData.data.substring(5);
     const { notes } = this.props;
     let personNext = notes && notes[0] ? notes.find((note) => note.id === noteId) : null;
@@ -421,17 +447,17 @@ export default class NoteDetail extends Component {
     this.props.openPage({ personNext, parentId: parentId });
     // this.props.openPage({ personNext,  parentId: person.id});
     return;
-    const tags = this.getNoteByTag(person.dataLable, tagName);
-    localStorage.setItem('showTag', tagName);
-    if (showLink.length > 1) {
-      window.history.pushState(personNext.heading, 'Sub Dir', `/notes/${personNext.id}`);
-      this.setState({ showLink: [''] });
-      this.refreshItems(personNext);
-    } else {
-      const linkArray =
-        lastLink !== noteId ? (showLink.includes(noteId) ? showLink.slice(0, showLink.indexOf(noteId)) : [...showLink, noteId]) : showLink;
-      this.setState({ showTag: tagName, person, tags, showLink: linkArray });
-    }
+    // const tags = this.getNoteByTag(person.dataLable, tagName);
+    // localStorage.setItem('showTag', tagName);
+    // if (showLink.length > 1) {
+    //   window.history.pushState(personNext.heading, 'Sub Dir', `/notes/${personNext.id}`);
+    //   this.setState({ showLink: [''] });
+    //   this.refreshItems(personNext);
+    // } else {
+    //   const linkArray =
+    //     lastLink !== noteId ? (showLink.includes(noteId) ? showLink.slice(0, showLink.indexOf(noteId)) : [...showLink, noteId]) : showLink;
+    //   this.setState({ showTag: tagName, person, tags, showLink: linkArray });
+    // }
   }
 
   noteItemsBunch(animate, logDaysBunch, bunch, showLogDaysBunch) {

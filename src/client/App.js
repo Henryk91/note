@@ -96,6 +96,41 @@ export default class App extends Component {
     });
   }
 
+  addMainNote(notes){
+    if(notes && notes.length){
+      let subs = [];
+      notes.forEach(note => {
+        if(note.heading.startsWith('Sub: ')){
+          subs.push(note)
+          return false
+        } 
+        return true
+      })
+
+      if(subs.length > 0){
+        const headings = subs.map(sub => {
+          return {tag: sub.heading, data: `href:${sub.id}`}
+        })
+        const subItems = {createdBy: subs[0].createdBy, dataLable: headings, heading: "Z Sub Directories", id: "subs"}
+        if (notes) notes.push(subItems)
+      }
+
+      if(notes[notes.length-1].id !== 'main'){
+        const mainPage = {
+          createdBy: "Main",
+          dataLable: [...notes].map(note => {
+            return {tag: note.heading, data: 'href:' + note.id}
+          }), 
+          heading: "Main",
+          id: "main",
+        }
+        notes.push(mainPage)
+      }
+      
+      return notes
+    }
+  }
+
   getMyNotes(noteName) {
     let { user } = this.state;
     if (noteName) user = noteName;
@@ -104,7 +139,7 @@ export default class App extends Component {
       localStorage.setItem('user', user);
       const data = localStorage.getItem(user);
       if (data && data[0] && data.length > 0) {
-        const pdata = JSON.parse(data);
+        const pdata = this.addMainNote(JSON.parse(data));
         if (this.state.notes !== pdata) {
           this.setState({ notes: pdata, filteredNotes: pdata, freshData:false });
         } else {
@@ -113,6 +148,7 @@ export default class App extends Component {
       }
 
       getMyNotesRec(user, res => {
+        res = this.addMainNote(res)
         if (res.length > 0) {
           res.sort(compareSort);
           console.log('Fresh Data')

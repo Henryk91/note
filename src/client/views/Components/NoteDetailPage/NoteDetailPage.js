@@ -139,7 +139,7 @@ export default class NoteDetailPage extends Component {
   createNoteDetailPage(searchTerm, noteNames, Theme, notes, pageLink, showAddItem, index, editName) {
     const key = pageLink && pageLink.params && pageLink.params.id ? pageLink.params.id : 'first';
     return (
-      <div id="multiple-pages1" key={key}>
+      <div id="multiple-pages1" key={key+index}>
         <NoteDetail
           hideAddItem={this.hideAddItem}
           SearchTerm={searchTerm}
@@ -218,7 +218,7 @@ export default class NoteDetailPage extends Component {
     if (!names) return;
 
     return names.map((name) => (
-      <Link key={name} style={{ textDecoration: 'none' }} to="/" title="Note List">
+      <Link key={name} style={{ textDecoration: 'none' }} to="/notes/main" title="Note List">
         <div className="listNameButton" onClick={() => this.props.set({ noteName: name })}>
           <h3> {name} </h3>
         </div>
