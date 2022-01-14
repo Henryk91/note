@@ -82,7 +82,8 @@ export default class NoteDetailPage extends Component {
       const newPages = pages.length === 1 && pages[0].params.id === '' ? [nextPage] : [...pages, nextPage];
 
       if(pages.length >= newPages.length ) {
-        this.scrollPageBack()
+        // this.scrollBackSetPage(newPages)
+        this.setState({ pages: newPages });
       } else {
         this.setState({ pages: newPages });
       }
@@ -209,7 +210,6 @@ export default class NoteDetailPage extends Component {
       let noteDetailPage = document.getElementById('multiple-pages');
       if (noteDetailPage) {
         let pageWidth = (noteDetailPage.scrollWidth / pageCount);
-        pageWidth = pageWidth - (pageWidth/(5+pageCount));
         let scrollAmount = pageWidth*-1;
 
         noteDetailPage.scrollBy({
