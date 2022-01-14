@@ -49,6 +49,7 @@ input[type='text'],
   border: none;
   border-radius: 2px;
   margin-top: 12vh;
+  margin-top: 5px;
   width: 200px;
   font-size: 18px;
 }
@@ -132,6 +133,7 @@ h2 {
 @import url('./views/Components/NewNote/style.css');
 @import url('./views/Components/NoteItem/style.css');
 @import url('./views/Components/EditNoteCheck/style.css');
+@import url('./views/Components/Login/style.css');
 
 .backButton {
   position: fixed;
