@@ -80,11 +80,49 @@ export default class NoteDetailPage extends Component {
 
     if (pageFoundIndex === -1) {
       const newPages = pages.length === 1 && pages[0].params.id === '' ? [nextPage] : [...pages, nextPage];
-      this.setState({ pages: newPages });
-    } else if (pageFoundIndex > -1) {
+
+      if(pages.length >= newPages.length ) {
+        this.scrollBackSetPage(newPages)
+      } else {
+        this.setState({ pages: newPages });
+      }
+    } else if (pageFoundIndex > -1 && !msg.showNote) {
       const localPageFoundIndex = pageFoundIndex === 0 ? 1 : pageFoundIndex;
       const newPages = pages.slice(0, localPageFoundIndex);
       this.setState({ pages: newPages });
+    } else if (pageFoundIndex > -1) {
+
+      if(pageFoundIndex === pages.length -1) {
+       
+        if(pages.length + 1 === this.state.pages.length && msg.hideNote) {
+          this.scrollPageBack();
+        } else {
+          const last = pages[pages.length -1]
+          const secondTolast = pages[pages.length -2]
+
+          if(secondTolast && last && last.params.id !== secondTolast.params.id){
+
+            pages.push(last)
+            this.setState({ pages });
+          } 
+          if(secondTolast && last && last.params.id === secondTolast.params.id){
+            this.setState({ pages });
+          } 
+        }
+      }
+
+      const localPages = localStorage.getItem('saved-pages');
+      
+      if(msg.showNote && !msg.hideNote) {
+
+        const locals = JSON.parse(localPages);
+        const last = locals[locals.length -1]
+        const secondTolast = locals[locals.length -2]
+
+        if(secondTolast && last && last.params.id === secondTolast.params.id){
+          this.setState({ pages: locals });
+        } 
+      }
     }
   };
 
@@ -115,7 +153,8 @@ export default class NoteDetailPage extends Component {
     localStorage.setItem('saved-pages', JSON.stringify(clone))
     const pagesCont = pages.map((pageLink, index) => {
       const lastPageShowAddItem = showAddItem && index === (pages.length - 1);
-      return this.createNoteDetailPage(searchTerm, noteNames, Theme, notes, pageLink, lastPageShowAddItem, index, editName);
+      const lastPage = index === (pages.length - 1)
+      return this.createNoteDetailPage(searchTerm, noteNames, Theme, notes, pageLink, lastPageShowAddItem, index, editName, lastPage);
     });
     return (
       <div className="slide-in" key={match.urls}>
@@ -136,7 +175,8 @@ export default class NoteDetailPage extends Component {
     );
   }
 
-  createNoteDetailPage(searchTerm, noteNames, Theme, notes, pageLink, showAddItem, index, editName) {
+  createNoteDetailPage(searchTerm, noteNames, Theme, notes, pageLink, showAddItem, index, editName, lastPage) {
+
     const key = pageLink && pageLink.params && pageLink.params.id ? pageLink.params.id : 'first';
     return (
       <div id="multiple-pages1" key={key+index}>
@@ -153,6 +193,7 @@ export default class NoteDetailPage extends Component {
           index={index}
           showAddItem={showAddItem}
           editName={editName}
+          lastPage={lastPage}
         />
       </div>
     );
@@ -173,7 +214,28 @@ export default class NoteDetailPage extends Component {
       }
       setTimeout(() => {
         let remainingPages = pages.slice(0, pageCount -1);
-        this.setState({ pages: remainingPages });
+        localStorage.setItem('showTag', null);
+        this.setState({ pages: remainingPages, showTag: '' });
+      }, 500);
+    }
+  }
+  
+  scrollBackSetPage(pages) {
+
+    if(pages && pages.length > 1){
+      const pageCount = pages.length;
+      let noteDetailPage = document.getElementById('multiple-pages');
+      if (noteDetailPage) {
+        let scrollAmount = (noteDetailPage.scrollWidth / pageCount)*-1;
+        noteDetailPage.scrollBy({
+          top: 0,
+          left: scrollAmount,
+          behavior: 'smooth'
+        });
+      }
+      setTimeout(() => {
+        localStorage.setItem('showTag', null);
+        this.setState({ pages, showTag: '' });
       }, 500);
     }
   }

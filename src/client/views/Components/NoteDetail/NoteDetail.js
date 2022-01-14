@@ -296,14 +296,37 @@ export default class NoteDetail extends Component {
 
     if (tagData && tagData.data && tagData.data.startsWith('href:') && editName === false) {
       // Is link
+      this.clearShowTag();
       this.handleLinkClick(tagData, person, tagName, showLink, lastLink);
     } else if (nextPerson && tagData !== undefined) {
       this.handleLinkInLinkClick(showLink, nextPerson, tagName);
     } else {
-      // this.openDetailOnNewPage(tagData, person);
-      this.noteDetailItemClick(nextPerson, person, tagName);
+
+      let sessionShowTag = localStorage.getItem('showTag');
+      if(this.props.lastPage && sessionShowTag) {
+        this.openDetailOnNewPage(tagData, person);
+      } 
+      if(this.props.lastPage) {
+        localStorage.setItem('showTag', tagName);
+      } else{
+
+        if(sessionShowTag && tagName && sessionShowTag !== tagName) {
+          localStorage.setItem('showTag', tagName);
+          this.setState({showTag: null})
+          const parentId = person.id;
+        this.props.openPage({ personNext:person, parentId: parentId, showNote: true, hideNote: tagName === '' });
+        } else {
+          this.clearShowTag();
+          this.openDetailOnNewPage(tagData, person);
+        }
+      }
     }
   };
+  
+  clearShowTag(){
+    localStorage.setItem('showTag', null);
+    this.setState({showTag: null})
+  }
 
   setNoteTheme = (name) => {
     this.props.set({ noteTheme: name });
@@ -366,6 +389,11 @@ export default class NoteDetail extends Component {
     items.forEach((tag) => {
       sort[tag.tag] ? sort[tag.tag].push(tag.data) : (sort[tag.tag] = [tag.data]);
     });
+    let listHasShowTag = false//items.findIndex(item => {item.tag === showTag})
+    items.forEach(item => {
+      // console.log('item',item.tag === showTag);
+      if(item.tag === showTag) listHasShowTag = true;
+    })
 
     let { linkProps, propertyArray } = this.setLogAndLinksAtTop(sort);
 
@@ -398,11 +426,12 @@ export default class NoteDetail extends Component {
       const themeBorder = `${Theme.toLowerCase()}-border-thick`;
       const themeHover = `${Theme.toLowerCase()}-hover`;
 
-      // if (bunch.length === 0) return;
       const className = 'detailedBox';
+      const showOnlyNote = this.props.lastPage && listHasShowTag;
+
       return (
         <div className={className} key={prop + i}>
-          {this.noteDetailListItem(linkBorder, showTag, prop, themeBorder, isLink, bunch, showDateSelector, themeBack, themeHover)}
+          {showOnlyNote ? null: this.noteDetailListItem(linkBorder, showTag, prop, themeBorder, isLink, bunch, showDateSelector, themeBack, themeHover)}
           {this.noteItemsBunch(animate, logDaysBunch, bunch, showLogDaysBunch)}
         </div>
       );
@@ -432,7 +461,7 @@ export default class NoteDetail extends Component {
     // let personNext = notes && notes[0] ? notes.find((note) => note.id === noteId) : null;
 
     const parentId = person.id;
-    this.props.openPage({ personNext:person, parentId: parentId });
+    this.props.openPage({ personNext:person, parentId: parentId, showNote: true, hideNote: true });
     // this.props.openPage({ personNext,  parentId: person.id});
     return;
   }
@@ -444,7 +473,7 @@ export default class NoteDetail extends Component {
 
     const parentId = person.id;
     console.log('parentId', parentId);
-    this.props.openPage({ personNext, parentId: parentId });
+    this.props.openPage({ personNext, parentId: parentId, hideNote: true });
     // this.props.openPage({ personNext,  parentId: person.id});
     return;
     // const tags = this.getNoteByTag(person.dataLable, tagName);
@@ -659,7 +688,7 @@ export default class NoteDetail extends Component {
             item={item}
             date={selectedDate}
             Theme={this.props.Theme}
-            show={showButton}
+            show={showButton && this.props.lastPage}
             set={this.updateNoteItem}
             cont={this.continueLog}
             type={prop}
