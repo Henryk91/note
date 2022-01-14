@@ -265,22 +265,21 @@ export default class NoteDetail extends Component {
     e.preventDefault();
     const selectedDate = e.target.value;
     this.setState({ displayDate: selectedDate });
-    this.showTagChange('');
+    this.showLogTagChange('');
     const self = this;
 
     setTimeout(() => {
-      self.showTagChange('Log');
+      self.showLogTagChange('Log');
     }, 10);
   };
 
   setDate = (prop, date) => {
     if (prop === 'Log Days') {
       this.setState({ displayDate: date, showLogDaysBunch: false });
-      // this.showTagChange('');
       const self = this;
       setTimeout(() => {
         window.scrollTo(0, 0);
-        self.showTagChange('Log');
+        self.showLogTagChange('Log');
       }, 10);
     }
   };
@@ -322,7 +321,16 @@ export default class NoteDetail extends Component {
       }
     }
   };
-  
+
+  showLogTagChange = (tagName) => {
+    const { person, showLink } = this.state;
+    let lastLink = showLink.length > 1 ? showLink[showLink.length - 1] : null;
+    const { notes } = this.props;
+    let nextPerson = lastLink ? notes.find((note) => note.id === lastLink) : null;
+    
+    this.noteDetailItemClick(nextPerson, person, tagName);
+  };
+
   clearShowTag(){
     localStorage.setItem('showTag', null);
     this.setState({showTag: null})
@@ -427,7 +435,7 @@ export default class NoteDetail extends Component {
       const themeHover = `${Theme.toLowerCase()}-hover`;
 
       const className = 'detailedBox';
-      const showOnlyNote = this.props.lastPage && listHasShowTag;
+      const showOnlyNote = this.props.lastPage && listHasShowTag && showTag !== 'Log' && !this.state.showLogDaysBunch;
 
       return (
         <div className={className} key={prop + i}>
@@ -612,12 +620,12 @@ export default class NoteDetail extends Component {
             ''
           )}
         {showTag === 'Log' && prop === 'Log' ? (
-          (<button className={`detailBoxTitleButton ${themeBack} ${themeHover}`} onClick={() => this.showTagChange('')}>
+          (<button className={`detailBoxTitleButton ${themeBack} ${themeHover}`} onClick={() => this.showLogTagChange('')}>
           Hide
         </button>)
         ) : prop === 'Log' ? (
           <div>
-            <button className={`detailBoxTitleButton ${themeBack} ${themeHover}`} onClick={() => this.showTagChange(prop)}>
+            <button className={`detailBoxTitleButton ${themeBack} ${themeHover}`} onClick={() => this.showLogTagChange(prop)}>
               Show
             </button>
           </div>
@@ -660,7 +668,7 @@ export default class NoteDetail extends Component {
       this.setState({ showLogDaysBunch: !showLogDaysBunch });
       const self = this;
       setTimeout(() => {
-        self.showTagChange('');
+        self.showLogTagChange('');
       }, 10);
     }
   }
