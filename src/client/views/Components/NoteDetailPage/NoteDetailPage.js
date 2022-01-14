@@ -82,14 +82,18 @@ export default class NoteDetailPage extends Component {
       const newPages = pages.length === 1 && pages[0].params.id === '' ? [nextPage] : [...pages, nextPage];
 
       if(pages.length >= newPages.length ) {
-        this.scrollBackSetPage(newPages)
+        this.scrollPageBack()
       } else {
         this.setState({ pages: newPages });
       }
     } else if (pageFoundIndex > -1 && !msg.showNote) {
       const localPageFoundIndex = pageFoundIndex === 0 ? 1 : pageFoundIndex;
       const newPages = pages.slice(0, localPageFoundIndex);
-      this.setState({ pages: newPages });
+      if(pageFoundIndex + 1 === this.state.pages.length) {
+        this.scrollPageBack();
+      } else {
+        this.scrollPagesBackAndSet(this.state.pages.length, this.state.pages.length - pageFoundIndex, newPages);
+      }
     } else if (pageFoundIndex > -1) {
 
       if(pageFoundIndex === pages.length -1) {
@@ -101,8 +105,7 @@ export default class NoteDetailPage extends Component {
           const secondTolast = pages[pages.length -2]
 
           if(secondTolast && last && last.params.id !== secondTolast.params.id){
-
-            pages.push(last)
+            pages.push(last);
             this.setState({ pages });
           } 
           if(secondTolast && last && last.params.id === secondTolast.params.id){
@@ -205,7 +208,10 @@ export default class NoteDetailPage extends Component {
       const pageCount = pages.length;
       let noteDetailPage = document.getElementById('multiple-pages');
       if (noteDetailPage) {
-        let scrollAmount = (noteDetailPage.scrollWidth / pageCount)*-1;
+        let pageWidth = (noteDetailPage.scrollWidth / pageCount);
+        pageWidth = pageWidth - (pageWidth/(5+pageCount));
+        let scrollAmount = pageWidth*-1;
+
         noteDetailPage.scrollBy({
           top: 0,
           left: scrollAmount,
@@ -220,13 +226,14 @@ export default class NoteDetailPage extends Component {
     }
   }
   
-  scrollBackSetPage(pages) {
-
+  scrollPagesBackAndSet(currentPageCount, pagesBackCount, pages) {
     if(pages && pages.length > 1){
-      const pageCount = pages.length;
       let noteDetailPage = document.getElementById('multiple-pages');
       if (noteDetailPage) {
-        let scrollAmount = (noteDetailPage.scrollWidth / pageCount)*-1;
+        let pageWidth = (noteDetailPage.scrollWidth / currentPageCount);
+        pageWidth = pageWidth - (pageWidth/(5+currentPageCount));
+        let scrollAmount = (pageWidth*pagesBackCount * -1);
+
         noteDetailPage.scrollBy({
           top: 0,
           left: scrollAmount,
