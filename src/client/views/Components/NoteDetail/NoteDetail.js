@@ -128,7 +128,7 @@ export default class NoteDetail extends Component {
     }
     let noteDetailPage = document.getElementById('multiple-pages');
     
-    if (noteDetailPage) noteDetailPage.scrollBy({
+    if (noteDetailPage) noteDetailPage.scroll({
         top: 0,
         left: noteDetailPage.scrollWidth * 2,
         behavior: 'smooth'
@@ -157,7 +157,7 @@ export default class NoteDetail extends Component {
     if (noteDetailPage)
       setTimeout(() => {
         let noteDetailPage = document.getElementById('multiple-pages');
-        noteDetailPage.scrollBy({
+        noteDetailPage.scroll({
           top: 0,
           left: noteDetailPage.scrollWidth * 5,
           behavior: 'smooth'

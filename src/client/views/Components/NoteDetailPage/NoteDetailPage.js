@@ -212,7 +212,7 @@ export default class NoteDetailPage extends Component {
         let pageWidth = (noteDetailPage.scrollWidth / pageCount);
         let scrollAmount = pageWidth*-1;
 
-        noteDetailPage.scrollBy({
+        noteDetailPage.scroll({
           top: 0,
           left: scrollAmount,
           behavior: 'smooth'
@@ -234,7 +234,7 @@ export default class NoteDetailPage extends Component {
         pageWidth = pageWidth - (pageWidth/(5+currentPageCount));
         let scrollAmount = (pageWidth*pagesBackCount * -1);
 
-        noteDetailPage.scrollBy({
+        noteDetailPage.scroll({
           top: 0,
           left: scrollAmount,
           behavior: 'smooth'
@@ -289,7 +289,7 @@ export default class NoteDetailPage extends Component {
         <div
           className={`detailUpButton ${themeHover} ${themeBack}`}
           onClick={() => {
-            window.scrollBy(0, document.body.scrollHeight);
+            window.scroll(0, document.body.scrollHeight);
           }}
         >
           <i className="fas fa-arrow-down" />
