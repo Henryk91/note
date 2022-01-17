@@ -58,15 +58,15 @@ export default class App extends Component {
       const {lastRefresh} = self.state;
       const now = new Date().getTime();
       const minTimeout = 1000 * 60 * 5;
-      if((lastRefresh + minTimeout) < now && lastRefresh){
+      if((lastRefresh + minTimeout) < now && lastRefresh && self){
         console.log('Refresh', new Date());
         self.setState({lastRefresh: now})
         self.checkLoginState();
       }
-      if((lastRefresh + minTimeout) > now){
+      if((lastRefresh + minTimeout) > now && self){
         console.log('Refresh in ', lastRefresh? ((lastRefresh + minTimeout) - now)/1000 : (minTimeout/1000), "seconds");
       }
-      if(!lastRefresh){
+      if(!lastRefresh && self){
         self.setState({lastRefresh: now})
       } 
      };
