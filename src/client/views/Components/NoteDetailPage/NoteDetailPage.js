@@ -220,8 +220,8 @@ export default class NoteDetailPage extends Component {
       }
       setTimeout(() => {
         let remainingPages = pages.slice(0, pageCount -1);
-        localStorage.setItem('showTag', null);
-        this.setState({ pages: remainingPages, showTag: '' });
+        localStorage.removeItem('showTag');
+        this.setState({ pages: remainingPages, showTag: null });
       }, 500);
     }
   }
@@ -241,8 +241,8 @@ export default class NoteDetailPage extends Component {
         });
       }
       setTimeout(() => {
-        localStorage.setItem('showTag', null);
-        this.setState({ pages, showTag: '' });
+        localStorage.removeItem('showTag');
+        this.setState({ pages, showTag: null });
       }, 500);
     }
   }

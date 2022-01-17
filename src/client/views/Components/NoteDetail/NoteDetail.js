@@ -182,7 +182,7 @@ export default class NoteDetail extends Component {
     if (person) {
       let sessionShowTag = localStorage.getItem('showTag');
       const { showTag } = this.state;
-      let tag = sessionShowTag ? sessionShowTag : showTag;
+      let tag = sessionShowTag ? sessionShowTag : sessionShowTag;
       const tags = this.getNoteByTag(person.dataLable, tag);
       this.setState({ person, tags, showTag: tag });
     }
@@ -285,6 +285,7 @@ export default class NoteDetail extends Component {
   };
 
   showTagChange = (tagName) => {
+    console.log('Double Click showTagChange',tagName);
     const { person, editName, showTag, showLink } = this.state;
     let lastLink = showLink.length > 1 ? showLink[showLink.length - 1] : null;
     const { notes } = this.props;
@@ -332,7 +333,7 @@ export default class NoteDetail extends Component {
   };
 
   clearShowTag(){
-    localStorage.setItem('showTag', null);
+    localStorage.removeItem('showTag');
     this.setState({showTag: null})
   }
 
@@ -435,7 +436,7 @@ export default class NoteDetail extends Component {
       const themeHover = `${Theme.toLowerCase()}-hover`;
 
       const className = 'detailedBox';
-      const showOnlyNote = this.props.lastPage && listHasShowTag && showTag !== 'Log' && !this.state.showLogDaysBunch;
+      const showOnlyNote = this.props.lastPage && listHasShowTag && showTag && showTag !== 'Log' && !this.state.showLogDaysBunch;
 
       return (
         <div className={className} key={prop + i}>
@@ -772,14 +773,15 @@ export default class NoteDetail extends Component {
     const themeBack = `${Theme.toLowerCase()}-back`;
     const themeHover = `${Theme.toLowerCase()}-hover`;
     const className = this.props.index === 0 ? "note-detail-item first-note-detail-item": "note-detail-item"
+    const heading = this.props.lastPage && this.state.showTag && this.state.showTag !== "null" ? this.state.showTag: person.heading
     return (
       <div className={className} key={person.id}>
         {editName ? (
           <div>{editNameB}</div>
         ) : (
-            <div id="personContainer" className="page-content-top">
+            <div id="personContainer" className="page-content-top1">
               <h1 id="personHead" className="nameBox">
-                {person.heading}
+                {heading}
               </h1>
               {true ? (
                 ''
