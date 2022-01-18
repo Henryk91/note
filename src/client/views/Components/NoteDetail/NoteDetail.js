@@ -108,7 +108,7 @@ export default class NoteDetail extends Component {
     this.setState({ searchTerm: nextProps.SearchTerm, editName: nextProps.editName });
     const self = this;
     setTimeout(() => {
-      this.initPage(nextProps, self);
+      self.initPage(nextProps, self);
     }, 100);
   }
 
@@ -120,7 +120,7 @@ export default class NoteDetail extends Component {
       } else {
         const person = getPerson(self.props.notes, self.props.match);
         this.props.openPage({ personNext: person });
-        self.refreshItems(person);
+        // self.refreshItems(person);
       }
     } else {
       const person = getPerson(self.props.notes, self.props.match);
@@ -285,7 +285,6 @@ export default class NoteDetail extends Component {
   };
 
   showTagChange = (tagName) => {
-    console.log('Double Click showTagChange',tagName);
     const { person, editName, showTag, showLink } = this.state;
     let lastLink = showLink.length > 1 ? showLink[showLink.length - 1] : null;
     const { notes } = this.props;
@@ -301,20 +300,20 @@ export default class NoteDetail extends Component {
     } else if (nextPerson && tagData !== undefined) {
       this.handleLinkInLinkClick(showLink, nextPerson, tagName);
     } else {
-
+      // Not A link
       let sessionShowTag = localStorage.getItem('showTag');
       if(this.props.lastPage && sessionShowTag) {
         this.openDetailOnNewPage(tagData, person);
       } 
       if(this.props.lastPage) {
         localStorage.setItem('showTag', tagName);
-      } else{
-
+        this.openDetailOnNewPage(tagData, person);
+      } else {
         if(sessionShowTag && tagName && sessionShowTag !== tagName) {
           localStorage.setItem('showTag', tagName);
           this.setState({showTag: null})
           const parentId = person.id;
-        this.props.openPage({ personNext:person, parentId: parentId, showNote: true, hideNote: tagName === '' });
+          this.props.openPage({ personNext:person, parentId: parentId, showNote: true, hideNote: tagName === '' });
         } else {
           this.clearShowTag();
           this.openDetailOnNewPage(tagData, person);
