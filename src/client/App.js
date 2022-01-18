@@ -75,6 +75,7 @@ export default class App extends Component {
   }
 
   setRedirect = () => {
+    return ;
     const path = window.location.pathname;
     if (path === '/') {
       document.location.href = '/notes/main';
