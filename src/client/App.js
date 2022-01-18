@@ -49,12 +49,14 @@ export default class App extends Component {
     this.getAllNotes = this.getAllNotes.bind(this);
     this.getNoteNames = this.getNoteNames.bind(this);
     this.checkLoginState = this.checkLoginState.bind(this);
+    this.setRedirect();
   }
 
   componentDidMount() {
     this.checkLoginState();
     const self = this;
     window.onfocus = function() {
+      self.setRedirect();
       const {lastRefresh} = self.state;
       const now = new Date().getTime();
       const minTimeout = 1000 * 60 * 5;
@@ -74,8 +76,8 @@ export default class App extends Component {
 
   setRedirect = () => {
     const path = window.location.pathname;
-    if (path !== '/') {
-      document.location.href = '/';
+    if (path === '/') {
+      document.location.href = '/notes/main';
     }
   };
 
@@ -160,7 +162,7 @@ export default class App extends Component {
         if (reRender && res.length > 0) {
           localStorage.setItem(user, JSON.stringify(res));
           this.setState({ notes: res, filteredNotes: res });
-          // this.setRedirect();
+          this.setRedirect();
         }
       });
     } else {
