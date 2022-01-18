@@ -175,6 +175,8 @@ export default class NoteDetailPage extends Component {
         <br />
         <br />
         <br />
+        <br />
+        <br />
       </div>
     );
   }
@@ -218,10 +220,11 @@ export default class NoteDetailPage extends Component {
           behavior: 'smooth'
         });
       }
+      let self = this;
       setTimeout(() => {
         let remainingPages = pages.slice(0, pageCount -1);
         localStorage.removeItem('showTag');
-        this.setState({ pages: remainingPages, showTag: null });
+        self.setState({ pages: remainingPages, showTag: null });
       }, 500);
     }
   }
@@ -240,9 +243,10 @@ export default class NoteDetailPage extends Component {
           behavior: 'smooth'
         });
       }
+      let self = this;
       setTimeout(() => {
         localStorage.removeItem('showTag');
-        this.setState({ pages, showTag: null });
+        self.setState({ pages, showTag: null });
       }, 500);
     }
   }
