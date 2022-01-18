@@ -136,7 +136,7 @@ export default class NoteDetail extends Component {
   }
 
   customScrollBy(element, startPosition, endPosition){
-    element.scrollTo({top: 0});
+    window.scrollTo({top: 0});
     const left = startPosition > endPosition;
     var i = startPosition;
     var int = setInterval(function() {
