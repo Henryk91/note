@@ -158,7 +158,7 @@ export default class NoteDetailPage extends Component {
     const pagesCont = pages.map((pageLink, index) => {
       const lastPageShowAddItem = showAddItem && index === (pages.length - 1);
       const lastPage = index === (pages.length - 1)
-      return this.createNoteDetailPage(searchTerm, noteNames, Theme, notes, pageLink, lastPageShowAddItem, index, editName, lastPage);
+      return this.createNoteDetailPage(searchTerm, noteNames, Theme, notes, pageLink, lastPageShowAddItem, index, editName, lastPage, pages.length);
     });
     return (
       <div className="slide-in" key={match.urls}>
@@ -181,12 +181,13 @@ export default class NoteDetailPage extends Component {
     );
   }
 
-  createNoteDetailPage(searchTerm, noteNames, Theme, notes, pageLink, showAddItem, index, editName, lastPage) {
+  createNoteDetailPage(searchTerm, noteNames, Theme, notes, pageLink, showAddItem, index, editName, lastPage, pageCount) {
 
     const key = pageLink && pageLink.params && pageLink.params.id ? pageLink.params.id : 'first';
     return (
       <div id="multiple-pages1" key={key+index}>
         <NoteDetail
+          pageCount={pageCount}
           hideAddItem={this.hideAddItem}
           SearchTerm={searchTerm}
           noteNames={noteNames}
@@ -212,13 +213,8 @@ export default class NoteDetailPage extends Component {
       let noteDetailPage = document.getElementById('multiple-pages');
       if (noteDetailPage) {
         let pageWidth = (noteDetailPage.scrollWidth / pageCount);
-        let scrollAmount = pageWidth*-1;
 
-        noteDetailPage.scroll({
-          top: 0,
-          left: scrollAmount,
-          behavior: 'smooth'
-        });
+        this.customScrollBy(noteDetailPage, noteDetailPage.scrollWidth - pageWidth, ( noteDetailPage.scrollWidth - pageWidth - pageWidth));
       }
       let self = this;
       setTimeout(() => {
@@ -227,6 +223,22 @@ export default class NoteDetailPage extends Component {
         self.setState({ pages: remainingPages, showTag: null });
       }, 500);
     }
+  }
+
+  customScrollBy(element, startPosition, endPosition){
+    window.scrollTo({top: 0});
+    const left = startPosition > endPosition;
+    var i = startPosition;
+    var int = setInterval(function() {
+      element.scrollTo({top: 0, left:i});
+      if(left) {
+        i -= 8;
+      } else {
+        i += 8;
+      }
+      if (left && i <= endPosition) clearInterval(int);
+      if (!left && i >= endPosition) clearInterval(int);
+    }, 1);
   }
   
   scrollPagesBackAndSet(currentPageCount, pagesBackCount, pages) {
@@ -237,7 +249,7 @@ export default class NoteDetailPage extends Component {
         pageWidth = pageWidth - (pageWidth/(5+currentPageCount));
         let scrollAmount = (pageWidth*pagesBackCount * -1);
 
-        noteDetailPage.scroll({
+        noteDetailPage.scrollBy({
           top: 0,
           left: scrollAmount,
           behavior: 'smooth'
@@ -274,14 +286,19 @@ export default class NoteDetailPage extends Component {
   scrollButtons(Theme, showAddItem) {
     const themeBack = `${Theme.toLowerCase()}-back`;
     const themeHover = `${Theme.toLowerCase()}-hover`;
+    const { pages } = this.state;
+
+    const showBackButton = pages.length > 1;
     return (
       <div className="detail-scroll">
         <button className={`editButtons1 detailUpButton ${themeHover} ${themeBack}`} onClick={() => this.editNameSet()}>
           <i className="fas fa-pen" />
         </button>
-        <button className={`detailUpButton ${themeHover} ${themeBack}`} onClick={() => this.scrollPageBack()}>
-          <i className="fas fa-arrow-left" />
-        </button>
+        {showBackButton? 
+          <button className={`detailUpButton ${themeHover} ${themeBack}`} onClick={() => this.scrollPageBack()}>
+            <i className="fas fa-arrow-left" />
+          </button>
+        : null}
         <div
           className={`detailUpButton ${themeHover} ${themeBack}`}
           onClick={() => {
@@ -293,7 +310,7 @@ export default class NoteDetailPage extends Component {
         <div
           className={`detailUpButton ${themeHover} ${themeBack}`}
           onClick={() => {
-            window.scroll(0, document.body.scrollHeight);
+            window.scrollBy(0, document.body.scrollHeight);
           }}
         >
           <i className="fas fa-arrow-down" />

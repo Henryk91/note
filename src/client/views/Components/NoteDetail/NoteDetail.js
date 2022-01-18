@@ -109,7 +109,7 @@ export default class NoteDetail extends Component {
     const self = this;
     setTimeout(() => {
       self.initPage(nextProps, self);
-    }, 100);
+    }, 5);
   }
 
   initPage(nextProps, self) {
@@ -128,11 +128,27 @@ export default class NoteDetail extends Component {
     }
     let noteDetailPage = document.getElementById('multiple-pages');
     
-    if (noteDetailPage) noteDetailPage.scroll({
-        top: 0,
-        left: noteDetailPage.scrollWidth * 2,
-        behavior: 'smooth'
-      });
+    // if (noteDetailPage) noteDetailPage.scrollBy({
+    //     top: 0,
+    //     left: noteDetailPage.scrollWidth * 2,
+    //     behavior: 'smooth'
+    //   });
+  }
+
+  customScrollBy(element, startPosition, endPosition){
+    element.scrollTo({top: 0});
+    const left = startPosition > endPosition;
+    var i = startPosition;
+    var int = setInterval(function() {
+      element.scrollTo({top: 0, left:i});
+      if(left) {
+        i -= 8;
+      } else {
+        i += 8;
+      }
+      if (left && i <= endPosition) clearInterval(int);
+      if (!left && i >= endPosition) clearInterval(int);
+    }, 1);
   }
   initPage3(self) {
     if (self.props.initShowtag) {
@@ -157,12 +173,17 @@ export default class NoteDetail extends Component {
     if (noteDetailPage)
       setTimeout(() => {
         let noteDetailPage = document.getElementById('multiple-pages');
-        noteDetailPage.scroll({
-          top: 0,
-          left: noteDetailPage.scrollWidth * 5,
-          behavior: 'smooth'
-        });
-      }, 300);
+        let pageWidth = (noteDetailPage.scrollWidth / (this.props.pageCount));
+        const start = noteDetailPage.scrollWidth - pageWidth - pageWidth;
+        const end = start + pageWidth
+        this.customScrollBy(noteDetailPage, start, end)
+
+        // noteDetailPage.scrollBy({
+        //   top: 0,
+        //   left: noteDetailPage.scrollWidth * 5,
+        //   behavior: 'smooth'
+        // });
+      }, 30);
   }
 
   getSingleNote(noteHeading) {
