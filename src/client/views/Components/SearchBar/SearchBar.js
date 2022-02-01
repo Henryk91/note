@@ -16,7 +16,7 @@ export default class SearchBar extends Component {
   search = () => {
     let { notes } = this.props;
     let { title2 } = this.state;
-    if (notes) {
+    if (notes && this.title) {
       const searchTerm = this.title.value;
       notes = notes.filter(val => {
         const firtName = val.heading.toLowerCase();
@@ -25,7 +25,8 @@ export default class SearchBar extends Component {
       });
     }
     if(this.title2) localStorage.setItem('user', this.title2.value);
-    this.props.set({ filteredNotes: notes, user: this.title2?.value? this.title2?.value: title2, searchTerm: this.title.value.toLowerCase() });
+    let searchTerm = this.title? this.title.value.toLowerCase(): null;
+    this.props.set({ filteredNotes: notes, user: this.title2?.value? this.title2?.value: title2, searchTerm: searchTerm });
   };
   clearSearch = () => {
     let { notes } = this.props;

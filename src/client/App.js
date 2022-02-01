@@ -211,7 +211,7 @@ export default class App extends Component {
     const index = notes.indexOf(val => val.id === update.id);
     notes[index] = update;
 
-    if (searchTerm === '') {
+    if (true) {
       const person = update.updateData? update.updateData: update.person? update.person: update;
       updateOneNoteRec({ person: person, delete: update.delete }, () => {
         if (update.delete) {
@@ -235,7 +235,8 @@ export default class App extends Component {
     } else {
       updatedNote = [usedNewNote.note];
     }
-    if (searchTerm === '') {
+
+    if (searchTerm === '' || searchTerm === null) {
       saveNewNote(usedNewNote.note, () => alert('setn'));
       this.setState({ notes: updatedNote, filteredNotes: updatedNote });
     } else {
