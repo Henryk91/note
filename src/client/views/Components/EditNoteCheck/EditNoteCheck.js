@@ -188,11 +188,11 @@ export default class EditNoteCheck extends Component {
   }
   newLink(themeBack, themeHover, notes) {
     const headings = this.getAllNoteHeadingsWithIds(notes);
+    let defaultId = null;
     const options = headings.map((item, index) => {
-      if(index === (headings.length -1)) return <option key={index} value={item.id} selected>{item.heading}</option>
+      if(index === (headings.length -1)) defaultId = item.id
       return <option key={index} value={item.id}>{item.heading}</option>
     });
-
     const defaultVal = headings && headings.length ? (headings[headings.length -1].heading).replace('Sub: ',''): ''
     return <div>
       <br />
@@ -200,7 +200,7 @@ export default class EditNoteCheck extends Component {
           New Folder
       </Link>
       <br />
-      <select onChange={this.changeLink} className={themeBack} name="number" id="links">
+      <select onChange={this.changeLink} className={themeBack} name="number" id="links" defaultValue={defaultId}>
         {options}
       </select>
       <br />
