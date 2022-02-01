@@ -64,9 +64,14 @@ export default class NewNote extends Component {
     
     return (
       <div>
-        <Link className="backButton" style={{ textDecoration: 'none' }} to="/" title="Note List">
+        <button
+          className={`backButton ${themeBack}`}
+          onClick={() => {
+            window.history.back();
+          }}
+        >
           <i className="fas fa-arrow-left" />
-        </Link>
+        </button>
         <form onSubmit={this.addNewUser}>
           <br />
           <input className={themeBack}  name="heading" type="text" placeholder="Headings" required="required" id="heading" />
