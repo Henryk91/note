@@ -277,6 +277,10 @@ export default class NoteDetailPage extends Component {
     );
   }
 
+  addButtonClicked = (showAddItem) => {
+    showAddItem ? this.showAddItemSet(false) : this.showAddItemSet(true);
+  }
+
   editNameSet = () => {
     window.scrollTo(0, 0);
     const { editName } = this.state;
@@ -315,14 +319,22 @@ export default class NoteDetailPage extends Component {
         >
           <i className="fas fa-arrow-down" />
         </div>
-        <div
-          className={`detailAddButton ${themeHover} ${themeBack}`}
-          onClick={() => {
-            showAddItem ? this.showAddItemSet(false) : this.showAddItemSet(true);
-          }}
-        >
-          <i className="fas fa-plus" />
-        </div>
+        {showBackButton === false ? (
+          <div className={`detailAddButton ${themeHover} ${themeBack}`}>
+            <Link style={{ textDecoration: 'none', color: 'white' }}    to="/new-note/" onClick={console.log('New Note')}>
+              <i className="fas fa-plus" />
+            </Link>
+          </div>
+        ) : <div
+            className={`detailAddButton ${themeHover} ${themeBack}`}
+            onClick={() => {
+              this.addButtonClicked(showAddItem)
+            }}
+          >
+            <i className="fas fa-plus" />
+          </div>
+        }
+        
       </div>
     );
   }
