@@ -152,14 +152,14 @@ export default class App extends Component {
 
       getMyNotesRec(user, res => {
         res = this.addMainNote(res)
-        if (res.length > 0) {
+        if (res && res.length > 0) {
           res.sort(compareSort);
           console.log('Fresh Data')
           this.setState({ freshData:true });
         }
 
         const stateNotes = this.state.notes;
-        const reRender = res && stateNotes ? JSON.stringify(res) !== JSON.stringify(stateNotes) : res.length > 0;
+        const reRender = res && stateNotes ? JSON.stringify(res) !== JSON.stringify(stateNotes) : res && res.length > 0;
         if (reRender && res.length > 0) {
           localStorage.setItem(user, JSON.stringify(res));
           this.setState({ notes: res, filteredNotes: res });
