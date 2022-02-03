@@ -1,4 +1,3 @@
-
 # React Note List
 
 ## Introduction
