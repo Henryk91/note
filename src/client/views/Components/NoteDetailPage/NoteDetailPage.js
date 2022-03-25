@@ -29,11 +29,11 @@ export default class NoteDetailPage extends Component {
     this.editNameSet = this.editNameSet.bind(this);
   }
 
-  componentWillMount(){
+  componentDidMount(){
     const localPages = localStorage.getItem('saved-pages')
     if(localPages)this.setState({pages: JSON.parse(localPages)})
-  }
-  componentDidMount(){
+  // }
+  // componentDidMount(){
     const isEditing = localStorage.getItem('new-folder-edit');
     if(isEditing){
       this.setState({showAddItem: true})

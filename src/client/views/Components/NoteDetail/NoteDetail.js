@@ -104,7 +104,7 @@ export default class NoteDetail extends Component {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentDidUpdate(nextProps) {
     this.setState({ searchTerm: nextProps.SearchTerm, editName: nextProps.editName });
     const self = this;
     setTimeout(() => {
