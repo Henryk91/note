@@ -105,11 +105,15 @@ export default class NoteDetail extends Component {
   }
 
   componentDidUpdate(nextProps) {
-    this.setState({ searchTerm: nextProps.SearchTerm, editName: nextProps.editName });
-    const self = this;
-    setTimeout(() => {
-      self.initPage(nextProps, self);
-    }, 5);
+    const { searchTerm, editName } = this.state;
+    if((searchTerm !== nextProps.SearchTerm || editName !== nextProps.editName) || this.props.notes !== nextProps.notes) {
+      this.setState({ searchTerm: nextProps.SearchTerm, editName: nextProps.editName });
+    
+      const self = this;
+      setTimeout(() => {
+        self.initPage(nextProps, self);
+      }, 5);
+    }
   }
 
   initPage(nextProps, self) {

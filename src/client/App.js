@@ -57,6 +57,7 @@ export default class App extends Component {
   }
 
   componentDidMount() {
+    this.setRedirect();
     this.checkLoginState();
     const self = this;
     window.onfocus = function() {
@@ -81,9 +82,12 @@ export default class App extends Component {
   setRedirect = () => {
     // return ;
     const path = window.location.pathname;
+    // console.log('setRedirect', path);
     if (path === '/') {
       const { notes, noteNames } = this.state;
-      if(notes, noteNames) window.history.pushState('', '', './notes/main');
+      let user = localStorage.getItem('user');
+      // console.log('(notes && noteNames) || user',(notes && noteNames) || user);
+      if((notes && noteNames) || user) window.history.pushState('', '', './notes/main');
     }
   };
 
@@ -116,23 +120,34 @@ export default class App extends Component {
       })
 
       if(subs.length > 0){
-        const headings = subs.map(sub => {
-          return {tag: sub.heading, data: `href:${sub.id}`}
+        const subFound = notes.find(note => {
+          return note.id === "subs"
         })
-        const subItems = {createdBy: subs[0].createdBy, dataLable: headings, heading: "Z Sub Directories", id: "subs"}
-        if (notes) notes.push(subItems)
+        if(!subFound){
+          const headings = subs.map(sub => {
+            return {tag: sub.heading, data: `href:${sub.id}`}
+          })
+          const subItems = {createdBy: subs[0].createdBy, dataLable: headings, heading: "Z Sub Directories", id: "subs"}
+          if (notes) notes.push(subItems)
+        }
       }
 
       if(notes[notes.length-1].id !== 'main'){
-        const mainPage = {
-          createdBy: "Main",
-          dataLable: [...notes].map(note => {
-            return {tag: note.heading, data: 'href:' + note.id}
-          }), 
-          heading: "Main",
-          id: "main",
+        const mainFound = notes.find(note => {
+          return note.id === "main"
+        })
+        // console.log('mainFound',mainFound);
+        if(!mainFound){
+          const mainPage = {
+            createdBy: "Main",
+            dataLable: [...notes].map(note => {
+              return {tag: note.heading, data: 'href:' + note.id}
+            }), 
+            heading: "Main",
+            id: "main",
+          }
+          notes.push(mainPage)
         }
-        notes.push(mainPage)
       }
       
       return notes
@@ -160,6 +175,7 @@ export default class App extends Component {
         if (res && res.length > 0) {
           res.sort(compareSort);
           console.log('Fresh Data')
+          this.setRedirect();
           this.setState({ freshData:true });
         }
 
