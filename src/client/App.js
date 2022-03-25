@@ -7,7 +7,10 @@ import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import { Home, SearchBar, NoteDetail, NoteDetailPage, NewNote, Login, Pomodoro, Memento } from './views/Components/index';
 import { getMyNotesRec, saveNewNote, updateOneNoteRec, getAllNotes, getNoteNames } from './views/Helpers/requests';
-
+// import { useHistory } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
+// import { withRouter } from "react-router-dom";
+// import createHistory from "history/createBrowserHistory"
 const compareSort = (a, b) => {
   const nameA = a.heading.toUpperCase();
   const nameB = b.heading.toUpperCase();
@@ -24,7 +27,7 @@ const compareSort = (a, b) => {
 function isMobileDevice() {
   return typeof window.orientation !== 'undefined' || navigator.userAgent.indexOf('IEMobile') !== -1;
 }
-
+// const navigate = useNavigate();
 export default class App extends Component {
   constructor(props) {
     super(props);
@@ -49,6 +52,7 @@ export default class App extends Component {
     this.getAllNotes = this.getAllNotes.bind(this);
     this.getNoteNames = this.getNoteNames.bind(this);
     this.checkLoginState = this.checkLoginState.bind(this);
+    this.router = undefined
     this.setRedirect();
   }
 
@@ -75,10 +79,11 @@ export default class App extends Component {
   }
 
   setRedirect = () => {
-    return ;
+    // return ;
     const path = window.location.pathname;
     if (path === '/') {
-      document.location.href = '/notes/main';
+      const { notes, noteNames } = this.state;
+      if(notes, noteNames) window.history.pushState('', '', './notes/main');
     }
   };
 
