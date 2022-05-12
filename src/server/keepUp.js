@@ -6,7 +6,7 @@ let isRunning = false;
 function refresh(url, startHour, endHour, minuteInterval) {
   const time = calcTimeNowOffset('+2');
   const timeNow = time.getHours();
-  if (timeNow > startHour && timeNow < endHour) {
+  if ((timeNow > startHour && timeNow < endHour) || (startHour === endHour)) {
     console.log('Calling KeepUp!', new Date().toLocaleString());
     https.get(url, (resp) => {
       console.log('KeepUp Responce Status:', resp.statusCode);
