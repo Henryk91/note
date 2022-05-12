@@ -57,6 +57,8 @@ export default class App extends Component {
   }
 
   componentDidMount() {
+    console.log('componentDidMount');
+    localStorage.setItem('saved-pages', JSON.stringify({params: {id: "main"}}))
     this.setRedirect();
     this.checkLoginState();
     const self = this;
@@ -289,6 +291,7 @@ export default class App extends Component {
       this.getNotesOnLoad(loginKey, user);
       const savedTheme = localStorage.getItem('theme');
       if (savedTheme) {
+        checkLoginState
         this.setState({ theme: savedTheme });
       }
     }
