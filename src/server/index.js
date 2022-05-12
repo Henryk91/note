@@ -27,7 +27,11 @@ userCheck(app);
 
 app.get('/*', (req, res) => {
   console.log('res',req.url);
-  res.redirect('/');
+  if(req && req.query && req.query.tempPass){
+    res.redirect('/notes/main');
+  } else {
+    res.redirect('/');
+  }
 });
 
 app.get('/sw.js', (req, res) => {
