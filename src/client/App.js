@@ -85,7 +85,8 @@ export default class App extends Component {
     // return ;
     const path = window.location.pathname;
     // console.log('setRedirect', path);
-    if (path === '/') {
+    console.log('window.location.href.includes(index.html)',window.location.href,window.location.href.includes('index.html'));
+    if (path === '/' || window.location.href.includes('index.html')) {
       const { notes, noteNames } = this.state;
       let user = localStorage.getItem('user');
       // console.log('(notes && noteNames) || user',(notes && noteNames) || user);
