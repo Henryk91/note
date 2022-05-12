@@ -27,6 +27,7 @@ export default class NoteDetailPage extends Component {
     this.hideAddItem = this.hideAddItem.bind(this);
     this.setNoteTheme = this.setNoteTheme.bind(this);
     this.editNameSet = this.editNameSet.bind(this);
+    this.prepForNote = this.prepForNote.bind(this);
   }
 
   componentDidMount(){
@@ -339,12 +340,22 @@ export default class NoteDetailPage extends Component {
     );
   }
 
+  prepForNote = (name) => {
+    const user =localStorage.getItem('user');
+    if(user !== name){
+      const test = {params: {id: "main"}}
+      localStorage.setItem('saved-pages', JSON.stringify(test))
+      this.setState({ pages: [test] });
+    }
+    this.props.set({ noteName: name })
+  }
+
   showNoteNames = (names) => {
     if (!names) return;
 
     return names.map((name) => (
       <Link key={name} style={{ textDecoration: 'none' }} to="/notes/main" title="Note List">
-        <div className="listNameButton" onClick={() => this.props.set({ noteName: name })}>
+        <div className="listNameButton" onClick={() => this.prepForNote(name)}>
           <h3> {name} </h3>
         </div>
       </Link>
