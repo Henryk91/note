@@ -28,8 +28,10 @@ userCheck(app);
 app.get('/*', (req, res) => {
   console.log('res',req.url);
   if(req && req.query && req.query.tempPass){
+    console.log('tempPasstempPass');
     res.redirect('/notes/main');
   } else {
+    console.log('redirectredirect');
     res.redirect('/');
   }
 });
