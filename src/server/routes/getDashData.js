@@ -21,7 +21,7 @@ module.exports = function (app) {
   });
 
   app.get('/api/dash-data/countries',cors(), (req, res) => {
-    fetch('https://corona.lmao.ninja/v2/countries')
+    fetch('https://disease.sh/v3/covid-19/countries')
       .then((fRes) => fRes.json())
       .then((data) => {
         console.log('Countries req.');
@@ -29,7 +29,7 @@ module.exports = function (app) {
       })
   });
   app.get('/api/dash-data/historical',cors(), (req, res) => {
-    fetch('https://corona.lmao.ninja/v2/historical/all?lastdays=80')
+    fetch('https://disease.sh/v3/covid-19/historical/all?lastdays=80')
       .then((fRes) => fRes.json())
       .then((data) => {
         console.log('Countries req.');
