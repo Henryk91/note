@@ -77,6 +77,19 @@ export default class NoteItem extends Component {
     this.setState({ editingItem: bVal });
   };
 
+
+  removeHideClass = () => {
+    var nodes = document.querySelectorAll(".hidden-noteItemBox")
+    for (var i =0; i < nodes.length; i++) {
+        nodes[i].classList.remove("hidden-noteItemBox")
+    }
+  }
+
+  closeEdit = () => {
+    this.setState({ editingItem: false })
+    this.removeHideClass()
+  }
+
   editItemBox(item) {
     const { Theme } = this.props;
     const themeBack = `${Theme.toLowerCase()}-back`;
@@ -101,7 +114,7 @@ export default class NoteItem extends Component {
           {' '}
           <i className="fas fa-check" />
         </button>
-        <button className={`submit-button ${themeBack} ${themeHover}`} onClick={() => this.setState({ editingItem: false })}>
+        <button className={`submit-button ${themeBack} ${themeHover}`} onClick={() => this.closeEdit()}>
           <i className="fas fa-times" />
         </button>
         <button className={`submit-button ${themeBack} ${themeHover}`} onClick={this.deleteItem}>
@@ -114,6 +127,19 @@ export default class NoteItem extends Component {
     );
   }
 
+  hideLogLines = () => {
+    var nodes = document.querySelectorAll(".noteItemBox")
+    for (var i =0; i < nodes.length; i++) {
+        nodes[i].classList.add("hidden-noteItemBox")
+    }
+  }
+
+  setEditState = () => {
+    this.setState({ editingItem: true })
+    this.hideLogLines()
+    window.scrollTo({top: 0});
+  }
+
   displayItemBox(item) {
     const { Theme, showEdit, count, show } = this.props;
     const themeBack = `${Theme.toLowerCase()}-back`;
@@ -123,16 +149,16 @@ export default class NoteItem extends Component {
     const noteItemClass = count > 0 ? 'noteItemHasCount' : 'noteItem';
 
     return (
-      <div className="noteItemBox">
+      <div className="noteItemBox" onClick={() => this.setEditState()}>
         {show ? (
           <div className="logLine">
             {showEdit ? null : <div className={`listCountBox noteItemCount ${themeBorder}`}> <span className="list-count-item">{count}</span> </div>}
             <div className={`${noteItemClass} white-color`} dangerouslySetInnerHTML={this.getMarkdownText(item)} />
-            {showEdit ? (
-              <div className={`editButtons ${themeBack} ${themeBackHover}`} onClick={() => this.setState({ editingItem: true })}>
+            {/* {showEdit ? (
+              <div className={`editButtons ${themeBack} ${themeBackHover}`} >
                 <i className="fas fa-pen" />
               </div>
-            ) : null}
+            ) : null} */}
             
           </div>
         ) : (
@@ -157,6 +183,7 @@ export default class NoteItem extends Component {
         showItem = false;
       }
     }
+    if(!showItem) return
     const themeBack = `${Theme.toLowerCase()}-back`;
     const themeBackHover = `${Theme.toLowerCase()}-hover`;
     const hasBreak =
@@ -181,7 +208,7 @@ export default class NoteItem extends Component {
         {showItem ? (
           <div>
             <div>
-              <p className="noteItem white-color">{newDate} {duration}</p>
+              <p className="noteItem white-color log-noteItem">{newDate} {duration}</p>
               <p className={`noteItem ${hasBreak}`}>{parsedItem.data}</p>
               <button className={`editButtons ${themeBack} ${themeBackHover}`} onClick={() => this.setState({ editingItem: true })}>
                 <i className="fas fa-pen" />

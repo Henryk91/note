@@ -3,13 +3,20 @@
     width:100%;
     height: 100%;
 }
+.hidden-noteItemBox{
+  visibility: hidden;
+  height: 0px !important;
+}
 
 .noteItem{
   overflow: hidden;
   margin-right: 0px;
   padding: 0px !important;
-  width: 85%;
+  /* width: 85%; */
   display: inline-block !important;
+}
+.log-noteItem{
+  width: 100%;
 }
 .noteItemHasCount{
   overflow: hidden;
@@ -42,7 +49,7 @@
 }
 .editTextarea{
   height: 100%;
-  width: 100%;
+  width: 100% !important;
   text-align: left;
   /* background: rgb(187, 59, 0); */
   color: white;
@@ -75,7 +82,7 @@
     padding-bottom: 10px;
     margin-bottom: 150px !important; 
     text-align: center;
-    height: 40vh;
+    height: 65vh;
 }
 
 .dateHeading{
