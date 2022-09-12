@@ -154,7 +154,10 @@ export default class NoteDetailPage extends Component {
       localStorage.removeItem('saved-pages')
     }
     
-    const clone = JSON.parse(JSON.stringify(pages))
+    let clone = JSON.parse(JSON.stringify(pages))
+    if(clone && clone[0] && clone[0].id !== '' && clone[0].id !== 'main'){
+      clone = [{params: {id: "main"}}, ...clone]
+    }
     localStorage.setItem('saved-pages', JSON.stringify(clone))
     const pagesCont = pages.map((pageLink, index) => {
       const lastPageShowAddItem = showAddItem && index === (pages.length - 1);
@@ -266,11 +269,18 @@ export default class NoteDetailPage extends Component {
 
   backButton(Theme) {
     const themeBack = `${Theme.toLowerCase()}-back`;
+    const { pages } = this.state;
+    const hasPages = pages.length > 1;
+
     return (
       <button
         className={`backButton ${themeBack}`}
         onClick={() => {
-          window.history.back();
+          if(hasPages){
+            this.scrollPageBack()
+          } else {
+            window.history.back();
+          }
         }}
       >
         <i className="fas fa-arrow-left" />
@@ -299,11 +309,6 @@ export default class NoteDetailPage extends Component {
         <button className={`editButtons1 detailUpButton ${themeHover} ${themeBack}`} onClick={() => this.editNameSet()}>
           <i className="fas fa-pen" />
         </button>
-        {showBackButton? 
-          <button className={`detailUpButton ${themeHover} ${themeBack}`} onClick={() => this.scrollPageBack()}>
-            <i className="fas fa-arrow-left" />
-          </button>
-        : null}
         <div
           className={`detailUpButton ${themeHover} ${themeBack}`}
           onClick={() => {
