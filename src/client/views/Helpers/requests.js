@@ -136,7 +136,7 @@ export function updateOneNoteRec(note, done) {
       },
       body: JSON.stringify(toUpdateNote)
     }).then((response) => {
-      done(response);
+      // done(response);
       if (response.ok) {
         const updateSavedItems = localStorage.getItem('updateOneNote');
         if (updateSavedItems) {
@@ -148,8 +148,11 @@ export function updateOneNoteRec(note, done) {
             localStorage.setItem('updateOneNote', JSON.stringify(saveItemArray));
           } else {
             localStorage.removeItem('updateOneNote');
+            done(response);
           }
         }
+      } else {
+        done(response);
       }
     });
   });

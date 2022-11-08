@@ -82,14 +82,10 @@ export default class App extends Component {
   }
 
   setRedirect = () => {
-    // return ;
     const path = window.location.pathname;
-    // console.log('setRedirect', path);
-    console.log('window.location.href.includes(index.html)',window.location.href,window.location.href.includes('index.html'));
     if (path === '/' || window.location.href.includes('index.html')) {
       const { notes, noteNames } = this.state;
       let user = localStorage.getItem('user');
-      // console.log('(notes && noteNames) || user',(notes && noteNames) || user);
       if((notes && noteNames) || user) window.history.pushState('', '', './notes/main');
     }
   };
@@ -139,7 +135,6 @@ export default class App extends Component {
         const mainFound = notes.find(note => {
           return note.id === "main"
         })
-        // console.log('mainFound',mainFound);
         if(!mainFound){
           const mainPage = {
             createdBy: "Main",
@@ -238,10 +233,10 @@ export default class App extends Component {
     if (true) {
       const person = update.updateData? update.updateData: update.person? update.person: update;
       updateOneNoteRec({ person: person, delete: update.delete }, () => {
-        if (update.delete) {
+        // if (update.delete) {
           const noteUser = localStorage.getItem('user');
           this.getMyNotes(noteUser);
-        }
+        // }
       });
     } else {
       alert('Cant update in search');
