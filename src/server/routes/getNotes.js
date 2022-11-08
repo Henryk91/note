@@ -2,11 +2,9 @@ const express = require('express');
 
 const router = express.Router();
 const Handler = require('../controllers/handlers.js');
-const KeepUp = require('../keepUp.js');
 const dbHandler = new Handler();
 
 router.get('/', (req, res) => {
-  KeepUp('https://henryk91-note.herokuapp.com/', 1, 1, 14);
 
   const { user } = req.query;
   if (user === 'all' || user === 'All') {
