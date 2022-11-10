@@ -70,8 +70,10 @@ module.exports = function () {
     console.log('Temp Pass Check', tempPass);
     NoteUser.find({ tempPass }, (err, docs) => {
       if (err) {
+        console.log('Temp Pass Error', err.name);
         done(err.name);
       } else {
+        console.log('Temp Pass Confirm');
         done(docs);
       }
     });
@@ -150,13 +152,14 @@ module.exports = function () {
 
   this.getMyNotes = (req, done) => {
     const { user } = req.query;
+    console.log("Trying to getMyNotes", user)
     const pass = req.query.tempPass;
     let permId = null;
 
     tempPassCheck(pass, (docPass) => {
       if (docPass[0]) {
         permId = docPass[0].permId;
-
+        console.log('Finding notes created by:', user);
         Note.find({ createdBy: user, userId: permId }, (err, docs) => {
           if (err) {
             console.log(err);
