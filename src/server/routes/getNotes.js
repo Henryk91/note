@@ -21,7 +21,8 @@ router.get('/', (req, res) => {
       });
     } else {
         dbHandler.getMyNotes(req, (docs) => {
-        res.json(docs);
+          console.log('Responding with docs');
+          res.json(docs);
       });
     }
   }
