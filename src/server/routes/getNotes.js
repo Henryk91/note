@@ -13,11 +13,13 @@ router.get('/', (req, res) => {
     });
   } else {
     const { noteHeading } = req.query;
+    console.log("Trying to getNote", noteHeading)
     if (noteHeading) {
       dbHandler.getNote(req, (docs) => {
         res.json(docs);
       });
     } else {
+      console.log("Trying to getMyNotes", noteHeading)
       dbHandler.getMyNotes(req, (docs) => {
         res.json(docs);
       });

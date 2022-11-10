@@ -67,6 +67,7 @@ module.exports = function () {
   };
 
   function tempPassCheck(tempPass, done) {
+    console.log('Temp Pass Check', tempPass);
     NoteUser.find({ tempPass }, (err, docs) => {
       if (err) {
         done(err.name);
