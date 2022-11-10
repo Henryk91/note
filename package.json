@@ -37,7 +37,7 @@
     "url-loader": "^1.0.1",
     "webpack": "^4.46.0",
     "webpack-cli": "^3.3.12",
-    "webpack-dev-server": "^3.11.2",
+    "webpack-dev-server": "^4.11.1",
     "workbox-webpack-plugin": "^4.3.1",
     "@babel/core": "^7.19.6",
     "@babel/plugin-proposal-class-properties": "^7.14.5",
