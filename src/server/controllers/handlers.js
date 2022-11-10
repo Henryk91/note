@@ -157,6 +157,7 @@ module.exports = function () {
     let permId = null;
 
     tempPassCheck(pass, (docPass) => {
+      console.log('docPass',docPass);
       if (docPass[0]) {
         permId = docPass[0].permId;
         console.log('Finding notes created by:', user);
