@@ -152,15 +152,16 @@ module.exports = function () {
 
   this.getMyNotes = (req, done) => {
     const { user } = req.query;
-    console.log("Trying to getMyNotes", user)
+    const decodedUser = decodeURI(user)
+    console.log("Trying to getMyNotes", decodedUser)
     const pass = req.query.tempPass;
     let permId = null;
 
     tempPassCheck(pass, (docPass) => {
       if (docPass[0]) {
         permId = docPass[0].permId;
-        console.log('Finding notes created by:', user);
-        Note.find({ createdBy: user, userId: permId }, (err, docs) => {
+        console.log('Finding notes created by:', decodedUser);
+        Note.find({ createdBy: decodedUser, userId: permId }, (err, docs) => {
           console.log('Notes Found', docs.length);
           if (err) {
             console.log(err);
@@ -179,17 +180,17 @@ module.exports = function () {
   };
 
   this.getNote = (req, done) => {
-    const { user } = req.query;
-    const { noteHeading } = req.query;
+    const { user, noteHeading } = req.query;
+    const decodedUser = decodeURI(user)
+    const decodedNoteHeading = decodeURI(noteHeading)
     const pass = req.query.tempPass;
     let permId = null;
 
     tempPassCheck(pass, (docPass) => {
       if (docPass[0]) {
         permId = docPass[0].permId;
-        console.log('Note Heading:', noteHeading);
-        console.log(noteHeading);
-        Note.find({ createdBy: user, userId: permId, id: noteHeading }, (err, docs) => {
+        console.log('Note Heading:', decodedNoteHeading);
+        Note.find({ createdBy: decodedUser, userId: permId, id: decodedNoteHeading }, (err, docs) => {
           if (err) {
             console.log(err);
             done('No notes');

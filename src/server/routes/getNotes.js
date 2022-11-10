@@ -7,15 +7,17 @@ const dbHandler = new Handler();
 router.get('/', (req, res) => {
 
   const { user } = req.query;
-  if (user === 'all' || user === 'All') {
+  const decodedUser = decodeURI(user)
+  if (decodedUser === 'all' || decodedUser === 'All') {
     dbHandler.getAllNotes(req, (docs) => {
       res.json(docs);
     });
   } else {
     const { noteHeading } = req.query;
+    const decodedNoteHeading = decodeURI(noteHeading)
     
     if (noteHeading) {
-      console.log("Trying to getNote", noteHeading)
+      console.log("Trying to getNote", decodedNoteHeading)
       dbHandler.getNote(req, (docs) => {
         res.json(docs);
       });
