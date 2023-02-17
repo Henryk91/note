@@ -18,6 +18,7 @@ body {
   text-align: center;
   font-family: 'Open Sans', sans-serif;
   margin: auto;
+  overscroll-behavior-x: none;
 }
 
 button {
@@ -348,6 +349,8 @@ h2 {
   animation-duration: 1s;
   overflow: hidden; */
   /* width: fit-content; */
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 @keyframes slide {
   from {max-width: 0px;}

@@ -140,7 +140,8 @@ input[type="date"]::-webkit-inner-spin-button{
 #multiple-pages{
   display: flex;
   flex-direction: row;
-  overflow: scroll;
+  overflow-x: hidden;
+  overscroll-behavior: none;
   /* margin-left: 25vw; */
   /* padding-left: 25vw; */
       /* align-items: center; */
