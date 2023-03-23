@@ -44,6 +44,7 @@ input[type='text'],
 [type='password'],
 [type='email'],
 [type='date'],
+[type='datetime-local'],
 [type='number'] {
   text-align: center;
   color: white;
@@ -51,7 +52,7 @@ input[type='text'],
   border-radius: 2px;
   margin-top: 12vh;
   margin-top: 5px;
-  width: 200px;
+  width: 250px;
   font-size: 18px;
 }
 textarea {

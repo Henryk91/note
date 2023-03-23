@@ -12,7 +12,7 @@ export default class EditNoteCheck extends Component {
       radioType: 'Note',
       upload: null,
       displayDate: new Date(),
-      inputDisplayDate: new Date().toISOString().split('T')[0]
+      inputDisplayDate: this.dateToInputDisplayDate(new Date())
     };
     this.changeDate = this.changeDate.bind(this)
     this.setRadioType = this.setRadioType.bind(this);
@@ -32,9 +32,22 @@ export default class EditNoteCheck extends Component {
     e.preventDefault();
     const selectedDate = e.target.value;
     let date = new Date(selectedDate);
-    this.setState({ displayDate: date, inputDisplayDate: date.toISOString().split('T')[0] });
+    this.setState({ displayDate: date, inputDisplayDate: this.dateToInputDisplayDate(date) });
     document.getElementById('text-date').value = date;
   };
+
+  dateToInputDisplayDate = (date) => {
+    if (!date || isNaN(date)) return ''
+    let seconds = this.addLeadingZero(date.getSeconds())
+    let minutes = this.addLeadingZero(date.getMinutes())
+    let hours = this.addLeadingZero(date.getHours())
+    return date.toISOString().split('T')[0] + "T" + hours + ":" + minutes + ":" + seconds
+  }
+
+  addLeadingZero = (number) => {
+    if(number < 10) number = "0" + number
+    return number
+  }
   
   changeLink = e => {
     e.preventDefault();
@@ -228,7 +241,7 @@ export default class EditNoteCheck extends Component {
 
   newLog(inputDisplayDate, themeBack, displayDate, lable) {
     return <div>
-      <input onChange={this.changeDate} value={inputDisplayDate} className={themeBack} type="date" name="dateSelector" />
+      <input onChange={this.changeDate} value={inputDisplayDate} className={themeBack} type="datetime-local" name="dateSelector" />
       <br />
       <input id="text-date" className={themeBack} name="tagTypeText" type="text" defaultValue={displayDate} onChange={e => this.onTodoChange(e.target.value)} />
       <br />

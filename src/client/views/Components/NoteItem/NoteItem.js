@@ -97,17 +97,23 @@ export default class NoteItem extends Component {
     let editText = item;
     const isLog = item.includes('"json":true');
     let editDate = null;
+    let editInputDate = null;
     if (isLog) {
       const logObj = JSON.parse(item);
       console.log(logObj.date);
       editDate = logObj.date;
       editText = logObj.data;
       console.log(logObj.data);
+      editInputDate = this.dateToInputDisplayDate(new Date(editDate))
     }
-
     return (
       <form onSubmit={this.submitChange} className="noteItemEditBox">
-        {isLog ? <textarea className={`editDateArea ${themeBack}`} name="itemDate" type="text" defaultValue={editDate} /> : null}
+        {isLog ? (
+          <>
+            <input onChange={this.changeDate} defaultValue={editInputDate} className={themeBack} type="datetime-local" name="dateSelector" />
+            <textarea id="text-date" className={`editDateArea ${themeBack}`} name="itemDate" type="text" defaultValue={editDate} />
+          </>
+        ) : null}
         <textarea className={`editTextarea ${themeBack}`} name="item" type="text" defaultValue={editText} />
         <br />
         <button className={`submit-button ${themeBack} ${themeHover}`} type="submit">
@@ -125,6 +131,27 @@ export default class NoteItem extends Component {
         <br />
       </form>
     );
+  }
+
+  changeDate = e => {
+    e.preventDefault();
+    const selectedDate = e.target.value;
+    let date = new Date(selectedDate);
+    this.setState({ displayDate: date, inputDisplayDate: this.dateToInputDisplayDate(date) });
+    document.getElementById('text-date').value = date;
+  };
+
+  dateToInputDisplayDate = (date) => {
+    if (!date || isNaN(date)) return ''
+    let seconds = this.addLeadingZero(date.getSeconds())
+    let minutes = this.addLeadingZero(date.getMinutes())
+    let hours = this.addLeadingZero(date.getHours())
+    return date.toISOString().split('T')[0] + "T" + hours + ":" + minutes + ":" + seconds
+  }
+
+  addLeadingZero = (number) => {
+    if(number < 10) number = "0" + number
+    return number
   }
 
   hideLogLines = () => {

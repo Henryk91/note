@@ -113,6 +113,10 @@
   margin-top: 0px;
 }
 
+input[type="datetime-local"]::-webkit-inner-spin-button{
+    display: none;
+    -webkit-appearance: none;
+}
 input[type="date"]::-webkit-inner-spin-button{
     display: none;
     -webkit-appearance: none;
