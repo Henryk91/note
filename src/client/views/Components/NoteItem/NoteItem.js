@@ -143,10 +143,9 @@ export default class NoteItem extends Component {
 
   dateToInputDisplayDate = (date) => {
     if (!date || isNaN(date)) return ''
-    let seconds = this.addLeadingZero(date.getSeconds())
     let minutes = this.addLeadingZero(date.getMinutes())
     let hours = this.addLeadingZero(date.getHours())
-    return date.toISOString().split('T')[0] + "T" + hours + ":" + minutes + ":" + seconds
+    return date.toISOString().split('T')[0] + "T" + hours + ":" + minutes
   }
 
   addLeadingZero = (number) => {
