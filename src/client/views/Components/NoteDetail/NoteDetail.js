@@ -796,10 +796,12 @@ export default class NoteDetail extends Component {
   pageContent(person, editName, editNameB, showAddItem, Theme, tags) {
     const themeBack = `${Theme.toLowerCase()}-back`;
     const themeHover = `${Theme.toLowerCase()}-hover`;
-    const className = this.props.index === 0 ? "note-detail-item first-note-detail-item": "note-detail-item"
+    const isFirstPage = this.props.index === 0
+    const className = isFirstPage ? "note-detail-item first-note-detail-item": "note-detail-item"
+    
     const heading = this.props.lastPage && this.state.showTag && this.state.showTag !== "null" ? this.state.showTag: person.heading
     return (
-      <div className={className} key={person.id}>
+      <div id={isFirstPage? 'isFirstPage': ''} className={className} key={person.id}>
         {editName ? (
           <div>{editNameB}</div>
         ) : (

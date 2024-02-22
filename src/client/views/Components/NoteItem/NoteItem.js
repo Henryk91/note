@@ -235,10 +235,10 @@ export default class NoteItem extends Component {
           <div>
             <div>
               <p className="noteItem white-color log-noteItem">{newDate} {duration}</p>
-              <p className={`noteItem ${hasBreak}`}>{parsedItem.data}</p>
-              <button className={`editButtons ${themeBack} ${themeBackHover}`} onClick={() => this.setState({ editingItem: true })}>
+              <div className={`noteItem ${hasBreak} dangerous-text`} dangerouslySetInnerHTML={this.getMarkdownText(parsedItem.data)} onClick={() => this.setState({ editingItem: true })} />
+              {/* <button className={`editButtons ${themeBack} ${themeBackHover}`} onClick={() => this.setState({ editingItem: true })}>
                 <i className="fas fa-pen" />
-              </button>
+              </button> */}
               {hasBreak && prevData ? (
                 <button className={`editButtons ${themeBack} ${themeBackHover}`} onClick={() => this.props.cont({ cont: prevData })}>
                   Cont

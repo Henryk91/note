@@ -166,3 +166,9 @@ input[type="date"]::-webkit-inner-spin-button{
 .page-content-top{
   margin-top: 15vh;
 }
+.no-width{
+  width: 0px;
+}
+#isFirstPage{
+  max-width: 98vw;
+}
