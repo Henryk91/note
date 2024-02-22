@@ -91,9 +91,16 @@ export default class EditNoteCheck extends Component {
     return text;
   }
 
-  onTextChange(ev) {
-    const text = this.getText(ev.target);
-    document.getElementById('input-div-text-area').value = text;
+  onTextChange(event) {
+    let input = event.target.value;
+    const element = document.getElementById('dynamic-text-area')
+    if(input.length > 17) {
+      element.classList.remove('small-text-area');  
+      element.classList.add('big-text-area');  
+    } else {
+      element.classList.add('small-text-area');  
+      element.classList.remove('big-text-area');
+    }
   }
 
   handleChange(event) {
@@ -248,8 +255,7 @@ export default class EditNoteCheck extends Component {
         <input className={themeBack} name="number" type="text" defaultValue={lable} />
       ) : (
           <div>
-            <input id="input-div-text-area" className={themeBack} onChange={this.handleChange} name="number" type="text" placeholder="Info" />
-            <div id="div-text-area" contentEditable className={`hidden ${themeBack}`} onInput={this.onTextChange} name="number" type="text" placeholder="Info" />
+            <textarea id="dynamic-text-area" className={`small-text-area ${themeBack}`} onChange={this.onTextChange} name="number" type="text" placeholder="Info" />
           </div>
         )}
       <br />
