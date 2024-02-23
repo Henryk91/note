@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/label-has-for */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable react/prop-types */
-import React, { Component } from 'react';
+import React, { Component, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 
@@ -91,8 +91,8 @@ export default class EditNoteCheck extends Component {
     return text;
   }
 
-  onTextChange(event) {
-    let input = event.target.value;
+  onTextChange(value) {
+    let input = `${value}`;
     input = input.replaceAll("%3A", ":")
     input = input.replaceAll("%20", " ")
     input = input.replaceAll("%0A", "\n")
@@ -106,7 +106,7 @@ export default class EditNoteCheck extends Component {
       element.classList.remove('big-text-area');
     }
 
-    if(input !== event.target.value)element.value = input;
+    if(input !== value)element.value = input;
   }
 
   handleChange(event) {
@@ -260,7 +260,14 @@ export default class EditNoteCheck extends Component {
       {lable ? (
         <input className={themeBack} name="number" type="text" defaultValue={lable} />
       ) : (
-          <textarea autoComplete="on" id="dynamic-text-area" className={`small-text-area ${themeBack}`} onChange={this.onTextChange} name="number" type="text" placeholder="Info" />
+        <AutoCompleteTextArea 
+          elementId={"dynamic-text-area"} 
+          className={`${themeBack}`} 
+          smallClassName={'small-text-area'} 
+          bigClassName={'big-text-area'}
+          placeholder="Info"
+          name="number"
+        /> 
         )}
       <br />
     </div>;
@@ -276,9 +283,82 @@ export default class EditNoteCheck extends Component {
     return <div>
       <input className={themeBack} name="tagTypeText" type="text" placeholder="Sub Heading" defaultValue={showTag} />
       <br />
-      <textarea id="input-div-text-area" className={`editNoteTextarea ${themeBack}`} onChange={this.handleChange} name="number" type="text" placeholder="eg: Company, Note" defaultValue={defaultVal}/>
-      <div id="div-text-area" contentEditable className={`hidden ${themeBack}`} onInput={this.onTextChange} name="number" type="text" placeholder="Info" />
+      <AutoCompleteTextArea 
+        elementId={"dynamic-text-area-a"} 
+        className={`${themeBack}`} 
+        smallClassName={'input-div-text-area'} 
+        bigClassName={'div-text-area'}
+        placeholder="eg: Company, Note" 
+        defaultValue={defaultVal}
+        name="number"
+      /> 
       <br />
     </div>;
   }
 }
+
+function AutoCompleteTextArea(
+  {
+    elementId,
+    className,
+    smallClassName,
+    bigClassName, 
+    onChange,
+    placeholder,
+    defaultValue,
+    name
+  }
+  ) {
+  const [isBig, setIsBig] = useState()
+  const [value, setValue] = useState()
+
+  const localChange = (event) => {
+    let input = event.target.value;
+
+    input = input.replaceAll("%3A", ":")
+    input = input.replaceAll("%20", " ")
+    input = input.replaceAll("%0A", "\n")
+
+    if(input.length > 17) {
+      if(!isBig) setIsBig(true)
+    } else {
+      if(isBig) setIsBig(false)
+    }
+
+    setValue(input)
+
+    if(input !== event.target.value){
+      const element = document.getElementById(elementId)
+      element.value = input;
+    }
+    if(onChange) onChange(input)
+  }
+  const pasteListener = () => {
+    const element = document.getElementById(elementId)
+    element.addEventListener("paste", async (event) => {
+      const text = await navigator.clipboard.readText();
+      setTimeout(() => {
+        const element = document.getElementById(elementId);
+        element.value = text;
+        element.focus()
+      },  10);
+    })
+  }
+  
+  useEffect(() => {
+    if(value){
+      const element = document.getElementById(elementId)
+      element.value = value;
+      element.focus()
+    }
+    pasteListener();
+    
+  },[isBig])
+
+  return isBig?(
+    <textarea id={elementId} className={`${className} ${bigClassName}`} onChange={localChange} name={name} type="text" placeholder={placeholder} defaultValue={defaultValue}/>
+  ):(
+    <input id={elementId} className={`${className} ${smallClassName}`} onChange={localChange} name={name} type="text" placeholder={placeholder} defaultValue={defaultValue} />
+  )
+}
+
