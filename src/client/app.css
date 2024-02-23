@@ -374,3 +374,7 @@ h2 {
   from {max-height: 0px;}
   to {max-height: 1000px;}
 }
+
+.flex{
+  display: flex;
+}
