@@ -339,7 +339,7 @@ function AutoCompleteTextArea(
       const text = await navigator.clipboard.readText();
       setTimeout(() => {
         const element = document.getElementById(elementId);
-        element.value = text;
+        element.value = element.value + text;
         element.focus()
       },  10);
     })
