@@ -145,7 +145,7 @@ input[type="date"]::-webkit-inner-spin-button{
   display: flex;
   flex-direction: row;
   overflow-x: hidden;
-  overscroll-behavior: none;
+  /* overscroll-behavior: none; */
   /* margin-left: 25vw; */
   /* padding-left: 25vw; */
       /* align-items: center; */
