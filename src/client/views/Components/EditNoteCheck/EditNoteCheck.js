@@ -362,7 +362,7 @@ function AutoCompleteTextArea(
       element.value = value;
       element.focus()
     }
-    pasteListener();
+    // pasteListener();
   },[doReload])
 
   return isBig?(
