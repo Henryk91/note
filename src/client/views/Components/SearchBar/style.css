@@ -7,7 +7,7 @@
 #userNameBox{
   font-size: 25px;
   margin: 1px;
-  margin-top: 10px;
+  /* margin-top: 10px; */
   border-bottom: 1px solid white;
   text-align: center;
   color: white;
