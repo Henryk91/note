@@ -343,6 +343,7 @@ function AutoCompleteTextArea(
   const pasteListener = () => {
     const el = document.getElementById(elementId)
     el.addEventListener("paste", async (event) => {
+      if (isBig) return
       event.preventDefault()
       const text = await navigator.clipboard.readText();
       const element = document.getElementById(elementId);
@@ -362,7 +363,7 @@ function AutoCompleteTextArea(
       element.value = value;
       element.focus()
     }
-    // pasteListener();
+    pasteListener();
   },[doReload])
 
   return isBig?(
