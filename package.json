@@ -24,7 +24,7 @@
     "dotenv": "^6.2.0",
     "express": "^4.17.1",
     "file-loader": "^3.0.0",
-    "marked": "^0.6.3",
+    "marked": "^4.0.10",
     "mongodb": "^3.6.11",
     "mongoose": "^5.13.5",
     "node-fetch": "^2.3.0",
