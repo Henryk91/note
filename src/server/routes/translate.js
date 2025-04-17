@@ -4,7 +4,7 @@ const fetch = require("node-fetch");
 
 module.exports = function (app) {
   app.post('/api/translate',cors({
-    origin: 'http://localhost:3000', // or '*', but better to specify
+    origin: '*', // or '*', but better to specify
   }), async (req, res) => {
   // app.post('/api/translate', async (req, res) => {
     const { sentence } = req.body;
