@@ -8,6 +8,9 @@ module.exports = function (app) {
     if (!sentence) {
       return res.status(400).json({ error: 'Missing sentence in request body' });
     }
+
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   
     try {
       // Build f.req payload
