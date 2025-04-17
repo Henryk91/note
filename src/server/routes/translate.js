@@ -1,5 +1,6 @@
 /* eslint-disable func-names */
 const cors = require('cors');
+const fetch = require("node-fetch");
 
 module.exports = function (app) {
   // app.post('/api/translate',cors(), async (req, res) => {
