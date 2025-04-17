@@ -7,6 +7,7 @@ const updateNotes = require('./routes/updateNotes');
 const userCheck = require('./routes/userCheck');
 const getDashData = require('./routes/getDashData');
 const sendEmail = require('./routes/sendEmail');
+const translate = require('./routes/translate');
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use(express.static('dist'));
 app.use('/api/note', getNotes);
 app.use('/api/note-names', getNoteNames);
 
+translate(app);
 updateNotes(app);
 getDashData(app);
 sendEmail(app);
