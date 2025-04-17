@@ -3,8 +3,10 @@ const cors = require('cors');
 const fetch = require("node-fetch");
 
 module.exports = function (app) {
-  // app.post('/api/translate',cors(), async (req, res) => {
-  app.post('/api/translate', async (req, res) => {
+  app.post('/api/translate',cors({
+    origin: 'http://localhost:3000', // or '*', but better to specify
+  }), async (req, res) => {
+  // app.post('/api/translate', async (req, res) => {
     const { sentence } = req.body;
     if (!sentence) {
       return res.status(400).json({ error: 'Missing sentence in request body' });
