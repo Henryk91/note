@@ -3,9 +3,7 @@ const cors = require('cors');
 const fetch = require("node-fetch");
 
 module.exports = function (app) {
-  app.post('/api/translate',cors({
-    origin: '*', // or '*', but better to specify
-  }), async (req, res) => {
+  app.post('/api/translate',cors({ origin: '*' }), async (req, res) => {
   // app.post('/api/translate', async (req, res) => {
     const { sentence } = req.body;
     if (!sentence) {
