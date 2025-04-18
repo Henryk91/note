@@ -319,8 +319,9 @@ module.exports = function () {
         console.log('userId',userId);
         if (doc.dataLable) {
             const referer = req.headers.referer;
+            const { pathname } = new URL(referer);
             const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-            const data = `Referer: ${referer}\nIp: ${ip}\n SA Date: ${calcTimeNowOffset('+2')}\n https://ipapi.co/${ip}/`;
+            const data = `Referer: ${referer}${pathname}\nIp: ${ip}\n SA Date: ${calcTimeNowOffset('+2')}\n https://ipapi.co/${ip}/`;
             let siteTag = 'Site one';
             if(referer){
               let siteName = referer.replace('http://','').replace('https://','')+"";
