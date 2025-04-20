@@ -318,10 +318,9 @@ module.exports = function () {
         doc.heading = 'Site Track';
         console.log('userId',userId);
         if (doc.dataLable) {
-            const referer = req.headers.referer;
-            const websiteName  = req.query && req.query.site ? req.query.site: '';
+            const referer = req.headers.referer; 
             const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-            const data = `Referer: ${referer} ${websiteName}\nIp: ${ip}\n SA Date: ${calcTimeNowOffset('+2')}\n https://ipapi.co/${ip}/`;
+            const data = `Referer: ${referer}\nIp: ${ip}\n SA Date: ${calcTimeNowOffset('+2')}\n https://ipapi.co/${ip}/`;
             let siteTag = 'Site one';
             if(referer){
               let siteName = referer.replace('http://','').replace('https://','')+"";
@@ -329,6 +328,8 @@ module.exports = function () {
                 siteTag = siteName.substring(0, siteName.indexOf('/'));
               }
             }
+            const websiteName  = req.query && req.query.site ? req.query.site: '';
+            if (websiteName && websiteName != '') siteTag = websiteName;
             console.log('siteTag',siteTag);
             doc.dataLable.push({ tag: siteTag, data });
         }
