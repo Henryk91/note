@@ -2,8 +2,17 @@
 const cors = require('cors');
 const fetch = require("node-fetch");
 
+const Handler = require('../controllers/handlers.js');
+const dbHandler = new Handler();
+
 module.exports = function (app) {
   app.options('/api/translate', cors());
+
+  app.get('/api/translate-practice', cors({ origin: '*' }), (req, res) => {
+    dbHandler.getTranslationPractice((docs) => {
+      res.json(docs);
+    });
+  });
   
   app.post('/api/translate',cors({ origin: '*' }), async (req, res) => {
   // app.post('/api/translate', async (req, res) => {

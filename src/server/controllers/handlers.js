@@ -344,4 +344,21 @@ module.exports = function () {
       }
     });
   };
+
+  this.getTranslationPractice = (done) => {
+    Note.find({ createdBy: "Henry", userId: "UUvFcBXO6Q", heading: "TranslationPractice" }, (err, docs) => {
+      if (err) {
+        console.log(err);
+        done(null);
+      }
+
+      const result = docs[0].dataLable.reduce((acc, { tag, data }) => {
+        acc[tag] = acc[tag] ? `${acc[tag]}.${data}.`: data;
+        acc[tag] = acc[tag].replaceAll("..", ".");
+        return acc;
+      }, {});
+
+      done(result);
+    });
+  }
 };
