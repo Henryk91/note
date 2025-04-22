@@ -6,7 +6,7 @@ const Handler = require('../controllers/handlers.js');
 const dbHandler = new Handler();
 
 module.exports = function (app) {
-  app.options('/api/translate', cors());
+  app.options('/api/translate-practice', cors());
 
   app.get('/api/translate-practice', cors({ origin: '*' }), (req, res) => {
     dbHandler.getTranslationPractice((docs) => {
@@ -14,6 +14,7 @@ module.exports = function (app) {
     });
   });
   
+  app.options('/api/translate', cors());
   app.post('/api/translate',cors({ origin: '*' }), async (req, res) => {
   // app.post('/api/translate', async (req, res) => {
     const { sentence } = req.body;
