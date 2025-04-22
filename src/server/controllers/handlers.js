@@ -353,8 +353,9 @@ module.exports = function () {
       }
 
       const result = docs[0].dataLable.reduce((acc, { tag, data }) => {
-        acc[tag] = acc[tag] ? `${acc[tag]}.${data}.`: data;
-        acc[tag] = acc[tag].replaceAll("..", ".");
+        const formatted = data.trim().endsWith(".")? `${data} `: `${data}. `;
+        acc[tag] = acc[tag] ? `${acc[tag]}${formatted}`: formatted;
+
         return acc;
       }, {});
 
