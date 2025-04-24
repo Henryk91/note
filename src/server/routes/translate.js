@@ -65,16 +65,12 @@ module.exports = function (app) {
       });
   
       const text = await googleRes.text();
-      const clean = text.replace(/^[^\[]+/, '');
-  
-      const lastIndex = clean.lastIndexOf("]]")
-      const cleaner = clean.slice(0, lastIndex)
-      const lastIndexB = cleaner.lastIndexOf("]]")
-      const cleanest = cleaner.slice(0, lastIndexB+2)
-  
+      const batches = text.split("\n").filter(row => row.startsWith("[["));
+      const translatedString = batches.reduce((a, b) => a.length >= b.length ? a : b);
+
       let data = [];
       try {
-        data = JSON.parse(cleanest);
+        data = JSON.parse(translatedString);
       } catch (err) {
         console.error('Failed to parse response:', err);
       }
@@ -86,9 +82,13 @@ module.exports = function (app) {
       if (typeof raw === 'string') {
           const rawList = JSON.parse(raw)
           const filteredList = rawList.flat(Infinity).filter((i) => {
-              return i !== null && typeof i === 'string' && i !== sentence && i !== 'en' && i !== 'de'
-          } )
-          translated = filteredList.toString();
+              return (
+                i !== null && typeof i === 'string' 
+                && i !== sentence && i !== 'en' 
+                && i !== 'de' && !sentence.includes(i)
+              )
+          });
+          translated = filteredList.join(" ");
       }
       
       res.json({ translated });
