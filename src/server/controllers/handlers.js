@@ -362,4 +362,27 @@ module.exports = function () {
       done(result);
     });
   }
+
+  this.getFullTranslationPractice = (done) => {
+  
+    Note.find({ createdBy: "TranslationPractice" }, (err, docs) => {
+      if (err) {
+        console.log(err);
+        done(null);
+      }
+
+      const result = docs.reduce((acc, {heading, dataLable}) => {
+        const result = dataLable.reduce((noteAcc, { tag, data }) => {
+          const formatted = data.trim().endsWith(".")? `${data} `: `${data}. `;
+          noteAcc[tag] = noteAcc[tag] ? `${acc[tag]}${formatted}`: formatted;
+          return noteAcc;
+        }, {});
+      
+        acc[heading] = result
+        return acc
+      }, {});
+      
+      done(result);
+    });
+  }
 };

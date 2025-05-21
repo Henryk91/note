@@ -13,6 +13,11 @@ module.exports = function (app) {
       res.json(docs);
     });
   });
+  app.get('/api/full-translate-practice', cors({ origin: '*' }), (req, res) => {
+    dbHandler.getFullTranslationPractice((docs) => {
+      res.json(docs);
+    });
+  });
   
   app.options('/api/translate', cors());
   app.post('/api/translate',cors({ origin: '*' }), async (req, res) => {
