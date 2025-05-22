@@ -395,6 +395,10 @@ module.exports = function () {
   this.getSavedTranslation = (req, done) => {
     const level  =  req?.query?.level;
     const subLevel  =  req?.query?.subLevel;
+    if (!level || !subLevel){
+      done(null);
+      return;
+    }
 
     Note.find({ createdBy: "TranslationPractice", heading: level }, (err, docs) => {
       if (err) {
@@ -408,7 +412,6 @@ module.exports = function () {
       }
 
       const filteredDocs = docs[0].dataLable.filter(item => item.tag === subLevel);
-      
       const english = splitSentences(filteredDocs[0].data);
       const german = filteredDocs.length > 1 ? splitSentences(filteredDocs[1].data): [];
       const englishSentences = english.map((sentence, index) => ({
