@@ -374,10 +374,10 @@ module.exports = function () {
       const result = docs.reduce((acc, {heading, dataLable}) => {
         const result = dataLable.reduce((noteAcc, { tag, data }) => {
           const formatted = data.trim().endsWith(".")? `${data} `: `${data}. `;
-          noteAcc[tag] = noteAcc[tag] ? `${acc[tag]}${formatted}`: formatted;
+          noteAcc[tag] = noteAcc[tag] ? `${noteAcc[tag]}${formatted}`: formatted;
           return noteAcc;
         }, {});
-      
+
         acc[heading] = result
         return acc
       }, {});
@@ -385,4 +385,38 @@ module.exports = function () {
       done(result);
     });
   }
+
+  const splitSentences = (input) =>
+    input
+      .split(/(?<=[.!?])\s+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+  this.getSavedTranslation = (req, done) => {
+    const level  =  req?.query?.level;
+    const subLevel  =  req?.query?.subLevel;
+
+    Note.find({ createdBy: "TranslationPractice", heading: level }, (err, docs) => {
+      if (err) {
+        console.log(err);
+        done(null);
+      }
+
+      if(docs.length < 1){
+        done(null);
+        return;
+      }
+
+      const filteredDocs = docs[0].dataLable.filter(item => item.tag === subLevel);
+      
+      const english = splitSentences(filteredDocs[0].data);
+      const german = filteredDocs.length > 1 ? splitSentences(filteredDocs[1].data): [];
+      const englishSentences = english.map((sentence, index) => ({
+        sentence,
+        translation: german[index] || ''
+      }));
+
+      done(englishSentences);
+    });
+  };
 };

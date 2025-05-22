@@ -18,6 +18,12 @@ module.exports = function (app) {
       res.json(docs);
     });
   });
+
+  app.get('/api/saved-translation', cors({ origin: '*' }), (req, res) => {
+    dbHandler.getSavedTranslation(req, (docs) => {
+      res.json(docs);
+    });
+  });
   
   app.options('/api/translate', cors());
   app.post('/api/translate',cors({ origin: '*' }), async (req, res) => {
