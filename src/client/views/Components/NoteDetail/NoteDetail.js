@@ -206,7 +206,6 @@ export default class NoteDetail extends Component {
   refreshItems = (person) => {
     if (person) {
       let sessionShowTag = localStorage.getItem('showTag');
-      const { showTag } = this.state;
       let tag = sessionShowTag ? sessionShowTag : sessionShowTag;
       const tags = this.getNoteByTag(person.dataLable, tag);
       this.setState({ person, tags, showTag: tag });
@@ -376,7 +375,9 @@ export default class NoteDetail extends Component {
     ));
 
   showHideBox = (showTag, prop) => {
-    if (showTag !== prop && prop !== 'Log') {
+    //TODO: Fix this logic
+    // if (showTag !== prop && prop !== 'Log') {
+    if (prop !== 'Log') {
       this.showTagChange(prop);
     } else if (showTag !== '' && prop !== 'Log') {
       this.showTagChange('');
@@ -543,7 +544,9 @@ export default class NoteDetail extends Component {
   }
 
   setLogAndLinksAtTop(sort) {
-    let propertyArray = Object.keys(sort).sort();
+    let propertyArray = Object.keys(sort)
+    const isFirstPage = this.props.index === 0;
+    if (isFirstPage) propertyArray.sort();
 
     if (propertyArray.includes('Log')) {
       propertyArray = propertyArray.filter((prop) => prop !== 'Log');
@@ -799,7 +802,7 @@ export default class NoteDetail extends Component {
     const isFirstPage = this.props.index === 0
     const className = isFirstPage ? "note-detail-item first-note-detail-item": "note-detail-item"
     
-    const heading = this.props.lastPage && this.state.showTag && this.state.showTag !== "null" ? this.state.showTag: person.heading
+    const heading = this.props.lastPage && this.state.showTag && this.state.showTag !== "null" && this.props.index > 1 ? this.state.showTag: person.heading
     return (
       <div id={isFirstPage? 'isFirstPage': ''} className={className} key={person.id}>
         {editName ? (

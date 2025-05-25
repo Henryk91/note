@@ -121,9 +121,9 @@ export default class Login extends Component {
           <div>
             <form onSubmit={this.saveLogin}>
               <br />
-              <input className={themeBack} name="email" type="email" placeholder="Email" required="required" autocomplete="username" />
+              <input className={themeBack} name="email" type="email" placeholder="Email" required="required" autoComplete="username" />
               <br />
-              <input className={themeBack} name="password" type="password" placeholder="Password" required="required" autocomplete="current-password" />
+              <input className={themeBack} name="password" type="password" placeholder="Password" required="required" autoComplete="current-password" />
               <br />
               <button className={themeBack + " " + themeHover} type="submit">
                 Submit
