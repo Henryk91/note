@@ -109,7 +109,12 @@ module.exports = function (app) {
     }
   });  
 
-  app.post('/api/confirm-translation', async (req, res) => {
+  const corsOptions = {
+    origin: ['https://henryk.co.za', 'http://localhost:3000'],
+    methods: ['POST'],
+  };
+
+  app.post('/api/confirm-translation', cors(corsOptions), async (req, res) => {
     const { english, german } = req.body;
     
     const prompt = `
