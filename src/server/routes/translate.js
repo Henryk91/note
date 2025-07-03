@@ -109,9 +109,17 @@ module.exports = function (app) {
     }
   });  
 
+  const allowedOrigins = ['https://henryk.co.za', 'https://example.com'];
+
   const corsOptions = {
-    origin: ['https://henryk.co.za', 'http://localhost:3000'],
-    methods: ['POST'],
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ['POST', 'OPTIONS'],
   };
 
   app.post('/api/confirm-translation', cors(corsOptions), async (req, res) => {
