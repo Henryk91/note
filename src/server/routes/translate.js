@@ -187,7 +187,7 @@ module.exports = function (app) {
       }
 
       const text = data.choices?.[0]?.message?.content?.trim().toLowerCase();
-      console.log('text',data.choices?.[0]?.message);
+      console.log('message',data.choices?.[0]?.message);
       res.json({ isCorrect: text === 'true' });
     } catch (error) {
       console.error('API Error:', error);
