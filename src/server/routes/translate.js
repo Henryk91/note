@@ -109,7 +109,7 @@ module.exports = function (app) {
     }
   });  
 
-  const allowedOrigins = ['http://localhost:3000', 'https://note.henryk.co.za'];
+  const allowedOrigins = ['http://localhost:3000', 'https://note.henryk.co.za', 'https://henryk.co.za'];
 
   const corsOptions = {
     origin: function (origin, callback) {
