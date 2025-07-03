@@ -108,4 +108,53 @@ module.exports = function (app) {
       res.status(500).json({ error: 'Translation proxy error' });
     }
   });  
+
+  app.post('/api/confirm-translation', async (req, res) => {
+    const { english, german } = req.body;
+    
+    const prompt = `
+      You are a translation evaluator.
+
+      Given the English sentence and its German translation, respond only with:
+
+      true — if the German translation is accurate and grammatically correct.
+      false — if there are errors in meaning or grammar.
+
+      English: "${english}"
+      German: "${german}"
+
+      Respond with only "true" or "false".
+    `;
+
+    try {
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.0,
+          max_tokens: 5,
+        }),
+      });
+
+      const data = await response.json();
+      const errorCode = data?.error?.code
+      if (errorCode) {
+        console.error('OpenAI API Error:', errorCode);
+        return res.status(500).json({ error: 'OpenAI API error' });
+      }
+
+      const text = data.choices?.[0]?.message?.content?.trim().toLowerCase();
+
+      res.json({ isCorrect: text === 'true' });
+    } catch (error) {
+      console.error('API Error:', error);
+      res.status(500).json({ error: 'Translation check failed' });
+    }
+  });
 };
