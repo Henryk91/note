@@ -130,18 +130,35 @@ module.exports = function (app) {
     const { english, german } = req.body;
     
     const prompt = `
-      You are a translation evaluator.
+        You are a translation evaluator.
 
-      Given the English sentence and its German translation, respond only with:
+        Your job is to check whether a German translation is both:
+        - Grammatically correct
+        - Faithfully conveys the intended meaning of the English sentence
 
-      true — if the German translation is accurate and grammatically correct.
-      false — if there are errors in meaning or grammar.
+        You MUST accept idiomatic German expressions — for example, "Abend" may be used instead of "night" when the meaning remains equivalent.
 
-      English: "${english}"
-      German: "${german}"
+        Ignore punctuation, capitalization, and stylistic differences.
 
-      Respond with only "true" or "false".
-    `;
+        ---
+        Example:
+        English: "The train, which was delayed by the storm, arrived late at night."
+        German: "Der Zug, der durch den Sturm verspätet wurde, kam gestern Abend spät an."
+        → true
+
+        ---
+        Now evaluate the following:
+
+        English: "${english}"
+        German: "${german}"
+
+        Respond only with:
+        true
+        or
+        false
+`;
+
+
 
     try {
 
@@ -160,6 +177,7 @@ module.exports = function (app) {
       });
 
       const data = await response.json();
+      console.log('data',data);
       const errorCode = data?.error?.code
       if (errorCode) {
         console.error('OpenAI API Error:', errorCode);
@@ -167,7 +185,7 @@ module.exports = function (app) {
       }
 
       const text = data.choices?.[0]?.message?.content?.trim().toLowerCase();
-
+      console.log('text',data.choices?.[0]?.message);
       res.json({ isCorrect: text === 'true' });
     } catch (error) {
       console.error('API Error:', error);
