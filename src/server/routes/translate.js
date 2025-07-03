@@ -109,17 +109,19 @@ module.exports = function (app) {
     }
   });  
 
-  const allowedOrigins = ['https://henryk.co.za', 'https://example.com'];
+  const allowedOrigins = ['http://localhost:3000', 'https://note.henryk.co.za'];
 
   const corsOptions = {
     origin: function (origin, callback) {
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        console.error('Blocked by CORS: origin =', origin);
         callback(new Error('Not allowed by CORS'));
       }
     },
     methods: ['POST', 'OPTIONS'],
+    optionsSuccessStatus: 204, // For legacy browsers
   };
 
   app.options('/api/confirm-translation', cors(corsOptions));
