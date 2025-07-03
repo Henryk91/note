@@ -139,6 +139,8 @@ module.exports = function (app) {
         You MUST accept idiomatic German expressions — for example, "Abend" may be used instead of "night" when the meaning remains equivalent.
 
         Ignore punctuation, capitalization, and stylistic differences.
+        Remember spelling is very important. And pay attention that all letters are present and that letters with umlauts are used correctly.
+
 
         ---
         Example:
