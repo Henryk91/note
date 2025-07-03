@@ -122,6 +122,8 @@ module.exports = function (app) {
     methods: ['POST', 'OPTIONS'],
   };
 
+  app.options('/api/confirm-translation', cors(corsOptions));
+
   app.post('/api/confirm-translation', cors(corsOptions), async (req, res) => {
     const { english, german } = req.body;
     
