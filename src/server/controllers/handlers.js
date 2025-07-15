@@ -413,7 +413,7 @@ module.exports = function () {
         return;
       }
 
-      const filteredDocs = docs[0].dataLable.filter(item => item.tag === subLevel);
+      const filteredDocs = docs[0].dataLable.filter(item => item.tag.trim() === subLevel);
 
       if (filteredDocs.length === 0){
         done(null);
