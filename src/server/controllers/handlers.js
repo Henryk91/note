@@ -7,8 +7,9 @@ const calcTimeNowOffset = require('../utils.js');
 require('dotenv').config();
 
 const mongoose = require('mongoose');
-
-mongoose.connect(process.env.DB, { useNewUrlParser: true, useUnifiedTopology:true });
+mongoose.connect(process.env.DB, { useNewUrlParser: true, useUnifiedTopology:true }).catch((err) => {
+  console.error('MongoDB connection error:', err);
+});
 
 const { Schema } = mongoose;
 
@@ -404,6 +405,7 @@ module.exports = function () {
       if (err) {
         console.log(err);
         done(null);
+        return;
       }
 
       if(docs.length < 1){
@@ -412,6 +414,12 @@ module.exports = function () {
       }
 
       const filteredDocs = docs[0].dataLable.filter(item => item.tag === subLevel);
+
+      if (filteredDocs.length === 0){
+        done(null);
+        return;
+      }
+
       const english = splitSentences(filteredDocs[0].data);
       const german = filteredDocs.length > 1 ? splitSentences(filteredDocs[1].data): [];
       const englishSentences = english.map((sentence, index) => ({
