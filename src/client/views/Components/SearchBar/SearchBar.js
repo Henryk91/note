@@ -59,12 +59,16 @@ export default class SearchBar extends Component {
     return (
       <header className={themeBack}>
         {showSearch === false ?
-          <div
+          <input
             className={themeBack}
             id="userNameBox"
+            type="text"
+            ref={c => (this.title2 = c)}
             aria-label="User Name"
             onKeyUp={this.search}
-          > {noteName} </div>
+            defaultValue={noteName}
+            placeholder="Add Note Name"
+          />
         :
         <div className="search-box">
           <input
