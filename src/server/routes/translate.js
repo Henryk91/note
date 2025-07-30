@@ -161,13 +161,28 @@ module.exports = function (app) {
 `;
 
 const prompt = `
+
+Most important instructions:
+0. The grammar rules that certain words need to be lowercase has been changed. Words can now be any case.
+1. For purposes of this evaluation german words with incorrect case should not be considered incorrect.
+2. If a word is spelled correctly but is not capitalized, it is still correct.
+3. Words can be spelled with a capital letter and it is still correct.
+4. Preposition can be spelled with a capital letter and it is still correct.
+5. Ignore differences in capitalization and punctuation.
+6. When I ask you to evaluate grammatical correctness, please do not fail the sentence if a word is incorrectly capitalized.
+
 You are a strict but fair German translation evaluator.
 
 Your job is to determine whether the following German sentence is:
-1. Grammatically correct (including case, verb form, word order, spelling, etc.)
-2. A faithful and natural-sounding translation of the English sentence
+1. The verb form is correct but ignore case.
+2. The word order is correct.
+3. The words can be upper or lower case but the spelling is correct
+4. The prepositions are correct but ignore case. 
+6. the declination of nouns is correct but ignore case.
+7. the conjugation of verbs is correct but ignore case.
+8. The sentence is a faithful and natural-sounding translation of the English sentence
+9. A faithful and natural-sounding translation of the English sentence
 
-You MUST enforce correct spelling and grammar.
 You MUST accept the following variations **as correct**:
 - Gender differences in nouns (e.g., "Lehrer" vs "Lehrerin") if they preserve meaning
 - Lowercase German nouns (like "schüler") if they are clearly identifiable and correctly spelled — treat this as a formatting issue, not a grammar error
@@ -192,10 +207,6 @@ true
 or
 false
 `;
-
-
-
-
 
     try {
 
