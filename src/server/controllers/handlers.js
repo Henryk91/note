@@ -3,6 +3,7 @@
 /* eslint-disable prefer-destructuring */
 /* eslint-disable no-param-reassign */
 /* eslint-disable func-names */
+const fetch = require("node-fetch");
 const calcTimeNowOffset = require('../utils.js');
 require('dotenv').config();
 
