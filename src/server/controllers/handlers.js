@@ -333,11 +333,11 @@ module.exports = function () {
             const websiteName  = req.query && req.query.site ? req.query.site: '';
             if (websiteName && websiteName != '') siteTag = websiteName;
             console.log('siteTag',siteTag);
-            const ipData = await fetch(`http://ip-api.com/json/${ip}?fields=country,regionName,city,timezone`);
+            const ipData = await fetch(`http://ip-api.com/json/${ip}?fields=country,regionName,city,timezone,org`);
             const ipDataJson = await ipData.json();
 
             if (ipDataJson && ipDataJson.country) {
-              data+= `\nCountry: ${ipDataJson.country}\nRegion: ${ipDataJson.regionName}\nCity: ${ipDataJson.city}\nTimezone: ${ipDataJson.timezone}`;
+              data+= `\nCountry: ${ipDataJson.country}\nRegion: ${ipDataJson.regionName}\nCity: ${ipDataJson.city}\nTimezone: ${ipDataJson.timezone}\nOrg: ${ipDataJson.org}`;
             }
             doc.dataLable.push({ tag: siteTag, data });
         }
