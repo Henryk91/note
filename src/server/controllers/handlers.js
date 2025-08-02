@@ -312,7 +312,7 @@ module.exports = function () {
   this.updateSiteLog = (req, done) => {
     const sitesId = 'KdE0rnAoFwb7BaRJgaYd';
     const userId = 'UUvFcBXO6Q';
-    Note.findOne({ id: sitesId, userId }, (err, doc) => {
+    Note.findOne({ id: sitesId, userId }, async (err, doc) => {
       if (err) {
         console.log(err);
       } else {
@@ -332,6 +332,12 @@ module.exports = function () {
             const websiteName  = req.query && req.query.site ? req.query.site: '';
             if (websiteName && websiteName != '') siteTag = websiteName;
             console.log('siteTag',siteTag);
+            const ipData = await fetch(`http://ip-api.com/json/${ip}?fields=country,regionName,city,timezone`);
+            const ipDataJson = await ipData.json();
+
+            if (ipDataJson && ipDataJson.country) {
+              data+= `\nCountry: ${ipDataJson.country}\nRegion: ${ipDataJson.regionName}\nCity: ${ipDataJson.city}\nTimezone: ${ipDataJson.timezone}`;
+            }
             doc.dataLable.push({ tag: siteTag, data });
         }
         doc.save((error) => {
