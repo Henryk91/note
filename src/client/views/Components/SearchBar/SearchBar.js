@@ -12,6 +12,7 @@ export default class SearchBar extends Component {
     this.clearSearch = this.clearSearch.bind(this)
     this.toggleSearch = this.toggleSearch.bind(this)
     this.toggleEditName = this.toggleEditName.bind(this)
+    this.editNameClick = this.editNameClick.bind(this)
   }
 
   search = () => {
@@ -48,6 +49,13 @@ export default class SearchBar extends Component {
     this.setState({editName: !editName})
   }
 
+  editNameClick = () => {
+    this.toggleEditName()
+    setTimeout(() => {
+      document.getElementById("userNameBox").focus()
+    }, 100);
+  }
+
   componentDidUpdate(prevProps) {
     if (prevProps.noteName !== this.props.noteName) {
       this.setState({title2: this.props.noteName})
@@ -71,7 +79,7 @@ export default class SearchBar extends Component {
             className={themeBack}
             id="userNameBox"
             aria-label="User Name"
-            onClick={() => this.toggleEditName()}
+            onClick={() => this.editNameClick()}
           > {noteName} </div>
           ): (
              <input
