@@ -10,6 +10,7 @@ const sendEmail = require('./routes/sendEmail');
 const translate = require('./routes/translate');
 
 const app = express();
+const cors = require('cors')
 
 app.use(
   cors({
