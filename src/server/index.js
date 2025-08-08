@@ -11,6 +11,17 @@ const translate = require('./routes/translate');
 
 const app = express();
 
+app.use(
+  cors({
+    origin: 'https://henryk.co.za',  // or an array of allowed origins
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  })
+);
+
+// Ensure Express answers the preflight
+app.options('*', cors());
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
