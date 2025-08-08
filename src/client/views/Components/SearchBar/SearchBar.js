@@ -7,10 +7,11 @@ import React, { Component } from 'react';
 export default class SearchBar extends Component {
   constructor(props) {
     super(props);
-    this.state = {showSearch: false, title2: '', title: ''};
+    this.state = {showSearch: false, title2: '', title: '', editName: false};
     this.search = this.search.bind(this);
     this.clearSearch = this.clearSearch.bind(this)
     this.toggleSearch = this.toggleSearch.bind(this)
+    this.toggleEditName = this.toggleEditName.bind(this)
   }
 
   search = () => {
@@ -42,6 +43,11 @@ export default class SearchBar extends Component {
     this.setState({...save})
   }
 
+  toggleEditName = () => {
+    const { editName } = this.state;
+    this.setState({editName: !editName})
+  }
+
   componentDidUpdate(prevProps) {
     if (prevProps.noteName !== this.props.noteName) {
       this.setState({title2: this.props.noteName})
@@ -50,7 +56,7 @@ export default class SearchBar extends Component {
 
   render() {
     const { noteName, Theme } = this.props;
-    const { showSearch } = this.state;
+    const { showSearch, editName } = this.state;
     const themeBack = `${Theme.toLowerCase()}-back`;
     let searching = this.title && this.title.value ? true: false;
     if (noteName && this.title2) {
@@ -59,7 +65,16 @@ export default class SearchBar extends Component {
     return (
       <header className={themeBack}>
         {showSearch === false ?
-          <input
+        <>
+          {editName === false? (
+            <div
+            className={themeBack}
+            id="userNameBox"
+            aria-label="User Name"
+            onClick={() => this.toggleEditName()}
+          > {noteName} </div>
+          ): (
+             <input
             className={themeBack}
             id="userNameBox"
             type="text"
@@ -68,7 +83,10 @@ export default class SearchBar extends Component {
             onKeyUp={this.search}
             defaultValue={noteName}
             placeholder="Add Note Name"
+            onBlur={() => this.toggleEditName()}
           />
+          )}
+         </>
         :
         <div className="search-box">
           <input
