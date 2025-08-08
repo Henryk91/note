@@ -32,7 +32,11 @@ export default class NoteDetailPage extends Component {
 
   componentDidMount(){
     const localPages = localStorage.getItem('saved-pages')
-    if(localPages)this.setState({pages: JSON.parse(localPages)})
+    if(localPages ) {
+      let pages = JSON.parse(localPages)
+      pages = pages.filter(page => page.params.id !== '')
+      if (pages.length > 1) this.setState({pages: JSON.parse(localPages)})
+    }
   // }
   // componentDidMount(){
     const isEditing = localStorage.getItem('new-folder-edit');
@@ -267,6 +271,11 @@ export default class NoteDetailPage extends Component {
     }
   }
 
+  logOut = () => {
+    localStorage.clear();
+    window.location.reload();
+  };
+
   backButton(Theme) {
     const themeBack = `${Theme.toLowerCase()}-back`;
     const { pages } = this.state;
@@ -279,11 +288,11 @@ export default class NoteDetailPage extends Component {
           if(hasPages){
             this.scrollPageBack()
           } else {
-            window.history.back();
+            this.logOut()
           }
         }}
       >
-        <i className="fas fa-arrow-left" />
+        <i className={hasPages? "fas fa-arrow-left": "fas fa-power-off"} />
       </button>
     );
   }
@@ -327,7 +336,7 @@ export default class NoteDetailPage extends Component {
         </div>
         {showBackButton === false ? (
           <div className={`detailAddButton ${themeHover} ${themeBack}`}>
-            <Link style={{ textDecoration: 'none', color: 'white' }}    to="/new-note/" onClick={console.log('New Note')}>
+            <Link style={{ textDecoration: 'none', color: 'white' }}    to="/new-note/">
               <i className="fas fa-plus" />
             </Link>
           </div>
