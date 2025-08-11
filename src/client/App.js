@@ -218,7 +218,12 @@ export default class App extends Component {
           res.push('None');
           if (res && res.length > 0) {
             localStorage.setItem('notenames', JSON.stringify(res));
-            this.setState({ noteNames: res });
+            let update = { noteNames: res }
+            if(!localStorage.getItem("user")) {
+              update.user = res[0]
+              this.getMyNotes(res[0]);
+            }
+            this.setState(update);
           }
         }
       });

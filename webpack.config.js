@@ -62,14 +62,13 @@ module.exports = {
     historyApiFallback: true,
     proxy: [
       {
-        context: ['/api'],
+        context: ['/api', '/api-old'],
         target: 'http://localhost:8080',
       },
     ],
   },
   plugins: [
     new CleanWebpackPlugin(),
-    // new CleanWebpackPlugin([outputDirectory]),
     new HtmlWebpackPlugin({
       template: './public/index.html',
       favicon: './public/favicon.ico'

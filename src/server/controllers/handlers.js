@@ -83,50 +83,30 @@ module.exports = function () {
 
   this.newNote = (req, done) => {
     const note = req;
-    const pass = req.userId;
+    note.userId = req.userId;
+    const createNote = new Note(note);
 
-    tempPassCheck(pass, (docPass) => {
-      if (docPass[0]) {
-        note.userId = docPass[0].permId;
-
-        const createNote = new Note(note);
-
-        createNote
-          .save()
-          .then((data) => {
-            console.log(data);
-            done('Created');
-          })
-          .catch((err) => {
-            console.log(err);
-            done(err.name);
-          });
-      } else {
-        done('Temp Pass fail');
-      }
-    });
+    createNote
+      .save()
+      .then((data) => {
+        console.log(data);
+        done('Created');
+      })
+      .catch((err) => {
+        console.log(err);
+        done(err.name);
+      });
   };
 
   this.getAllNotes = (req, done) => {
-    const pass = req.query.tempPass;
-    let permId = null;
-
-    tempPassCheck(pass, (docPass) => {
-      if (docPass[0]) {
-        permId = docPass[0].permId;
-
-        Note.find({ userId: permId })
-          .then((docs) => {
-            done(docs);
-          })
-          .catch((err) => {
-            console.log(err);
-            done('No notes');
-          });
-      } else {
-        done('Logout User');
-      }
-    });
+    Note.find({ userId: req.userId })
+      .then((docs) => {
+        done(docs);
+      })
+      .catch((err) => {
+        console.log(err);
+        done('No notes');
+      });
   };
 
   this.userLogin = (req, done) => {
@@ -160,174 +140,125 @@ module.exports = function () {
     const { user } = req.query;
     const decodedUser = decodeURI(user);
     console.log('Trying to getMyNotes', decodedUser);
-    const pass = req.query.tempPass;
-    let permId = null;
 
-    tempPassCheck(pass, (docPass) => {
-      if (docPass[0]) {
-        permId = docPass[0].permId;
-        console.log('Finding notes created by:', decodedUser);
-        Note.find({ createdBy: decodedUser, userId: permId })
-          .then((docs) => {
-            console.log('Notes Found', docs.length);
-            docs = docs.map((doc) => ({
-              createdBy: doc.createdBy,
-              dataLable: doc.dataLable,
-              heading: doc.heading,
-              id: doc.id,
-            }));
+    console.log('Finding notes created by:', decodedUser);
 
-            done(docs);
-          })
-          .catch((err) => {
-            console.log(err);
-            done('No notes');
-          });
-      } else {
-        done('Logout User');
-      }
-    });
+    Note.find({ createdBy: decodedUser, userId: req.auth.sub })
+      .then((docs) => {
+        console.log('Notes Found', docs.length);
+        docs = docs.map((doc) => ({
+          createdBy: doc.createdBy,
+          dataLable: doc.dataLable,
+          heading: doc.heading,
+          id: doc.id,
+        }));
+
+        done(docs);
+      })
+      .catch((err) => {
+        console.log(err);
+        done('No notes');
+      });
   };
 
   this.getNote = (req, done) => {
     const { user, noteHeading } = req.query;
     const decodedUser = decodeURI(user);
     const decodedNoteHeading = decodeURI(noteHeading);
-    const pass = req.query.tempPass;
-    let permId = null;
 
-    tempPassCheck(pass, (docPass) => {
-      if (docPass[0]) {
-        permId = docPass[0].permId;
-        console.log('Note Heading:', decodedNoteHeading);
-        Note.find({ createdBy: decodedUser, userId: permId, id: decodedNoteHeading })
-          .then((docs) => {
-            docs = docs.map((doc) => ({
-              createdBy: doc.createdBy,
-              dataLable: doc.dataLable,
-              heading: doc.heading,
-              id: doc.id,
-            }));
+    console.log('Note Heading:', decodedNoteHeading);
+    Note.find({ createdBy: decodedUser, userId: req.auth.sub, id: decodedNoteHeading })
+      .then((docs) => {
+        docs = docs.map((doc) => ({
+          createdBy: doc.createdBy,
+          dataLable: doc.dataLable,
+          heading: doc.heading,
+          id: doc.id,
+        }));
 
-            done(docs);
-          })
-          .catch((err) => {
-            console.log(err);
-            done('No notes');
-          });
-      } else {
-        done('Logout User');
-      }
-    });
+        done(docs);
+      })
+      .catch((err) => {
+        console.log(err);
+        done('No notes');
+      });
   };
 
   this.getNoteNames = (req, done) => {
-    const pass = req.query.tempPass;
-    let permId = null;
+    Note.find({ userId: req.auth.sub })
+      .then((docs) => {
+        const nameArray = docs.map((doc) => (doc = doc.createdBy));
 
-    tempPassCheck(pass, (docPass) => {
-      if (docPass[0]) {
-        permId = docPass[0].permId;
+        const unique = nameArray.filter(onlyUnique);
+        done(unique);
+      })
+      .catch((err) => {
+        console.log(err);
+        done('No notes');
+      });
+  };
 
-        Note.find({ userId: permId })
-          .then((docs) => {
-            const nameArray = docs.map((doc) => (doc = doc.createdBy));
+  this.updateNote = (req, done) => {
+    const updateNoteId = req.body.person.id;
 
-            const unique = nameArray.filter(onlyUnique);
-            done(unique);
+    Note.findOne({ id: updateNoteId, userId: req.auth.sub })
+      .then((doc) => {
+        const update = req.body.person;
+        doc.heading = update.heading;
+        doc.dataLable = update.dataLable;
+        doc
+          .save()
+          .then((data) => {
+            done('success');
           })
           .catch((err) => {
             console.log(err);
             done('No notes');
           });
-      } else {
-        done('Logout User');
-      }
-    });
-  };
-
-  this.updateNote = (req, done) => {
-    console.log(req.query.tempPass);
-    console.log(req.body.person.id);
-    const updateNoteId = req.body.person.id;
-
-    const pass = req.query.tempPass;
-    let permId = null;
-
-    tempPassCheck(pass, (docPass) => {
-      if (docPass[0]) {
-        permId = docPass[0].permId;
-
-        Note.findOne({ id: updateNoteId, userId: permId })
-          .then((doc) => {
-            const update = req.body.person;
-            doc.heading = update.heading;
-            doc.dataLable = update.dataLable;
-            doc
-              .save()
-              .then((data) => {
-                done('success');
-              })
-              .catch((err) => {
-                console.log(err);
-                done('No notes');
-              });
-          })
-          .catch((err) => {
-            console.log(err);
-            done('Error', err);
-          });
-      }
-    });
+      })
+      .catch((err) => {
+        console.log(err);
+        done('Error', err);
+      });
   };
   this.updateOneNote = (req, done) => {
     const updateNoteId = req.body.person.id;
 
-    const pass = req.query.tempPass;
-    let permId = null;
-
-    tempPassCheck(pass, (docPass) => {
-      if (docPass[0]) {
-        permId = docPass[0].permId;
-
-        Note.findOne({ id: updateNoteId, userId: permId })
-          .then((doc) => {
-            const update = req.body.person;
-            doc.heading = update.heading;
-            if (doc.dataLable) {
-              if (req.body.delete) {
-                const newLable = doc.dataLable.filter(
-                  (item) => JSON.stringify(item) !== JSON.stringify(update.dataLable)
-                );
-                doc.dataLable = newLable;
-              } else if (update.dataLable.edit) {
-                const dataLable = update.dataLable;
-                const docDataLable = JSON.parse(JSON.stringify(doc.dataLable));
-                const ind = docDataLable.findIndex((item) => item.data === dataLable.data);
-                if (docDataLable[ind]) {
-                  docDataLable[ind].data = dataLable.edit;
-                  doc.dataLable = docDataLable;
-                }
-              } else {
-                doc.dataLable.push(update.dataLable);
-              }
+    Note.findOne({ id: updateNoteId, userId: req.auth.sub })
+      .then((doc) => {
+        const update = req.body.person;
+        doc.heading = update.heading;
+        if (doc.dataLable) {
+          if (req.body.delete) {
+            const newLable = doc.dataLable.filter((item) => JSON.stringify(item) !== JSON.stringify(update.dataLable));
+            doc.dataLable = newLable;
+          } else if (update.dataLable.edit) {
+            const dataLable = update.dataLable;
+            const docDataLable = JSON.parse(JSON.stringify(doc.dataLable));
+            const ind = docDataLable.findIndex((item) => item.data === dataLable.data);
+            if (docDataLable[ind]) {
+              docDataLable[ind].data = dataLable.edit;
+              doc.dataLable = docDataLable;
             }
-            doc
-              .save()
-              .then((data) => {
-                done('success');
-              })
-              .catch((err) => {
-                console.log('Error', err);
-                done('fail');
-              });
+          } else {
+            doc.dataLable.push(update.dataLable);
+          }
+        }
+        doc
+          .save()
+          .then((data) => {
+            done('success');
           })
           .catch((err) => {
-            console.log(err);
+            console.log('Error', err);
+            done('fail');
           });
-      }
-    });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
+
   this.updateSiteLog = (req, done) => {
     const sitesId = 'KdE0rnAoFwb7BaRJgaYd';
     const userId = 'UUvFcBXO6Q';

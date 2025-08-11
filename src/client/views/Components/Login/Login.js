@@ -33,8 +33,11 @@ export default class Login extends Component {
     loginRequest(user, res => {
       console.log('Login res',res);
       
-      if (res.id) {
+      if (res?.id) {
         localStorage.setItem('loginKey', res.id);
+        window.location.reload();
+      } else if (res?.user?.id) {
+        localStorage.setItem('loginKey', res?.user?.id);
         window.location.reload();
       } else {
         alert('Login Error');

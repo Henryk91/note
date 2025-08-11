@@ -4,7 +4,7 @@ const Handler = require('../controllers/handlers.js');
 const dbHandler = new Handler();
 
 module.exports = function (app) {
-  app.post('/api/login', (req, res) => {
+  app.post('/api-old/login', (req, res) => {
     console.log('Trying to log in');
     
     let docId = '';
@@ -18,7 +18,7 @@ module.exports = function (app) {
       }
     });
   });
-  app.post('/api/register', (req, res) => {
+  app.post('/api-old/register', (req, res) => {
     let docId = '';
     dbHandler.newUser(req.body, (dbResp) => {
       docId = dbResp;

@@ -8,17 +8,25 @@ const userCheck = require('./routes/userCheck');
 const getDashData = require('./routes/getDashData');
 const sendEmail = require('./routes/sendEmail');
 const translate = require('./routes/translate');
+const jwtSetup = require('./jwt-setup');
+const cookieParser = require('cookie-parser');
 
 const app = express();
+app.use(express.json());
 const cors = require('cors')
+
+app.use(cookieParser());
 
 app.use(
   cors({
-    origin: 'https://henryk.co.za',  // or an array of allowed origins
+    origin: ['http://localhost:3000', 'https://henryk.co.za'],  // or an array of allowed origins
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
   })
 );
+
+require('dotenv').config();
 
 // Ensure Express answers the preflight
 app.options('*', cors());
@@ -26,7 +34,7 @@ app.options('*', cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-require('dotenv').config();
+jwtSetup(app)
 
 app.use(express.static('dist'));
 app.use('/api/note', getNotes);
@@ -40,7 +48,6 @@ sendEmail(app);
 userCheck(app);
 
 app.get('/*', (req, res) => {
-  console.log('res',req.url);
   if(req && req.query && req.query.tempPass){
     console.log('tempPasstempPass');
     res.redirect('/notes/main');

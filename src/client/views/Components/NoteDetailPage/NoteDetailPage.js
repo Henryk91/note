@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { NoteDetail } from '../index';
+import { logoutUser } from '../../Helpers/requests';
 
 export default class NoteDetailPage extends Component {
   constructor(props) {
@@ -272,8 +273,7 @@ export default class NoteDetailPage extends Component {
   }
 
   logOut = () => {
-    localStorage.clear();
-    window.location.reload();
+    logoutUser((data) => window.location.reload());
   };
 
   backButton(Theme) {
