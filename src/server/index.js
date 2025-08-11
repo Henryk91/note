@@ -48,11 +48,9 @@ sendEmail(app);
 userCheck(app);
 
 app.get('/*', (req, res) => {
-  if(req && req.query && req.query.tempPass){
-    console.log('tempPasstempPass');
+  if(req?.cookies?.access_token && req?.url !== '/notes/main'){
     res.redirect('/notes/main');
   } else {
-    console.log('redirectredirect');
     res.redirect('/');
   }
 });
