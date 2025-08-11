@@ -27,7 +27,8 @@ function refreshToken(next) {
   })
     .then(res => res.json())
     .then((data) => {
-      if(data?.error === "Missing refresh token"){
+      if(data?.error === "Missing refresh token" || data?.error ===  "Invalid refresh token"){
+
         localStorage.clear();
         window.location.reload();
       }

@@ -13,8 +13,9 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const REFRESH_SECRET = process.env.REFRESH_SECRET;
 const JWT_ALG = 'HS256';
 
-const ACCESS_EXPIRES = '15m'; // short-lived access token
-const REFRESH_EXPIRES = '30d'; // long-lived refresh token
+const ACCESS_EXPIRES = process.env.ACCESS_EXPIRES ?? '15m'; // short-lived access token
+const REFRESH_EXPIRES = process.env.REFRESH_EXPIRES ?? '30d'; // long-lived refresh token
+const MAX_SESSIONS = process.env.MAX_SESSIONS ?? 3; // <= allow concurrent devices
 const ACCESS_MAX_AGE_MS = 15 * 60 * 1000; // 15 minutes
 const REFRESH_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // ~30 days
 
@@ -58,6 +59,29 @@ module.exports = function (app) {
       algorithm: JWT_ALG,
       expiresIn: REFRESH_EXPIRES,
     });
+  }
+
+  async function addSession(user, plainRefresh, req) {
+    const tokenHash = await bcrypt.hash(plainRefresh, 12);
+    user.refreshSessions.push({
+      tokenHash,
+      userAgent: req.get('user-agent'),
+      ip: req.ip,
+    });
+    // keep only the most recent MAX_SESSIONS
+    if (user.refreshSessions.length > MAX_SESSIONS) {
+      user.refreshSessions = user.refreshSessions.slice(-MAX_SESSIONS);
+    }
+    await user.save();
+  }
+
+  async function findSessionIndex(user, presentedRefresh) {
+    // compare against each hash; small array (≤3) so OK
+    for (let i = 0; i < user.refreshSessions.length; i++) {
+      const ok = await bcrypt.compare(presentedRefresh, user.refreshSessions[i].tokenHash);
+      if (ok) return i;
+    }
+    return -1;
   }
 
   // ---- Register ----
@@ -105,9 +129,7 @@ module.exports = function (app) {
       const access = signAccessToken(user);
       const refresh = signRefreshToken(user);
 
-      // rotate baseline
-      user.refreshTokenHash = await bcrypt.hash(refresh, 12);
-      await user.save();
+      await addSession(user, refresh, req);
 
       setAccessCookie(res, access);
       setRefreshCookie(res, refresh);
@@ -151,8 +173,8 @@ module.exports = function (app) {
   // ---- Refresh endpoint (token rotation) ----
   app.post('/api/refresh', async (req, res) => {
     try {
-      const refreshCookie = req.cookies?.refresh_token;
-      if (!refreshCookie) return res.status(401).json({ error: 'Missing refresh token' });
+      const refreshToken = req.cookies?.refresh_token;
+      if (!refreshToken) return res.status(401).json({ error: 'Missing refresh token' });
 
       let payload;
       try {
@@ -162,24 +184,19 @@ module.exports = function (app) {
       }
 
       const user = await User.findById(payload.sub);
-      if (!user || !user.refreshTokenHash) {
-        return res.status(401).json({ error: 'Invalid refresh token' });
-      }
+      if (!user) return res.status(401).json({ error: 'Invalid refresh token' });
 
-      // Check presented refresh token matches the stored hash
-      const match = await bcrypt.compare(refreshCookie, user.refreshTokenHash);
-      if (!match) {
-        // Possible reuse or a stale token: revoke by clearing stored hash
-        user.refreshTokenHash = null;
-        await user.save();
-        clearAuthCookies(res);
-        return res.status(401).json({ error: 'Refresh token mismatch' });
-      }
+      const idx = await findSessionIndex(user, token);
+      if (idx === -1) return res.status(401).json({ error: 'Invalid refresh token' });
 
-      // Rotate: issue new refresh & access; replace stored hash
+      // Rotate this session only
       const newAccess = signAccessToken(user);
       const newRefresh = signRefreshToken(user);
-      user.refreshTokenHash = await bcrypt.hash(newRefresh, 12);
+
+      user.refreshSessions[idx].tokenHash = await bcrypt.hash(newRefresh, 12);
+      user.refreshSessions[idx].lastUsedAt = new Date();
+      user.refreshSessions[idx].userAgent = req.get('user-agent');
+      user.refreshSessions[idx].ip = req.ip;
       await user.save();
 
       setAccessCookie(res, newAccess);
@@ -194,24 +211,40 @@ module.exports = function (app) {
   // ---- Logout (revoke refresh, clear cookies) ----
   app.post('/api/logout', async (req, res) => {
     try {
-      const auth = req.cookies?.refresh_token;
-      if (auth) {
-        // best-effort revoke
+      const token = req.cookies?.refresh_token;
+      if (token) {
         const payload = (() => {
           try {
-            return jwt.decode(auth);
+            return jwt.decode(token);
           } catch {
             return null;
           }
         })();
         if (payload?.sub) {
-          await User.findByIdAndUpdate(payload.sub, { $set: { refreshTokenHash: null } });
+          const user = await User.findById(payload.sub);
+          if (user) {
+            const idx = await findSessionIndex(user, token);
+            if (idx !== -1) {
+              user.refreshSessions.splice(idx, 1); // remove only this device
+              await user.save();
+            }
+          }
         }
       }
     } finally {
       clearAuthCookies(res);
       res.json({ ok: true });
     }
+  });
+
+  app.post('/api/logout-all', async (req, res) => {
+    const token = req.cookies?.refresh_token;
+    const payload = token ? jwt.decode(token) : null;
+    if (payload?.sub) {
+      await User.findByIdAndUpdate(payload.sub, { $set: { refreshSessions: [] } });
+    }
+    clearAuthCookies(res);
+    res.json({ ok: true });
   });
 
   // ---- Auth error handler for express-jwt ----

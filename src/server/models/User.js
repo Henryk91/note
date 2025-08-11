@@ -1,5 +1,14 @@
 const mongoose = require('mongoose');
 
+const refreshSessionSchema = new mongoose.Schema({
+  tokenHash: { type: String, required: true },
+  userAgent: String,
+  ip: String,
+  createdAt: { type: Date, default: Date.now },
+  lastUsedAt: { type: Date, default: Date.now },
+  // optional: expiresAt if you want server-enforced expiry
+});
+
 const userSchema = new mongoose.Schema(
   {
     firstName: { type: String, required: true },
@@ -7,7 +16,7 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true, index: true },
     passwordHash: { type: String, required: true },
     // store the *current* hashed refresh token for rotation
-    refreshTokenHash: { type: String, default: null },
+    refreshSessions: { type: [refreshSessionSchema], default: [] },
   },
   { timestamps: true }
 );
