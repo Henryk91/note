@@ -213,7 +213,7 @@ export default class App extends Component {
     }
     if (loginKey && !notesInitialLoad && !noteNames) {
       getNoteNames(res => {
-        if (res.length > 0) {
+        if (res.length > 0 && res != 'No notes') {
           res.push('All');
           res.push('None');
           if (res && res.length > 0) {

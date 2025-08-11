@@ -9,7 +9,7 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/button-has-type */
 import React, { Component } from 'react';
-import marked from 'marked';
+import {marked} from 'marked';
 
 marked.setOptions({
   breaks: true
