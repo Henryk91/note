@@ -1,11 +1,9 @@
 /* eslint-disable func-names */
-const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { expressjwt: jwtMiddleware } = require('express-jwt');
 
 const Handler = require('./controllers/handlers.js');
-const dbHandler = new Handler();
 
 const User = require('./models/User');
 
@@ -13,7 +11,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const REFRESH_SECRET = process.env.REFRESH_SECRET;
 const JWT_ALG = 'HS256';
 
-const ACCESS_EXPIRES = process.env.ACCESS_EXPIRES ?? '15m'; // short-lived access token
+const ACCESS_EXPIRES = process.env.ACCESS_EXPIRES ?? '5m'; // short-lived access token
 const REFRESH_EXPIRES = process.env.REFRESH_EXPIRES ?? '30d'; // long-lived refresh token
 const MAX_SESSIONS = process.env.MAX_SESSIONS ?? 3; // <= allow concurrent devices
 const ACCESS_MAX_AGE_MS = 15 * 60 * 1000; // 15 minutes
