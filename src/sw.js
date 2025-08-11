@@ -1,16 +1,16 @@
 /* eslint-disable no-restricted-globals */
-// Modern Workbox – no importScripts, no __precacheManifest
 import {precacheAndRoute} from 'workbox-precaching';
 import {registerRoute} from 'workbox-routing';
 import {NetworkFirst, StaleWhileRevalidate, CacheFirst} from 'workbox-strategies';
 import {ExpirationPlugin} from 'workbox-expiration';
+import {clientsClaim} from 'workbox-core';
 
-// Injected at build by InjectManifest:
+// Injected at build
 precacheAndRoute(self.__WB_MANIFEST);
 
-// Take control asap
+// Take control ASAP
 self.skipWaiting();
-self.clientsClaim();
+clientsClaim();
 
 // HTML pages (SPA shell): network-first
 registerRoute(
@@ -18,9 +18,7 @@ registerRoute(
   new NetworkFirst({
     cacheName: 'pages-cache',
     networkTimeoutSeconds: 5,
-    plugins: [
-      new ExpirationPlugin({maxAgeSeconds: 24 * 60 * 60, purgeOnQuotaError: true}),
-    ],
+    plugins: [new ExpirationPlugin({maxAgeSeconds: 24 * 60 * 60, purgeOnQuotaError: true})],
   })
 );
 
@@ -29,9 +27,7 @@ registerRoute(
   ({request}) => request.destination === 'script' || request.destination === 'style',
   new StaleWhileRevalidate({
     cacheName: 'assets-cache',
-    plugins: [
-      new ExpirationPlugin({maxEntries: 200, maxAgeSeconds: 7 * 24 * 60 * 60, purgeOnQuotaError: true}),
-    ],
+    plugins: [new ExpirationPlugin({maxEntries: 200, maxAgeSeconds: 7 * 24 * 60 * 60, purgeOnQuotaError: true})],
   })
 );
 
@@ -40,9 +36,7 @@ registerRoute(
   ({request}) => request.destination === 'font',
   new CacheFirst({
     cacheName: 'fonts-cache',
-    plugins: [
-      new ExpirationPlugin({maxEntries: 50, maxAgeSeconds: 30 * 24 * 60 * 60, purgeOnQuotaError: true}),
-    ],
+    plugins: [new ExpirationPlugin({maxEntries: 50, maxAgeSeconds: 30 * 24 * 60 * 60, purgeOnQuotaError: true})],
   })
 );
 
@@ -51,13 +45,11 @@ registerRoute(
   ({request}) => request.destination === 'image',
   new CacheFirst({
     cacheName: 'images-cache',
-    plugins: [
-      new ExpirationPlugin({maxEntries: 200, maxAgeSeconds: 30 * 24 * 60 * 60, purgeOnQuotaError: true}),
-    ],
+    plugins: [new ExpirationPlugin({maxEntries: 200, maxAgeSeconds: 30 * 24 * 60 * 60, purgeOnQuotaError: true})],
   })
 );
 
-// Optional: let pages tell SW to activate immediately after update
+// Optional: allow page to trigger activation
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
