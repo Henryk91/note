@@ -10,10 +10,10 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const REFRESH_SECRET = process.env.REFRESH_SECRET;
 const JWT_ALG = 'HS256';
 
-const ACCESS_EXPIRES = process.env.ACCESS_EXPIRES ?? '1m'; // short-lived access token
+const ACCESS_EXPIRES = process.env.ACCESS_EXPIRES ?? '15m'; // short-lived access token
 const REFRESH_EXPIRES = process.env.REFRESH_EXPIRES ?? '30d'; // long-lived refresh token
-const MAX_SESSIONS = process.env.MAX_SESSIONS ?? 2; // <= allow concurrent devices
-console.log('MAX_SESSIONS', MAX_SESSIONS);
+const MAX_SESSIONS = process.env.MAX_SESSIONS ?? 3; // <= allow concurrent devices
+
 const ACCESS_MAX_AGE_MS = 15 * 60 * 1000; // 15 minutes
 const REFRESH_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // ~30 days
 
@@ -71,18 +71,6 @@ module.exports = function (app) {
       user.refreshSessions = user.refreshSessions.slice(1);
     }
     await user.save();
-  }
-
-  async function findSessionIndex(user, presented) {
-    for (let i = 0; i < user.refreshSessions.length; i++) {
-      console.log('user.refreshSessions[i].tokenHash', user.refreshSessions[i].tokenHash);
-      console.log('presented', presented);
-      console.log('');
-      const ok = await bcrypt.compare(presented, user.refreshSessions[i].tokenHash);
-      console.log('compare', i, ok);
-      if (ok) return i;
-    }
-    return -1;
   }
 
   function findSessionIndexBySid(user, sid) {
