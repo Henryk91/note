@@ -3,17 +3,17 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { expressjwt: jwtMiddleware } = require('express-jwt');
 
-const Handler = require('./controllers/handlers.js');
-
 const User = require('./models/User');
+const { randomUUID } = require('crypto');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const REFRESH_SECRET = process.env.REFRESH_SECRET;
 const JWT_ALG = 'HS256';
 
-const ACCESS_EXPIRES = process.env.ACCESS_EXPIRES ?? '5m'; // short-lived access token
+const ACCESS_EXPIRES = process.env.ACCESS_EXPIRES ?? '1m'; // short-lived access token
 const REFRESH_EXPIRES = process.env.REFRESH_EXPIRES ?? '30d'; // long-lived refresh token
-const MAX_SESSIONS = process.env.MAX_SESSIONS ?? 3; // <= allow concurrent devices
+const MAX_SESSIONS = process.env.MAX_SESSIONS ?? 2; // <= allow concurrent devices
+console.log('MAX_SESSIONS', MAX_SESSIONS);
 const ACCESS_MAX_AGE_MS = 15 * 60 * 1000; // 15 minutes
 const REFRESH_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // ~30 days
 
@@ -52,34 +52,41 @@ module.exports = function (app) {
     });
   }
 
-  function signRefreshToken(user) {
-    return jwt.sign({ sub: user._id.toString(), email: user.email }, REFRESH_SECRET, {
+  function signRefreshToken(user, sid) {
+    return jwt.sign({ sub: user._id.toString(), email: user.email, sid }, REFRESH_SECRET, {
       algorithm: JWT_ALG,
       expiresIn: REFRESH_EXPIRES,
     });
   }
 
-  async function addSession(user, plainRefresh, req) {
+  async function addSession(user, plainRefresh, sid, req) {
     const tokenHash = await bcrypt.hash(plainRefresh, 12);
     user.refreshSessions.push({
+      sid,
       tokenHash,
       userAgent: req.get('user-agent'),
       ip: req.ip,
     });
-    // keep only the most recent MAX_SESSIONS
-    if (user.refreshSessions.length > MAX_SESSIONS) {
-      user.refreshSessions = user.refreshSessions.slice(-MAX_SESSIONS);
+    if (user.refreshSessions.length > Number(MAX_SESSIONS)) {
+      user.refreshSessions = user.refreshSessions.slice(1);
     }
     await user.save();
   }
 
-  async function findSessionIndex(user, presentedRefresh) {
-    // compare against each hash; small array (≤3) so OK
+  async function findSessionIndex(user, presented) {
     for (let i = 0; i < user.refreshSessions.length; i++) {
-      const ok = await bcrypt.compare(presentedRefresh, user.refreshSessions[i].tokenHash);
+      console.log('user.refreshSessions[i].tokenHash', user.refreshSessions[i].tokenHash);
+      console.log('presented', presented);
+      console.log('');
+      const ok = await bcrypt.compare(presented, user.refreshSessions[i].tokenHash);
+      console.log('compare', i, ok);
       if (ok) return i;
     }
     return -1;
+  }
+
+  function findSessionIndexBySid(user, sid) {
+    return user.refreshSessions.findIndex(s => s.sid === sid);
   }
 
   // ---- Register ----
@@ -96,7 +103,8 @@ module.exports = function (app) {
 
       // issue tokens
       const access = signAccessToken(user);
-      const refresh = signRefreshToken(user);
+      const sid = randomUUID();
+      const refresh = signRefreshToken(user, sid);
 
       // store hashed refresh token (rotation baseline)
       const refreshHash = await bcrypt.hash(refresh, 12);
@@ -125,9 +133,10 @@ module.exports = function (app) {
       if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
 
       const access = signAccessToken(user);
-      const refresh = signRefreshToken(user);
+      const sid = randomUUID();
+      const refresh = signRefreshToken(user, sid);
 
-      await addSession(user, refresh, req);
+      await addSession(user, refresh, sid, req);
 
       setAccessCookie(res, access);
       setRefreshCookie(res, refresh);
@@ -171,12 +180,12 @@ module.exports = function (app) {
   // ---- Refresh endpoint (token rotation) ----
   app.post('/api/refresh', async (req, res) => {
     try {
-      const refreshToken = req.cookies?.refresh_token;
-      if (!refreshToken) return res.status(401).json({ error: 'Missing refresh token' });
+      const token = req.cookies?.refresh_token;
+      if (!token) return res.status(401).json({ error: 'Missing refresh token' });
 
       let payload;
       try {
-        payload = jwt.verify(refreshCookie, REFRESH_SECRET, { algorithms: [JWT_ALG] });
+        payload = jwt.verify(token, REFRESH_SECRET, { algorithms: [JWT_ALG] });
       } catch {
         return res.status(401).json({ error: 'Invalid refresh token' });
       }
@@ -184,12 +193,13 @@ module.exports = function (app) {
       const user = await User.findById(payload.sub);
       if (!user) return res.status(401).json({ error: 'Invalid refresh token' });
 
-      const idx = await findSessionIndex(user, token);
+      const idx = findSessionIndexBySid(user, payload.sid); 
       if (idx === -1) return res.status(401).json({ error: 'Invalid refresh token' });
 
       // Rotate this session only
       const newAccess = signAccessToken(user);
-      const newRefresh = signRefreshToken(user);
+      const sid = randomUUID();
+      const newRefresh = signRefreshToken(user, sid);
 
       user.refreshSessions[idx].tokenHash = await bcrypt.hash(newRefresh, 12);
       user.refreshSessions[idx].lastUsedAt = new Date();
@@ -221,7 +231,7 @@ module.exports = function (app) {
         if (payload?.sub) {
           const user = await User.findById(payload.sub);
           if (user) {
-            const idx = await findSessionIndex(user, token);
+            const idx = findSessionIndexBySid(user, payload.sid); 
             if (idx !== -1) {
               user.refreshSessions.splice(idx, 1); // remove only this device
               await user.save();

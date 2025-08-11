@@ -6,7 +6,7 @@ export function logoutUser(next) {
     },
     body: ""
   })
-    .then(res => res.json())
+    .then(res => res?.json())
     .then((data) => {
       localStorage.clear();
       next(data);
@@ -17,26 +17,20 @@ export function logoutUser(next) {
     });
 }
 
-function refreshToken(next) {
-  fetch('/api/refresh', {
+async function refreshToken() {
+  const res = await fetch('/api/refresh', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
     body: ""
   })
-    .then(res => res.json())
-    .then((data) => {
-      if(data?.error === "Missing refresh token" || data?.error ===  "Invalid refresh token"){
 
-        localStorage.clear();
-        window.location.reload();
-      }
-      next(data);
-    })
-    .catch((error) => {
-      next(error);
-    });
+  if (res.status === 401) {
+    localStorage.clear();
+    window.location.reload();
+  }
+  return res
 }
 
 export async function apiFetch(url, options) {
@@ -46,9 +40,8 @@ export async function apiFetch(url, options) {
   });
 
   if (res.status === 401) {
-    refreshToken(next => {
-      console.log('next',next);
-    })
+    const refRes = await refreshToken()
+    if (refRes?.ok) return await apiFetch(url, options)
     return;
   }
 
@@ -59,7 +52,7 @@ export function getNoteNames(next) {
   apiFetch(`/api/note-names`, {
   credentials: 'include', // send cookies (access_token, refresh_token)
 })
-    .then(res => res.json())
+    .then(res => res?.json())
     .then((data) => next(data))
     .catch((error) => {
       console.log('Error:', error);
@@ -69,7 +62,7 @@ export function getNoteNames(next) {
 
 export function getAllNotes(next) {
   apiFetch("/api/note?user=all")
-    .then(res => res.json())
+    .then(res => res?.json())
     .then((data) => next(data))
     .catch((error) => {
       console.log('Error:', error);
@@ -79,7 +72,7 @@ export function getAllNotes(next) {
 
 export function getMyNotesRec(user, next) {
   apiFetch(`/api/note?user=${user}`)
-    .then(res => res.json())
+    .then(res => res?.json())
     .then((data) => next(data))
     .catch((error) => {
       console.log('Error:', error);
@@ -89,7 +82,7 @@ export function getMyNotesRec(user, next) {
 
 export function getNote(user, noteHeading, next) {
   apiFetch(`/api/note?user=${user}&noteHeading=${noteHeading}`)
-    .then(res => res.json())
+    .then(res => res?.json())
     .then((data) => next(data))
     .catch((error) => {
       console.log('Error:', error);
@@ -105,7 +98,7 @@ export function loginRequest(note, next) {
     },
     body: JSON.stringify(note)
   })
-    .then(res => res.json())
+    .then(res => res?.json())
     .then((data) => {
       next(data);
     })
@@ -123,7 +116,7 @@ export function createAccount(note, next) {
     },
     body: JSON.stringify(note)
   })
-    .then(res => res.json())
+    .then(res => res?.json())
     .then((data) => {
       next(data);
     })
@@ -159,7 +152,7 @@ export function updateOneNoteRec(note, done) {
       body: JSON.stringify(toUpdateNote)
     }).then((response) => {
 
-      if (response.ok) {
+      if (response?.ok) {
         const updateSavedItems = localStorage.getItem('updateOneNote');
         if (updateSavedItems) {
           let saveItemArray = JSON.parse(updateSavedItems);

@@ -1,12 +1,11 @@
 const mongoose = require('mongoose');
 
 const refreshSessionSchema = new mongoose.Schema({
+  sid: { type: String, required: true },
   tokenHash: { type: String, required: true },
   userAgent: String,
   ip: String,
-  createdAt: { type: Date, default: Date.now },
-  lastUsedAt: { type: Date, default: Date.now },
-  // optional: expiresAt if you want server-enforced expiry
+  lastUsedAt: Date
 });
 
 const userSchema = new mongoose.Schema(
