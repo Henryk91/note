@@ -1,114 +1,63 @@
 /* eslint-disable no-restricted-globals */
+// Modern Workbox – no importScripts, no __precacheManifest
+import {precacheAndRoute} from 'workbox-precaching';
+import {registerRoute} from 'workbox-routing';
+import {NetworkFirst, StaleWhileRevalidate, CacheFirst} from 'workbox-strategies';
+import {ExpirationPlugin} from 'workbox-expiration';
 
-// === Workbox v3 (classic) ===
-importScripts('https://storage.googleapis.com/workbox-cdn/releases/3.5.0/workbox-sw.js');
+// Injected at build by InjectManifest:
+precacheAndRoute(self.__WB_MANIFEST);
 
-// If Workbox didn't load, bail early (prevents runtime errors)
-if (!self.workbox) {
-  // eslint-disable-next-line no-console
-  console.log("Workbox didn't load");
-} else {
-  const { workbox } = self;
+// Take control asap
+self.skipWaiting();
+self.clientsClaim();
 
-  // Take control immediately on update
-  workbox.skipWaiting();
-  workbox.clientsClaim();
+// HTML pages (SPA shell): network-first
+registerRoute(
+  ({request}) => request.mode === 'navigate',
+  new NetworkFirst({
+    cacheName: 'pages-cache',
+    networkTimeoutSeconds: 5,
+    plugins: [
+      new ExpirationPlugin({maxAgeSeconds: 24 * 60 * 60, purgeOnQuotaError: true}),
+    ],
+  })
+);
 
-  // Optional: set custom cache names
-  workbox.core.setCacheNameDetails({
-    prefix: 'noteList',
-    suffix: 'msiv1',
-    precache: 'precache',
-    runtime: 'runtime',
-  });
+// JS & CSS: stale-while-revalidate
+registerRoute(
+  ({request}) => request.destination === 'script' || request.destination === 'style',
+  new StaleWhileRevalidate({
+    cacheName: 'assets-cache',
+    plugins: [
+      new ExpirationPlugin({maxEntries: 200, maxAgeSeconds: 7 * 24 * 60 * 60, purgeOnQuotaError: true}),
+    ],
+  })
+);
 
-  // ---- Precache (safe even when nothing injected) ----
-  // If your build doesn't inject __precacheManifest, ensure it's an array
-  self.__precacheManifest = self.__precacheManifest || [];
-  workbox.precaching.precacheAndRoute(self.__precacheManifest);
+// Fonts: cache-first
+registerRoute(
+  ({request}) => request.destination === 'font',
+  new CacheFirst({
+    cacheName: 'fonts-cache',
+    plugins: [
+      new ExpirationPlugin({maxEntries: 50, maxAgeSeconds: 30 * 24 * 60 * 60, purgeOnQuotaError: true}),
+    ],
+  })
+);
 
-  // ---- Runtime routes ----
+// Images: cache-first
+registerRoute(
+  ({request}) => request.destination === 'image',
+  new CacheFirst({
+    cacheName: 'images-cache',
+    plugins: [
+      new ExpirationPlugin({maxEntries: 200, maxAgeSeconds: 30 * 24 * 60 * 60, purgeOnQuotaError: true}),
+    ],
+  })
+);
 
-  // 1) App shell / HTML pages (network-first)
-  workbox.routing.registerRoute(
-    // Requests that look like navigation to your SPA root or with query
-    /(\/$|\/\?.*$)/,
-    workbox.strategies.networkFirst({
-      cacheName: 'pages-cache',
-      plugins: [
-        new workbox.expiration.Plugin({
-          maxAgeSeconds: 24 * 60 * 60, // 1 day
-          purgeOnQuotaError: true,
-        }),
-      ],
-    })
-  );
-
-  // 2) JS & CSS (stale-while-revalidate)
-  workbox.routing.registerRoute(
-    /.*\.(?:js|css)$/,
-    workbox.strategies.staleWhileRevalidate({
-      cacheName: 'assets-cache',
-      plugins: [
-        new workbox.expiration.Plugin({
-          maxEntries: 200,
-          maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
-          purgeOnQuotaError: true,
-        }),
-      ],
-    })
-  );
-
-  // 3) Fonts (cache-first)
-  workbox.routing.registerRoute(
-    /.*\.(?:woff2?|ttf|otf|eot)$/,
-    workbox.strategies.cacheFirst({
-      cacheName: 'fonts-cache',
-      plugins: [
-        new workbox.expiration.Plugin({
-          maxEntries: 50,
-          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-          purgeOnQuotaError: true,
-        }),
-      ],
-    })
-  );
-
-  // 4) Images (cache-first)
-  workbox.routing.registerRoute(
-    /.*\.(?:png|jpg|jpeg|gif|svg|webp|ico)$/,
-    workbox.strategies.cacheFirst({
-      cacheName: 'images-cache',
-      plugins: [
-        new workbox.expiration.Plugin({
-          maxEntries: 200,
-          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-          purgeOnQuotaError: true,
-        }),
-      ],
-    })
-  );
-
-  // 5) Example: API calls (uncomment if needed)
-  // workbox.routing.registerRoute(
-  //   /\/api\/.*$/,
-  //   workbox.strategies.networkFirst({
-  //     cacheName: 'api-cache',
-  //     networkTimeoutSeconds: 5,
-  //     plugins: [
-  //       new workbox.expiration.Plugin({
-  //         maxEntries: 100,
-  //         maxAgeSeconds: 24 * 60 * 60,
-  //         purgeOnQuotaError: true,
-  //       }),
-  //     ],
-  //   })
-  // );
-
-  // Optional: listen for skipWaiting messages
-  self.addEventListener('message', (event) => {
-    if (event.data && event.data.type === 'SKIP_WAITING') {
-      self.skipWaiting();
-    }
-  });
-}
+// Optional: let pages tell SW to activate immediately after update
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
+});
