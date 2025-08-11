@@ -146,6 +146,7 @@ module.exports = function (app) {
       path: [
         '/api/refresh',
         '/api/login',
+        '/api/log',
         '/api/register',
         '/api/emails',
         '/api/email',
