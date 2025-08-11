@@ -147,7 +147,6 @@ module.exports = function (app) {
         '/api/refresh',
         '/api/login',
         '/api/register',
-        '/api/log*',
         '/api/emails',
         '/api/email',
         '/api/translate-practice',
@@ -155,6 +154,7 @@ module.exports = function (app) {
         '/api/saved-translation',
         '/api/translate',
         '/api/confirm-translation',
+        /^\/api\/log\/.*/,
         /^\/api\/dash-data\/.*/,
       ],
     })
