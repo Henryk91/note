@@ -205,10 +205,9 @@ export default class NoteDetail extends Component {
 
   refreshItems = (person) => {
     if (person) {
-      let sessionShowTag = localStorage.getItem('showTag');
-      let tag = sessionShowTag ? sessionShowTag : sessionShowTag;
-      const tags = this.getNoteByTag(person.dataLable, tag);
-      this.setState({ person, tags, showTag: tag });
+      const sessionShowTag = localStorage.getItem('showTag');
+      const tags = this.getNoteByTag(person.dataLable, sessionShowTag);
+      this.setState({ person, tags, showTag: sessionShowTag });
     }
   };
 
@@ -801,8 +800,9 @@ export default class NoteDetail extends Component {
     const themeHover = `${Theme.toLowerCase()}-hover`;
     const isFirstPage = this.props.index === 0
     const className = isFirstPage ? "note-detail-item first-note-detail-item": "note-detail-item"
-    
-    const heading = this.props.lastPage && this.state.showTag && this.state.showTag !== "null" && this.props.index > 1 ? this.state.showTag: person.heading
+    const localShowTag = localStorage.getItem('showTag');
+    const heading = this.props.lastPage && localShowTag && this.state.showTag && this.state.showTag !== "null" && this.props.index > 1 ? this.state.showTag: person.heading
+
     return (
       <div id={isFirstPage? 'isFirstPage': ''} className={className} key={person.id}>
         {editName ? (

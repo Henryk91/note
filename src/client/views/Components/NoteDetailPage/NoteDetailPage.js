@@ -93,6 +93,7 @@ export default class NoteDetailPage extends Component {
       } else {
         this.setState({ pages: newPages });
       }
+      localStorage.setItem('saved-pages', JSON.stringify(newPages))
     } else if (pageFoundIndex > -1 && !msg.showNote) {
       const localPageFoundIndex = pageFoundIndex === 0 ? 1 : pageFoundIndex;
       const newPages = pages.slice(0, localPageFoundIndex);
@@ -114,9 +115,11 @@ export default class NoteDetailPage extends Component {
           if(secondTolast && last && last.params.id !== secondTolast.params.id){
             pages.push(last);
             this.setState({ pages });
+            localStorage.setItem('saved-pages', JSON.stringify(pages))
           } 
           if(secondTolast && last && last.params.id === secondTolast.params.id){
             this.setState({ pages });
+            localStorage.setItem('saved-pages', JSON.stringify(pages))
           } 
         }
       }
@@ -131,6 +134,7 @@ export default class NoteDetailPage extends Component {
 
         if(secondTolast && last && last.params.id === secondTolast.params.id){
           this.setState({ pages: locals });
+          localStorage.setItem('saved-pages', JSON.stringify(locals))
         } 
       }
     }
@@ -156,14 +160,14 @@ export default class NoteDetailPage extends Component {
     if (isNoteNames) {
       person = null;
       pages = [{ params: { id: '' } }]
-      localStorage.removeItem('saved-pages')
+      // localStorage.removeItem('saved-pages')
     }
     
     let clone = JSON.parse(JSON.stringify(pages))
     if(clone && clone[0] && clone[0].params.id !== '' && clone[0].params.id !== 'main'){
       clone = [{params: {id: "main"}}, ...clone]
     }
-    localStorage.setItem('saved-pages', JSON.stringify(clone))
+
     const pagesCont = pages.map((pageLink, index) => {
       const lastPageShowAddItem = showAddItem && index === (pages.length - 1);
       const lastPage = index === (pages.length - 1)
@@ -230,6 +234,7 @@ export default class NoteDetailPage extends Component {
         let remainingPages = pages.slice(0, pageCount -1);
         localStorage.removeItem('showTag');
         self.setState({ pages: remainingPages, showTag: null });
+        localStorage.setItem('saved-pages', JSON.stringify(remainingPages))
       }, 500);
     }
   }
@@ -358,8 +363,8 @@ export default class NoteDetailPage extends Component {
     const user =localStorage.getItem('user');
     if(user !== name){
       const test = {params: {id: "main"}}
-      localStorage.setItem('saved-pages', JSON.stringify(test))
-      this.setState({ pages: [test] });
+      // localStorage.setItem('saved-pages', JSON.stringify(test))
+      // this.setState({ pages: [test] });
     }
     this.props.set({ noteName: name })
   }

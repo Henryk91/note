@@ -65,7 +65,7 @@ export default class App extends Component {
 
   componentDidMount() {
     console.log('componentDidMount');
-    localStorage.setItem('saved-pages', JSON.stringify({params: {id: "main"}}))
+    // localStorage.setItem('saved-pages', JSON.stringify({params: {id: "main"}}))
     this.setRedirect();
     this.checkLoginState();
     const self = this;

@@ -47,7 +47,7 @@ export default class Home extends Component {
     const { notes, Theme, User } = this.props;
     const themeBack = `${Theme.toLowerCase()}-back`;
     const themeHover = `${Theme.toLowerCase()}-hover`;
-    localStorage.removeItem('saved-pages')
+    // localStorage.removeItem('saved-pages')
     return (
       <div id="home1">
         <button
