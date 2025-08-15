@@ -22,8 +22,8 @@ module.exports = function (app) {
   function setAccessCookie(res, token) {
     res.cookie('access_token', token, {
       httpOnly: true,
-      secure: false, // set true in production (HTTPS)
-      sameSite: 'lax',
+      secure: true, // set true in production (HTTPS)
+      sameSite: 'none',
       maxAge: ACCESS_MAX_AGE_MS,
       path: '/',
     });
@@ -32,8 +32,8 @@ module.exports = function (app) {
   function setRefreshCookie(res, token) {
     res.cookie('refresh_token', token, {
       httpOnly: true,
-      secure: false, // set true in production (HTTPS)
-      sameSite: 'lax',
+      secure: true, // set true in production (HTTPS)
+      sameSite: 'none',
       maxAge: REFRESH_MAX_AGE_MS,
       path: '/', // you can scope to '/refresh' if you prefer
     });
