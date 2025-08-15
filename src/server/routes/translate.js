@@ -6,27 +6,43 @@ const Handler = require('../controllers/handlers.js');
 const dbHandler = new Handler();
 
 module.exports = function (app) {
-  app.options('/api/translate-practice', cors());
+   const allowedOrigins = ['http://localhost:3000', 'https://note.henryk.co.za', 'https://henryk.co.za'];
 
-  app.get('/api/translate-practice', cors({ origin: '*' }), (req, res) => {
+  const corsOptions = {
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.error('Blocked by CORS: origin =', origin);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
+    allowedHeaders: ['Content-Type','Authorization'],
+    optionsSuccessStatus: 204, // For legacy browsers
+  };
+  
+  app.options('/api/translate-practice', cors(corsOptions));
+
+  app.get('/api/translate-practice', cors(corsOptions), (req, res) => {
     dbHandler.getTranslationPractice((docs) => {
       res.json(docs);
     });
   });
-  app.get('/api/full-translate-practice', cors({ origin: '*' }), (req, res) => {
+  app.get('/api/full-translate-practice', cors(corsOptions), (req, res) => {
     dbHandler.getFullTranslationPractice((docs) => {
       res.json(docs);
     });
   });
 
-  app.get('/api/saved-translation', cors({ origin: '*' }), (req, res) => {
+  app.get('/api/saved-translation', cors(corsOptions), (req, res) => {
     dbHandler.getSavedTranslation(req, (docs) => {
       res.json(docs);
     });
   });
   
-  app.options('/api/translate', cors());
-  app.post('/api/translate',cors({ origin: '*' }), async (req, res) => {
+  app.options('/api/translate', cors(corsOptions));
+  app.post('/api/translate',cors(corsOptions), async (req, res) => {
   // app.post('/api/translate', async (req, res) => {
     const { sentence } = req.body;
     if (!sentence) {
@@ -108,21 +124,6 @@ module.exports = function (app) {
       res.status(500).json({ error: 'Translation proxy error' });
     }
   });  
-
-  const allowedOrigins = ['http://localhost:3000', 'https://note.henryk.co.za', 'https://henryk.co.za'];
-
-  const corsOptions = {
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.error('Blocked by CORS: origin =', origin);
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    methods: ['POST', 'OPTIONS'],
-    optionsSuccessStatus: 204, // For legacy browsers
-  };
 
   app.options('/api/confirm-translation', cors(corsOptions));
 
