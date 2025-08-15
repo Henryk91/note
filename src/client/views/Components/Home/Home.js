@@ -38,6 +38,7 @@ export default class Home extends Component {
   }
 
   logOut = () => {
+    console.log('logOut localStorage.clear()');
     localStorage.clear();
     window.location.reload();
   };

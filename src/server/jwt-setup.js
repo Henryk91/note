@@ -176,14 +176,21 @@ module.exports = function (app) {
       try {
         payload = jwt.verify(token, REFRESH_SECRET, { algorithms: [JWT_ALG] });
       } catch {
+        console.log("Can't verify refresh_token");
         return res.status(401).json({ error: 'Invalid refresh token' });
       }
 
       const user = await User.findById(payload.sub);
-      if (!user) return res.status(401).json({ error: 'Invalid refresh token' });
+      if (!user) {
+        console.log('No uer from payload.sub');
+        return res.status(401).json({ error: 'Invalid refresh token' });
+      }
 
       const idx = findSessionIndexBySid(user, payload.sid); 
-      if (idx === -1) return res.status(401).json({ error: 'Invalid refresh token' });
+      if (idx === -1) {
+        console.log('Login session no longer available');
+        return res.status(401).json({ error: 'Invalid refresh token' });
+      }
 
       // Rotate this session only
       const newAccess = signAccessToken(user);

@@ -8,6 +8,7 @@ export function logoutUser(next) {
   })
     .then(res => res?.json())
     .then((data) => {
+      console.log('logoutUser localStorage.clear()');
       localStorage.clear();
       next(data);
     })
@@ -27,6 +28,7 @@ async function refreshToken() {
   })
 
   if (res.status === 401) {
+    console.log('refreshToken localStorage.clear()');
     localStorage.clear();
     window.location.reload();
   }
