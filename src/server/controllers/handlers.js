@@ -99,7 +99,7 @@ module.exports = function () {
   };
 
   this.getAllNotes = (req, done) => {
-    Note.find({ userId: req.userId })
+    Note.find({ userId: req.auth.sub })
       .then((docs) => {
         done(docs);
       })
