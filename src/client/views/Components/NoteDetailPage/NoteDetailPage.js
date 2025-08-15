@@ -18,7 +18,7 @@ export default class NoteDetailPage extends Component {
       showLogDaysBunch: false,
       searchTerm: '',
       showLink: [''],
-      pages: [{ params: { id: '' } }],
+      pages: [{ params: { id: 'main' } }],
     };
     this.openPage = this.openPage.bind(this);
     this.noteDetailSet = this.noteDetailSet.bind(this);
@@ -160,7 +160,7 @@ export default class NoteDetailPage extends Component {
     }
     
     let clone = JSON.parse(JSON.stringify(pages))
-    if(clone && clone[0] && clone[0].id !== '' && clone[0].id !== 'main'){
+    if(clone && clone[0] && clone[0].params.id !== '' && clone[0].params.id !== 'main'){
       clone = [{params: {id: "main"}}, ...clone]
     }
     localStorage.setItem('saved-pages', JSON.stringify(clone))
