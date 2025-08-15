@@ -4,13 +4,20 @@
 /* eslint-disable max-len */
 /* eslint-disable no-unused-expressions */
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Link, Redirect, Switch } from 'react-router-dom';
 import { Home, SearchBar, NoteDetail, NoteDetailPage, NewNote, Login, Pomodoro, Memento } from './views/Components/index';
 import { getMyNotesRec, saveNewNote, updateOneNoteRec, getAllNotes, getNoteNames } from './views/Helpers/requests';
-// import { useHistory } from "react-router-dom";
-// import { useNavigate } from "react-router-dom";
-// import { withRouter } from "react-router-dom";
-// import createHistory from "history/createBrowserHistory"
+
+const ProtectedRoutes = ({ children }) => {
+  const loginKey = localStorage.getItem("loginKey");
+  if (!loginKey) return <Redirect to="/login" />;
+  return (
+    <>
+      {children}
+    </>
+  );
+};
+
 const compareSort = (a, b) => {
   const nameA = a.heading.toUpperCase();
   const nameB = b.heading.toUpperCase();
@@ -346,8 +353,12 @@ export default class App extends Component {
     }
     return (
       <Router>
-        {loginKey ? (
-          <div>
+        <Switch>
+        <Route
+          path="/login"
+          render={() => <Login  Theme={theme} />}
+        />
+            <ProtectedRoutes>
             <header>
               <SearchBar set={this.setFilterNote} noteName={user} Theme={theme} notes={notes} />
               <nav className="bigScreen" id="links">
@@ -381,10 +392,8 @@ export default class App extends Component {
             <Route exact path="/new-note" component={() => <NewNote Theme={theme} set={this.addNewNote} />} />
             <Route exact path="/pomodoro" component={() => <Pomodoro />} />
             <Route exact path="/memento" component={() => <Memento Theme={theme} />} />
-          </div>
-        ) : (
-          <Login Theme={theme} />
-        )}
+            </ProtectedRoutes>
+        </Switch>
       </Router>
     );
   }

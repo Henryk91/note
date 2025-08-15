@@ -2,14 +2,15 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-// const CleanWebpackPlugin = require('clean-webpack-plugin');
 const { InjectManifest } = require('workbox-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 
 const outputDirectory = 'dist';
 
+const isProd = process.env.NODE_ENV === "production";
+
 module.exports = {
-  mode: 'development', // or 'production'
+  mode: isProd? 'production': 'development',
   entry: [
     // If you still need polyfills:
     // 'core-js/stable',
@@ -73,11 +74,16 @@ module.exports = {
       template: './public/index.html',
       favicon: './public/favicon.ico'
     }),
-    new InjectManifest({
-      swSrc: path.join(__dirname, './src/sw.js'),
-      swDest: 'sw.js',
-      maximumFileSizeToCacheInBytes: 5 * 1024 * 1024
-    }),
+    ,
+    ...(isProd
+      ? [
+          new InjectManifest({
+        swSrc: path.join(__dirname, './src/sw.js'),
+        swDest: 'sw.js',
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024
+      })
+        ]
+    : []),
     new CopyPlugin({
     patterns: [
       { from: './src/manifest.json', to: 'manifest.json' },

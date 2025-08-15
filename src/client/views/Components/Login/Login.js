@@ -35,10 +35,10 @@ export default class Login extends Component {
       
       if (res?.id) {
         localStorage.setItem('loginKey', res.id);
-        window.location.reload();
+        window.location.href = "/notes/main";
       } else if (res?.user?.id) {
         localStorage.setItem('loginKey', res?.user?.id);
-        window.location.reload();
+        window.location.href = "/notes/main";
       } else {
         alert('Login Error');
         console.log(res);
