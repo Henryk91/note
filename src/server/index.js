@@ -17,14 +17,25 @@ const cors = require('cors')
 
 app.use(cookieParser());
 
-app.use(
-  cors({
-    origin: ['http://localhost:3000', 'https://henryk.co.za'],  // or an array of allowed origins
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
-  })
-);
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://note.henryk.co.za',
+  'https://henryk.co.za'
+];
+
+app.use(cors({
+  origin(origin, cb) {
+    // allow same-origin / server-to-server (no Origin header)
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, origin || true);
+    return cb(new Error('CORS not allowed'));
+  },
+  credentials: true,
+  methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization']
+}));
+
+// Preflight helper (optional but nice to have)
+app.options('*', cors({ origin: allowedOrigins, credentials: true }));
 
 require('dotenv').config();
 
