@@ -9,6 +9,7 @@ const getDashData = require('./routes/getDashData');
 const sendEmail = require('./routes/sendEmail');
 const translate = require('./routes/translate');
 const jwtSetup = require('./jwt-setup');
+const translationScoresRouter = require('./routes/translationScores');
 const cookieParser = require('cookie-parser');
 
 const app = express();
@@ -51,6 +52,7 @@ jwtSetup(app)
 app.use(express.static('dist'));
 app.use('/api/note', getNotes);
 app.use('/api/note-names', getNoteNames);
+app.use('/api/translation-scores', translationScoresRouter);
 
 translate(app);
 updateNotes(app);
