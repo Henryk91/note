@@ -1,6 +1,5 @@
 /* eslint-disable func-names */
 const Handler = require('../controllers/handlers.js');
-const cors = require('cors');
 const dbHandler = new Handler();
 
 module.exports = function (app) {
@@ -21,7 +20,7 @@ module.exports = function (app) {
     // res.json({ Ok: '100' });
   });
 
-  app.get('/api/log*',cors(), (req, res) => {
+  app.get('/api/log*', (req, res) => {
     dbHandler.updateSiteLog(req, (dbResp) => {
       console.log('req.headers',req.headers);
       res.json({ Ok: dbResp });

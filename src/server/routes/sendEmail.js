@@ -1,5 +1,4 @@
 /* eslint-disable func-names */
-var cors = require('cors');
 const nodemailer = require('nodemailer');
 
 const name =  process.env.EMAIL_ADDRESS;
@@ -7,7 +6,7 @@ const pass = process.env.EMAIL_PASS;
 
 module.exports = function (app) {
 
-  app.post('/api/email',cors(), (req, res) => {
+  app.post('/api/email', (req, res) => {
     
     console.log('Email send Request',);
     let transport = nodemailer.createTransport({
@@ -41,7 +40,7 @@ module.exports = function (app) {
     });
   });
 
-  app.post('/api/emails',cors(), (req, res) => {
+  app.post('/api/emails', (req, res) => {
     
     console.log('Email send Request',);
     let transport = nodemailer.createTransport({

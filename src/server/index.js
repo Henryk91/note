@@ -12,8 +12,9 @@ const jwtSetup = require('./jwt-setup');
 const cookieParser = require('cookie-parser');
 
 const app = express();
-app.use(express.json());
 const cors = require('cors')
+
+app.use(express.json());
 
 app.use(cookieParser());
 
@@ -23,7 +24,7 @@ const allowedOrigins = [
   'https://henryk.co.za'
 ];
 
-app.use(cors({
+const corsOptions = {
   origin(origin, cb) {
     // allow same-origin / server-to-server (no Origin header)
     if (!origin || allowedOrigins.includes(origin)) return cb(null, origin || true);
@@ -31,16 +32,16 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
-  allowedHeaders: ['Content-Type','Authorization']
-}));
+  allowedHeaders: ['Content-Type','Authorization'],
+  optionsSuccessStatus: 204, // For legacy browsers
+}
+
+app.use(cors(corsOptions));
 
 // Preflight helper (optional but nice to have)
-app.options('*', cors({ origin: allowedOrigins, credentials: true }));
+app.options('*', cors(corsOptions));
 
 require('dotenv').config();
-
-// Ensure Express answers the preflight
-app.options('*', cors());
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
