@@ -28,12 +28,20 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'score must be between 0 and 100' });
     }
 
-    const update = { score };
-    if (typeof attempts === 'number' && attempts >= 1) update.attempts = attempts;
+    const update = {
+      $set: { score },
+      $setOnInsert: { userId, exerciseId, attempts: 1 }, // insert starts at 1
+    };
+
+    if (typeof attempts === 'number' && attempts >= 1) {
+      update.$set.attempts = attempts;
+    } else {
+      update.$inc = { attempts: 1 };
+    }
 
     const doc = await TranslationScore.findOneAndUpdate(
       { userId, exerciseId },
-      { $set: update, $setOnInsert: { userId, exerciseId } },
+      update,
       { new: true, upsert: true, runValidators: true }
     );
 
