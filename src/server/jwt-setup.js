@@ -184,7 +184,6 @@ module.exports = function (app) {
       let payload;
       try {
         payload = jwt.verify(token, REFRESH_SECRET, { algorithms: [JWT_ALG] });
-        console.log('payload',payload);
       } catch {
         console.log("Can't verify refresh_token");
         return res.status(401).json({ error: 'Invalid refresh token' });
@@ -197,9 +196,6 @@ module.exports = function (app) {
       }
 
       const idx = findSessionIndexBySid(user, payload.sid); 
-      console.log('xxxxxxxxxxx');
-      console.log('Session ind:', idx);
-      console.log('xxxxxxxxxxx');
       if (idx === -1) {
         console.log('Login session no longer available');
         return res.status(401).json({ error: 'Invalid refresh token' });
@@ -207,16 +203,13 @@ module.exports = function (app) {
 
       // Rotate this session only
       const newAccess = signAccessToken(user);
-      // const sid = randomUUID();
       const newRefresh = signRefreshToken(user, payload.sid);
-      console.log('Before user.refreshSessions[idx]',user.refreshSessions[idx]);
 
       user.refreshSessions[idx].tokenHash = await bcrypt.hash(newRefresh, 12);
       user.refreshSessions[idx].lastUsedAt = new Date();
       user.refreshSessions[idx].userAgent = req.get('user-agent');
       user.refreshSessions[idx].ip = req.ip;
 
-      console.log('Afteruser.refreshSessions[idx]',user.refreshSessions[idx]);
       await user.save();
 
       setAccessCookie(res, newAccess);
