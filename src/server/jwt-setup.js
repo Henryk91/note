@@ -40,8 +40,17 @@ module.exports = function (app) {
   }
 
   function clearAuthCookies(res) {
-    res.clearCookie('access_token', { httpOnly: true, secure: false, sameSite: 'lax', path: '/' });
-    res.clearCookie('refresh_token', { httpOnly: true, secure: false, sameSite: 'lax', path: '/' });
+    const opts = {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      path: '/',
+    };
+
+    for (const name of ['access_token', 'refresh_token']) {
+      res.clearCookie(name, opts);
+      res.cookie(name, '', { ...opts, expires: new Date(0), maxAge: 0 });
+    }
   }
 
   // ---- JWT helpers ----
@@ -236,7 +245,9 @@ module.exports = function (app) {
         }
       }
     } finally {
+      console.log('Clear auth Cookies');
       clearAuthCookies(res);
+      res.set('Cache-Control', 'no-store');
       res.json({ ok: true });
     }
   });
@@ -248,6 +259,7 @@ module.exports = function (app) {
       await User.findByIdAndUpdate(payload.sub, { $set: { refreshSessions: [] } });
     }
     clearAuthCookies(res);
+    res.set('Cache-Control', 'no-store');
     res.json({ ok: true });
   });
 
