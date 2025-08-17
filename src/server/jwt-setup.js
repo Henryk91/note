@@ -207,8 +207,8 @@ module.exports = function (app) {
 
       // Rotate this session only
       const newAccess = signAccessToken(user);
-      const sid = randomUUID();
-      const newRefresh = signRefreshToken(user, sid);
+      // const sid = randomUUID();
+      const newRefresh = signRefreshToken(user, payload.sid);
       console.log('Before user.refreshSessions[idx]',user.refreshSessions[idx]);
 
       user.refreshSessions[idx].tokenHash = await bcrypt.hash(newRefresh, 12);
