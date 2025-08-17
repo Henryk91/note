@@ -209,11 +209,14 @@ module.exports = function (app) {
       const newAccess = signAccessToken(user);
       const sid = randomUUID();
       const newRefresh = signRefreshToken(user, sid);
+      console.log('Before user.refreshSessions[idx]',user.refreshSessions[idx]);
 
       user.refreshSessions[idx].tokenHash = await bcrypt.hash(newRefresh, 12);
       user.refreshSessions[idx].lastUsedAt = new Date();
       user.refreshSessions[idx].userAgent = req.get('user-agent');
       user.refreshSessions[idx].ip = req.ip;
+
+      console.log('Afteruser.refreshSessions[idx]',user.refreshSessions[idx]);
       await user.save();
 
       setAccessCookie(res, newAccess);
