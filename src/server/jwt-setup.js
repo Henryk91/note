@@ -184,6 +184,7 @@ module.exports = function (app) {
       let payload;
       try {
         payload = jwt.verify(token, REFRESH_SECRET, { algorithms: [JWT_ALG] });
+        console.log('payload',payload);
       } catch {
         console.log("Can't verify refresh_token");
         return res.status(401).json({ error: 'Invalid refresh token' });
@@ -196,6 +197,9 @@ module.exports = function (app) {
       }
 
       const idx = findSessionIndexBySid(user, payload.sid); 
+      console.log('xxxxxxxxxxx');
+      console.log('Session ind:', idx);
+      console.log('xxxxxxxxxxx');
       if (idx === -1) {
         console.log('Login session no longer available');
         return res.status(401).json({ error: 'Invalid refresh token' });
