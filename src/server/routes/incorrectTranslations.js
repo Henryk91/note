@@ -37,7 +37,7 @@ router.post('/', async (req, res) => {
             userId,
             exerciseId,
             sentence,
-            attempts: 0,
+            // attempts: 0,
             corrected: false
           },
           $inc: { attempts: 1 }
@@ -57,6 +57,7 @@ router.post('/', async (req, res) => {
     });
   } catch (err) {
     const status = err.status || 500;
+    console.log('Insert Error:', err.message);
     return res.status(status).json({ ok: false, error: err.message || 'Server error' });
   }
 });
