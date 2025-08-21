@@ -10,6 +10,8 @@ const sendEmail = require('./routes/sendEmail');
 const translate = require('./routes/translate');
 const jwtSetup = require('./jwt-setup');
 const translationScoresRouter = require('./routes/translationScores');
+const incorrectTranslationsRoute = require('./routes/incorrectTranslations');
+
 const cookieParser = require('cookie-parser');
 
 const app = express();
@@ -53,6 +55,7 @@ app.use(express.static('dist'));
 app.use('/api/note', getNotes);
 app.use('/api/note-names', getNoteNames);
 app.use('/api/translation-scores', translationScoresRouter);
+app.use('/api/incorrect-translations', incorrectTranslationsRoute);
 
 translate(app);
 updateNotes(app);
