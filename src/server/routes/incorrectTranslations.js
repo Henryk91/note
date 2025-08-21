@@ -24,26 +24,24 @@ router.post('/', async (req, res) => {
     // Build bulk upsert ops
     // Pattern: setOnInsert.attempts = 0 and $inc.attempts = 1 => new docs end with attempts = 1
     const ops = items.map(({ exerciseId, sentence, userInput, translation, corrected }) => ({
-      updateOne: {
-        filter: { userId, exerciseId, sentence },
-        update: {
-          // Always keep latest userInput/translation; only set corrected if explicitly provided
-          $set: {
-            userInput,
-            translation,
-            ...(typeof corrected === 'boolean' ? { corrected } : {})
-          },
-          $setOnInsert: {
-            userId,
-            exerciseId,
-            sentence,
-            // attempts: 0,
-            corrected: false
-          },
-          $inc: { attempts: 1 }
-        },
-        upsert: true
-      }
+        updateOne: {
+            filter: { userId, exerciseId, sentence },
+            update: {
+            $set: {
+                userInput,
+                translation,
+                ...(typeof corrected === 'boolean' ? { corrected } : {})
+            },
+            $setOnInsert: {
+                userId,
+                exerciseId,
+                sentence
+            },
+            $inc: { attempts: 1 } // creates 1 on insert, +1 on update
+            },
+            upsert: true,
+            setDefaultsOnInsert: true  // <-- ensures Mongoose applies schema defaults on insert
+        }
     }));
 
     const result = await IncorrectTranslation.bulkWrite(ops, { ordered: false });
