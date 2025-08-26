@@ -74,7 +74,7 @@ router.get('/', async (req, res) => {
       filter.corrected = corrected === 'true';
     }
 
-    const docs = await IncorrectTranslation.find(filter, { exerciseId: 1, sentence: 1, translation: 1, _id: 0 }).sort({ updatedAt: -1 });
+    const docs = await IncorrectTranslation.find(filter, { exerciseId: 1, sentence: 1, translation: 1, _id: 0 }).sort({ updatedAt: 1 });
 
     return res.json({ ok: true, items: docs });
   } catch (err) {
