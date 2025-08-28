@@ -321,6 +321,26 @@ module.exports = function () {
       });
   };
 
+  this.getTranslationLevels = (done) => {
+    Note.aggregate([
+      { $match: { createdBy: 'TranslationPractice' } },
+      { 
+        $project: { 
+          heading: 1,
+          tags: { $setUnion: ['$dataLable.tag', []] }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]).then((rows) => {
+      const result = Object.fromEntries(rows.map(({ heading, tags }) => [heading, tags]));
+      done(result);
+    })
+    .catch((err) => {
+      console.log(err);
+      done(null);
+    });
+  };
+
   this.getFullTranslationPractice = (done) => {
     Note.find({ createdBy: 'TranslationPractice' })
       .then((docs) => {

@@ -11,6 +11,13 @@ module.exports = function (app) {
       res.json(docs);
     });
   });
+
+  app.get('/api/translate-levels', (req, res) => {
+    dbHandler.getTranslationLevels((docs) => {
+      res.json(docs);
+    });
+  });
+
   app.get('/api/full-translate-practice', (req, res) => {
     dbHandler.getFullTranslationPractice((docs) => {
       res.json(docs);

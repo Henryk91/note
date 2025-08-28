@@ -160,6 +160,7 @@ module.exports = function (app) {
         '/api/emails',
         '/api/email',
         '/api/translate-practice',
+        '/api/translate-levels',
         '/api/full-translate-practice',
         '/api/saved-translation',
         '/api/translate',
