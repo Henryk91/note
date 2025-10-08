@@ -24,7 +24,8 @@ app.use(cookieParser());
 const allowedOrigins = [
   'http://localhost:3000',
   'https://note.henryk.co.za',
-  'https://henryk.co.za'
+  'https://henryk.co.za',
+  'https://translation-practice.henryk.co.za'
 ];
 
 const corsOptions = {
