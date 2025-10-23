@@ -20,10 +20,12 @@ const REFRESH_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // ~30 days
 module.exports = function (app) {
 
   function getRequestDomain(req){
+    console.log('req',req);
+    const host = req.headers.origin
     // whitelist and derive domain safely
-    if (req.hostname.endsWith('.lingodrill.com')) {
+    if (host.endsWith('.lingodrill.com')) {
       return '.lingodrill.com'; // share across all lingodrill subdomains
-    } else if (req.hostname.endsWith('.henryk.co.za')) {
+    } else if (host.endsWith('.henryk.co.za')) {
       return '.henryk.co.za';   // share across henryk.co.za subdomains
     } else {
       return undefined;         // default: host-only (safer fallback)
