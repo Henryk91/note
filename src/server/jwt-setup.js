@@ -23,7 +23,7 @@ module.exports = function (app) {
     console.log('req.headers.host',req?.headers?.host);
     console.log('req?.hostname',req?.hostname);
     console.log('req.headers?.referer',req?.headers?.referer);
-    const host = req?.headers?.referer
+    const host = req?.hostname
     // whitelist and derive domain safely
     if (host?.endsWith('.lingodrill.com')) {
       return '.lingodrill.com'; // share across all lingodrill subdomains

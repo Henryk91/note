@@ -19,8 +19,6 @@ const cors = require('cors')
 
 app.use(express.json());
 
-app.set('trust proxy', 1); // Heroku/Render/NGINX etc.
-
 app.use(cookieParser());
 
 const allowedOrigins = [
