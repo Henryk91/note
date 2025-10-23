@@ -154,8 +154,8 @@ module.exports = function (app) {
 
       await addSession(user, refresh, sid, req);
 
-      setAccessCookie(res, access);
-      setRefreshCookie(res, refresh);
+      setAccessCookie(req, res, access);
+      setRefreshCookie(req, res, refresh);
       res.json({ ok: true, user: { id: user._id, email: user.email } });
     } catch (e) {
       console.error(e);
@@ -232,8 +232,8 @@ module.exports = function (app) {
 
       await user.save();
 
-      setAccessCookie(res, newAccess);
-      setRefreshCookie(res, newRefresh);
+      setAccessCookie(req, res, newAccess);
+      setRefreshCookie(req, res, newRefresh);
       res.json({ ok: true });
     } catch (e) {
       console.error(e);
