@@ -18,24 +18,39 @@ const ACCESS_MAX_AGE_MS = 15 * 60 * 1000; // 15 minutes
 const REFRESH_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // ~30 days
 
 module.exports = function (app) {
+
+  function getRequestDomain(req){
+    // whitelist and derive domain safely
+    if (req.hostname.endsWith('.lingodrill.com')) {
+      return '.lingodrill.com'; // share across all lingodrill subdomains
+    } else if (req.hostname.endsWith('.henryk.co.za')) {
+      return '.henryk.co.za';   // share across henryk.co.za subdomains
+    } else {
+      return undefined;         // default: host-only (safer fallback)
+    }
+  }
   // ---- Cookie helpers ----
   function setAccessCookie(res, token) {
+    const domain = getRequestDomain(req);
     res.cookie('access_token', token, {
       httpOnly: true,
       secure: true, // set true in production (HTTPS)
       sameSite: 'none',
       maxAge: ACCESS_MAX_AGE_MS,
       path: '/',
+      domain,
     });
   }
 
   function setRefreshCookie(res, token) {
+    const domain = getRequestDomain(req);
     res.cookie('refresh_token', token, {
       httpOnly: true,
       secure: true, // set true in production (HTTPS)
       sameSite: 'none',
       maxAge: REFRESH_MAX_AGE_MS,
       path: '/', // you can scope to '/refresh' if you prefer
+      domain,
     });
   }
 
