@@ -20,8 +20,7 @@ const REFRESH_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // ~30 days
 module.exports = function (app) {
 
   function getRequestDomain(req){
-    console.log('req',req);
-    const host = req?.headers?.origin
+    const host = req?.hostname
     // whitelist and derive domain safely
     if (host.endsWith('.lingodrill.com')) {
       return '.lingodrill.com'; // share across all lingodrill subdomains
