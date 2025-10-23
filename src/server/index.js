@@ -25,7 +25,9 @@ const allowedOrigins = [
   'http://localhost:3000',
   'https://note.henryk.co.za',
   'https://henryk.co.za',
-  'https://translation-practice.henryk.co.za'
+  'https://translation-practice.henryk.co.za',
+  'https://practice.lingodrill.com',
+  'https://german.lingodrill.com'
 ];
 
 const corsOptions = {
