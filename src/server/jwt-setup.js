@@ -21,7 +21,7 @@ module.exports = function (app) {
 
   function getRequestDomain(req){
     console.log('req',req);
-    const host = req.headers.origin
+    const host = req?.headers?.origin
     // whitelist and derive domain safely
     if (host.endsWith('.lingodrill.com')) {
       return '.lingodrill.com'; // share across all lingodrill subdomains
