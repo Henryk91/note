@@ -29,6 +29,9 @@ const allowedOrigins = [
   'https://lingodrill.com',
   'https://www.lingodrill.com',
   'https://practice.lingodrill.com',
+  'http://lingodrill.com',
+  'http://www.lingodrill.com',
+  'http://practice.lingodrill.com',
   'https://german.lingodrill.com'
 ];
 
