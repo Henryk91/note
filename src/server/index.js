@@ -26,6 +26,8 @@ const allowedOrigins = [
   'https://note.henryk.co.za',
   'https://henryk.co.za',
   'https://translation-practice.henryk.co.za',
+  'https://lingodrill.com',
+  'https://www.lingodrill.com',
   'https://practice.lingodrill.com',
   'https://german.lingodrill.com'
 ];
