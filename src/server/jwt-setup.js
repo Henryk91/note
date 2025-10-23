@@ -30,7 +30,7 @@ module.exports = function (app) {
     }
   }
   // ---- Cookie helpers ----
-  function setAccessCookie(res, token) {
+  function setAccessCookie(req, res, token) {
     const domain = getRequestDomain(req);
     res.cookie('access_token', token, {
       httpOnly: true,
@@ -42,7 +42,7 @@ module.exports = function (app) {
     });
   }
 
-  function setRefreshCookie(res, token) {
+  function setRefreshCookie(req, res, token) {
     const domain = getRequestDomain(req);
     res.cookie('refresh_token', token, {
       httpOnly: true,
@@ -123,8 +123,8 @@ module.exports = function (app) {
       user.refreshTokenHash = refreshHash;
       await user.save();
 
-      setAccessCookie(res, access);
-      setRefreshCookie(res, refresh);
+      setAccessCookie(req, res, access);
+      setRefreshCookie(req, res, refresh);
       res.status(201).json({ ok: true, user: { id: user._id, email: user.email } });
     } catch (e) {
       console.error(e);
