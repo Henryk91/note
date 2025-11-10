@@ -34,7 +34,9 @@ const allowedOrigins = [
   'http://practice.lingodrill.com',
   'http://api.lingodrill.com',
   'https://api.lingodrill.com',
-  'https://german.lingodrill.com'
+  'https://german.lingodrill.com',
+  'https://bpmn-collaborator.onrender.com',
+  'https://bpmn-collaborator.henryk.co.za'
 ];
 
 const corsOptions = {
