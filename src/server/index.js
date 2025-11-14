@@ -23,9 +23,6 @@ app.use(cookieParser());
 
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://note.henryk.co.za',
-  'https://henryk.co.za',
-  'https://translation-practice.henryk.co.za',
   'https://lingodrill.com',
   'https://www.lingodrill.com',
   'https://practice.lingodrill.com',
@@ -36,13 +33,24 @@ const allowedOrigins = [
   'https://api.lingodrill.com',
   'https://german.lingodrill.com',
   'https://bpmn-collaborator.onrender.com',
-  'https://bpmn-collaborator.henryk.co.za'
 ];
+
+const isHenrykSubdomain = (origin) => {
+  try {
+    const { protocol, hostname } = new URL(origin);
+    if (protocol !== 'https:') return false;
+    return hostname === 'henryk.co.za' || hostname.endsWith('.henryk.co.za');
+  } catch (err) {
+    return false;
+  }
+};
 
 const corsOptions = {
   origin(origin, cb) {
     // allow same-origin / server-to-server (no Origin header)
-    if (!origin || allowedOrigins.includes(origin)) return cb(null, origin || true);
+    if (!origin || allowedOrigins.includes(origin) || isHenrykSubdomain(origin)) {
+      return cb(null, origin || true);
+    }
     return cb(new Error('CORS not allowed'));
   },
   credentials: true,
