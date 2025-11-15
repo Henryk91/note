@@ -103,11 +103,55 @@ module.exports = function (app) {
     return user.refreshSessions.findIndex(s => s.sid === sid);
   }
 
+  function sanitizeString(value) {
+    return typeof value === 'string' ? value.trim() : '';
+  }
+
+  const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const NAME_REGEX = /^[\p{L}][\p{L}\p{M}.'\- ]*$/u;
+
+  function validateRegisterPayload(body = {}) {
+    const errors = {};
+    const firstName = sanitizeString(body.firstName);
+    const lastName = sanitizeString(body.lastName);
+    const email = sanitizeString(body.email).toLowerCase();
+    const password = typeof body.password === 'string' ? body.password : '';
+
+    if (!firstName) {
+      errors.firstName = 'First name is required';
+    } else if (!NAME_REGEX.test(firstName)) {
+      errors.firstName = 'Invalid first name';
+    }
+    if (!lastName) {
+      errors.lastName = 'Last name is required';
+    } else if (!NAME_REGEX.test(lastName)) {
+      errors.lastName = 'Invalid last name';
+    }
+
+    if (!email) {
+      errors.email = 'Email is required';
+    } else if (!EMAIL_REGEX.test(email)) {
+      errors.email = 'Invalid email address';
+    }
+
+    if (!password) {
+      errors.password = 'Password is required';
+    }
+
+    return {
+      isValid: Object.keys(errors).length === 0,
+      errors,
+      values: { firstName, lastName, email, password }
+    };
+  }
+
   // ---- Register ----
   app.post('/api/register', async (req, res) => {
     try {
-      const { email, password, firstName, lastName } = req.body || {};
-      if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+      const { isValid, errors, values } = validateRegisterPayload(req.body);
+      if (!isValid) return res.status(400).json({ error: 'Validation failed', details: errors });
+
+      const { email, password, firstName, lastName } = values;
 
       const exists = await User.findOne({ email });
       if (exists) return res.status(409).json({ error: 'Email already in use' });
