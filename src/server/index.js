@@ -2,6 +2,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const getNotes = require('./routes/getNotes');
+const handleNotesV2 = require('./routes/handleNotesV2');
 const getNoteNames = require('./routes/getNoteNames');
 const updateNotes = require('./routes/updateNotes');
 const userCheck = require('./routes/userCheck');
@@ -73,6 +74,7 @@ jwtSetup(app)
 
 app.use(express.static('dist'));
 app.use('/api/note', getNotes);
+app.use('/api/note-v2', handleNotesV2);
 app.use('/api/note-names', getNoteNames);
 app.use('/api/translation-scores', translationScoresRouter);
 app.use('/api/incorrect-translations', incorrectTranslationsRoute);

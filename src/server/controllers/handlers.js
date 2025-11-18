@@ -22,6 +22,20 @@ const noteSchema = new Schema({
   dataLable: { type: Array },
 });
 
+const noteContent = new mongoose.Schema({
+  data: { type: String, required: true },
+  date: { type: String},
+});
+
+const noteV2Schema = new Schema({
+  id: { type: String, required: true },
+  userId: { type: String, required: true },
+  name: { type: String },
+  parentId: { type: String, required: true },
+  type: { type: String, required: true },
+  content: { type: noteContent },
+});
+
 const noteUserSchema = new Schema({
   email: { type: String, required: true },
   firstName: { type: String, required: true },
@@ -33,6 +47,7 @@ const noteUserSchema = new Schema({
 
 const Note = mongoose.model('Notes', noteSchema);
 const NoteUser = mongoose.model('NoteUsers', noteUserSchema);
+const NoteV2 = mongoose.model('notes-v2', noteV2Schema);
 
 module.exports = function () {
   this.docId = (count) => {
@@ -405,4 +420,73 @@ module.exports = function () {
         done(null);
       });
   };
+
+  this.getNoteV2Content = (req, done) => {
+    NoteV2.find({ userId: req.auth.sub,  parentId: req.query.parentId?? ""})
+      .then((docs) => {
+        done(docs);
+      })
+      .catch((err) => {
+        console.log(err);
+        done('No notes');
+      });
+  };
+
+  this.newV2Note = (req, done) => {
+    const {id, parentId, type, content, name} = req.body;
+
+    const note = {
+      id, parentId, type, content, userId: req.auth.sub
+    }
+    if(name) note["name"] = name;
+    const createNote = new NoteV2(note);
+
+    createNote
+      .save()
+      .then((data) => {
+        done(data);
+      })
+      .catch((err) => {
+        console.log(err);
+        done(err.name);
+      });
+  };
+
+  this.updateV2Note = (req, done) => {
+    const {id, parentId, content, name} = req.body;
+
+    NoteV2.findOne({ id: id, userId: req.auth.sub })
+      .then((doc) => {
+        if(!parentId){
+          done('Error no note id:',id);
+          return
+        }
+        if(parentId) doc.parentId = parentId;
+        if(content) doc.content = content;
+        if(name) doc.name = name;
+        doc
+          .save()
+          .then((data) => {
+            done(data);
+          })
+          .catch((err) => {
+            console.log(err);
+            done('Error', err);
+          });
+      })
+      .catch((err) => {
+        console.log(err);
+        done('Error', err);
+      });
+  };
+
+  this.deleteV2Note = ((req, done) => {
+    const {id} = req.body;
+    NoteV2.deleteOne({ id: id, userId: req.auth.sub }).then((data) => {
+      done(data);
+    }).catch((err) => {
+        console.log(err);
+        done('Error', err);
+      });
+    });
 };
