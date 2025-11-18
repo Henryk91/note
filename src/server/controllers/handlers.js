@@ -49,6 +49,22 @@ const Note = mongoose.model('Notes', noteSchema);
 const NoteUser = mongoose.model('NoteUsers', noteUserSchema);
 const NoteV2 = mongoose.model('notes-v2', noteV2Schema);
 
+function formatDate(input) {
+  const date = new Date(input);
+
+  if (isNaN(date.getTime())) {
+    throw new Error("Invalid date format");
+  }
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  const weekday = input.slice(0, 3);
+
+  return `${year}/${month}/${day} ${weekday}`;
+}
+
 module.exports = function () {
   this.docId = (count) => {
     let text = '';
@@ -255,7 +271,14 @@ module.exports = function () {
               docDataLable[ind].data = dataLable.edit;
               doc.dataLable = docDataLable;
             }
+
+            this.syncUpdateV2Note(req, () => {
+              console.log('Partial Syncd');
+            })
           } else {
+            this.syncCreateV2Note(req, () => {
+              console.log('Create note Syncd');
+            })
             doc.dataLable.push(update.dataLable);
           }
         }
@@ -422,7 +445,8 @@ module.exports = function () {
   };
 
   this.getNoteV2Content = (req, done) => {
-    NoteV2.find({ userId: req.auth.sub,  parentId: req.query.parentId?? ""})
+    const userId = req.auth.sub;
+    NoteV2.find({ userId: userId,  parentId: req.query.parentId?? ""})
       .then((docs) => {
         done(docs);
       })
@@ -433,29 +457,44 @@ module.exports = function () {
   };
 
   this.newV2Note = (req, done) => {
+    const userId = req.auth.sub;
     const {id, parentId, type, content, name} = req.body;
 
-    const note = {
-      id, parentId, type, content, userId: req.auth.sub
-    }
-    if(name) note["name"] = name;
-    const createNote = new NoteV2(note);
+    NoteV2.findOne({ userId: userId,  id: id})
+      .then((doc) => {
+        if(doc){
+          console.log('Note with this id already Created!');
+          done(doc)
+          return;
+        }
 
-    createNote
-      .save()
-      .then((data) => {
-        done(data);
+        const note = {
+          id, parentId, type, content, userId
+        }
+        if(name) note["name"] = name;
+        const createNote = new NoteV2(note);
+
+        createNote
+          .save()
+          .then((data) => {
+            done(data);
+          })
+          .catch((err) => {
+            console.log(err);
+            done(err.name);
+          });
       })
       .catch((err) => {
         console.log(err);
-        done(err.name);
+        done('No notes');
       });
   };
 
   this.updateV2Note = (req, done) => {
+    const userId = req.auth.sub;
     const {id, parentId, content, name} = req.body;
 
-    NoteV2.findOne({ id: id, userId: req.auth.sub })
+    NoteV2.findOne({ id: id, userId: userId })
       .then((doc) => {
         if(!parentId){
           done('Error no note id:',id);
@@ -481,12 +520,99 @@ module.exports = function () {
   };
 
   this.deleteV2Note = ((req, done) => {
+    const userId = req.auth.sub;
     const {id} = req.body;
-    NoteV2.deleteOne({ id: id, userId: req.auth.sub }).then((data) => {
+    NoteV2.deleteOne({ id: id, userId: userId }).then((data) => {
       done(data);
     }).catch((err) => {
         console.log(err);
         done('Error', err);
       });
     });
+
+  this.syncUpdateV2Note = (req, done) => {
+    const body = req.body;
+    const userId = req.auth.sub;
+    const person = body.person
+    const isNote = !person.dataLable.data.includes('"json":true')
+
+    const parentId = person.id + "::" + person.dataLable.tag;
+    const jsonDataLableEdit = !isNote? JSON.parse(person.dataLable.edit): undefined;
+    const content = isNote? {data: person.dataLable.edit}: {data: jsonDataLableEdit.data, date: jsonDataLableEdit.date}
+    const partialId = parentId + "::" + (isNote? "NOTE::": "LOG::");
+    NoteV2.findOne({ id: { $regex: new RegExp("^" + partialId) }, parentId: parentId, userId: userId, "content.data": person.dataLable.data })
+      .then((doc) => {
+        if(!doc){
+          done('Error note not found');
+          return
+        }
+        if(!parentId){
+          done('Error no note id:',id);
+          return
+        }
+        if(parentId) doc.parentId = parentId;
+        if(content) doc.content = content;
+        doc
+          .save()
+          .then((data) => {
+            done(data);
+          })
+          .catch((err) => {
+            console.log(err);
+            done('Error', err);
+          });
+      })
+      .catch((err) => {
+        console.log(err);
+        done('Error', err);
+      });
+  }
+
+  this.syncCreateV2Note = (req, done) => {
+    const body = req.body;
+    const person = body.person
+    const isNote = !person.dataLable.data.includes('"json":true')
+    let parentId = person.id + "::" + person.dataLable.tag;
+    const jsonDataLableData= !isNote? JSON.parse(person.dataLable.data): undefined;
+    const content = isNote? {data: person.dataLable.data}: {data: jsonDataLableData.data, date: jsonDataLableData.date}
+
+    if(!isNote){
+      const userId = req.auth.sub;
+
+      const logDirCreate = {id: (person.id+"::Log"), userId, parentId: person.id, type: "FOLDER", name: "Log"}
+      const logDirCreateReq = {...req}
+      logDirCreateReq.body = logDirCreate
+
+      this.newV2Note(logDirCreateReq, (data) => {
+        console.log('Log Dir created');
+
+        const logDay = jsonDataLableData.date ? formatDate(jsonDataLableData.date.substring(0, 16).trim()) : "unknown";
+        const logDayId = (logDirCreate.id + "::" + logDay).trim().replaceAll(" ", "-");
+        const logDayCreate = {id: logDayId, userId, parentId: logDirCreate.id, type: "FOLDER", name: logDay}
+        const logDayCreateReq = {...req}
+        logDayCreateReq.body = logDayCreate
+
+        this.newV2Note(logDayCreateReq, (data) => {
+          console.log('Log Day Created');
+          const newReq = {...req}
+          const id = this.docId(10);
+          newReq.body = {id: (parentId+"::LOG::" + id), userId, parentId: logDayCreate.id, type: "LOG", content}
+
+          this.newV2Note(newReq, (data) => {
+            console.log('Log Created');
+            done(data)
+          })
+        })
+      })
+    } else {
+      const type = isNote? "NOTE": "LOG"
+      const newReq = {...req}
+      const id = this.docId(10);
+      newReq.body = {id, parentId, type, content}
+      this.newV2Note(newReq, (data) => {
+        console.log('data',data);
+        done(data)
+      })
+    }
+  }
 };
