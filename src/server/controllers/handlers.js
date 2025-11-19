@@ -4,7 +4,7 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable func-names */
 const fetch = require('node-fetch');
-const calcTimeNowOffset = require('../utils.js');
+const { calcTimeNowOffset, formatDate, mapNoteV2ToNoteV1, mapNoteV1ToNoteV2Query} = require('../utils.js');
 require('dotenv').config();
 
 const mongoose = require('mongoose');
@@ -48,22 +48,6 @@ const noteUserSchema = new Schema({
 const Note = mongoose.model('Notes', noteSchema);
 const NoteUser = mongoose.model('NoteUsers', noteUserSchema);
 const NoteV2 = mongoose.model('notes-v2', noteV2Schema);
-
-function formatDate(input) {
-  const date = new Date(input);
-
-  if (isNaN(date.getTime())) {
-    throw new Error("Invalid date format");
-  }
-
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  const weekday = input.slice(0, 3);
-
-  return `${year}/${month}/${day} ${weekday}`;
-}
 
 module.exports = function () {
   this.docId = (count) => {
@@ -258,11 +242,18 @@ module.exports = function () {
     Note.findOne({ id: updateNoteId, userId: req.auth.sub })
       .then((doc) => {
         const update = req.body.person;
-        doc.heading = update.heading;
+        if(update.heading) doc.heading = update.heading;
         if (doc.dataLable) {
           if (req.body.delete) {
             const newLable = doc.dataLable.filter((item) => JSON.stringify(item) !== JSON.stringify(update.dataLable));
             doc.dataLable = newLable;
+
+            if(update.heading){
+              this.syncDeleteV2Note(req, (docs) => {
+                console.log('V2 Note deleted');
+              });
+            }
+
           } else if (update.dataLable.edit) {
             const dataLable = update.dataLable;
             const docDataLable = JSON.parse(JSON.stringify(doc.dataLable));
@@ -272,13 +263,17 @@ module.exports = function () {
               doc.dataLable = docDataLable;
             }
 
-            this.syncUpdateV2Note(req, () => {
-              console.log('Partial Syncd');
-            })
+            if(update.heading){
+              this.syncUpdateV2Note(req, () => {
+                console.log('Partial Syncd');
+              })
+            }
           } else {
-            this.syncCreateV2Note(req, () => {
-              console.log('Create note Syncd');
-            })
+            if(update.heading){
+              this.syncCreateV2Note(req, () => {
+                console.log('Create note Syncd');
+              })
+            }
             doc.dataLable.push(update.dataLable);
           }
         }
@@ -445,7 +440,7 @@ module.exports = function () {
   };
 
   this.getNoteV2Content = (req, done) => {
-    const userId = req.auth.sub;
+    const userId = req?.auth?.sub;
     NoteV2.find({ userId: userId,  parentId: req.query.parentId?? ""})
       .then((docs) => {
         done(docs);
@@ -457,7 +452,7 @@ module.exports = function () {
   };
 
   this.newV2Note = (req, done) => {
-    const userId = req.auth.sub;
+    const userId =  req.auth.sub;
     const {id, parentId, type, content, name} = req.body;
 
     NoteV2.findOne({ userId: userId,  id: id})
@@ -531,17 +526,11 @@ module.exports = function () {
     });
 
   this.syncUpdateV2Note = (req, done) => {
-    const body = req.body;
-    const userId = req.auth.sub;
-    const person = body.person
-    const isNote = !person.dataLable.data.includes('"json":true')
+    const {queryParams, newContent, parentId} = mapNoteV1ToNoteV2Query(req);
 
-    const parentId = person.id + "::" + person.dataLable.tag;
-    const jsonDataLableEdit = !isNote? JSON.parse(person.dataLable.edit): undefined;
-    const content = isNote? {data: person.dataLable.edit}: {data: jsonDataLableEdit.data, date: jsonDataLableEdit.date}
-    const partialId = parentId + "::" + (isNote? "NOTE::": "LOG::");
-    NoteV2.findOne({ id: { $regex: new RegExp("^" + partialId) }, parentId: parentId, userId: userId, "content.data": person.dataLable.data })
+    NoteV2.findOne(queryParams)
       .then((doc) => {
+        console.log('doc',doc);
         if(!doc){
           done('Error note not found');
           return
@@ -551,7 +540,8 @@ module.exports = function () {
           return
         }
         if(parentId) doc.parentId = parentId;
-        if(content) doc.content = content;
+        if(newContent?.data) doc.content.data = newContent.data;
+        if(newContent?.date) doc.content.date = newContent.date;
         doc
           .save()
           .then((data) => {
@@ -614,5 +604,80 @@ module.exports = function () {
         done(data)
       })
     }
+  }
+
+  this.syncDeleteV2Note = (req, done) => {
+    const {queryParams} = mapNoteV1ToNoteV2Query(req);
+
+    NoteV2.findOne(queryParams)
+      .then((doc) => {
+        if(!doc){
+          done('Error note not found');
+          return
+        }
+        const newReq = {...req, body: {id: doc.id}}
+        this.deleteV2Note(newReq, (docs) => {
+          console.log('V2 Note deleted');
+        });
+    }).catch((err) => {
+      console.log('Error', err);
+      done('fail');
+    });
+  }
+
+  this.syncCreateV1Note = (req, done) => {
+    const mapped = mapNoteV2ToNoteV1(req.body)
+    const syncReq = {...req, body: mapped};
+
+    this.updateOneNote(syncReq, (docs) => {
+      console.log('Created Note V1');
+    });
+  }
+
+  this.syncUpdateV1Note = (req, done) => {
+    const userId = req.auth.sub;
+    NoteV2.findOne({ id: req.body.id, userId: userId })
+      .then((doc) => {
+        if(!doc) {
+          done("No Note found");
+          return;
+        }
+        const edit = doc.content?.date? JSON.stringify({json: true, date: doc.content?.date, data: doc.content.data}) : doc.content.data;
+        const data = {...req.body, edit: edit}
+        const mapped = mapNoteV2ToNoteV1(data)
+        const syncReq = {...req, body: mapped};
+
+        this.updateOneNote(syncReq, (docs) => {
+          console.log('Created Note V1');
+          done(docs)
+        });
+
+      }).catch((err) => {
+        console.log('Error',err);
+        done("Error")
+      })
+  }
+
+  this.syncDeleteV1Note = (req, done) => {
+    const userId = req.auth.sub;
+    NoteV2.findOne({ id: req.body.id, userId: userId })
+      .then((doc) => {
+        if(!doc) {
+          done("No Note found");
+          return;
+        }
+        const data = {...req.body};
+        const mapped = mapNoteV2ToNoteV1(data);
+        const syncReq = {...req, body: {...mapped, delete: true}};
+
+        this.updateOneNote(syncReq, (docs) => {
+          done(docs)
+        });
+
+      }).catch((err) => {
+        console.log('Error',err);
+        done("Error")
+      })
+  
   }
 };
