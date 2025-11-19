@@ -298,7 +298,6 @@ module.exports = function () {
     Note.findOne({ id: sitesId, userId })
       .then(async (doc) => {
         doc.heading = 'Site Track';
-        console.log('userId', userId);
         if (doc.dataLable) {
           const referer = req.headers.referer;
           const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
@@ -320,6 +319,24 @@ module.exports = function () {
             data += `\nCountry: ${ipDataJson.country}\nRegion: ${ipDataJson.regionName}\nCity: ${ipDataJson.city}\nTimezone: ${ipDataJson.timezone}\nOrg: ${ipDataJson.org}`;
           }
           doc.dataLable.push({ tag: siteTag, data });
+
+          const parentId = "KdE0rnAoFwb7BaRJgaYd::" + siteTag
+          const noteV2Id = parentId + "::NOTE::" + this.docId(10);
+          const note = {
+            id: noteV2Id, parentId, type: "NOTE", content:{data}, userId
+          }
+     
+          const createNote = new NoteV2(note);
+
+          createNote
+            .save()
+            .then((data) => {
+              console.log('Note V2 updated');
+            })
+            .catch((err) => {
+              console.log('Note V2 update error:', err);
+            });
+
         }
         doc
           .save()
