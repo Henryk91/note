@@ -5,6 +5,7 @@ dotenv.config();
 
 const DEFAULT_ALLOWED_ORIGINS = [
   'http://localhost:3000',
+  'http://localhost:4000',
   'https://lingodrill.com',
   'https://www.lingodrill.com',
   'https://practice.lingodrill.com',
