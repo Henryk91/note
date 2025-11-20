@@ -2,13 +2,15 @@
   "name": "note-list",
   "version": "1.0.0",
   "description": "Note list App with a node mongo backend",
-  "main": "src/server/index.js",
+  "main": "build/server/index.js",
   "scripts": {
-    "build": "webpack --mode production",
-    "start": "node --trace-warnings src/server/index.js",
-    "start:all": "npm run build && node --trace-deprecation src/server/index.js",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "webpack --mode production",
+    "build:server": "tsc -p tsconfig.server.json",
+    "start": "node --trace-warnings build/server/index.js",
+    "start:all": "npm run build && node --trace-deprecation build/server/index.js",
     "client": "webpack-dev-server --mode development --devtool inline-source-map --hot",
-    "server": "nodemon src/server/index.js",
+    "server": "ts-node-dev --respawn --transpile-only --project tsconfig.server.json src/server/index.ts",
     "dev": "concurrently \"npm run server\" \"npm run client\""
   },
   "author": "Henry Koekemoer",
@@ -22,7 +24,6 @@
     "babel-jest": "^30.0.5",
     "babel-loader": "^9.2.1",
     "bcryptjs": "^3.0.2",
-    "body-parser": "^1.20.3",
     "browserslist": "^4.23.3",
     "caniuse-lite": "^1.0.30001646",
     "clean-webpack-plugin": "^4.0.0",
@@ -35,13 +36,16 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "express-jwt": "^8.5.1",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^7.4.0",
     "file-loader": "^6.2.0",
+    "helmet": "^8.0.0",
+    "hpp": "^0.2.3",
     "html-webpack-plugin": "^5.6.3",
     "jsonwebtoken": "^9.0.2",
     "marked": "^16.1.2",
     "mongodb": "^6.9.0",
     "mongoose": "^8.17.1",
-    "node-fetch": "^2.7.0",
     "nodemailer": "^7.0.7",
     "react": "^16.14.0",
     "react-animated-weather": "^2.0.0",
@@ -53,10 +57,20 @@
     "webpack": "^5.101.0",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.2",
-    "workbox-webpack-plugin": "^7.3.0"
+    "workbox-webpack-plugin": "^7.3.0",
+    "xss": "^1.0.15",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.26.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.8",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/hpp": "^0.2.6",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^22.7.5",
+    "@types/nodemailer": "^7.0.4",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.6",
     "eslint": "^8.57.0",
@@ -68,10 +82,12 @@
     "eslint-plugin-react": "^7.37.2",
     "jest": "^30.0.5",
     "nodemon": "^3.1.10",
-    "prettier": "^3.3.3"
+    "prettier": "^3.3.3",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.6.3"
   },
   "engines": {
-    "node": "18.x",
-    "npm": "9.x"
+    "node": "20.x",
+    "npm": "10.x"
   }
 }
