@@ -1,82 +1,65 @@
-/* eslint-disable func-names */
-const nodemailer = require('nodemailer');
+import { Application, Request, Response } from 'express';
+import nodemailer from 'nodemailer';
 
-const name =  process.env.EMAIL_ADDRESS;
+const name = process.env.EMAIL_ADDRESS;
 const pass = process.env.EMAIL_PASS;
 
-module.exports = function (app) {
-
-  app.post('/api/email', (req, res) => {
-    
-    console.log('Email send Request',);
-    let transport = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 587,
-        auth: {
-            user: name,
-            pass: pass
-        }
-    });
-
-    const info = req.body && req.body.text ? req.body.text : 'Message missing.'
-    const msgFrom = req.body && req.body.email ? req.body.email : 'mail@henryk.co.za'
-
-    const message = {
-        from: msgFrom, // Sender address
-        to: 'heinrichk91@gmail.com',         // List of recipients
-        subject: 'From Website', // Subject line
-        text: info // Plain text body
-    };
-
-    transport.sendMail(message, function(err, info) {
-
-        if (err) {
-          console.log('Email sending error:',err)
-          res.json({ Ok: '50' });
-        } else {
-            res.json({ Ok: '100' });
-          console.log('Success sending email!',info);
-        }
-    });
+const createTransport = () =>
+  nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    auth: {
+      user: name,
+      pass,
+    },
   });
 
-  app.post('/api/emails', (req, res) => {
-    
-    console.log('Email send Request',);
-    let transport = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 587,
-        auth: {
-            user: name,
-            pass: pass
-        }
-    });
+export default function sendEmail(app: Application) {
+  app.post('/api/email', async (req: Request, res: Response) => {
+    try {
+      const transport = createTransport();
+      const info = req.body && (req.body as any).text ? (req.body as any).text : 'Message missing.';
+      const msgFrom = req.body && (req.body as any).email ? (req.body as any).email : 'mail@henryk.co.za';
 
-    let body = JSON.parse(JSON.stringify(req.body));
-    let keys = Object.keys(body)
-    body = JSON.parse(keys[0]);
-    console.log('Body',body);
+      const message = {
+        from: msgFrom,
+        to: 'heinrichk91@gmail.com',
+        subject: 'From Website',
+        text: info,
+      };
 
-    const info = body && body.text ? body.text : 'Message missing.'
-    const msgFrom = body && body.from ? body.from : 'mail@henryk.co.za'
-    const msgTo = body && body.to ? body.to : 'heinrichk91@gmail.com'
-    const subject = body && body.subject ? body.subject : 'From Website'
-    const message = {
-        from: msgFrom, // Sender address
-        to: msgTo,         // List of recipients
-        subject: subject, // Subject line
-        text: info // Plain text body
-    };
-
-    transport.sendMail(message, function(err, info) {
-
-        if (err) {
-          console.log('Email sending error:',err)
-          res.json({ Ok: '50' });
-        } else {
-            res.json({ Ok: '100' });
-          console.log('Success sending email!',info);
-        }
-    });
+      await transport.sendMail(message);
+      res.json({ Ok: '100' });
+    } catch (err) {
+      console.log('Email sending error:', err);
+      res.json({ Ok: '50' });
+    }
   });
-};
+
+  app.post('/api/emails', async (req: Request, res: Response) => {
+    try {
+      const transport = createTransport();
+      const rawBody = JSON.parse(JSON.stringify(req.body));
+      const keys = Object.keys(rawBody);
+      const parsedBody = JSON.parse(keys[0]);
+
+      const info = parsedBody?.text ?? 'Message missing.';
+      const msgFrom = parsedBody?.from ?? 'mail@henryk.co.za';
+      const msgTo = parsedBody?.to ?? 'heinrichk91@gmail.com';
+      const subject = parsedBody?.subject ?? 'From Website';
+
+      const message = {
+        from: msgFrom,
+        to: msgTo,
+        subject,
+        text: info,
+      };
+
+      await transport.sendMail(message);
+      res.json({ Ok: '100' });
+    } catch (err) {
+      console.log('Email sending error:', err);
+      res.json({ Ok: '50' });
+    }
+  });
+}

@@ -1,14 +1,13 @@
-const express = require('express');
+import { Request, Response, Router } from 'express';
+import Handler from '../controllers/handlers';
 
-const router = express.Router();
-const Handler = require('../controllers/handlers.js');
-
+const router = Router();
 const dbHandler = new Handler();
 
-router.get('/', (req, res) => {
+router.get('/', (req: Request, res: Response) => {
   dbHandler.getNoteNames(req, (docs) => {
     res.json(docs);
   });
 });
 
-module.exports = router;
+export default router;

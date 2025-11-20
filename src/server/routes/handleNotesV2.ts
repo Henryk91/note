@@ -1,43 +1,43 @@
-const express = require('express');
+import { Request, Response, Router } from 'express';
+import Handler from '../controllers/handlers';
 
-const router = express.Router();
-const Handler = require('../controllers/handlers.js');
+const router = Router();
 const dbHandler = new Handler();
 
-router.get('/', (req, res) => {
+router.get('/', (req: Request, res: Response) => {
   dbHandler.getNoteV2Content(req, (docs) => {
     res.json(docs);
   });
 });
 
-router.post('/', (req, res) => {
+router.post('/', (req: Request, res: Response) => {
   dbHandler.newV2Note(req, (docs) => {
     res.json(docs);
   });
 
-  dbHandler.syncCreateV1Note(req, (docs) => {
+  dbHandler.syncCreateV1Note(req, () => {
     console.log('Created Note V1');
   });
 });
 
-router.put('/', (req, res) => {
+router.put('/', (req: Request, res: Response) => {
   dbHandler.updateV2Note(req, (docs) => {
     res.json(docs);
   });
-  
-  dbHandler.syncUpdateV1Note(req, (docs) => {
+
+  dbHandler.syncUpdateV1Note(req, () => {
     console.log('Updated Note V1');
   });
 });
 
-router.delete('/', (req, res) => {
+router.delete('/', (req: Request, res: Response) => {
   dbHandler.deleteV2Note(req, (docs) => {
     res.json(docs);
   });
 
-  dbHandler.syncDeleteV1Note(req, (docs) => {
+  dbHandler.syncDeleteV1Note(req, () => {
     console.log('Deleted Note V1');
   });
 });
 
-module.exports = router;
+export default router;

@@ -1,47 +1,34 @@
-/* eslint-disable func-names */
-const Handler = require('../controllers/handlers.js');
-const fetch = require("node-fetch");
+import { Application, Request, Response } from 'express';
 
-module.exports = function (app) {
-  app.get('/api/dash-data/weather', (req, res) => {
-    const Api_Key = process.env.Api_Key;
-  var coordinates = req.query.coordinates;
-  fetch(
-    `https://api.darksky.net/forecast/${Api_Key}/${coordinates}?units=auto&exclude=alerts`
-  )
-    .then((fetchRes) => fetchRes.json())
-    .then(function (json) {
-      res.setHeader("Content-Type", "application/json");
+export default function getDashData(app: Application) {
+  app.get('/api/dash-data/weather', async (req: Request, res: Response) => {
+    try {
+      const Api_Key = process.env.Api_Key;
+      const coordinates = (req.query.coordinates as string) ?? '';
+      const fetchRes = await fetch(`https://api.darksky.net/forecast/${Api_Key}/${coordinates}?units=auto&exclude=alerts`);
+      const json = await fetchRes.json();
+      res.setHeader('Content-Type', 'application/json');
       res.send(JSON.stringify(json));
-    })
-    .catch(function (error) {
-      res.send(JSON.stringify(error));
-    });
+    } catch (error) {
+      res.status(500).json({ error: 'Unable to fetch weather', detail: (error as Error).message });
+    }
   });
 
-  app.get('/api/dash-data/countries', (req, res) => {
-    fetch('https://disease.sh/v3/covid-19/countries')
-      .then((fRes) => fRes.json())
-      .then((data) => {
-        console.log('Countries req.');
-        res.json(data);
-      })
+  app.get('/api/dash-data/countries', async (_req: Request, res: Response) => {
+    const fRes = await fetch('https://disease.sh/v3/covid-19/countries');
+    const data = await fRes.json();
+    res.json(data);
   });
-  app.get('/api/dash-data/historical', (req, res) => {
-    fetch('https://disease.sh/v3/covid-19/historical/all?lastdays=80')
-      .then((fRes) => fRes.json())
-      .then((data) => {
-        console.log('Countries req.');
-        res.json(data);
-      })
+
+  app.get('/api/dash-data/historical', async (_req: Request, res: Response) => {
+    const fRes = await fetch('https://disease.sh/v3/covid-19/historical/all?lastdays=80');
+    const data = await fRes.json();
+    res.json(data);
   });
-  app.get('/api/dash-data/map-data', (req, res) => {
-    fetch('https://thevirustracker.com/timeline/map-data.json')
-      .then((fRes) => fRes.json())
-      .then((data) => {
-        console.log('The Virus tracker');
-        res.json(data);
-      })
+
+  app.get('/api/dash-data/map-data', async (_req: Request, res: Response) => {
+    const fRes = await fetch('https://thevirustracker.com/timeline/map-data.json');
+    const data = await fRes.json();
+    res.json(data);
   });
-  
-};
+}

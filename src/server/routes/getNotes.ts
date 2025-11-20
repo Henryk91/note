@@ -1,34 +1,32 @@
-const express = require('express');
+import { Request, Response, Router } from 'express';
+import Handler from '../controllers/handlers';
 
-const router = express.Router();
-const Handler = require('../controllers/handlers.js');
+const router = Router();
 const dbHandler = new Handler();
 
-router.get('/', (req, res) => {
-
-  const { user } = req.query;
-  const decodedUser = decodeURI(user)
-  if (decodedUser === 'all' || decodedUser === 'All') {
+router.get('/', (req: Request, res: Response) => {
+  const { user } = req.query as { user?: string };
+  const decodedUser = user ? decodeURI(user) : '';
+  if (decodedUser.toLowerCase() === 'all') {
     dbHandler.getAllNotes(req, (docs) => {
       res.json(docs);
     });
   } else {
-    const { noteHeading } = req.query;
-    const decodedNoteHeading = decodeURI(noteHeading)
-    
+    const { noteHeading } = req.query as { noteHeading?: string };
+    const decodedNoteHeading = noteHeading ? decodeURI(noteHeading) : '';
+
     if (noteHeading) {
-      console.log("Trying to getNote", decodedNoteHeading)
+      console.log('Trying to getNote', decodedNoteHeading);
       dbHandler.getNote(req, (docs) => {
         res.json(docs);
       });
     } else {
-        dbHandler.getMyNotes(req, (docs) => {
-          console.log('Responding with docs');
-          res.json(docs);
+      dbHandler.getMyNotes(req, (docs) => {
+        console.log('Responding with docs');
+        res.json(docs);
       });
     }
   }
-  // res.json(noteDummy)
 });
 
-module.exports = router;
+export default router;

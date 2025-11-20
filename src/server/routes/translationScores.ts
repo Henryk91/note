@@ -1,12 +1,11 @@
-// routes/translationScores.js
-const express = require('express');
-const router = express.Router();
-const TranslationScore = require('../models/TranslationScore');
+import { Request, Response, Router } from 'express';
+import TranslationScore from '../models/TranslationScore';
 
-// GET all scores (optionally filter by userId)
-router.get('/', async (req, res) => {
+const router = Router();
+
+router.get('/', async (req: Request, res: Response) => {
   try {
-    const userId = req.auth.sub;
+    const userId = (req as any).auth?.sub;
     const filter = userId ? { userId } : {};
     const docs = await TranslationScore.find(filter).lean();
     res.json(docs);
@@ -16,10 +15,9 @@ router.get('/', async (req, res) => {
   }
 });
 
-// UPSERT (set/replace) score
-router.post('/', async (req, res) => {
+router.post('/', async (req: Request, res: Response) => {
   try {
-    const userId = req.auth.sub;
+    const userId = (req as any).auth?.sub;
     const { exerciseId, score, attempts } = req.body || {};
     if (!userId || !exerciseId || typeof score !== 'number') {
       return res.status(400).json({ error: 'userId, exerciseId, and numeric score are required' });
@@ -28,7 +26,7 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'score must be between 0 and 100' });
     }
 
-    const update = { score };
+    const update: any = { score };
     if (typeof attempts === 'number' && attempts >= 1) update.attempts = attempts;
 
     const doc = await TranslationScore.findOneAndUpdate(
@@ -38,7 +36,7 @@ router.post('/', async (req, res) => {
     );
 
     res.status(200).json(doc);
-  } catch (err) {
+  } catch (err: any) {
     if (err?.code === 11000) {
       return res.status(409).json({ error: 'Duplicate key for userId+exerciseId' });
     }
@@ -47,4 +45,4 @@ router.post('/', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

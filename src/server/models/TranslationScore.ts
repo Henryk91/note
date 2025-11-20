@@ -1,7 +1,18 @@
-// models/TranslationScore.js
-const mongoose = require('mongoose');
+import mongoose, { Document, Model } from 'mongoose';
 
-const TranslationScoreSchema = new mongoose.Schema(
+export interface TranslationScoreAttrs {
+  userId: string;
+  exerciseId: string;
+  score: number;
+  attempts?: number;
+}
+
+export interface TranslationScoreDoc extends TranslationScoreAttrs, Document {
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const TranslationScoreSchema = new mongoose.Schema<TranslationScoreDoc>(
   {
     userId: { type: String, required: true, index: true },
     exerciseId: { type: String, required: true, index: true },
@@ -13,4 +24,9 @@ const TranslationScoreSchema = new mongoose.Schema(
 
 TranslationScoreSchema.index({ userId: 1, exerciseId: 1 }, { unique: true });
 
-module.exports = mongoose.model('TranslationScore', TranslationScoreSchema);
+const TranslationScore: Model<TranslationScoreDoc> = mongoose.model<TranslationScoreDoc>(
+  'TranslationScore',
+  TranslationScoreSchema
+);
+
+export default TranslationScore;

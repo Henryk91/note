@@ -1,157 +1,154 @@
-/* eslint-disable func-names */
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const { expressjwt: jwtMiddleware } = require('express-jwt');
+import bcrypt from 'bcryptjs';
+import { randomUUID } from 'crypto';
+import { Application, CookieOptions, NextFunction, Request, Response } from 'express';
+import { expressjwt as jwtMiddleware } from 'express-jwt';
+import jwt from 'jsonwebtoken';
+import type { StringValue } from 'ms';
+import { z } from 'zod';
 
-const User = require('./models/User');
-const { randomUUID } = require('crypto');
+import config from './config';
+import User from './models/User';
 
-const JWT_SECRET = process.env.JWT_SECRET;
-const REFRESH_SECRET = process.env.REFRESH_SECRET;
-const JWT_ALG = 'HS256';
+const JWT_ALG: jwt.Algorithm = 'HS256';
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const NAME_REGEX = /^[\p{L}][\p{L}\p{M}.'\- ]*$/u;
 
-const ACCESS_EXPIRES = process.env.ACCESS_EXPIRES ?? '15m'; // short-lived access token
-const REFRESH_EXPIRES = process.env.REFRESH_EXPIRES ?? '30d'; // long-lived refresh token
-const MAX_SESSIONS = process.env.MAX_SESSIONS ?? 3; // <= allow concurrent devices
+type AuthenticatedRequest = Request & { auth?: { sub?: string; [key: string]: unknown } };
 
-const ACCESS_MAX_AGE_MS = 15 * 60 * 1000; // 15 minutes
-const REFRESH_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // ~30 days
+const EmailSchema = z
+  .string()
+  .trim()
+  .regex(EMAIL_REGEX, 'Invalid email')
+  .transform((value) => value.toLowerCase());
 
-module.exports = function (app) {
+const RegisterSchema = z.object({
+  firstName: z.string().trim().min(1).regex(NAME_REGEX, 'Invalid first name'),
+  lastName: z.string().trim().min(1).regex(NAME_REGEX, 'Invalid last name'),
+  email: EmailSchema,
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+});
 
-  function getRequestDomain(req){
-    const referer = req?.headers?.referer
-    console.log('referer',referer);
-    // whitelist and derive domain safely
-    if (referer?.includes('.lingodrill.com')) {
-      return '.lingodrill.com'; // share across all lingodrill subdomains
-    } else if (referer?.includes('.henryk.co.za')) {
-      return '.henryk.co.za';   // share across henryk.co.za subdomains
-    } else {
-      return undefined;         // default: host-only (safer fallback)
+const LoginSchema = z.object({
+  email: EmailSchema,
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+});
+
+const durationToMs = (value: string, fallback: number) => {
+  const match = value.match(/^(\d+)([smhd])$/);
+  if (!match) return fallback;
+  const amount = Number(match[1]);
+  const unit = match[2];
+  const multipliers: Record<string, number> = {
+    s: 1000,
+    m: 60 * 1000,
+    h: 60 * 60 * 1000,
+    d: 24 * 60 * 60 * 1000,
+  };
+  return amount * (multipliers[unit] ?? 1) || fallback;
+};
+
+const ACCESS_MAX_AGE_MS = durationToMs(config.jwt.accessExpiresIn, 15 * 60 * 1000);
+const REFRESH_MAX_AGE_MS = durationToMs(config.jwt.refreshExpiresIn, 30 * 24 * 60 * 60 * 1000);
+const COOKIE_SAMESITE: CookieOptions['sameSite'] = config.secureCookies ? 'none' : 'lax';
+const ACCESS_EXPIRES_IN = config.jwt.accessExpiresIn as StringValue;
+const REFRESH_EXPIRES_IN = config.jwt.refreshExpiresIn as StringValue;
+
+const getRequestDomain = (req: Request) => {
+  const referer = req?.headers?.referer;
+  // whitelist and derive domain safely
+  if (referer?.includes('.lingodrill.com')) {
+    return '.lingodrill.com'; // share across all lingodrill subdomains
+  }
+  if (referer?.includes('.henryk.co.za')) {
+    return '.henryk.co.za'; // share across henryk.co.za subdomains
+  }
+  return undefined; // default: host-only
+};
+
+const createValidationMiddleware =
+  <T>(schema: z.ZodSchema<T>) =>
+  (req: Request, res: Response, next: NextFunction) => {
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: 'Validation failed', details: parsed.error.flatten().fieldErrors });
     }
+    req.body = parsed.data as typeof req.body;
+    return next();
+  };
+
+const setAccessCookie = (req: Request, res: Response, token: string) => {
+  const domain = getRequestDomain(req);
+  res.cookie('access_token', token, {
+    httpOnly: true,
+    secure: config.secureCookies,
+    sameSite: COOKIE_SAMESITE,
+    maxAge: ACCESS_MAX_AGE_MS,
+    path: '/',
+    domain,
+  });
+};
+
+const setRefreshCookie = (req: Request, res: Response, token: string) => {
+  const domain = getRequestDomain(req);
+  res.cookie('refresh_token', token, {
+    httpOnly: true,
+    secure: config.secureCookies,
+    sameSite: COOKIE_SAMESITE,
+    maxAge: REFRESH_MAX_AGE_MS,
+    path: '/',
+    domain,
+  });
+};
+
+const clearAuthCookies = (res: Response) => {
+  const opts: CookieOptions = {
+    httpOnly: true,
+    secure: config.secureCookies,
+    sameSite: COOKIE_SAMESITE,
+    path: '/',
+  };
+
+  for (const name of ['access_token', 'refresh_token']) {
+    res.clearCookie(name, opts);
+    res.cookie(name, '', { ...opts, expires: new Date(0), maxAge: 0 });
   }
-  // ---- Cookie helpers ----
-  function setAccessCookie(req, res, token) {
-    const domain = getRequestDomain(req);
-    res.cookie('access_token', token, {
-      httpOnly: true,
-      secure: true, // set true in production (HTTPS)
-      sameSite: 'none',
-      maxAge: ACCESS_MAX_AGE_MS,
-      path: '/',
-      domain,
-    });
+};
+
+const signAccessToken = (user: any) => {
+  const options: jwt.SignOptions = { algorithm: JWT_ALG, expiresIn: ACCESS_EXPIRES_IN };
+  return jwt.sign({ sub: user._id.toString(), email: user.email }, config.jwt.secret, options);
+};
+
+const signRefreshToken = (user: any, sid: string) => {
+  const options: jwt.SignOptions = { algorithm: JWT_ALG, expiresIn: REFRESH_EXPIRES_IN };
+  return jwt.sign({ sub: user._id.toString(), email: user.email, sid }, config.jwt.refreshSecret, options);
+};
+
+const addSession = async (user: any, plainRefresh: string, sid: string, req: Request) => {
+  user.refreshSessions = user.refreshSessions ?? [];
+  const tokenHash = await bcrypt.hash(plainRefresh, 12);
+  user.refreshSessions.push({
+    sid,
+    tokenHash,
+    userAgent: req.get('user-agent'),
+    ip: req.ip,
+  });
+  if (user.refreshSessions.length > Number(config.jwt.maxSessions)) {
+    user.refreshSessions = user.refreshSessions.slice(1);
   }
+  await user.save();
+};
 
-  function setRefreshCookie(req, res, token) {
-    const domain = getRequestDomain(req);
-    res.cookie('refresh_token', token, {
-      httpOnly: true,
-      secure: true, // set true in production (HTTPS)
-      sameSite: 'none',
-      maxAge: REFRESH_MAX_AGE_MS,
-      path: '/', // you can scope to '/refresh' if you prefer
-      domain,
-    });
-  }
+const findSessionIndexBySid = (user: any, sid: string) => {
+  if (!user.refreshSessions) return -1;
+  return user.refreshSessions.findIndex((session: any) => session.sid === sid);
+};
 
-  function clearAuthCookies(res) {
-    const opts = {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      path: '/',
-    };
-
-    for (const name of ['access_token', 'refresh_token']) {
-      res.clearCookie(name, opts);
-      res.cookie(name, '', { ...opts, expires: new Date(0), maxAge: 0 });
-    }
-  }
-
-  // ---- JWT helpers ----
-  function signAccessToken(user) {
-    return jwt.sign({ sub: user._id.toString(), email: user.email }, JWT_SECRET, {
-      algorithm: JWT_ALG,
-      expiresIn: ACCESS_EXPIRES,
-    });
-  }
-
-  function signRefreshToken(user, sid) {
-    return jwt.sign({ sub: user._id.toString(), email: user.email, sid }, REFRESH_SECRET, {
-      algorithm: JWT_ALG,
-      expiresIn: REFRESH_EXPIRES,
-    });
-  }
-
-  async function addSession(user, plainRefresh, sid, req) {
-    const tokenHash = await bcrypt.hash(plainRefresh, 12);
-    user.refreshSessions.push({
-      sid,
-      tokenHash,
-      userAgent: req.get('user-agent'),
-      ip: req.ip,
-    });
-    if (user.refreshSessions.length > Number(MAX_SESSIONS)) {
-      user.refreshSessions = user.refreshSessions.slice(1);
-    }
-    await user.save();
-  }
-
-  function findSessionIndexBySid(user, sid) {
-    return user.refreshSessions.findIndex(s => s.sid === sid);
-  }
-
-  function sanitizeString(value) {
-    return typeof value === 'string' ? value.trim() : '';
-  }
-
-  const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  const NAME_REGEX = /^[\p{L}][\p{L}\p{M}.'\- ]*$/u;
-
-  function validateRegisterPayload(body = {}) {
-    const errors = {};
-    const firstName = sanitizeString(body.firstName);
-    const lastName = sanitizeString(body.lastName);
-    const email = sanitizeString(body.email).toLowerCase();
-    const password = typeof body.password === 'string' ? body.password : '';
-
-    if (!firstName) {
-      errors.firstName = 'First name is required';
-    } else if (!NAME_REGEX.test(firstName)) {
-      errors.firstName = 'Invalid first name';
-    }
-    if (!lastName) {
-      errors.lastName = 'Last name is required';
-    } else if (!NAME_REGEX.test(lastName)) {
-      errors.lastName = 'Invalid last name';
-    }
-
-    if (!email) {
-      errors.email = 'Email is required';
-    } else if (!EMAIL_REGEX.test(email)) {
-      errors.email = 'Invalid email address';
-    }
-
-    if (!password) {
-      errors.password = 'Password is required';
-    }
-
-    return {
-      isValid: Object.keys(errors).length === 0,
-      errors,
-      values: { firstName, lastName, email, password }
-    };
-  }
-
+const jwtSetup = (app: Application) => {
   // ---- Register ----
-  app.post('/api/register', async (req, res) => {
+  app.post('/api/register', createValidationMiddleware(RegisterSchema), async (req: Request, res: Response) => {
     try {
-      const { isValid, errors, values } = validateRegisterPayload(req.body);
-      if (!isValid) return res.status(400).json({ error: 'Validation failed', details: errors });
-
-      const { email, password, firstName, lastName } = values;
+      const { email, password, firstName, lastName } = req.body as z.infer<typeof RegisterSchema>;
 
       const exists = await User.findOne({ email });
       if (exists) return res.status(409).json({ error: 'Email already in use' });
@@ -159,7 +156,6 @@ module.exports = function (app) {
       const passwordHash = await bcrypt.hash(password, 12);
       const user = await User.create({ email, passwordHash, firstName, lastName });
 
-      // issue tokens
       const access = signAccessToken(user);
       const sid = randomUUID();
       const refresh = signRefreshToken(user, sid);
@@ -179,10 +175,9 @@ module.exports = function (app) {
   });
 
   // ---- Login ----
-  app.post('/api/login', async (req, res) => {
+  app.post('/api/login', createValidationMiddleware(LoginSchema), async (req: Request, res: Response) => {
     try {
-      const { email, password } = req.body || {};
-      if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+      const { email, password } = req.body as z.infer<typeof LoginSchema>;
 
       const user = await User.findOne({ email });
       if (!user) return res.status(401).json({ error: 'Invalid credentials' });
@@ -209,7 +204,7 @@ module.exports = function (app) {
   app.use(
     '/api',
     jwtMiddleware({
-      secret: JWT_SECRET,
+      secret: config.jwt.secret,
       algorithms: [JWT_ALG],
       getToken: (req) => req.cookies?.access_token || null,
     }).unless({
@@ -232,32 +227,40 @@ module.exports = function (app) {
     })
   );
 
-  app.get('/api/me', async (req, res) => {
-    const user = await User.findById(req.auth.sub).select('_id email');
+  app.get('/api/me', async (req: AuthenticatedRequest, res: Response) => {
+    const userId = req.auth?.sub;
+    if (!userId) return res.status(401).json({ error: 'Invalid or missing access token' });
+    const user = await User.findById(userId).select('_id email');
     res.json({ user });
   });
 
   // ---- Refresh endpoint (token rotation) ----
-  app.post('/api/refresh', async (req, res) => {
+  app.post('/api/refresh', async (req: Request, res: Response) => {
     try {
       const token = req.cookies?.refresh_token;
       if (!token) return res.status(401).json({ error: 'Missing refresh token' });
 
-      let payload;
+      let payload: jwt.JwtPayload | string;
       try {
-        payload = jwt.verify(token, REFRESH_SECRET, { algorithms: [JWT_ALG] });
+        payload = jwt.verify(token, config.jwt.refreshSecret, { algorithms: [JWT_ALG] });
       } catch {
         console.log("Can't verify refresh_token");
         return res.status(401).json({ error: 'Invalid refresh token' });
       }
 
-      const user = await User.findById(payload.sub);
-      if (!user) {
-        console.log('No uer from payload.sub');
+      if (typeof payload === 'string' || typeof payload.sub !== 'string' || typeof (payload as any).sid !== 'string') {
         return res.status(401).json({ error: 'Invalid refresh token' });
       }
 
-      const idx = findSessionIndexBySid(user, payload.sid); 
+      const user = await User.findById(payload.sub);
+      if (!user) {
+        console.log('No user from payload.sub');
+        return res.status(401).json({ error: 'Invalid refresh token' });
+      }
+
+      user.refreshSessions = user.refreshSessions ?? [];
+
+      const idx = findSessionIndexBySid(user, payload.sid);
       if (idx === -1) {
         console.log('Login session no longer available');
         return res.status(401).json({ error: 'Invalid refresh token' });
@@ -284,7 +287,7 @@ module.exports = function (app) {
   });
 
   // ---- Logout (revoke refresh, clear cookies) ----
-  app.post('/api/logout', async (req, res) => {
+  app.post('/api/logout', async (req: Request, res: Response) => {
     try {
       const token = req.cookies?.refresh_token;
       if (token) {
@@ -295,10 +298,12 @@ module.exports = function (app) {
             return null;
           }
         })();
-        if (payload?.sub) {
+        if (payload && typeof payload !== 'string' && payload.sub) {
           const user = await User.findById(payload.sub);
           if (user) {
-            const idx = findSessionIndexBySid(user, payload.sid); 
+            user.refreshSessions = user.refreshSessions ?? [];
+            const sid = typeof payload.sid === 'string' ? payload.sid : undefined;
+            const idx = sid ? findSessionIndexBySid(user, sid) : -1;
             if (idx !== -1) {
               user.refreshSessions.splice(idx, 1); // remove only this device
               await user.save();
@@ -314,9 +319,9 @@ module.exports = function (app) {
     }
   });
 
-  app.post('/api/logout-all', async (req, res) => {
+  app.post('/api/logout-all', async (req: Request, res: Response) => {
     const token = req.cookies?.refresh_token;
-    const payload = token ? jwt.decode(token) : null;
+    const payload: any = token ? jwt.decode(token) : null;
     if (payload?.sub) {
       await User.findByIdAndUpdate(payload.sub, { $set: { refreshSessions: [] } });
     }
@@ -326,10 +331,12 @@ module.exports = function (app) {
   });
 
   // ---- Auth error handler for express-jwt ----
-  app.use((err, req, res, next) => {
+  app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
     if (err.name === 'UnauthorizedError') {
       return res.status(401).json({ error: 'Invalid or missing access token' });
     }
     next(err);
   });
 };
+
+export default jwtSetup;

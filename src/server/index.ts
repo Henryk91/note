@@ -1,42 +1,32 @@
-/* eslint-disable no-undef */
-const express = require('express');
-const bodyParser = require('body-parser');
-const getNotes = require('./routes/getNotes');
-const handleNotesV2 = require('./routes/handleNotesV2');
-const getNoteNames = require('./routes/getNoteNames');
-const updateNotes = require('./routes/updateNotes');
-const userCheck = require('./routes/userCheck');
-const getDashData = require('./routes/getDashData');
-const sendEmail = require('./routes/sendEmail');
-const translate = require('./routes/translate');
-const jwtSetup = require('./jwt-setup');
-const translationScoresRouter = require('./routes/translationScores');
-const incorrectTranslationsRoute = require('./routes/incorrectTranslations');
+import cookieParser from 'cookie-parser';
+import cors, { CorsOptions } from 'cors';
+import express, { NextFunction, Request, Response } from 'express';
+import helmet from 'helmet';
+import mongoSanitize from 'express-mongo-sanitize';
+import rateLimit from 'express-rate-limit';
+import hpp from 'hpp';
+import path from 'path';
+import xss from 'xss';
 
-const cookieParser = require('cookie-parser');
+import config from './config';
+import jwtSetup from './jwt-setup';
+import getNotes from './routes/getNotes';
+import handleNotesV2 from './routes/handleNotesV2';
+import getNoteNames from './routes/getNoteNames';
+import updateNotes from './routes/updateNotes';
+import userCheck from './routes/userCheck';
+import getDashData from './routes/getDashData';
+import sendEmail from './routes/sendEmail';
+import translate from './routes/translate';
+import translationScoresRouter from './routes/translationScores';
+import incorrectTranslationsRoute from './routes/incorrectTranslations';
 
 const app = express();
-const cors = require('cors')
 
-app.use(express.json());
+app.set('trust proxy', 1);
+app.disable('x-powered-by');
 
-app.use(cookieParser());
-
-const allowedOrigins = [
-  'http://localhost:3000',
-  'https://lingodrill.com',
-  'https://www.lingodrill.com',
-  'https://practice.lingodrill.com',
-  'http://lingodrill.com',
-  'http://www.lingodrill.com',
-  'http://practice.lingodrill.com',
-  'http://api.lingodrill.com',
-  'https://api.lingodrill.com',
-  'https://german.lingodrill.com',
-  'https://bpmn-collaborator.onrender.com',
-];
-
-const isHenrykSubdomain = (origin) => {
+const isHenrykSubdomain = (origin: string) => {
   try {
     const { protocol, hostname } = new URL(origin);
     if (protocol !== 'https:') return false;
@@ -46,33 +36,68 @@ const isHenrykSubdomain = (origin) => {
   }
 };
 
-const corsOptions = {
+const corsOptions: CorsOptions = {
   origin(origin, cb) {
-    // allow same-origin / server-to-server (no Origin header)
-    if (!origin || allowedOrigins.includes(origin) || isHenrykSubdomain(origin)) {
-      return cb(null, origin || true);
+    if (!origin) return cb(null, true);
+    if (config.allowedOrigins.includes(origin) || isHenrykSubdomain(origin)) {
+      return cb(null, origin);
     }
     return cb(new Error('CORS not allowed'));
   },
   credentials: true,
-  methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
-  allowedHeaders: ['Content-Type','Authorization'],
-  optionsSuccessStatus: 204, // For legacy browsers
-}
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 204,
+};
 
+app.use(
+  helmet({
+    // allow serving static assets and API from same domain
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  })
+);
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const sanitizeValue = (value: unknown): unknown => {
+  if (value === null || value === undefined) return value;
+  if (typeof value === 'string') return xss(value);
+  if (Array.isArray(value)) return value.map(sanitizeValue);
+  if (value instanceof Date || value instanceof Buffer) return value;
+  if (typeof value === 'object') {
+    return Object.entries(value as Record<string, unknown>).reduce((acc, [key, entry]) => {
+      acc[key] = sanitizeValue(entry);
+      return acc;
+    }, {} as Record<string, unknown>);
+  }
+  return value;
+};
+
+const sanitizeRequest = (req: Request, _res: Response, next: NextFunction) => {
+  req.body = sanitizeValue(req.body);
+  req.query = sanitizeValue(req.query) as Request['query'];
+  req.params = sanitizeValue(req.params) as Request['params'];
+  next();
+};
+
+app.use('/api', apiLimiter);
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+app.use(hpp());
+app.use(mongoSanitize({ allowDots: true }));
+app.use(sanitizeRequest);
+app.use(cookieParser());
 app.use(cors(corsOptions));
-
-// Preflight helper (optional but nice to have)
 app.options('*', cors(corsOptions));
 
-require('dotenv').config();
+jwtSetup(app);
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-
-jwtSetup(app)
-
-app.use(express.static('dist'));
+app.use(express.static(path.resolve(process.cwd(), 'dist')));
 app.use('/api/note', getNotes);
 app.use('/api/note-v2', handleNotesV2);
 app.use('/api/note-names', getNoteNames);
@@ -83,19 +108,36 @@ translate(app);
 updateNotes(app);
 getDashData(app);
 sendEmail(app);
-
 userCheck(app);
 
-app.get('/*', (req, res) => {
-  if(req?.cookies?.access_token && req?.url !== '/notes/main'){
+app.get('/health', (_req, res) => {
+  res.status(200).json({ ok: true, uptime: process.uptime() });
+});
+
+app.get('/sw.js', (_req, res) => {
+  res.setHeader('Cache-Control', 'max-age=0, no-cache, no-store, must-revalidate');
+  res.sendFile(path.resolve(process.cwd(), 'dist', 'sw.js'));
+});
+
+app.get(/^\/(?!api).*/, (req, res) => {
+  if (req?.cookies?.access_token && req?.url !== '/notes/main') {
     res.redirect('/notes/main');
   } else {
     res.redirect('/');
   }
 });
 
-app.get('/sw.js', (req, res) => {
-  res.setHeader('Cache-Control', 'max-age=0, no-cache, no-store, must-revalidate');
-  res.sendFile('sw.js', { root: path.join(__dirname, 'dist') });
+app.use((req, res) => {
+  res.status(404).json({ error: 'Not found' });
 });
-app.listen(process.env.PORT || 8080, () => console.log(`Listening on port ${process.env.PORT || 8080}!`));
+
+app.use((err: Error & { status?: number }, _req: Request, res: Response, _next: NextFunction) => {
+  console.error(err);
+  res
+    .status(err.status ?? 500)
+    .json({ error: 'Internal server error', message: config.isProd ? undefined : err.message });
+});
+
+app.listen(config.port, () => {
+  console.log(`Listening on port ${config.port}!`);
+});

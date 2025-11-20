@@ -1,28 +1,26 @@
-/* eslint-disable func-names */
-const Handler = require('../controllers/handlers.js');
+import { Application, Request, Response } from 'express';
+import Handler from '../controllers/handlers';
 
 const dbHandler = new Handler();
 
-module.exports = function (app) {
-  app.post('/api-old/login', (req, res) => {
+export default function userCheck(app: Application) {
+  app.post('/api-old/login', (req: Request, res: Response) => {
     console.log('Trying to log in');
-    
-    let docId = '';
+
     dbHandler.userLogin(req.body, (dbResp) => {
-      docId = dbResp;
-      console.log('Db Trying to log in res',dbResp);
-      if (docId.indexOf('Login') < 0) {
+      const docId = dbResp;
+      console.log('Db Trying to log in res', dbResp);
+      if (typeof docId === 'string' && docId.indexOf('Login') < 0) {
         res.json({ id: docId });
       } else {
         res.json({ status: dbResp });
       }
     });
   });
-  app.post('/api-old/register', (req, res) => {
-    let docId = '';
+
+  app.post('/api-old/register', (req: Request, res: Response) => {
     dbHandler.newUser(req.body, (dbResp) => {
-      docId = dbResp;
+      res.json({ id: dbResp });
     });
-    res.json({ id: docId });
   });
-};
+}

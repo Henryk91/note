@@ -1,201 +1,108 @@
-/* eslint-disable func-names */
-const fetch = require("node-fetch");
+import { Application, Request, Response } from 'express';
+import Handler from '../controllers/handlers';
 
-const Handler = require('../controllers/handlers.js');
 const dbHandler = new Handler();
 
-module.exports = function (app) {
-
-  app.get('/api/translate-practice', (req, res) => {
+export default function translate(app: Application) {
+  app.get('/api/translate-practice', (_req: Request, res: Response) => {
     dbHandler.getTranslationPractice((docs) => {
       res.json(docs);
     });
   });
 
-  app.get('/api/translate-levels', (req, res) => {
+  app.get('/api/translate-levels', (_req: Request, res: Response) => {
     dbHandler.getTranslationLevels((docs) => {
       res.json(docs);
     });
   });
 
-  app.get('/api/full-translate-practice', (req, res) => {
+  app.get('/api/full-translate-practice', (_req: Request, res: Response) => {
     dbHandler.getFullTranslationPractice((docs) => {
       res.json(docs);
     });
   });
 
-  app.get('/api/saved-translation', (req, res) => {
+  app.get('/api/saved-translation', (req: Request, res: Response) => {
     dbHandler.getSavedTranslation(req, (docs) => {
       res.json(docs);
     });
   });
-  
-  app.post('/api/translate', async (req, res) => {
-  // app.post('/api/translate', async (req, res) => {
-    const { sentence } = req.body;
+
+  app.post('/api/translate', async (req: Request, res: Response) => {
+    const { sentence } = req.body as { sentence?: string };
     if (!sentence) {
       return res.status(400).json({ error: 'Missing sentence in request body' });
     }
-  
+
     try {
-      // Build f.req payload
       const inner = JSON.stringify([[sentence, 'en', 'de', 1], []]);
       const fReq = JSON.stringify([[['MkEWBc', inner, null, 'generic']]]);
-  
-      // Construct URL with query params
+
       const url = new URL('https://translate.google.com/_/TranslateWebserverUi/data/batchexecute');
-      const params = {
+      const params: Record<string, string> = {
         rpcids: 'MkEWBc',
         'source-path': '/',
-        'f.sid': '3888633823004036940',          // may need updating
+        'f.sid': '3888633823004036940',
         bl: 'boq_translate-webserver_20250409.05_p0',
         hl: 'en-US',
         'soc-app': '1',
         'soc-platform': '1',
         'soc-device': '1',
         _reqid: '40663570',
-        rt: 'c'
+        rt: 'c',
       };
       Object.entries(params).forEach(([k, v]) => url.searchParams.append(k, v));
-  
-      // Build form-urlencoded body
+
       const body = new URLSearchParams();
       body.set('f.req', fReq);
-      body.set('at', 'AHGM0bVQ0AKqbZcpE4PGnmHYtvg4:1744623569088'); // may need refreshing
-  
-      // Forward request to Google
+      body.set('at', 'AHGM0bVQ0AKqbZcpE4PGnmHYtvg4:1744623569088');
+
       const googleRes = await fetch(url.toString(), {
         method: 'POST',
         headers: {
-          'Accept': '*/*',
+          Accept: '*/*',
           'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-          'Origin': 'https://translate.google.com',
-          'Referer': 'https://translate.google.com/',
-          'Sec-Fetch-Mode': 'cors',
-          'Sec-Fetch-Site': 'same-origin',
-          'X-Client-Data': 'CJK2yQEIorbJAQipncoBCOrkygEIlKHLAQiRo8sBCIagzQEI/aXOAQifzs4BCLrnzgEIlujOAQ=='
+          Origin: 'https://translate.google.com',
+          Referer: 'https://translate.google.com/',
         },
         credentials: 'include',
-        body: body.toString()
+        body: body.toString(),
       });
-  
-      const text = await googleRes.text();
-      const batches = text.split("\n").filter(row => row.startsWith("[["));
-      const translatedString = batches.reduce((a, b) => a.length >= b.length ? a : b);
 
-      let data = [];
+      const text = await googleRes.text();
+      const batches = text.split('\n').filter((row) => row.startsWith('[['));
+      const translatedString = batches.reduce((a, b) => (a.length >= b.length ? a : b));
+
+      let data: any[] = [];
       try {
         data = JSON.parse(translatedString);
       } catch (err) {
         console.error('Failed to parse response:', err);
       }
-  
-      // Extract the translated sentence
+
       const raw = data[0]?.[2];
-  
+
       let translated = '';
       if (typeof raw === 'string') {
-          const rawList = JSON.parse(raw)
-          const filteredList = rawList.flat(Infinity).filter((i) => {
-              return (
-                i !== null && typeof i === 'string' 
-                && i !== sentence && i !== 'en' 
-                && i !== 'de' && !sentence.includes(i)
-              )
-          });
-          translated = filteredList.join(" ");
+        const rawList = JSON.parse(raw);
+        const filteredList = rawList.flat(Infinity).filter((i: any) => {
+          return i !== null && typeof i === 'string' && i !== sentence && i !== 'en' && i !== 'de' && !sentence.includes(i);
+        });
+        translated = filteredList.join(' ');
       }
-      
+
       res.json({ translated });
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: 'Translation proxy error' });
     }
-  });  
+  });
 
-  app.post('/api/confirm-translation',  async (req, res) => {
-    const { english, german } = req.body;
-    
-    const prompt2 = `
-        You are a translation evaluator.
+  app.post('/api/confirm-translation', async (req: Request, res: Response) => {
+    const { english, german } = req.body as { english?: string; german?: string };
+    if (!english || !german) return res.status(400).json({ error: 'Missing english/german body params' });
 
-        Your job is to check whether a German translation is both:
-        - Grammatically correct
-        - Faithfully conveys the intended meaning of the English sentence
-
-        You MUST accept idiomatic German expressions — for example, "Abend" may be used instead of "night" when the meaning remains equivalent.
-
-        Ignore punctuation, capitalization, and stylistic differences.
-        Remember spelling is very important. And pay attention that all letters are present and that letters with umlauts are used correctly.
-
-
-        ---
-        Example:
-        English: "The train, which was delayed by the storm, arrived late at night."
-        German: "Der Zug, der durch den Sturm verspätet wurde, kam gestern Abend spät an."
-        → true
-
-        ---
-        Now evaluate the following:
-
-        English: "${english}"
-        German: "${german}"
-
-        Respond only with:
-        true
-        or
-        false
-`;
-
-const prompt3 = `
-
-Most important instructions:
-0. The grammar rules that certain words need to be lowercase has been changed. Words can now be any case.
-1. For purposes of this evaluation german words with incorrect case should not be considered incorrect.
-2. If a word is spelled correctly but is not capitalized, it is still correct.
-3. Words can be spelled with a capital letter and it is still correct.
-4. Preposition can be spelled with a capital letter and it is still correct.
-5. Ignore differences in capitalization and punctuation.
-6. When I ask you to evaluate grammatical correctness, please do not fail the sentence if a word is incorrectly capitalized.
-
-You are a strict but fair German translation evaluator.
-
-Your job is to determine whether the following German sentence is:
-1. The verb form is correct but ignore case.
-2. The word order is correct.
-3. The words can be upper or lower case but the spelling is correct
-4. The prepositions are correct but ignore case. 
-6. the declination of nouns is correct but ignore case.
-7. the conjugation of verbs is correct but ignore case.
-8. The sentence is a faithful and natural-sounding translation of the English sentence
-9. A faithful and natural-sounding translation of the English sentence
-
-You MUST accept the following variations **as correct**:
-- Gender differences in nouns (e.g., "Lehrer" vs "Lehrerin") if they preserve meaning
-- Lowercase German nouns (like "schüler") if they are clearly identifiable and correctly spelled — treat this as a formatting issue, not a grammar error
-- Word order variations that are natural and grammatically valid
-- Idiomatic or natural German phrasing if it conveys the same meaning
-- Ignore differences in capitalization and punctuation
-
----
-Example:
-English: "The teacher named all the students one by one."
-German: "Die Lehrerin nannte alle schüler nacheinander."
-→ true
-
----
-Now evaluate:
-
-English: "${english}"
-German: "${german}"
-
-Respond only with:
-true
-or
-false
-`;
-
-const prompt = `
+    const prompt = `
 You are a strict but fair German translation evaluator.
 
 Your job is to determine whether the following German sentence is:
@@ -228,15 +135,13 @@ or
 false
 `;
 
-
-
     try {
       console.log('English', english);
       console.log('German', german);
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -248,19 +153,19 @@ false
       });
 
       const data = await response.json();
-      console.log('data',data);
-      const errorCode = data?.error?.code
+      console.log('data', data);
+      const errorCode = data?.error?.code;
       if (errorCode) {
         console.error('OpenAI API Error:', errorCode);
         return res.status(500).json({ error: 'OpenAI API error' });
       }
 
       const text = data.choices?.[0]?.message?.content?.trim().toLowerCase();
-      console.log('message',data.choices?.[0]?.message);
+      console.log('message', data.choices?.[0]?.message);
       res.json({ isCorrect: text === 'true' });
     } catch (error) {
       console.error('API Error:', error);
       res.status(500).json({ error: 'Translation check failed' });
     }
   });
-};
+}

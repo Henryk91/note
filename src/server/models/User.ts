@@ -1,23 +1,47 @@
-const mongoose = require('mongoose');
+import mongoose, { Document, Model } from 'mongoose';
 
-const refreshSessionSchema = new mongoose.Schema({
+export interface RefreshSession {
+  sid: string;
+  tokenHash: string;
+  userAgent?: string;
+  ip?: string;
+  lastUsedAt?: Date;
+}
+
+export interface UserAttrs {
+  firstName: string;
+  lastName: string;
+  email: string;
+  passwordHash: string;
+  refreshSessions?: RefreshSession[];
+  refreshTokenHash?: string;
+}
+
+export interface UserDoc extends UserAttrs, Document {
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const refreshSessionSchema = new mongoose.Schema<RefreshSession>({
   sid: { type: String, required: true },
   tokenHash: { type: String, required: true },
   userAgent: String,
   ip: String,
-  lastUsedAt: Date
+  lastUsedAt: Date,
 });
 
-const userSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema<UserDoc>(
   {
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     email: { type: String, required: true, unique: true, index: true },
     passwordHash: { type: String, required: true },
-    // store the *current* hashed refresh token for rotation
     refreshSessions: { type: [refreshSessionSchema], default: [] },
+    refreshTokenHash: { type: String },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model('User', userSchema);
+const User: Model<UserDoc> = mongoose.model<UserDoc>('User', userSchema);
+
+export default User;
