@@ -21,7 +21,7 @@ import translate from './routes/translate';
 import translationScoresRouter from './routes/translationScores';
 import incorrectTranslationsRoute from './routes/incorrectTranslations';
 
-const app = express();
+export const app = express();
 
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
@@ -138,6 +138,11 @@ app.use((err: Error & { status?: number }, _req: Request, res: Response, _next: 
     .json({ error: 'Internal server error', message: config.isProd ? undefined : err.message });
 });
 
-app.listen(config.port, () => {
-  console.log(`Listening on port ${config.port}!`);
-});
+// Only start the HTTP server when running the real app, not during tests
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(config.port, () => {
+    console.log(`Listening on port ${config.port}!`);
+  });
+}
+
+export default app;
