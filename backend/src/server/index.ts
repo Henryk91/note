@@ -71,8 +71,9 @@ app.use(
           'data:',
           'https://cdnjs.cloudflare.com',
           'https://fonts.gstatic.com',
+          'https://db.onlinewebfonts.com',
         ],
-        scriptSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
         connectSrc: [
           "'self'",
           'https://cdnjs.cloudflare.com',
