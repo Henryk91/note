@@ -3,7 +3,11 @@ import React, { Component } from 'react';
 export default class SearchBar extends Component {
   constructor(props) {
     super(props);
-    this.state = { showSearch: false, title2: '', title: '', editName: false };
+    this.state = {
+      showSearch: false,
+      currentNoteName: '',
+      editName: false,
+    };
     this.search = this.search.bind(this);
     this.clearSearch = this.clearSearch.bind(this);
     this.toggleSearch = this.toggleSearch.bind(this);
@@ -14,15 +18,14 @@ export default class SearchBar extends Component {
   componentDidUpdate(prevProps) {
     const { noteName } = this.props;
     if (prevProps.noteName !== noteName) {
-      this.setState({ title2: noteName });
+      this.setState({ currentNoteName: noteName });
     }
   }
 
   toggleSearch = () => {
     const { showSearch } = this.state;
     const save = { showSearch: !showSearch };
-    if (this.title2) save.title2 = this.title2.value;
-    if (this.title) save.title = this.title.value;
+    if (this.currentNoteName) save.currentNoteName = this.currentNoteName;
     this.setState({ ...save });
   };
 
@@ -40,32 +43,32 @@ export default class SearchBar extends Component {
 
   clearSearch = () => {
     const { notes, set } = this.props;
-    const { title2 } = this.state;
-    this.title.value = null;
+    const { currentNoteName } = this.state;
     set({
       filteredNotes: notes,
-      user: this.title2?.value ? this.title2?.value : title2,
+      user: currentNoteName,
       searchTerm: null,
     });
+
+    this.setState({ showSearch: false });
   };
 
-  search = () => {
+  search = (event) => {
     const { set } = this.props;
     let { notes } = this.props;
-    const { title2 } = this.state;
-    if (notes && this.title) {
-      const searchTerm = this.title.value;
-      notes = notes.filter((val) => {
-        const firtName = val.heading.toLowerCase();
-        const term = searchTerm.toLowerCase();
-        return firtName.includes(term);
-      });
+    const { currentNoteName, showSearch, editName } = this.state;
+    const searchTerm = !editName ? event?.target?.value || '' : null;
+
+    const editingName = !showSearch && editName;
+    const userName = editingName ? event?.target?.value || '' : currentNoteName;
+    if (notes && searchTerm && searchTerm !== '') {
+      const term = searchTerm.toLowerCase();
+      notes = notes.filter((val) => val.heading.toLowerCase().includes(term));
     }
-    if (this.title2) localStorage.setItem('user', this.title2.value);
-    const searchTerm = this.title ? this.title.value.toLowerCase() : null;
+    if (userName) localStorage.setItem('user', userName);
     set({
       filteredNotes: notes,
-      user: this.title2?.value ? this.title2?.value : title2,
+      user: userName,
       searchTerm,
     });
   };
@@ -74,10 +77,7 @@ export default class SearchBar extends Component {
     const { noteName, Theme } = this.props;
     const { showSearch, editName } = this.state;
     const themeBack = `${Theme.toLowerCase()}-back`;
-    const searching = !!(this.title && this.title.value);
-    if (noteName && this.title2) {
-      this.title2.value = noteName;
-    }
+    const searching = showSearch && !editName;
 
     return (
       <header className={themeBack}>
@@ -97,9 +97,8 @@ export default class SearchBar extends Component {
             className={themeBack}
             id="userNameBox"
             type="text"
-            ref={(c) => (this.title2 = c)}
             aria-label="User Name"
-            onKeyUp={this.search}
+            onKeyUp={(e) => this.search(e)}
             defaultValue={noteName}
             placeholder="Add Note Name"
             onBlur={() => this.toggleEditName()}
@@ -111,9 +110,8 @@ export default class SearchBar extends Component {
               className={themeBack}
               id="searchBox"
               aria-label="Search Name"
-              onKeyUp={this.search}
+              onKeyUp={(e) => this.search(e)}
               type="text"
-              ref={(c) => (this.title = c)}
               placeholder="Search..."
             />
           </div>

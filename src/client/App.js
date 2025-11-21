@@ -23,40 +23,20 @@ import {
   getNoteNames,
 } from './views/Helpers/requests';
 
+import { compareSort } from './views/Helpers/utils';
+
 function ProtectedRoutes({ children }) {
   const loginKey = localStorage.getItem('loginKey');
   if (!loginKey) return <Redirect to="/login" />;
-  return <>{children}</>;
+  return children;
 }
 
-const compareSort = (a, b) => {
-  const nameA = a.heading.toUpperCase();
-  const nameB = b.heading.toUpperCase();
-
-  let comparison = 0;
-  if (nameA > nameB) {
-    comparison = 1;
-  } else if (nameA < nameB) {
-    comparison = -1;
-  }
-  return comparison;
-};
-
-function isMobileDevice() {
-  return (
-    typeof window.orientation !== 'undefined' ||
-    navigator.userAgent.indexOf('IEMobile') !== -1
-  );
-}
-// const navigate = useNavigate();
 export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
       notes: null,
-      filteredNotes: null,
       user: '',
-      loginKey: null,
       notesInitialLoad: false,
       noteNames: null,
       theme: 'Dark',
@@ -73,13 +53,11 @@ export default class App extends Component {
     this.getAllNotes = this.getAllNotes.bind(this);
     this.getNoteNames = this.getNoteNames.bind(this);
     this.checkLoginState = this.checkLoginState.bind(this);
-    this.router = undefined;
     this.setRedirect();
   }
 
   componentDidMount() {
     console.log('componentDidMount');
-    // localStorage.setItem('saved-pages', JSON.stringify({params: {id: "main"}}))
     this.setRedirect();
     this.checkLoginState();
     const self = this;
@@ -131,7 +109,7 @@ export default class App extends Component {
   getAllNotes() {
     getAllNotes((res) => {
       res.sort(compareSort);
-      this.setState({ notes: res, filteredNotes: res });
+      this.setState({ notes: res });
     });
   }
 
@@ -148,7 +126,6 @@ export default class App extends Component {
         if (notes !== pdata) {
           this.setState({
             notes: pdata,
-            filteredNotes: pdata,
             freshData: false,
           });
         } else {
@@ -166,19 +143,17 @@ export default class App extends Component {
           this.setState({ freshData: true });
         }
 
-        const stateNotes = this.state.notes;
+        const stateNotes = notes;
         const reRender =
           res && stateNotes
             ? JSON.stringify(res) !== JSON.stringify(stateNotes)
             : res && res.length > 0;
         if (reRender && res.length > 0) {
           localStorage.setItem(user, JSON.stringify(res));
-          this.setState({ notes: res, filteredNotes: res });
+          this.setState({ notes: res });
           this.setRedirect();
         }
       });
-    } else {
-      // alert('Please add username at the top');
     }
   }
 
@@ -188,7 +163,6 @@ export default class App extends Component {
       this.getMyNotes(val.user);
     }
     this.setState({
-      filteredNotes: val.filteredNotes,
       user: val.user,
       searchTerm: val.searchTerm,
     });
@@ -209,14 +183,15 @@ export default class App extends Component {
     }
     if (loginKey && !notesInitialLoad && !noteNames) {
       getNoteNames((res) => {
-        if (res.length > 0 && res != 'No notes') {
+        if (res.length > 0 && res !== 'No notes') {
           res.push('All');
           res.push('None');
           if (res && res.length > 0) {
             localStorage.setItem('notenames', JSON.stringify(res));
-            const update = { noteNames: res };
+            let update = { noteNames: res };
             if (!localStorage.getItem('user')) {
-              update.user = res[0];
+              // update.user = res[0];
+              update = { ...update, user: res[0] };
               this.getMyNotes(res[0]);
             }
             this.setState(update);
@@ -227,34 +202,22 @@ export default class App extends Component {
   }
 
   updateNote = (update) => {
-    // const { notes, searchTerm } = this.state;
     const { notes } = this.state;
     const index = notes.indexOf((val) => val.id === update.id);
     notes[index] = update;
 
-    if (true) {
-      let person = null;
-      if (update.updateData) {
-        person = update.updateData;
-      } else if (update.person) {
-        person = update.person;
-      } else {
-        person = update;
-      }
-      // const person = update.updateData
-      //   ? update.updateData
-      //   : update.person
-      //     ? update.person
-      //     : update;
-      updateOneNoteRec({ person, delete: update.delete }, () => {
-        // if (update.delete) {
-        const noteUser = localStorage.getItem('user');
-        this.getMyNotes(noteUser);
-        // }
-      });
+    let person = null;
+    if (update.updateData) {
+      person = update.updateData;
+    } else if (update.person) {
+      person = update.person;
     } else {
-      alert('Cant update in search');
+      person = update;
     }
+    updateOneNoteRec({ person, delete: update.delete }, () => {
+      const noteUser = localStorage.getItem('user');
+      this.getMyNotes(noteUser);
+    });
   };
 
   addNewNote = (newNote) => {
@@ -271,7 +234,7 @@ export default class App extends Component {
 
     if (searchTerm === '' || searchTerm === null) {
       saveNewNote(usedNewNote.note, () => alert('setn'));
-      this.setState({ notes: updatedNote, filteredNotes: updatedNote });
+      this.setState({ notes: updatedNote });
     } else {
       alert('Cant update in search');
     }
@@ -280,7 +243,7 @@ export default class App extends Component {
   noteDetailSet = (msg) => {
     if (msg.noteName) {
       const { noteName } = msg;
-      this.setState({ user: noteName, notes: null, filteredNotes: null });
+      this.setState({ user: noteName, notes: null });
       this.getMyNotes(noteName);
     } else if (msg.noteTheme) {
       this.setState({ theme: msg.noteTheme });
@@ -345,13 +308,11 @@ export default class App extends Component {
     const user = localStorage.getItem('user');
     if (user !== null) this.setState({ user });
     if (loginKey !== null) {
-      this.setState({ loginKey });
       this.getNoteNames(loginKey);
 
       this.getNotesOnLoad(loginKey, user);
       const savedTheme = localStorage.getItem('theme');
       if (savedTheme) {
-        // checkLoginState;
         this.setState({ theme: savedTheme });
       }
     }
@@ -366,15 +327,7 @@ export default class App extends Component {
   }
 
   render() {
-    const {
-      theme,
-      notes,
-      user,
-      searchTerm,
-      // filteredNotes,
-      // loginKey,
-      freshData,
-    } = this.state;
+    const { theme, notes, user, searchTerm, freshData } = this.state;
 
     const { noteNames } = this.state;
     const themeBack = `${theme.toLowerCase()}-back`;
@@ -386,12 +339,6 @@ export default class App extends Component {
       } else {
         menuButton.style.color = '#ffa500';
       }
-    }
-    if (
-      !document.location.pathname.includes('note-names') &&
-      isMobileDevice()
-    ) {
-      // document.documentElement.webkitRequestFullscreen();
     }
 
     if (theme === 'Green') {
@@ -424,7 +371,7 @@ export default class App extends Component {
         .querySelector('meta[name="theme-color"]')
         .setAttribute('content', '#27343b');
     }
-    // const newNoteComponent =
+
     return (
       <Router>
         <Switch>
@@ -454,7 +401,7 @@ export default class App extends Component {
             <Route
               exact
               path="/all"
-              component={(props) => (
+              render={(props) => (
                 <Home
                   {...props}
                   SearchTerm={searchTerm}
@@ -466,7 +413,7 @@ export default class App extends Component {
             <Route
               exact
               path="/index.html"
-              component={(props) => (
+              render={(props) => (
                 <NoteDetailPage
                   SearchTerm={searchTerm}
                   noteNames={noteNames}
@@ -475,13 +422,12 @@ export default class App extends Component {
                   set={this.noteDetailSet}
                   notes={notes}
                 />
-                // <Home SearchTerm={searchTerm} noteNames={noteNames} User={user} Theme={theme} {...props} notes={filteredNotes} />
               )}
             />
             <Route
               exact
               path="/"
-              component={(props) => (
+              render={(props) => (
                 <NoteDetailPage
                   SearchTerm={searchTerm}
                   noteNames={noteNames}
@@ -490,7 +436,6 @@ export default class App extends Component {
                   set={this.noteDetailSet}
                   notes={notes}
                 />
-                // <Home SearchTerm={searchTerm} noteNames={noteNames} User={user} Theme={theme} {...props} notes={filteredNotes} />
               )}
             />
             <Route
@@ -510,13 +455,13 @@ export default class App extends Component {
             <Route
               exact
               path="/new-note"
-              component={() => <NewNote Theme={theme} set={this.addNewNote} />}
+              render={() => <NewNote Theme={theme} set={this.addNewNote} />}
             />
-            <Route exact path="/pomodoro" component={() => <Pomodoro />} />
+            <Route exact path="/pomodoro" render={() => <Pomodoro />} />
             <Route
               exact
               path="/memento"
-              component={() => <Memento Theme={theme} />}
+              render={() => <Memento Theme={theme} />}
             />
           </ProtectedRoutes>
         </Switch>

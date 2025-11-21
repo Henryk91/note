@@ -1,32 +1,14 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import { EditNoteCheck, NoteItem } from '../index';
-import { getNote } from '../../Helpers/requests';
+import NoteItem from '../NoteItem/NoteItem';
+import EditNoteCheck from '../EditNoteCheck/EditNoteCheck';
 import { getPerson } from '../../Helpers/utils';
-
-// const getPerson = (notes, propForId) => {
-//   if (propForId === 'note-name') {
-//     return this.props.noteNames;
-//   }
-//   const person =
-//     notes && notes[0]
-//       ? notes.filter((val) => val.id === propForId.params.id)[0]
-//       : null;
-
-//   if (person && person.id === 'main') {
-//     person.dataLable = person.dataLable.filter(
-//       (note) => !note.tag.startsWith('Sub: '),
-//     );
-//   }
-//   return person;
-// };
 
 export default class NoteDetail extends Component {
   constructor(props) {
     super(props);
     this.state = {
       person: null,
-      showAddItem: false,
       editName: false,
       tags: null,
       showTag: '',
@@ -36,8 +18,6 @@ export default class NoteDetail extends Component {
       showLogDaysBunch: false,
       searchTerm: '',
       showLink: [''],
-      oldLogDaysBunch: null,
-      allDatesSaved: null,
       prevDate: null,
       nextDate: null,
     };
@@ -48,40 +28,14 @@ export default class NoteDetail extends Component {
     this.showTagChange = this.showTagChange.bind(this);
     this.showHideBox = this.showHideBox.bind(this);
     this.showNoteThemes = this.showNoteThemes.bind(this);
-    this.getSingleNote = this.getSingleNote.bind(this);
-    this.editNameSet = this.editNameSet.bind(this);
-    this.showAddItemSet = this.showAddItemSet.bind(this);
     this.setNoteTheme = this.setNoteTheme.bind(this);
     this.createNoteItemBunch = this.createNoteItemBunch.bind(this);
     this.showLogDays = this.showLogDays.bind(this);
   }
 
   componentDidMount() {
-    // this.initPage2(this);
     this.initPage3(this);
   }
-
-  // initPage2(self) {
-  //   let person = null;
-  //   const { match, notes, initShowtag } = self.props;
-  //   if (initShowtag) {
-  //     person = getPerson(notes, initShowtag);
-  //     if (person) {
-  //       this.refreshItems(person);
-  //     } else if (match) {
-  //       person = getPerson(notes, match);
-  //       this.refreshItems(person);
-  //     }
-  //   } else if (match) {
-  //     if (match.url.includes('subs')) {
-  //       person = this.getSubs(notes);
-  //       this.refreshItems(person);
-  //     } else {
-  //       person = getPerson(notes, match);
-  //       this.refreshItems(person);
-  //     }
-  //   }
-  // }
 
   componentDidUpdate(nextProps) {
     const { searchTerm, editName } = this.state;
@@ -96,9 +50,9 @@ export default class NoteDetail extends Component {
         editName: nextProps.editName,
       });
 
-      const self = this;
+      // const self = this;
       setTimeout(() => {
-        self.initPage(nextProps, self);
+        this.initPage(nextProps, this);
       }, 5);
     }
   }
@@ -115,7 +69,6 @@ export default class NoteDetail extends Component {
     this.refreshItems(nextPerson);
   }
 
-  // handleLinkClick(tagData, person, tagName, showLink, lastLink) {
   handleLinkClick(tagData, person) {
     const noteId = tagData.data.substring(5);
     const { notes, openPage } = this.props;
@@ -125,19 +78,6 @@ export default class NoteDetail extends Component {
     const parentId = person.id;
     console.log('parentId', parentId);
     openPage({ personNext, parentId, hideNote: true });
-    // this.props.openPage({ personNext,  parentId: person.id});
-
-    // const tags = this.getNoteByTag(person.dataLable, tagName);
-    // localStorage.setItem('showTag', tagName);
-    // if (showLink.length > 1) {
-    //   window.history.pushState(personNext.heading, 'Sub Dir', `/notes/${personNext.id}`);
-    //   this.setState({ showLink: [''] });
-    //   this.refreshItems(personNext);
-    // } else {
-    //   const linkArray =
-    //     lastLink !== noteId ? (showLink.includes(noteId) ? showLink.slice(0, showLink.indexOf(noteId)) : [...showLink, noteId]) : showLink;
-    //   this.setState({ showTag: tagName, person, tags, showLink: linkArray });
-    // }
   }
 
   handleLinkButtons(animate, isLink, allDates, bunch) {
@@ -165,15 +105,9 @@ export default class NoteDetail extends Component {
       } else {
         sort[tag.tag] = [tag.data];
       }
-      // sort[tag.tag]
-      //   ? sort[tag.tag].push(tag.data)
-      //   : (sort[tag.tag] = [tag.data]);
     });
-    let listHasShowTag = false; // items.findIndex(item => {item.tag === showTag})
-    items.forEach((item) => {
-      // console.log('item',item.tag === showTag);
-      if (item.tag === showTag) listHasShowTag = true;
-    });
+
+    const listHasShowTag = items.some((item) => item.tag === showTag);
 
     const { linkProps, propertyArray } = this.setLogAndLinksAtTop(sort);
     const { Theme, lastPage } = this.props;
@@ -183,13 +117,15 @@ export default class NoteDetail extends Component {
 
       const showButton = showTag === prop;
 
-      let allDates = this.getAllDatesSorted(sort, prop, searchTerm);
-      // console.log('logDayBunchLogic', logDaysBunch);
+      let allDates = this.getDataFilteredAndSorted(sort, prop, searchTerm);
+      // let allDates = showDateSelector
+      //   ? this.getDataFilteredAndSorted(sort, prop, searchTerm)
+      //   : [...sort[prop]];
+
       const { selectedDate, logDaysBunch } = this.logDayBunchLogic(
         prop,
         displayDate,
         allDates,
-        // logDaysBunch,
       );
 
       const isLink = this.isLinkCheck(sort, prop);
@@ -223,8 +159,9 @@ export default class NoteDetail extends Component {
         showTag !== 'Log' &&
         !showLogDaysBunch;
 
+      const key = prop + i;
       return (
-        <div className={className} key={prop + i}>
+        <div className={className} key={key}>
           {showOnlyNote
             ? null
             : this.noteDetailListItem(
@@ -271,10 +208,10 @@ export default class NoteDetail extends Component {
   setDate = (prop, date) => {
     if (prop === 'Log Days') {
       this.setState({ displayDate: date, showLogDaysBunch: false });
-      const self = this;
+      // const self = this;
       setTimeout(() => {
         window.scrollTo(0, 0);
-        self.showLogTagChange('Log');
+        this.showLogTagChange('Log');
       }, 10);
     }
   };
@@ -284,19 +221,6 @@ export default class NoteDetail extends Component {
     set({ noteTheme: name });
     localStorage.setItem('theme', name);
   };
-
-  getSingleNote(noteHeading) {
-    const user = localStorage.getItem('user');
-    if (user !== '') {
-      getNote(user, noteHeading, (res) => {
-        if (res.length > 0) {
-          this.refreshItems(res[0]);
-        }
-      });
-    } else {
-      alert('Please add username at the top');
-    }
-  }
 
   getSubs(notes) {
     const subs = notes.filter((note) => note.heading.startsWith('Sub: '));
@@ -316,20 +240,23 @@ export default class NoteDetail extends Component {
     return null;
   }
 
-  getAllDatesSorted(sort, prop, searchTerm) {
+  getDataFilteredAndSorted(sort, prop, searchTerm) {
     let allDates = [...sort[prop]];
 
-    allDates = allDates.sort((a, b) => {
-      if (a.includes('"json":true')) {
-        return new Date(JSON.parse(a).date) - new Date(JSON.parse(b).date);
-      }
-    });
-
     if (searchTerm) {
+      const lowerSearch = searchTerm.toLowerCase();
       allDates = allDates.filter((item) =>
-        JSON.stringify(item).toLowerCase().includes(searchTerm),
+        item?.toLowerCase()?.includes(lowerSearch),
       );
     }
+
+    if (prop !== 'Log') return allDates;
+    allDates = allDates
+      .filter((d) => d.includes('"json":true'))
+      .sort(
+        (a, b) => new Date(JSON.parse(a).date) - new Date(JSON.parse(b).date),
+      );
+
     return allDates;
   }
 
@@ -356,23 +283,16 @@ export default class NoteDetail extends Component {
     }
   };
 
-  showAddItemSet = (bVal) => {
-    this.setState({ showAddItem: bVal });
-    if (bVal) window.scrollTo(0, 0);
-  };
-
-  editNameSet = (bVal) => {
-    this.setState({ editName: bVal });
-  };
-
   showHideBox = (showTag, prop) => {
     // TODO: Fix this logic
-    // if (showTag !== prop && prop !== 'Log') {
     if (prop !== 'Log') {
       this.showTagChange(prop);
-    } else if (showTag !== '' && prop !== 'Log') {
-      this.showTagChange('');
     }
+    // if (prop !== 'Log') {
+    //   this.showTagChange(prop);
+    // } else if (showTag !== '' && prop !== 'Log') {
+    //   this.showTagChange('');
+    // }
   };
 
   showNoteThemes = (names) =>
@@ -426,11 +346,11 @@ export default class NoteDetail extends Component {
       // Not A link
       const sessionShowTag = localStorage.getItem('showTag');
       if (lastPage && sessionShowTag) {
-        this.openDetailOnNewPage(tagData, person);
+        this.openDetailOnNewPage(person);
       }
       if (lastPage) {
         localStorage.setItem('showTag', tagName);
-        this.openDetailOnNewPage(tagData, person);
+        this.openDetailOnNewPage(person);
       } else if (sessionShowTag && tagName && sessionShowTag !== tagName) {
         localStorage.setItem('showTag', tagName);
         this.setState({ showTag: null });
@@ -443,7 +363,7 @@ export default class NoteDetail extends Component {
         });
       } else {
         this.clearShowTag();
-        this.openDetailOnNewPage(tagData, person);
+        this.openDetailOnNewPage(person);
       }
     }
   };
@@ -451,12 +371,17 @@ export default class NoteDetail extends Component {
   changeDate = (e) => {
     e.preventDefault();
     const selectedDate = e.target.value;
-    this.setState({ displayDate: selectedDate });
+
+    const dateObj = new Date(selectedDate);
+    let dateToChangeTo = `${dateObj}`;
+    dateToChangeTo = dateToChangeTo.substring(0, 16).trim();
+
+    this.setState({ displayDate: dateToChangeTo });
     this.showLogTagChange('');
-    const self = this;
+    // const self = this;
 
     setTimeout(() => {
-      self.showLogTagChange('Log');
+      this.showLogTagChange('Log');
     }, 10);
   };
 
@@ -478,7 +403,7 @@ export default class NoteDetail extends Component {
     const { set } = this.props;
     this.setState({ addLable: val.cont });
     set({ forParent: true, showAddItem: true });
-    this.showAddItemSet(true);
+    window.scrollTo(0, 0);
   };
 
   submitNameChange = (e) => {
@@ -507,7 +432,6 @@ export default class NoteDetail extends Component {
       : '';
 
     if (tag === 'Note' || tag === 'Upload') tag = textTag;
-    // tag === 'Note' || tag === 'Upload' ? (tag = textTag) : tag;
 
     if (tag === 'Log') {
       number = JSON.stringify({ json: true, date: textTag, data: number });
@@ -535,13 +459,14 @@ export default class NoteDetail extends Component {
     set({ updateData });
 
     this.refreshItems(person);
-    this.setState({ showAddItem: false, addLable: null });
+    this.setState({ addLable: null });
     hideAddItem({ show: false });
 
-    if (!number.includes('href:')) {
-      event.target.number.value = '';
-      event.target.tagTypeText.value = '';
-    }
+    // Todo: Clear input boxes after submit?
+    // if (!number.includes('href:')) {
+    //   event.target.number.value = '';
+    //   event.target.tagTypeText.value = '';
+    // }
   };
 
   refreshItems = (person) => {
@@ -572,11 +497,8 @@ export default class NoteDetail extends Component {
     return sort[prop] && sort[prop][0] && sort[prop][0].startsWith('href:');
   }
 
-  openDetailOnNewPage(tagData, person) {
-    // const noteId = tagData.data.substring(5);
+  openDetailOnNewPage(person) {
     const { openPage } = this.props;
-    // const { notes } = this.props;
-    // let personNext = notes && notes[0] ? notes.find((note) => note.id === noteId) : null;
 
     const parentId = person.id;
     openPage({
@@ -585,7 +507,6 @@ export default class NoteDetail extends Component {
       showNote: true,
       hideNote: true,
     });
-    // this.props.openPage({ personNext,  parentId: person.id});
   }
 
   noteDetailItemClick(nextPerson, person, tagName) {
@@ -638,12 +559,6 @@ export default class NoteDetail extends Component {
         const start = localNoteDetailPage.scrollWidth - pageWidth - pageWidth;
         const end = start + pageWidth;
         this.customScrollBy(localNoteDetailPage, start, end);
-
-        // noteDetailPage.scrollBy({
-        //   top: 0,
-        //   left: noteDetailPage.scrollWidth * 5,
-        //   behavior: 'smooth'
-        // });
       }, 30);
   }
 
@@ -682,24 +597,14 @@ export default class NoteDetail extends Component {
           noteNames,
         );
         openPage({ personNext: newPerson });
-        // self.refreshItems(person);
       }
     } else {
       const person = getPerson(self.props.notes, self.props.match, noteNames);
       self.refreshItems(person);
     }
-    // const noteDetailPage = document.getElementById('multiple-pages');
-
-    // if (noteDetailPage) noteDetailPage.scrollBy({
-    //     top: 0,
-    //     left: noteDetailPage.scrollWidth * 2,
-    //     behavior: 'smooth'
-    //   });
   }
 
-  // logDayBunchLogic(prop, selectedDate, allDates, logDaysBunch) {
   logDayBunchLogic(prop, selectedDate, allDates) {
-    // console.log('logDaysBunch',logDaysBunch);
     let newSelectedDate = selectedDate;
     let newLogDaysBunch;
     if (prop === 'Log') {
@@ -855,9 +760,9 @@ export default class NoteDetail extends Component {
     const { showLogDaysBunch, person } = this.state;
     if (person && showTag === 'Log') {
       this.setState({ showLogDaysBunch: !showLogDaysBunch });
-      const self = this;
+      // const self = this;
       setTimeout(() => {
-        self.showLogTagChange('');
+        this.showLogTagChange('');
       }, 10);
     }
   }
@@ -880,11 +785,9 @@ export default class NoteDetail extends Component {
         count = item.count;
         dateItem = item.date;
       }
+      const key = dateItem + prop + ind;
       return (
-        <div
-          onClick={() => this.setDate(prop, dateItem)}
-          key={dateItem + prop + ind}
-        >
+        <div onClick={() => this.setDate(prop, dateItem)} key={key}>
           <NoteItem
             nextItem={nextItem}
             prevItem={prevItem}
@@ -907,7 +810,7 @@ export default class NoteDetail extends Component {
   cancelAddItemEdit() {
     const { hideAddItem } = this.props;
     hideAddItem({ show: false });
-    this.setState({ showAddItem: false, addLable: null });
+    this.setState({ addLable: null });
     localStorage.removeItem('new-folder-edit');
   }
 
@@ -984,8 +887,6 @@ export default class NoteDetail extends Component {
   pageContent(person, editName, editNameB, showAddItem, Theme, tags) {
     const { showTag } = this.state;
     const { index, lastPage } = this.props;
-    const themeBack = `${Theme.toLowerCase()}-back`;
-    const themeHover = `${Theme.toLowerCase()}-hover`;
     const isFirstPage = index === 0;
     const className = isFirstPage
       ? 'note-detail-item first-note-detail-item'
@@ -1009,17 +910,6 @@ export default class NoteDetail extends Component {
             <h1 id="personHead" className="nameBox">
               {heading}
             </h1>
-            {true ? (
-              ''
-            ) : (
-              <div
-                className={`nameBox ${themeHover} ${themeBack}`}
-                id="nameBoxButton"
-                onClick={() => this.editNameSet(true)}
-              >
-                <i className="fas fa-pen" />
-              </div>
-            )}
           </div>
         )}
 

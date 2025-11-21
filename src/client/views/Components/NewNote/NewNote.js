@@ -5,16 +5,8 @@ import { docId } from '../../Helpers/utils';
 export default class NewNote extends Component {
   constructor(props) {
     super(props);
-    // this.state = {
-    //   radioType: 'Number',
-    // };
     this.addNewUser = this.addNewUser.bind(this);
-    // this.setRadioType = this.setRadioType.bind(this);
   }
-
-  // setRadioType(type) {
-  //   this.setState({ radioType: type });
-  // }
 
   addNewUser = (event) => {
     event.preventDefault();
@@ -24,7 +16,6 @@ export default class NewNote extends Component {
     let tag = event.target.tagType.value;
 
     if (tag === 'Note') tag = event.target.tagTypeText.value;
-    // tag === 'Note' ? (tag = event.target.tagTypeText.value) : tag;
     const loginKey = localStorage.getItem('loginKey');
     const uniqueId = docId();
     const textTag = event.target.tagTypeText.value;
@@ -39,8 +30,7 @@ export default class NewNote extends Component {
       heading,
       dataLable: [{ tag, data: number }],
     };
-    // this.setState({ showAddItem: false });
-    // this.props.set({ note });
+
     const { set } = this.props;
     set({ note });
     window.history.back();

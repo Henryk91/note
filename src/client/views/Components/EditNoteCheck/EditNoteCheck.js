@@ -172,7 +172,7 @@ export default class EditNoteCheck extends Component {
     const options = headings.map((item, index) => {
       if (index === headings.length - 1) defaultId = item.id;
       return (
-        <option key={index} value={item.id}>
+        <option key={item.id} value={item.id}>
           {item.heading}
         </option>
       );
@@ -289,10 +289,11 @@ export default class EditNoteCheck extends Component {
   }
 
   newNote(themeBack, showTag) {
+    let localShowTag = showTag;
     const creatingNewFolder = localStorage.getItem('new-folder-edit');
     let defaultVal = '';
     if (creatingNewFolder) {
-      showTag = 'Note';
+      localShowTag = 'Note';
       defaultVal = '1.';
     }
     return (
@@ -302,7 +303,7 @@ export default class EditNoteCheck extends Component {
           name="tagTypeText"
           type="text"
           placeholder="Sub Heading"
-          defaultValue={showTag}
+          defaultValue={localShowTag}
         />
         <br />
         <AutoCompleteTextArea
@@ -320,14 +321,15 @@ export default class EditNoteCheck extends Component {
   }
 
   render() {
-    let { radioType, displayDate, inputDisplayDate } = this.state;
+    const { radioType, displayDate, inputDisplayDate } = this.state;
+    let localRadioType = radioType;
     const { upload } = this.state;
     const { showTag, Theme, lable, allNotes } = this.props;
     let defaultNote = true;
     let defaultLog = false;
     let defaultLink = false;
     if (showTag === 'Log') {
-      radioType = 'Log';
+      localRadioType = 'Log';
       defaultLog = true;
       defaultNote = false;
     }
@@ -336,7 +338,7 @@ export default class EditNoteCheck extends Component {
 
     const wasEditing = localStorage.getItem('was-new-folder-edit');
     if (wasEditing) {
-      radioType = 'Link';
+      localRadioType = 'Link';
       defaultLink = true;
       defaultLog = false;
       defaultNote = false;
@@ -385,18 +387,18 @@ export default class EditNoteCheck extends Component {
           />
         </div>
 
-        {radioType === 'Note' ? this.newNote(themeBack, showTag) : null}
-        {radioType === 'Log'
+        {localRadioType === 'Note' ? this.newNote(themeBack, showTag) : null}
+        {localRadioType === 'Log'
           ? this.newLog(inputDisplayDate, themeBack, displayDate, lable)
           : null}
-        {radioType === 'Link'
+        {localRadioType === 'Link'
           ? this.newLink(themeBack, themeHover, allNotes)
           : null}
-        {radioType === 'Upload'
+        {localRadioType === 'Upload'
           ? this.newUpload(themeBack, showTag, upload)
           : null}
-        {radioType === 'Number' ? this.newNumber(themeBack) : null}
-        {radioType === 'Email' ? this.newEmail(themeBack) : null}
+        {localRadioType === 'Number' ? this.newNumber(themeBack) : null}
+        {localRadioType === 'Email' ? this.newEmail(themeBack) : null}
       </div>
     );
   }

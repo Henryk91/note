@@ -1,49 +1,10 @@
 import React, { Component } from 'react';
 import { marked } from 'marked';
+import { getLogDuration } from '../../Helpers/utils';
 
 marked.setOptions({
   breaks: true,
 });
-
-const checkIsToday = (dateString) => {
-  const today = new Date();
-  const someDate = new Date(dateString);
-  return (
-    someDate.getDate() == today.getDate() &&
-    someDate.getMonth() == today.getMonth() &&
-    someDate.getFullYear() == today.getFullYear()
-  );
-};
-
-function getLogDuration(nextItem, parsedItem) {
-  const parsedNextItem = nextItem ? JSON.parse(nextItem) : null;
-
-  const getTimeDifference = (start, end) => {
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    const duration = endDate.getTime() - startDate.getTime();
-    let minutes = Math.floor((duration / (1000 * 60)) % 60);
-    let hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
-
-    hours = hours < 10 ? `0${hours}` : hours;
-    minutes = minutes < 10 ? `0${minutes}` : minutes;
-
-    return `${hours}:${minutes}`;
-  };
-
-  let nextDate = parsedNextItem ? parsedNextItem.date : null;
-
-  if (!nextDate) {
-    if (checkIsToday(parsedItem.date)) {
-      nextDate = `${new Date()}`;
-    }
-  }
-
-  const duration = nextDate
-    ? `(${getTimeDifference(parsedItem.date, nextDate)})`
-    : '';
-  return duration;
-}
 
 export default class NoteItem extends Component {
   constructor(props) {
@@ -58,7 +19,6 @@ export default class NoteItem extends Component {
     this.editItemSet = this.editItemSet.bind(this);
   }
 
-  // eslint-disable-next-line class-methods-use-this
   getMarkdownText(input) {
     const rawMarkup = marked(input, { sanitize: false });
     return { __html: rawMarkup };
@@ -122,10 +82,6 @@ export default class NoteItem extends Component {
     e.preventDefault();
     const selectedDate = e.target.value;
     const date = new Date(selectedDate);
-    this.setState({
-      displayDate: date,
-      inputDisplayDate: this.dateToInputDisplayDate(date),
-    });
     document.getElementById('text-date').value = date;
   };
 
@@ -230,28 +186,23 @@ export default class NoteItem extends Component {
 
     return (
       <div className="noteItemBox" onClick={() => this.setEditState()}>
-        {show ? (
-          <div className="logLine">
-            {showEdit ? null : (
-              <div className={`listCountBox noteItemCount ${themeBorder}`}>
-                {' '}
-                <span className="list-count-item">{count}</span>{' '}
-              </div>
-            )}
-            <div
-              className={`${noteItemClass} white-color`}
-              dangerouslySetInnerHTML={this.getMarkdownText(item)}
-            />
-            {/* {showEdit ? (
-              <div className={`editButtons ${themeBack} ${themeBackHover}`} >
-                <i className="fas fa-pen" />
-              </div>
-            ) : null} */}
-          </div>
-        ) : (
-          ''
+        {show && (
+          <>
+            <div className="logLine">
+              {showEdit ? null : (
+                <div className={`listCountBox noteItemCount ${themeBorder}`}>
+                  {' '}
+                  <span className="list-count-item">{count}</span>{' '}
+                </div>
+              )}
+              <div
+                className={`${noteItemClass} white-color`}
+                dangerouslySetInnerHTML={this.getMarkdownText(item)}
+              />
+            </div>
+            <hr />
+          </>
         )}
-        {show ? <hr /> : null}
       </div>
     );
   }
@@ -272,7 +223,7 @@ export default class NoteItem extends Component {
         showItem = false;
       }
     }
-    if (!showItem) return <></>;
+    if (!showItem) return '';
 
     const themeBack = `${Theme.toLowerCase()}-back`;
     const themeBackHover = `${Theme.toLowerCase()}-hover`;
@@ -281,24 +232,6 @@ export default class NoteItem extends Component {
       ? 'logNoteItem'
       : null;
 
-    // if (parsedItem.data === 'Break' || parsedItem.data === 'Pause' || parsedItem.data === 'Lunch') {
-    //   hasBreak = 'logNoteItem';
-    // } else if (parsedItem.data === 'Pause') {
-    //   hasBreak = 'logNoteItem';
-    // } else if (parsedItem.data === 'Lunch') {
-    //   hasBreak = 'logNoteItem';
-    // } else {
-    //   hasBreak = null;
-    // }
-
-    // const hasBreak =
-    //   parsedItem.data === 'Break'
-    //     ? 'logNoteItem'
-    //     : parsedItem.data === 'Pause'
-    //       ? 'logNoteItem'
-    //       : parsedItem.data === 'Lunch'
-    //         ? 'logNoteItem'
-    //         : null;
     let prevData = null;
 
     if (prevItem !== null && prevItem !== undefined) {
@@ -310,7 +243,7 @@ export default class NoteItem extends Component {
     const { cont } = this.props;
     return (
       <div className="noteItemBox">
-        {showItem ? (
+        {showItem && (
           <div>
             <div>
               <span className="flex">
@@ -339,8 +272,6 @@ export default class NoteItem extends Component {
             </div>
             <hr />
           </div>
-        ) : (
-          ''
         )}
       </div>
     );
@@ -364,18 +295,13 @@ export default class NoteItem extends Component {
     const noEditingNoLog = !editing && !isLog;
     return (
       <div>
-        {item ? (
+        {item && (
           <div className="noteTagBox">
             {editing && this.editItemBox(item)}
             {noEditingIsLog && this.displayLogItemBox(item, itemPrev)}
             {noEditingNoLog && this.displayItemBox(item)}
-            {/* {editing
-              ? this.editItemBox(item)
-              : isLog
-                ? this.displayLogItemBox(item, itemPrev)
-                : this.displayItemBox(item)} */}
           </div>
-        ) : null}
+        )}
       </div>
     );
   }

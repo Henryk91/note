@@ -7,17 +7,8 @@ export default class NoteDetailPage extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      person: null,
       showAddItem: false,
       editName: false,
-      tags: null,
-      showTag: '',
-      addLable: null,
-      displayDate: null,
-      continueData: null,
-      showLogDaysBunch: false,
-      searchTerm: '',
-      showLink: [''],
       pages: [{ params: { id: 'main' } }],
     };
     this.openPage = this.openPage.bind(this);
@@ -38,8 +29,7 @@ export default class NoteDetailPage extends Component {
       pages = pages.filter((page) => page.params.id !== '');
       if (pages.length > 1) this.setState({ pages: JSON.parse(localPages) });
     }
-    // }
-    // componentDidMount(){
+
     const isEditing = localStorage.getItem('new-folder-edit');
     if (isEditing) {
       this.setState({ showAddItem: true });
@@ -70,8 +60,8 @@ export default class NoteDetailPage extends Component {
 
   noteDetailSet = (msg) => {
     const { set } = this.props;
+
     if (msg.forParent) {
-      delete msg.forParent;
       this.setState({ ...msg });
     } else {
       set(msg);
@@ -81,72 +71,75 @@ export default class NoteDetailPage extends Component {
   openPage = (msg) => {
     if (!msg.personNext) return;
     const nextPage = { params: { id: msg.personNext.id } };
-    let { pages } = this.state;
-
-    const parentPageIndex = pages.findIndex(
+    const { pages } = this.state;
+    let updatePages = pages;
+    const parentPageIndex = updatePages.findIndex(
       (page) => page.params.id === msg.parentId,
     );
 
-    const pageFoundIndex = pages.findIndex(
+    const pageFoundIndex = updatePages.findIndex(
       (page) => page.params.id === msg.personNext.id,
     );
     if (parentPageIndex > -1 && pageFoundIndex === -1) {
-      pages = pages.slice(0, parentPageIndex + 1);
+      updatePages = updatePages.slice(0, parentPageIndex + 1);
     } else if (parentPageIndex > 0 && pageFoundIndex > -1) {
-      pages = pages.slice(0, pageFoundIndex + 1);
+      updatePages = updatePages.slice(0, pageFoundIndex + 1);
     }
 
     if (pageFoundIndex === -1) {
       const newPages =
-        pages.length === 1 && pages[0].params.id === ''
+        updatePages.length === 1 && updatePages[0].params.id === ''
           ? [nextPage]
-          : [...pages, nextPage];
+          : [...updatePages, nextPage];
 
-      if (pages.length >= newPages.length) {
-        // this.scrollBackSetPage(newPages)
-        this.setState({ pages: newPages });
-      } else {
-        this.setState({ pages: newPages });
-      }
+      this.setState({ pages: newPages });
       localStorage.setItem('saved-pages', JSON.stringify(newPages));
     } else if (pageFoundIndex > -1 && !msg.showNote) {
-      const { pages } = this.state;
       const localPageFoundIndex = pageFoundIndex === 0 ? 1 : pageFoundIndex;
-      const newPages = pages.slice(0, localPageFoundIndex);
-      if (pageFoundIndex + 1 === pages.length) {
+      const newPages = updatePages.slice(0, localPageFoundIndex);
+      if (pageFoundIndex + 1 === updatePages.length) {
         this.scrollPageBack();
       } else {
         this.scrollPagesBackAndSet(
-          pages.length,
-          pages.length - pageFoundIndex,
+          updatePages.length,
+          updatePages.length - pageFoundIndex,
           newPages,
         );
       }
     } else if (pageFoundIndex > -1) {
-      const { pages } = this.state;
-      if (pageFoundIndex === pages.length - 1) {
-        if (pages.length + 1 === pages.length && msg.hideNote) {
+      const freshStatePages = pages;
+      if (pageFoundIndex === freshStatePages.length - 1) {
+        if (
+          freshStatePages.length + 1 === freshStatePages.length &&
+          msg.hideNote
+        ) {
           this.scrollPageBack();
         } else {
-          const last = pages[pages.length - 1];
-          const secondTolast = pages[pages.length - 2];
+          const last = freshStatePages[freshStatePages.length - 1];
+          const secondTolast = freshStatePages[freshStatePages.length - 2];
 
           if (
             secondTolast &&
             last &&
             last.params.id !== secondTolast.params.id
           ) {
-            pages.push(last);
-            this.setState({ pages });
-            localStorage.setItem('saved-pages', JSON.stringify(pages));
+            freshStatePages.push(last);
+            this.setState({ pages: freshStatePages });
+            localStorage.setItem(
+              'saved-pages',
+              JSON.stringify(freshStatePages),
+            );
           }
           if (
             secondTolast &&
             last &&
             last.params.id === secondTolast.params.id
           ) {
-            this.setState({ pages });
-            localStorage.setItem('saved-pages', JSON.stringify(pages));
+            this.setState({ pages: freshStatePages });
+            localStorage.setItem(
+              'saved-pages',
+              JSON.stringify(freshStatePages),
+            );
           }
         }
       }
@@ -176,8 +169,6 @@ export default class NoteDetailPage extends Component {
   };
 
   showNoteNames = (names) =>
-    // if (!names) return;
-
     names?.map((name) => (
       <Link
         key={name}
@@ -196,12 +187,7 @@ export default class NoteDetailPage extends Component {
   };
 
   addButtonClicked = (showAddItem) => {
-    if (showAddItem) {
-      this.showAddItemSet(false);
-      return;
-    }
-    this.showAddItemSet(true);
-    // showAddItem ? this.showAddItemSet(false) : this.showAddItemSet(true);
+    this.showAddItemSet(!showAddItem);
   };
 
   editNameSet = () => {
@@ -212,12 +198,6 @@ export default class NoteDetailPage extends Component {
 
   prepForNote = (name) => {
     const { set } = this.props;
-    // const user = localStorage.getItem('user');
-    // if (user !== name) {
-    //   const test = { params: { id: 'main' } };
-    //   // localStorage.setItem('saved-pages', JSON.stringify(test))
-    //   // this.setState({ pages: [test] });
-    // }
     set({ noteName: name });
   };
 
@@ -312,7 +292,7 @@ export default class NoteDetailPage extends Component {
       const self = this;
       setTimeout(() => {
         localStorage.removeItem('showTag');
-        self.setState({ pages, showTag: null });
+        self.setState({ pages });
       }, 500);
     }
   }
@@ -351,7 +331,7 @@ export default class NoteDetailPage extends Component {
       setTimeout(() => {
         const remainingPages = pages.slice(0, pageCount - 1);
         localStorage.removeItem('showTag');
-        self.setState({ pages: remainingPages, showTag: null });
+        self.setState({ pages: remainingPages });
         localStorage.setItem('saved-pages', JSON.stringify(remainingPages));
       }, 500);
     }
@@ -441,21 +421,17 @@ export default class NoteDetailPage extends Component {
   }
 
   render() {
-    // let { person, pages } = this.state;
-    let { pages } = this.state;
+    const { pages } = this.state;
+    let localPages = pages;
     const { showAddItem, editName } = this.state;
     const { match, noteNames, Theme, searchTerm, notes } = this.props;
 
-    // const editNameB = person ? this.editNameBox(person.heading) : null;
-
     const isNoteNames = match.url === '/notes/note-names';
     if (isNoteNames) {
-      // person = null;
-      pages = [{ params: { id: '' } }];
-      // localStorage.removeItem('saved-pages')
+      localPages = [{ params: { id: '' } }];
     }
 
-    let clone = JSON.parse(JSON.stringify(pages));
+    let clone = JSON.parse(JSON.stringify(localPages));
     if (
       clone &&
       clone[0] &&
@@ -465,9 +441,10 @@ export default class NoteDetailPage extends Component {
       clone = [{ params: { id: 'main' } }, ...clone];
     }
 
-    const pagesCont = pages.map((pageLink, index) => {
-      const lastPageShowAddItem = showAddItem && index === pages.length - 1;
-      const lastPage = index === pages.length - 1;
+    const lastPageIndex = localPages.length - 1;
+    const pagesCont = localPages.map((pageLink, index) => {
+      const lastPageShowAddItem = showAddItem && index === lastPageIndex;
+      const lastPage = index === lastPageIndex;
       return this.createNoteDetailPage(
         searchTerm,
         noteNames,
@@ -478,7 +455,7 @@ export default class NoteDetailPage extends Component {
         index,
         editName,
         lastPage,
-        pages.length,
+        localPages.length,
       );
     });
     return (
