@@ -49,8 +49,8 @@ export default class NoteItem extends Component {
 
   deleteItem = (e) => {
     e.preventDefault();
-    const { set } = this.props;
-    const { item, index, type } = this.state;
+    const { set, type } = this.props;
+    const { item, index } = this.state;
     if (confirm('Are you sure you want to permanently delete this?')) {
       this.setState({ item: null });
       set({
