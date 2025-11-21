@@ -1,5 +1,5 @@
 
-import App from '../src/client/App'
+import App from '../frontend/src/client/App'
 import renderer from 'react-test-renderer';
 import React from 'react';
 

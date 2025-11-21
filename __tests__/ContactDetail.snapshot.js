@@ -1,5 +1,5 @@
 
-import NoteDetail from '../src/client/views/Components/NoteDetail/NoteDetail';
+import NoteDetail from '../frontend/src/client/views/Components/NoteDetail/NoteDetail';
 import renderer from 'react-test-renderer';
 import React from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';

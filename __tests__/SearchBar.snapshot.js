@@ -1,5 +1,5 @@
 
-import SearchBar from '../src/client/views/Components/SearchBar/SearchBar';
+import SearchBar from '../frontend/src/client/views/Components/SearchBar/SearchBar';
 import renderer from 'react-test-renderer';
 import React from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';

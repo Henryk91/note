@@ -82,7 +82,7 @@ before(async () => {
   }
 
   // import app after env + mocks + db are ready
-  const { default: app } = await import('../../src/server/index');
+  const { default: app } = await import('../../backend/src/server/index');
   agent = supertest.agent(app as any);
 });
 

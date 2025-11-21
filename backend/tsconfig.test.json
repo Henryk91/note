@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "types": ["node", "mocha"],
+    "outDir": "../build/test",
+    "esModuleInterop": true,
+    "rootDir": ".",
+    "typeRoots": ["./src/types", "./node_modules/@types"]
+  },
+  "include": ["src/server/**/*", "src/types/**/*", "../__tests__/integration/**/*"]
+}

@@ -5,7 +5,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const { InjectManifest } = require('workbox-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 
-const outputDirectory = 'dist';
+const outputDirectory = path.resolve(__dirname, '../dist');
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -18,7 +18,7 @@ module.exports = {
     './src/client/index.js'
   ],
   output: {
-    path: path.join(__dirname, outputDirectory),
+    path: outputDirectory,
     filename: 'bundle.[contenthash].js',
     publicPath: '/'
   },
@@ -89,6 +89,7 @@ module.exports = {
       { from: './src/manifest.json', to: 'manifest.json' },
       { from: './public/favicon.png', to: 'favicon.png' },
       { from: './public/favicon512.png', to: 'favicon512.png' },
+      { from: './public/BeepSound.wav', to: 'BeepSound.wav' },
     ]
   }),
   ]

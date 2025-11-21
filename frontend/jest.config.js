@@ -2,6 +2,8 @@
 // https://jestjs.io/docs/en/configuration.html
 
 module.exports = {
+    rootDir: __dirname,
+    roots: ['<rootDir>/src', '<rootDir>/../__tests__'],
     // Automatically clear mock calls and instances between every test
     clearMocks: true,
   

@@ -12,15 +12,15 @@ A live demo version can be found [here](https://henryk91-note.glitch.me)
 
 ### Development mode
 
-In dev mode, 2 servers are running. The front end code will be served by a webpack dev server for hot and live reloading. The Express code will be served by a node server using nodemon to automatically restart the server whenever server side code changes.
+In dev mode, 2 servers are running. The front end code is served by a webpack dev server for hot and live reloading (now in `frontend/`). The Express code is served by a node server using ts-node-dev (now in `backend/`) to automatically restart whenever server side code changes.
 
 ### Production mode
 
-In the production mode, only 1 server is running. Client side code will be bundled into static files using webpack and served by the Node.js/Express server.
+In production, only the backend server runs. Client side code is bundled into static files using webpack and served by the Node.js/Express server from `/dist`.
 
 ### Testing
 
-Testing is done with a Jest/Enzyme combination. The folder also contains a snapshot folder for all components as well as a file with test data.
+Frontend snapshots run with Jest/Enzyme. Backend integration tests run with Mocha/Chai/Supertest against an in-memory MongoDB.
 
 ## Quick Start
 
@@ -29,28 +29,26 @@ Testing is done with a Jest/Enzyme combination. The folder also contains a snaps
 git clone https://github.com/Henryk91/note.git
 
 # Go inside the directory
-cd note-list
+cd note
 
-# Install dependencies
-npm install
+# Install dependencies per package
+npm install --prefix frontend
+npm install --prefix backend
 
-# Start dev server
+# Start dev servers (frontend + backend together)
 npm run dev
 
-# Build for production
+# Build for production (frontend first, then backend)
 npm run build
 
-# Start production server
+# Start production server (serves built assets from /dist)
 npm start
 
-# Run Tests
+# Run backend integration tests
 npm run test
 
-# Run Test and keep waching
-npm run test:watch
-
-# Run Test and print out a detailed chart 
-npm run test:coverage
+# Run frontend snapshot tests
+npm run test:frontend
 
 ```
 
@@ -58,9 +56,11 @@ npm run test:coverage
 
 ### Folder Structure
 
-All the source code is inside src directory. Inside src there are client and server directories. All the front-end code (react, css, js) are in the client directory. Backend Node.js/Express is are in the server directory.
+- `frontend/` — package.json and node_modules for the React app. Source lives in `frontend/src/client`; static assets live in `frontend/public`.
+- `backend/` — package.json and node_modules for the API. Source lives in `backend/src/server` (types in `backend/src/types`).
+- Configs are scoped per package: `frontend/webpack.config.js`, `frontend/.babelrc`, `frontend/.eslintrc.cjs`, `frontend/jest.config.js` (with `frontend/enzyme.config.js`); backend TypeScript + ESLint live in `backend/tsconfig*.json` and `backend/.eslintrc.cjs`.
 
-All components are in their own folder (src/client/view/component) with the css file. For ease of testing all component css is linked into the main app.css file that is linked into the index.
+All components are in their own folder (frontend/src/client/view/component) with the CSS file. For ease of testing all component CSS is linked into the main `app.css` file that is linked into the index.
 
 ## Specifics
 

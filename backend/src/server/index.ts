@@ -21,6 +21,9 @@ import translate from './routes/translate';
 import translationScoresRouter from './routes/translationScores';
 import incorrectTranslationsRoute from './routes/incorrectTranslations';
 
+// project root is three levels up from compiled server files (backend/src/server)
+const projectRoot = path.resolve(__dirname, '../../..');
+
 export const app = express();
 
 app.set('trust proxy', 1);
@@ -97,7 +100,7 @@ app.options('*', cors(corsOptions));
 
 jwtSetup(app);
 
-app.use(express.static(path.resolve(process.cwd(), 'dist')));
+app.use(express.static(path.join(projectRoot, 'dist')));
 app.use('/api/note', getNotes);
 app.use('/api/note-v2', handleNotesV2);
 app.use('/api/note-names', getNoteNames);
@@ -116,7 +119,7 @@ app.get('/health', (_req, res) => {
 
 app.get('/sw.js', (_req, res) => {
   res.setHeader('Cache-Control', 'max-age=0, no-cache, no-store, must-revalidate');
-  res.sendFile(path.resolve(process.cwd(), 'dist', 'sw.js'));
+  res.sendFile(path.join(projectRoot, 'dist', 'sw.js'));
 });
 
 app.get(/^\/(?!api).*/, (req, res) => {
