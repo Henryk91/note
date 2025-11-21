@@ -57,7 +57,32 @@ app.use(
   helmet({
     // allow serving static assets and API from same domain
     crossOriginResourcePolicy: { policy: 'cross-origin' },
-  })
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          'https://cdnjs.cloudflare.com',
+          'https://fonts.googleapis.com',
+        ],
+        fontSrc: [
+          "'self'",
+          'data:',
+          'https://cdnjs.cloudflare.com',
+          'https://fonts.gstatic.com',
+        ],
+        scriptSrc: ["'self'"],
+        connectSrc: [
+          "'self'",
+          'https://cdnjs.cloudflare.com',
+          'https://fonts.googleapis.com',
+        ],
+        imgSrc: ["'self'", 'data:'],
+        objectSrc: ["'none'"],
+      },
+    },
+  }),
 );
 
 const apiLimiter = rateLimit({
@@ -73,10 +98,13 @@ const sanitizeValue = (value: unknown): unknown => {
   if (Array.isArray(value)) return value.map(sanitizeValue);
   if (value instanceof Date || value instanceof Buffer) return value;
   if (typeof value === 'object') {
-    return Object.entries(value as Record<string, unknown>).reduce((acc, [key, entry]) => {
-      acc[key] = sanitizeValue(entry);
-      return acc;
-    }, {} as Record<string, unknown>);
+    return Object.entries(value as Record<string, unknown>).reduce(
+      (acc, [key, entry]) => {
+        acc[key] = sanitizeValue(entry);
+        return acc;
+      },
+      {} as Record<string, unknown>,
+    );
   }
   return value;
 };
@@ -118,7 +146,10 @@ app.get('/health', (_req, res) => {
 });
 
 app.get('/sw.js', (_req, res) => {
-  res.setHeader('Cache-Control', 'max-age=0, no-cache, no-store, must-revalidate');
+  res.setHeader(
+    'Cache-Control',
+    'max-age=0, no-cache, no-store, must-revalidate',
+  );
   res.sendFile(path.join(projectRoot, 'dist', 'sw.js'));
 });
 
@@ -135,12 +166,20 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });
 });
 
-app.use((err: Error & { status?: number }, _req: Request, res: Response, _next: NextFunction) => {
-  console.error(err);
-  res
-    .status(err.status ?? 500)
-    .json({ error: 'Internal server error', message: config.isProd ? undefined : err.message });
-});
+app.use(
+  (
+    err: Error & { status?: number },
+    _req: Request,
+    res: Response,
+    _next: NextFunction,
+  ) => {
+    console.error(err);
+    res.status(err.status ?? 500).json({
+      error: 'Internal server error',
+      message: config.isProd ? undefined : err.message,
+    });
+  },
+);
 
 // Only start the HTTP server when running the real app, not during tests
 if (process.env.NODE_ENV !== 'test') {
