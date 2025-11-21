@@ -78,6 +78,8 @@ app.use(
           "'self'",
           'https://cdnjs.cloudflare.com',
           'https://fonts.googleapis.com',
+          'https://fonts.gstatic.com',
+          'https://db.onlinewebfonts.com',
         ],
         imgSrc: ["'self'", 'data:'],
         objectSrc: ["'none'"],
