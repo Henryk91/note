@@ -22,7 +22,7 @@ import translationScoresRouter from './routes/translationScores';
 import incorrectTranslationsRoute from './routes/incorrectTranslations';
 
 // project root is three levels up from compiled server files (backend/src/server)
-const projectRoot = path.resolve(__dirname, '../../..');
+const projectRoot = path.resolve(__dirname, '../..');
 
 export const app = express();
 
@@ -123,11 +123,12 @@ app.get('/sw.js', (_req, res) => {
 });
 
 app.get(/^\/(?!api).*/, (req, res) => {
-  if (req?.cookies?.access_token && req?.url !== '/notes/main') {
-    res.redirect('/notes/main');
-  } else {
-    res.redirect('/');
+  // Always serve the SPA entry point; redirect once to a preferred path if needed.
+  const targetPath = req?.cookies?.access_token ? '/notes/main' : '/';
+  if (req.url !== targetPath) {
+    return res.redirect(targetPath);
   }
+  return res.sendFile(path.join(projectRoot, 'dist', 'index.html'));
 });
 
 app.use((req, res) => {
