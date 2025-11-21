@@ -11,7 +11,7 @@ module.exports = {
     sourceType: 'module',
     project: ['./tsconfig.server.json', './tsconfig.test.json'],
   },
-  plugins: ['@typescript-eslint', 'prettier'],
+  plugins: ['@typescript-eslint', 'prettier', 'unused-imports'],
   extends: ['airbnb-base', 'plugin:@typescript-eslint/recommended', 'prettier'],
   settings: {
     'import/resolver': {
@@ -27,6 +27,8 @@ module.exports = {
     'prettier/prettier': ['error', { singleQuote: true }],
     'import/extensions': ['error', 'ignorePackages', { js: 'never', jsx: 'never', ts: 'never', tsx: 'never' }],
     'no-underscore-dangle': 'off',
+    "unused-imports/no-unused-vars": "error",
+    "unused-imports/no-unused-imports": "error"
   },
   overrides: [
     {
@@ -48,6 +50,12 @@ module.exports = {
         'react/prop-types': 0,
         'import/extensions': ['error', 'ignorePackages', { js: 'never', jsx: 'never' }],
         'class-methods-use-this': 'off',
+        "react/button-has-type": "off",
+        "jsx-a11y/click-events-have-key-events": "off",
+        "jsx-a11y/no-static-element-interactions": "off",
+        "jsx-a11y/control-has-associated-label": "off",
+        "no-plusplus": "off",
+        "jsx-a11y/label-has-associated-control": "off",
       },
     },
     {

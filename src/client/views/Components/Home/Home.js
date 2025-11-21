@@ -1,8 +1,3 @@
-/* eslint-disable no-param-reassign */
-/* eslint-disable no-return-assign */
-/* eslint-disable no-unused-expressions */
-/* eslint-disable react/button-has-type */
-/* eslint-disable react/prop-types */
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -11,14 +6,18 @@ const onlyUnique = (value, index, self) => self.indexOf(value) === index;
 const createList = (notes, theme) => {
   let list = null;
 
-  const themeBorder = `${theme.toLowerCase()}-border-thick`;  
+  const themeBorder = `${theme.toLowerCase()}-border-thick`;
 
   if (notes) {
-    list = notes.map(person => {
-      const dataLable = [...person.dataLable].map(dataL => (dataL = dataL.tag));
+    list = notes.map((person) => {
+      const dataLable = [...person.dataLable].map((dataL) => dataL.tag);
       const noteCount = dataLable.filter(onlyUnique).length;
       return (
-        <Link key={person.id} style={{ textDecoration: 'none' }} to={`/notes/${person.id}`}>
+        <Link
+          key={person.id}
+          style={{ textDecoration: 'none' }}
+          to={`/notes/${person.id}`}
+        >
           <div className="listNameButton dark-hover">
             <div className={`listCountBox ${themeBorder}`}> {noteCount} </div>
             <h3>{person.heading}</h3>
@@ -47,7 +46,7 @@ export default class Home extends Component {
     const { notes, Theme, User } = this.props;
     const themeBack = `${Theme.toLowerCase()}-back`;
     const themeHover = `${Theme.toLowerCase()}-hover`;
-    // localStorage.removeItem('saved-pages')
+
     return (
       <div id="home1">
         <button
@@ -60,14 +59,18 @@ export default class Home extends Component {
         </button>
         {User !== 'None' ? (
           <div className="detail-scroll">
-            <Link style={{ textDecoration: 'none' }} className={`detailAddButton ${themeHover} ${themeBack}`} to="/new-note/">
+            <Link
+              style={{ textDecoration: 'none' }}
+              className={`detailAddButton ${themeHover} ${themeBack}`}
+              to="/new-note/"
+            >
               <i className="fas fa-plus" />
             </Link>
           </div>
         ) : null}
         {notes ? (
           <div className="slide-in">
-            <div key="page-content-top" className="page-content-top1" ></div>
+            <div key="page-content-top" className="page-content-top1" />
             {createList(notes, Theme)}
             <br />
           </div>

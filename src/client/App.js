@@ -1,22 +1,33 @@
-/* eslint-disable react/prop-types */
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable no-alert */
-/* eslint-disable max-len */
-/* eslint-disable no-unused-expressions */
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Route, Link, Redirect, Switch } from 'react-router-dom';
-import { Home, SearchBar, NoteDetail, NoteDetailPage, NewNote, Login, Pomodoro, Memento } from './views/Components/index';
-import { getMyNotesRec, saveNewNote, updateOneNoteRec, getAllNotes, getNoteNames } from './views/Helpers/requests';
+import {
+  BrowserRouter as Router,
+  Route,
+  Link,
+  Redirect,
+  Switch,
+} from 'react-router-dom';
+import {
+  Home,
+  SearchBar,
+  NoteDetailPage,
+  NewNote,
+  Login,
+  Pomodoro,
+  Memento,
+} from './views/Components/index';
+import {
+  getMyNotesRec,
+  saveNewNote,
+  updateOneNoteRec,
+  getAllNotes,
+  getNoteNames,
+} from './views/Helpers/requests';
 
-const ProtectedRoutes = ({ children }) => {
-  const loginKey = localStorage.getItem("loginKey");
+function ProtectedRoutes({ children }) {
+  const loginKey = localStorage.getItem('loginKey');
   if (!loginKey) return <Redirect to="/login" />;
-  return (
-    <>
-      {children}
-    </>
-  );
-};
+  return <>{children}</>;
+}
 
 const compareSort = (a, b) => {
   const nameA = a.heading.toUpperCase();
@@ -32,7 +43,10 @@ const compareSort = (a, b) => {
 };
 
 function isMobileDevice() {
-  return typeof window.orientation !== 'undefined' || navigator.userAgent.indexOf('IEMobile') !== -1;
+  return (
+    typeof window.orientation !== 'undefined' ||
+    navigator.userAgent.indexOf('IEMobile') !== -1
+  );
 }
 // const navigate = useNavigate();
 export default class App extends Component {
@@ -48,7 +62,7 @@ export default class App extends Component {
       theme: 'Dark',
       searchTerm: '',
       freshData: false,
-      lastRefresh: null
+      lastRefresh: null,
     };
     this.addNewNote = this.addNewNote.bind(this);
     this.updateNote = this.updateNote.bind(this);
@@ -59,7 +73,7 @@ export default class App extends Component {
     this.getAllNotes = this.getAllNotes.bind(this);
     this.getNoteNames = this.getNoteNames.bind(this);
     this.checkLoginState = this.checkLoginState.bind(this);
-    this.router = undefined
+    this.router = undefined;
     this.setRedirect();
   }
 
@@ -69,31 +83,38 @@ export default class App extends Component {
     this.setRedirect();
     this.checkLoginState();
     const self = this;
-    window.onfocus = function() {
+    window.onfocus = function () {
       self.setRedirect();
-      const {lastRefresh} = self.state;
+      const { lastRefresh } = self.state;
       const now = new Date().getTime();
       const minTimeout = 1000 * 60 * 5;
-      if((lastRefresh + minTimeout) < now && lastRefresh && self){
+      if (lastRefresh + minTimeout < now && lastRefresh && self) {
         console.log('Refresh', new Date());
-        self.setState({lastRefresh: now})
+        self.setState({ lastRefresh: now });
         self.checkLoginState();
       }
-      if((lastRefresh + minTimeout) > now && self){
-        console.log('Refresh in ', lastRefresh? ((lastRefresh + minTimeout) - now)/1000 : (minTimeout/1000), "seconds");
+      if (lastRefresh + minTimeout > now && self) {
+        console.log(
+          'Refresh in ',
+          lastRefresh
+            ? (lastRefresh + minTimeout - now) / 1000
+            : minTimeout / 1000,
+          'seconds',
+        );
       }
-      if(!lastRefresh && self){
-        self.setState({lastRefresh: now})
-      } 
-     };
+      if (!lastRefresh && self) {
+        self.setState({ lastRefresh: now });
+      }
+    };
   }
 
   setRedirect = () => {
     const path = window.location.pathname;
     if (path === '/' || window.location.href.includes('index.html')) {
       const { notes, noteNames } = this.state;
-      let user = localStorage.getItem('user');
-      if((notes && noteNames) || user) window.history.pushState('', '', './notes/main');
+      const user = localStorage.getItem('user');
+      if ((notes && noteNames) || user)
+        window.history.pushState('', '', './notes/main');
     }
   };
 
@@ -108,58 +129,14 @@ export default class App extends Component {
   }
 
   getAllNotes() {
-    getAllNotes(res => {
+    getAllNotes((res) => {
       res.sort(compareSort);
       this.setState({ notes: res, filteredNotes: res });
     });
   }
 
-  addMainNote(notes){
-    if(notes && notes.length){
-      let subs = [];
-      notes.forEach(note => {
-        if(note.heading.startsWith('Sub: ')){
-          subs.push(note)
-          return false
-        } 
-        return true
-      })
-
-      if(subs.length > 0){
-        const subFound = notes.find(note => {
-          return note.id === "subs"
-        })
-        if(!subFound){
-          const headings = subs.map(sub => {
-            return {tag: sub.heading, data: `href:${sub.id}`}
-          })
-          const subItems = {createdBy: subs[0].createdBy, dataLable: headings, heading: "Z Sub Directories", id: "subs"}
-          if (notes) notes.push(subItems)
-        }
-      }
-
-      if(notes[notes.length-1].id !== 'main'){
-        const mainFound = notes.find(note => {
-          return note.id === "main"
-        })
-        if(!mainFound){
-          const mainPage = {
-            createdBy: "Main",
-            dataLable: [...notes].map(note => {
-              return {tag: note.heading, data: 'href:' + note.id}
-            }), 
-            heading: "Main",
-            id: "main",
-          }
-          notes.push(mainPage)
-        }
-      }
-      
-      return notes
-    }
-  }
-
   getMyNotes(noteName) {
+    const { notes } = this.state;
     let { user } = this.state;
     if (noteName) user = noteName;
 
@@ -168,24 +145,32 @@ export default class App extends Component {
       const data = localStorage.getItem(user);
       if (data && data[0] && data.length > 0) {
         const pdata = this.addMainNote(JSON.parse(data));
-        if (this.state.notes !== pdata) {
-          this.setState({ notes: pdata, filteredNotes: pdata, freshData:false });
+        if (notes !== pdata) {
+          this.setState({
+            notes: pdata,
+            filteredNotes: pdata,
+            freshData: false,
+          });
         } else {
-          this.setState({ freshData:false });
+          this.setState({ freshData: false });
         }
       }
 
-      getMyNotesRec(user, res => {
-        res = this.addMainNote(res)
+      getMyNotesRec(user, (resp) => {
+        let res = resp;
+        res = this.addMainNote(resp);
         if (res && res.length > 0) {
           res.sort(compareSort);
-          console.log('Fresh Data')
+          console.log('Fresh Data');
           this.setRedirect();
-          this.setState({ freshData:true });
+          this.setState({ freshData: true });
         }
 
         const stateNotes = this.state.notes;
-        const reRender = res && stateNotes ? JSON.stringify(res) !== JSON.stringify(stateNotes) : res && res.length > 0;
+        const reRender =
+          res && stateNotes
+            ? JSON.stringify(res) !== JSON.stringify(stateNotes)
+            : res && res.length > 0;
         if (reRender && res.length > 0) {
           localStorage.setItem(user, JSON.stringify(res));
           this.setState({ notes: res, filteredNotes: res });
@@ -202,7 +187,11 @@ export default class App extends Component {
     if (user !== val.user) {
       this.getMyNotes(val.user);
     }
-    this.setState({ filteredNotes: val.filteredNotes, user: val.user, searchTerm: val.searchTerm });
+    this.setState({
+      filteredNotes: val.filteredNotes,
+      user: val.user,
+      searchTerm: val.searchTerm,
+    });
   }
 
   getNoteNames(loginKey) {
@@ -219,15 +208,15 @@ export default class App extends Component {
       if (selectedUser) this.getMyNotes(selectedUser);
     }
     if (loginKey && !notesInitialLoad && !noteNames) {
-      getNoteNames(res => {
+      getNoteNames((res) => {
         if (res.length > 0 && res != 'No notes') {
           res.push('All');
           res.push('None');
           if (res && res.length > 0) {
             localStorage.setItem('notenames', JSON.stringify(res));
-            let update = { noteNames: res }
-            if(!localStorage.getItem("user")) {
-              update.user = res[0]
+            const update = { noteNames: res };
+            if (!localStorage.getItem('user')) {
+              update.user = res[0];
               this.getMyNotes(res[0]);
             }
             this.setState(update);
@@ -237,17 +226,30 @@ export default class App extends Component {
     }
   }
 
-  updateNote = update => {
-    const { notes, searchTerm } = this.state;
-    const index = notes.indexOf(val => val.id === update.id);
+  updateNote = (update) => {
+    // const { notes, searchTerm } = this.state;
+    const { notes } = this.state;
+    const index = notes.indexOf((val) => val.id === update.id);
     notes[index] = update;
 
     if (true) {
-      const person = update.updateData? update.updateData: update.person? update.person: update;
-      updateOneNoteRec({ person: person, delete: update.delete }, () => {
+      let person = null;
+      if (update.updateData) {
+        person = update.updateData;
+      } else if (update.person) {
+        person = update.person;
+      } else {
+        person = update;
+      }
+      // const person = update.updateData
+      //   ? update.updateData
+      //   : update.person
+      //     ? update.person
+      //     : update;
+      updateOneNoteRec({ person, delete: update.delete }, () => {
         // if (update.delete) {
-          const noteUser = localStorage.getItem('user');
-          this.getMyNotes(noteUser);
+        const noteUser = localStorage.getItem('user');
+        this.getMyNotes(noteUser);
         // }
       });
     } else {
@@ -255,10 +257,10 @@ export default class App extends Component {
     }
   };
 
-  addNewNote = newNote => {
+  addNewNote = (newNote) => {
     const { notes, user, searchTerm } = this.state;
     const usedNewNote = newNote;
-    user !== '' ? (usedNewNote.note.createdBy = user) : null;
+    if (user !== '') usedNewNote.note.createdBy = user;
     let updatedNote = [];
 
     if (notes) {
@@ -275,7 +277,7 @@ export default class App extends Component {
     }
   };
 
-  noteDetailSet = msg => {
+  noteDetailSet = (msg) => {
     if (msg.noteName) {
       const { noteName } = msg;
       this.setState({ user: noteName, notes: null, filteredNotes: null });
@@ -287,11 +289,61 @@ export default class App extends Component {
     }
   };
 
+  addMainNote(notes) {
+    if (notes && notes.length) {
+      const subs = [];
+      notes.forEach((note) => {
+        if (note.heading.startsWith('Sub: ')) {
+          subs.push(note);
+          return false;
+        }
+        return true;
+      });
+
+      if (subs.length > 0) {
+        const subFound = notes.find((note) => note.id === 'subs');
+        if (!subFound) {
+          const headings = subs.map((sub) => ({
+            tag: sub.heading,
+            data: `href:${sub.id}`,
+          }));
+          const subItems = {
+            createdBy: subs[0].createdBy,
+            dataLable: headings,
+            heading: 'Z Sub Directories',
+            id: 'subs',
+          };
+          if (notes) notes.push(subItems);
+        }
+      }
+
+      if (notes[notes.length - 1].id !== 'main') {
+        const mainFound = notes.find((note) => note.id === 'main');
+        if (!mainFound) {
+          const mainPage = {
+            createdBy: 'Main',
+            dataLable: [...notes].map((note) => ({
+              tag: note.heading,
+              data: `href:${note.id}`,
+            })),
+            heading: 'Main',
+            id: 'main',
+          };
+          notes.push(mainPage);
+        }
+      }
+
+      return notes;
+    }
+
+    return [];
+  }
+
   checkLoginState() {
     console.log('checkLoginState');
     const loginKey = localStorage.getItem('loginKey');
     const user = localStorage.getItem('user');
-    user !== null ? this.setState({ user }) : null;
+    if (user !== null) this.setState({ user });
     if (loginKey !== null) {
       this.setState({ loginKey });
       this.getNoteNames(loginKey);
@@ -299,102 +351,174 @@ export default class App extends Component {
       this.getNotesOnLoad(loginKey, user);
       const savedTheme = localStorage.getItem('theme');
       if (savedTheme) {
-        checkLoginState
+        // checkLoginState;
         this.setState({ theme: savedTheme });
       }
     }
   }
 
   menuButton(event) {
-    if(document.location.pathname.includes('note-names')){
+    if (document.location.pathname.includes('note-names')) {
       event.preventDefault();
       window.history.back();
       this.checkLoginState();
-    } 
+    }
   }
 
   render() {
-    const { theme, notes, user, searchTerm, filteredNotes, loginKey, freshData } = this.state;
+    const {
+      theme,
+      notes,
+      user,
+      searchTerm,
+      // filteredNotes,
+      // loginKey,
+      freshData,
+    } = this.state;
 
     const { noteNames } = this.state;
     const themeBack = `${theme.toLowerCase()}-back`;
 
-    let menuButton = document.getElementById('menuButton');
-    if(menuButton){
-      if(freshData){
+    const menuButton = document.getElementById('menuButton');
+    if (menuButton) {
+      if (freshData) {
         menuButton.style.color = '#ffffff';
       } else {
         menuButton.style.color = '#ffa500';
       }
     }
-    if (!document.location.pathname.includes('note-names') && isMobileDevice()) {
+    if (
+      !document.location.pathname.includes('note-names') &&
+      isMobileDevice()
+    ) {
       // document.documentElement.webkitRequestFullscreen();
     }
 
     if (theme === 'Green') {
       document.body.style.backgroundColor = '#103762';
-      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#103762');
+      document
+        .querySelector('meta[name="theme-color"]')
+        .setAttribute('content', '#103762');
     }
     if (theme === 'Red') {
       document.body.style.backgroundColor = '#030303';
-      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#d00000');
+      document
+        .querySelector('meta[name="theme-color"]')
+        .setAttribute('content', '#d00000');
     }
     if (theme === 'Ocean') {
       document.body.style.backgroundColor = '#35373D';
-      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#38cdb8');
+      document
+        .querySelector('meta[name="theme-color"]')
+        .setAttribute('content', '#38cdb8');
     }
     if (theme === 'Dark') {
       document.body.style.backgroundColor = '#061f2f';
-      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0090c8');
+      document
+        .querySelector('meta[name="theme-color"]')
+        .setAttribute('content', '#0090c8');
     }
     if (theme === 'Night') {
       document.body.style.backgroundColor = '#061f2f';
-      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#27343b');
+      document
+        .querySelector('meta[name="theme-color"]')
+        .setAttribute('content', '#27343b');
     }
+    // const newNoteComponent =
     return (
       <Router>
         <Switch>
-        <Route
-          path="/login"
-          render={() => <Login  Theme={theme} />}
-        />
-            <ProtectedRoutes>
+          <Route path="/login" render={() => <Login Theme={theme} />} />
+          <ProtectedRoutes>
             <header>
-              <SearchBar set={this.setFilterNote} noteName={user} Theme={theme} notes={notes} />
+              <SearchBar
+                set={this.setFilterNote}
+                noteName={user}
+                Theme={theme}
+                notes={notes}
+              />
               <nav className="bigScreen" id="links">
-                <Link style={{ textDecoration: 'none' }} className={`dark-hover ${themeBack}`} onClick={(e) => {this.menuButton(e)}} id="menuButton" to="/notes/note-names">
+                <Link
+                  style={{ textDecoration: 'none' }}
+                  className={`dark-hover ${themeBack}`}
+                  onClick={(e) => {
+                    this.menuButton(e);
+                  }}
+                  id="menuButton"
+                  to="/notes/note-names"
+                >
                   <i className="fas fa-bars " />
                 </Link>
               </nav>
             </header>
-            <Route exact path="/all" component={props => <Home {...props} SearchTerm={searchTerm} Theme={theme} notes={notes} />} />
+            <Route
+              exact
+              path="/all"
+              component={(props) => (
+                <Home
+                  {...props}
+                  SearchTerm={searchTerm}
+                  Theme={theme}
+                  notes={notes}
+                />
+              )}
+            />
             <Route
               exact
               path="/index.html"
-              component={props => (
-                <NoteDetailPage SearchTerm={searchTerm} noteNames={noteNames} Theme={theme} {...props} set={this.noteDetailSet} notes={notes} />
+              component={(props) => (
+                <NoteDetailPage
+                  SearchTerm={searchTerm}
+                  noteNames={noteNames}
+                  Theme={theme}
+                  {...props}
+                  set={this.noteDetailSet}
+                  notes={notes}
+                />
                 // <Home SearchTerm={searchTerm} noteNames={noteNames} User={user} Theme={theme} {...props} notes={filteredNotes} />
               )}
             />
             <Route
               exact
               path="/"
-              component={props => (
-                <NoteDetailPage SearchTerm={searchTerm} noteNames={noteNames} Theme={theme} {...props} set={this.noteDetailSet} notes={notes} />
+              component={(props) => (
+                <NoteDetailPage
+                  SearchTerm={searchTerm}
+                  noteNames={noteNames}
+                  Theme={theme}
+                  {...props}
+                  set={this.noteDetailSet}
+                  notes={notes}
+                />
                 // <Home SearchTerm={searchTerm} noteNames={noteNames} User={user} Theme={theme} {...props} notes={filteredNotes} />
               )}
             />
             <Route
               exact
               path="/notes/:id"
-              render={props => (
-                <NoteDetailPage SearchTerm={searchTerm} noteNames={noteNames} Theme={theme} {...props} set={this.noteDetailSet} notes={notes} />
+              render={(props) => (
+                <NoteDetailPage
+                  SearchTerm={searchTerm}
+                  noteNames={noteNames}
+                  Theme={theme}
+                  {...props}
+                  set={this.noteDetailSet}
+                  notes={notes}
+                />
               )}
             />
-            <Route exact path="/new-note" component={() => <NewNote Theme={theme} set={this.addNewNote} />} />
+            <Route
+              exact
+              path="/new-note"
+              component={() => <NewNote Theme={theme} set={this.addNewNote} />}
+            />
             <Route exact path="/pomodoro" component={() => <Pomodoro />} />
-            <Route exact path="/memento" component={() => <Memento Theme={theme} />} />
-            </ProtectedRoutes>
+            <Route
+              exact
+              path="/memento"
+              component={() => <Memento Theme={theme} />}
+            />
+          </ProtectedRoutes>
         </Switch>
       </Router>
     );

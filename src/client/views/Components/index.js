@@ -1,12 +1,23 @@
+import SearchBar from './SearchBar/SearchBar';
+import Home from './Home/Home';
+import NoteDetail from './NoteDetail/NoteDetail';
+import NoteItem from './NoteItem/NoteItem';
+import NewNote from './NewNote/NewNote';
+import EditNoteCheck from './EditNoteCheck/EditNoteCheck';
+import Login from './Login/Login';
+import Pomodoro from './Pomodoro/Pomodoro';
+import Memento from './Memento/Memento';
+import NoteDetailPage from './NoteDetailPage/NoteDetailPage';
 
-import { default as SearchBar } from './SearchBar/SearchBar';
-import { default as Home } from './Home/Home';
-import { default as NoteDetail } from './NoteDetail/NoteDetail'
-import { default as NoteItem } from './NoteItem/NoteItem'
-import { default as NewNote } from './NewNote/NewNote'
-import { default as EditNoteCheck } from './EditNoteCheck/EditNoteCheck'
-import { default as Login } from './Login/Login'
-import { default as Pomodoro } from './Pomodoro/Pomodoro'
-import { default as Memento } from './Memento/Memento'
-import { default as NoteDetailPage } from './NoteDetailPage/NoteDetailPage'
-export { SearchBar , Home , NoteDetail ,NoteItem , NewNote , EditNoteCheck ,Login, Pomodoro , NoteDetailPage, Memento};
+export {
+  SearchBar,
+  Home,
+  NoteDetail,
+  NoteItem,
+  NewNote,
+  EditNoteCheck,
+  Login,
+  Pomodoro,
+  NoteDetailPage,
+  Memento,
+};

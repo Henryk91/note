@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import { NoteDetail } from '../index';
+import NoteDetail from '../NoteDetail/NoteDetail';
 import { logoutUser } from '../../Helpers/requests';
 
 export default class NoteDetailPage extends Component {
@@ -31,30 +31,37 @@ export default class NoteDetailPage extends Component {
     this.prepForNote = this.prepForNote.bind(this);
   }
 
-  componentDidMount(){
-    const localPages = localStorage.getItem('saved-pages')
-    if(localPages ) {
-      let pages = JSON.parse(localPages)
-      pages = pages.filter(page => page.params.id !== '')
-      if (pages.length > 1) this.setState({pages: JSON.parse(localPages)})
+  componentDidMount() {
+    const localPages = localStorage.getItem('saved-pages');
+    if (localPages) {
+      let pages = JSON.parse(localPages);
+      pages = pages.filter((page) => page.params.id !== '');
+      if (pages.length > 1) this.setState({ pages: JSON.parse(localPages) });
     }
-  // }
-  // componentDidMount(){
+    // }
+    // componentDidMount(){
     const isEditing = localStorage.getItem('new-folder-edit');
-    if(isEditing){
-      this.setState({showAddItem: true})
-      localStorage.removeItem('new-folder-edit')
-      localStorage.setItem('was-new-folder-edit',true)
+    if (isEditing) {
+      this.setState({ showAddItem: true });
+      localStorage.removeItem('new-folder-edit');
+      localStorage.setItem('was-new-folder-edit', true);
     }
   }
+
   setNoteTheme = (name) => {
-    this.props.set({ noteTheme: name });
+    const { set } = this.props;
+    set({ noteTheme: name });
     localStorage.setItem('theme', name);
   };
 
   showNoteThemes = (names) =>
     names.map((name) => (
-      <Link key={name} style={{ textDecoration: 'none' }} to="/" title="Note List">
+      <Link
+        key={name}
+        style={{ textDecoration: 'none' }}
+        to="/"
+        title="Note List"
+      >
         <div className="listNameButton" onClick={() => this.setNoteTheme(name)}>
           <h3> {name} Theme </h3>
         </div>
@@ -62,22 +69,27 @@ export default class NoteDetailPage extends Component {
     ));
 
   noteDetailSet = (msg) => {
-    if(msg.forParent){
-     delete msg.forParent
-     this.setState({...msg})
+    const { set } = this.props;
+    if (msg.forParent) {
+      delete msg.forParent;
+      this.setState({ ...msg });
     } else {
-      this.props.set(msg);
+      set(msg);
     }
-    
   };
+
   openPage = (msg) => {
     if (!msg.personNext) return;
     const nextPage = { params: { id: msg.personNext.id } };
     let { pages } = this.state;
 
-    const parentPageIndex = pages.findIndex((page) => page.params.id === msg.parentId);
+    const parentPageIndex = pages.findIndex(
+      (page) => page.params.id === msg.parentId,
+    );
 
-    const pageFoundIndex = pages.findIndex((page) => page.params.id === msg.personNext.id);
+    const pageFoundIndex = pages.findIndex(
+      (page) => page.params.id === msg.personNext.id,
+    );
     if (parentPageIndex > -1 && pageFoundIndex === -1) {
       pages = pages.slice(0, parentPageIndex + 1);
     } else if (parentPageIndex > 0 && pageFoundIndex > -1) {
@@ -85,57 +97,71 @@ export default class NoteDetailPage extends Component {
     }
 
     if (pageFoundIndex === -1) {
-      const newPages = pages.length === 1 && pages[0].params.id === '' ? [nextPage] : [...pages, nextPage];
+      const newPages =
+        pages.length === 1 && pages[0].params.id === ''
+          ? [nextPage]
+          : [...pages, nextPage];
 
-      if(pages.length >= newPages.length ) {
+      if (pages.length >= newPages.length) {
         // this.scrollBackSetPage(newPages)
         this.setState({ pages: newPages });
       } else {
         this.setState({ pages: newPages });
       }
-      localStorage.setItem('saved-pages', JSON.stringify(newPages))
+      localStorage.setItem('saved-pages', JSON.stringify(newPages));
     } else if (pageFoundIndex > -1 && !msg.showNote) {
+      const { pages } = this.state;
       const localPageFoundIndex = pageFoundIndex === 0 ? 1 : pageFoundIndex;
       const newPages = pages.slice(0, localPageFoundIndex);
-      if(pageFoundIndex + 1 === this.state.pages.length) {
+      if (pageFoundIndex + 1 === pages.length) {
         this.scrollPageBack();
       } else {
-        this.scrollPagesBackAndSet(this.state.pages.length, this.state.pages.length - pageFoundIndex, newPages);
+        this.scrollPagesBackAndSet(
+          pages.length,
+          pages.length - pageFoundIndex,
+          newPages,
+        );
       }
     } else if (pageFoundIndex > -1) {
-
-      if(pageFoundIndex === pages.length -1) {
-       
-        if(pages.length + 1 === this.state.pages.length && msg.hideNote) {
+      const { pages } = this.state;
+      if (pageFoundIndex === pages.length - 1) {
+        if (pages.length + 1 === pages.length && msg.hideNote) {
           this.scrollPageBack();
         } else {
-          const last = pages[pages.length -1]
-          const secondTolast = pages[pages.length -2]
+          const last = pages[pages.length - 1];
+          const secondTolast = pages[pages.length - 2];
 
-          if(secondTolast && last && last.params.id !== secondTolast.params.id){
+          if (
+            secondTolast &&
+            last &&
+            last.params.id !== secondTolast.params.id
+          ) {
             pages.push(last);
             this.setState({ pages });
-            localStorage.setItem('saved-pages', JSON.stringify(pages))
-          } 
-          if(secondTolast && last && last.params.id === secondTolast.params.id){
+            localStorage.setItem('saved-pages', JSON.stringify(pages));
+          }
+          if (
+            secondTolast &&
+            last &&
+            last.params.id === secondTolast.params.id
+          ) {
             this.setState({ pages });
-            localStorage.setItem('saved-pages', JSON.stringify(pages))
-          } 
+            localStorage.setItem('saved-pages', JSON.stringify(pages));
+          }
         }
       }
 
       const localPages = localStorage.getItem('saved-pages');
-      
-      if(msg.showNote && !msg.hideNote) {
 
+      if (msg.showNote && !msg.hideNote) {
         const locals = JSON.parse(localPages);
-        const last = locals[locals.length -1]
-        const secondTolast = locals[locals.length -2]
+        const last = locals[locals.length - 1];
+        const secondTolast = locals[locals.length - 2];
 
-        if(secondTolast && last && last.params.id === secondTolast.params.id){
+        if (secondTolast && last && last.params.id === secondTolast.params.id) {
           this.setState({ pages: locals });
-          localStorage.setItem('saved-pages', JSON.stringify(locals))
-        } 
+          localStorage.setItem('saved-pages', JSON.stringify(locals));
+        }
       }
     }
   };
@@ -149,167 +175,50 @@ export default class NoteDetailPage extends Component {
     if (bVal) window.scrollTo(0, 0);
   };
 
-  render() {
-    let { person, pages } = this.state;
-    const { showAddItem, tags, editName } = this.state;
-    const { match, noteNames, Theme, searchTerm, notes } = this.props;
+  showNoteNames = (names) =>
+    // if (!names) return;
 
-    const editNameB = person ? this.editNameBox(person.heading) : null;
-
-    const isNoteNames = match.url === '/notes/note-names';
-    if (isNoteNames) {
-      person = null;
-      pages = [{ params: { id: '' } }]
-      // localStorage.removeItem('saved-pages')
-    }
-    
-    let clone = JSON.parse(JSON.stringify(pages))
-    if(clone && clone[0] && clone[0].params.id !== '' && clone[0].params.id !== 'main'){
-      clone = [{params: {id: "main"}}, ...clone]
-    }
-
-    const pagesCont = pages.map((pageLink, index) => {
-      const lastPageShowAddItem = showAddItem && index === (pages.length - 1);
-      const lastPage = index === (pages.length - 1)
-      return this.createNoteDetailPage(searchTerm, noteNames, Theme, notes, pageLink, lastPageShowAddItem, index, editName, lastPage, pages.length);
-    });
-    return (
-      <div className="slide-in" key={match.urls}>
-        {this.backButton(Theme)}
-        {isNoteNames ? this.sidebarPage(noteNames) : null}
-        <div id="multiple-pages">{pagesCont}</div>
-        {false ? '' : this.scrollButtons(Theme, showAddItem)}
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-      </div>
-    );
-  }
-
-  createNoteDetailPage(searchTerm, noteNames, Theme, notes, pageLink, showAddItem, index, editName, lastPage, pageCount) {
-
-    const key = pageLink && pageLink.params && pageLink.params.id ? pageLink.params.id : 'first';
-    return (
-      <div id="multiple-pages1" key={key+index}>
-        <NoteDetail
-          pageCount={pageCount}
-          hideAddItem={this.hideAddItem}
-          SearchTerm={searchTerm}
-          noteNames={noteNames}
-          Theme={Theme}
-          {...this.props}
-          set={this.noteDetailSet}
-          openPage={this.openPage}
-          notes={notes}
-          initShowtag={pageLink}
-          index={index}
-          showAddItem={showAddItem}
-          editName={editName}
-          lastPage={lastPage}
-        />
-      </div>
-    );
-  }
-
-  scrollPageBack() {
-    const { pages } = this.state;
-    if(pages && pages.length > 1){
-      const pageCount = pages.length;
-      let noteDetailPage = document.getElementById('multiple-pages');
-      if (noteDetailPage) {
-        let pageWidth = (noteDetailPage.scrollWidth / pageCount);
-
-        this.customScrollBy(noteDetailPage, noteDetailPage.scrollWidth - pageWidth, ( noteDetailPage.scrollWidth - pageWidth - pageWidth));
-      }
-      let self = this;
-      setTimeout(() => {
-        let remainingPages = pages.slice(0, pageCount -1);
-        localStorage.removeItem('showTag');
-        self.setState({ pages: remainingPages, showTag: null });
-        localStorage.setItem('saved-pages', JSON.stringify(remainingPages))
-      }, 500);
-    }
-  }
-
-  customScrollBy(element, startPosition, endPosition){
-    window.scrollTo({top: 0});
-    const left = startPosition > endPosition;
-    var i = startPosition;
-    var int = setInterval(function() {
-      element.scrollTo({top: 0, left:i});
-      if(left) {
-        i -= 8;
-      } else {
-        i += 8;
-      }
-      if (left && i <= endPosition) clearInterval(int);
-      if (!left && i >= endPosition) clearInterval(int);
-    }, 1);
-  }
-  
-  scrollPagesBackAndSet(currentPageCount, pagesBackCount, pages) {
-    if(pages && pages.length > 1){
-      let noteDetailPage = document.getElementById('multiple-pages');
-      if (noteDetailPage) {
-        let pageWidth = (noteDetailPage.scrollWidth / currentPageCount);
-        pageWidth = pageWidth - (pageWidth/(5+currentPageCount));
-        let scrollAmount = (pageWidth*pagesBackCount * -1);
-
-        noteDetailPage.scrollBy({
-          top: 0,
-          left: scrollAmount,
-          behavior: 'smooth'
-        });
-      }
-      let self = this;
-      setTimeout(() => {
-        localStorage.removeItem('showTag');
-        self.setState({ pages, showTag: null });
-      }, 500);
-    }
-  }
+    names?.map((name) => (
+      <Link
+        key={name}
+        style={{ textDecoration: 'none' }}
+        to="/notes/main"
+        title="Note List"
+      >
+        <div className="listNameButton" onClick={() => this.prepForNote(name)}>
+          <h3> {name} </h3>
+        </div>
+      </Link>
+    ));
 
   logOut = () => {
-    logoutUser((data) => window.location.reload());
+    logoutUser(() => window.location.reload());
   };
 
-  backButton(Theme) {
-    const themeBack = `${Theme.toLowerCase()}-back`;
-    const { pages } = this.state;
-    const hasPages = pages.length > 1;
-
-    return (
-      <button
-        className={`backButton ${themeBack}`}
-        onClick={() => {
-          if(hasPages){
-            this.scrollPageBack()
-          } else {
-            this.logOut()
-          }
-        }}
-      >
-        <i className={hasPages? "fas fa-arrow-left": "fas fa-power-off"} />
-      </button>
-    );
-  }
-
   addButtonClicked = (showAddItem) => {
-    showAddItem ? this.showAddItemSet(false) : this.showAddItemSet(true);
-  }
+    if (showAddItem) {
+      this.showAddItemSet(false);
+      return;
+    }
+    this.showAddItemSet(true);
+    // showAddItem ? this.showAddItemSet(false) : this.showAddItemSet(true);
+  };
 
   editNameSet = () => {
     window.scrollTo(0, 0);
     const { editName } = this.state;
     this.setState({ editName: !editName });
+  };
+
+  prepForNote = (name) => {
+    const { set } = this.props;
+    // const user = localStorage.getItem('user');
+    // if (user !== name) {
+    //   const test = { params: { id: 'main' } };
+    //   // localStorage.setItem('saved-pages', JSON.stringify(test))
+    //   // this.setState({ pages: [test] });
+    // }
+    set({ noteName: name });
   };
 
   scrollButtons(Theme, showAddItem) {
@@ -320,7 +229,10 @@ export default class NoteDetailPage extends Component {
     const showBackButton = pages.length > 1;
     return (
       <div className="detail-scroll">
-        <button className={`editButtons1 detailUpButton ${themeHover} ${themeBack}`} onClick={() => this.editNameSet()}>
+        <button
+          className={`editButtons1 detailUpButton ${themeHover} ${themeBack}`}
+          onClick={() => this.editNameSet()}
+        >
           <i className="fas fa-pen" />
         </button>
         <div
@@ -341,49 +253,157 @@ export default class NoteDetailPage extends Component {
         </div>
         {showBackButton === false ? (
           <div className={`detailAddButton ${themeHover} ${themeBack}`}>
-            <Link style={{ textDecoration: 'none', color: 'white' }}    to="/new-note/">
+            <Link
+              style={{ textDecoration: 'none', color: 'white' }}
+              to="/new-note/"
+            >
               <i className="fas fa-plus" />
             </Link>
           </div>
-        ) : <div
+        ) : (
+          <div
             className={`detailAddButton ${themeHover} ${themeBack}`}
             onClick={() => {
-              this.addButtonClicked(showAddItem)
+              this.addButtonClicked(showAddItem);
             }}
           >
             <i className="fas fa-plus" />
           </div>
-        }
-        
+        )}
       </div>
     );
   }
 
-  prepForNote = (name) => {
-    const user =localStorage.getItem('user');
-    if(user !== name){
-      const test = {params: {id: "main"}}
-      // localStorage.setItem('saved-pages', JSON.stringify(test))
-      // this.setState({ pages: [test] });
-    }
-    this.props.set({ noteName: name })
+  backButton(Theme) {
+    const themeBack = `${Theme.toLowerCase()}-back`;
+    const { pages } = this.state;
+    const hasPages = pages.length > 1;
+
+    return (
+      <button
+        className={`backButton ${themeBack}`}
+        onClick={() => {
+          if (hasPages) {
+            this.scrollPageBack();
+          } else {
+            this.logOut();
+          }
+        }}
+      >
+        <i className={hasPages ? 'fas fa-arrow-left' : 'fas fa-power-off'} />
+      </button>
+    );
   }
 
-  showNoteNames = (names) => {
-    if (!names) return;
+  scrollPagesBackAndSet(currentPageCount, pagesBackCount, pages) {
+    if (pages && pages.length > 1) {
+      const noteDetailPage = document.getElementById('multiple-pages');
+      if (noteDetailPage) {
+        let pageWidth = noteDetailPage.scrollWidth / currentPageCount;
+        pageWidth -= pageWidth / (5 + currentPageCount);
+        const scrollAmount = pageWidth * pagesBackCount * -1;
 
-    return names.map((name) => (
-      <Link key={name} style={{ textDecoration: 'none' }} to="/notes/main" title="Note List">
-        <div className="listNameButton" onClick={() => this.prepForNote(name)}>
-          <h3> {name} </h3>
-        </div>
-      </Link>
-    ));
-  };
+        noteDetailPage.scrollBy({
+          top: 0,
+          left: scrollAmount,
+          behavior: 'smooth',
+        });
+      }
+      const self = this;
+      setTimeout(() => {
+        localStorage.removeItem('showTag');
+        self.setState({ pages, showTag: null });
+      }, 500);
+    }
+  }
+
+  customScrollBy(element, startPosition, endPosition) {
+    window.scrollTo({ top: 0 });
+    const left = startPosition > endPosition;
+    let i = startPosition;
+    const int = setInterval(() => {
+      element.scrollTo({ top: 0, left: i });
+      if (left) {
+        i -= 8;
+      } else {
+        i += 8;
+      }
+      if (left && i <= endPosition) clearInterval(int);
+      if (!left && i >= endPosition) clearInterval(int);
+    }, 1);
+  }
+
+  scrollPageBack() {
+    const { pages } = this.state;
+    if (pages && pages.length > 1) {
+      const pageCount = pages.length;
+      const noteDetailPage = document.getElementById('multiple-pages');
+      if (noteDetailPage) {
+        const pageWidth = noteDetailPage.scrollWidth / pageCount;
+
+        this.customScrollBy(
+          noteDetailPage,
+          noteDetailPage.scrollWidth - pageWidth,
+          noteDetailPage.scrollWidth - pageWidth - pageWidth,
+        );
+      }
+      const self = this;
+      setTimeout(() => {
+        const remainingPages = pages.slice(0, pageCount - 1);
+        localStorage.removeItem('showTag');
+        self.setState({ pages: remainingPages, showTag: null });
+        localStorage.setItem('saved-pages', JSON.stringify(remainingPages));
+      }, 500);
+    }
+  }
+
+  createNoteDetailPage(
+    searchTerm,
+    noteNames,
+    Theme,
+    notes,
+    pageLink,
+    showAddItem,
+    index,
+    editName,
+    lastPage,
+    pageCount,
+  ) {
+    const key =
+      pageLink && pageLink.params && pageLink.params.id
+        ? pageLink.params.id
+        : 'first';
+    return (
+      <div id="multiple-pages1" key={key + index}>
+        <NoteDetail
+          pageCount={pageCount}
+          hideAddItem={this.hideAddItem}
+          SearchTerm={searchTerm}
+          noteNames={noteNames}
+          Theme={Theme}
+          {...this.props}
+          set={this.noteDetailSet}
+          openPage={this.openPage}
+          notes={notes}
+          initShowtag={pageLink}
+          index={index}
+          showAddItem={showAddItem}
+          editName={editName}
+          lastPage={lastPage}
+        />
+      </div>
+    );
+  }
 
   sidebarPage(noteNames) {
     const noteNameBlock = this.showNoteNames(noteNames);
-    const noteThemeBlock = this.showNoteThemes(['Red', 'Ocean', 'Green', 'Dark', 'Night']);
+    const noteThemeBlock = this.showNoteThemes([
+      'Red',
+      'Ocean',
+      'Green',
+      'Dark',
+      'Night',
+    ]);
     return (
       <div>
         <br />
@@ -391,13 +411,23 @@ export default class NoteDetailPage extends Component {
         {noteNameBlock}
         <br />
         <h3>Apps</h3>
-        <Link key="memento" style={{ textDecoration: 'none' }} to="/memento" title="Note List">
+        <Link
+          key="memento"
+          style={{ textDecoration: 'none' }}
+          to="/memento"
+          title="Note List"
+        >
           <div className="listNameButton">
             {' '}
             <h3> Memento </h3>
           </div>
         </Link>
-        <Link key="pomodoro" style={{ textDecoration: 'none' }} to="/pomodoro" title="Note List">
+        <Link
+          key="pomodoro"
+          style={{ textDecoration: 'none' }}
+          to="/pomodoro"
+          title="Note List"
+        >
           <div className="listNameButton">
             {' '}
             <h3> Pomodoro </h3>
@@ -406,6 +436,68 @@ export default class NoteDetailPage extends Component {
         <br />
         <h3>Themes</h3>
         {noteThemeBlock}
+      </div>
+    );
+  }
+
+  render() {
+    // let { person, pages } = this.state;
+    let { pages } = this.state;
+    const { showAddItem, editName } = this.state;
+    const { match, noteNames, Theme, searchTerm, notes } = this.props;
+
+    // const editNameB = person ? this.editNameBox(person.heading) : null;
+
+    const isNoteNames = match.url === '/notes/note-names';
+    if (isNoteNames) {
+      // person = null;
+      pages = [{ params: { id: '' } }];
+      // localStorage.removeItem('saved-pages')
+    }
+
+    let clone = JSON.parse(JSON.stringify(pages));
+    if (
+      clone &&
+      clone[0] &&
+      clone[0].params.id !== '' &&
+      clone[0].params.id !== 'main'
+    ) {
+      clone = [{ params: { id: 'main' } }, ...clone];
+    }
+
+    const pagesCont = pages.map((pageLink, index) => {
+      const lastPageShowAddItem = showAddItem && index === pages.length - 1;
+      const lastPage = index === pages.length - 1;
+      return this.createNoteDetailPage(
+        searchTerm,
+        noteNames,
+        Theme,
+        notes,
+        pageLink,
+        lastPageShowAddItem,
+        index,
+        editName,
+        lastPage,
+        pages.length,
+      );
+    });
+    return (
+      <div className="slide-in" key={match.urls}>
+        {this.backButton(Theme)}
+        {isNoteNames ? this.sidebarPage(noteNames) : null}
+        <div id="multiple-pages">{pagesCont}</div>
+        {false ? '' : this.scrollButtons(Theme, showAddItem)}
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
       </div>
     );
   }

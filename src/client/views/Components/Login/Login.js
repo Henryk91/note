@@ -1,7 +1,3 @@
-/* eslint-disable no-restricted-globals */
-/* eslint-disable react/prop-types */
-/* eslint-disable react/button-has-type */
-/* eslint-disable no-alert */
 import React, { Component } from 'react';
 import { loginRequest, createAccount } from '../../Helpers/requests';
 
@@ -9,36 +5,36 @@ export default class Login extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      signUp: false
+      signUp: false,
     };
     this.saveLogin = this.saveLogin.bind(this);
     this.createAccount = this.createAccount.bind(this);
     this.loginState = this.loginState.bind(this);
   }
 
-  saveLogin = () => {
+  saveLogin = (event) => {
     event.preventDefault();
     let password = event.target.password.value;
     let email = event.target.email.value;
-    if(password && email){
+    if (password && email) {
       password = password.trim();
       email = email.trim();
     }
     const user = {
       email,
-      password
+      password,
     };
     console.log('Trying to log in!');
-    
-    loginRequest(user, res => {
-      console.log('Login res',res);
-      
+
+    loginRequest(user, (res) => {
+      console.log('Login res', res);
+
       if (res?.id) {
         localStorage.setItem('loginKey', res.id);
-        window.location.href = "/notes/main";
+        window.location.href = '/notes/main';
       } else if (res?.user?.id) {
         localStorage.setItem('loginKey', res?.user?.id);
-        window.location.href = "/notes/main";
+        window.location.href = '/notes/main';
       } else {
         alert('Login Error');
         console.log(res);
@@ -46,7 +42,7 @@ export default class Login extends Component {
     });
   };
 
-  createAccount = event => {
+  createAccount = (event) => {
     event.preventDefault();
 
     let password = event.target.password.value;
@@ -57,22 +53,20 @@ export default class Login extends Component {
       let lastName = event.target.lastName.value;
       let email = event.target.email.value;
 
-      let password = event.target.password.value;
-      
-      if(password) password = password.trim();
-      if(email) email = email.trim();
-      if(firstName) firstName = firstName.trim();
-      if(lastName) lastName = lastName.trim();
-      
+      if (password) password = password.trim();
+      if (email) email = email.trim();
+      if (firstName) firstName = firstName.trim();
+      if (lastName) lastName = lastName.trim();
+
       const user = {
         email,
         firstName,
         lastName,
         password,
         tempPass: [''],
-        permId: ''
+        permId: '',
       };
-      createAccount(user, res => {
+      createAccount(user, (res) => {
         if (res.id) {
           localStorage.setItem('loginKey', res.id);
           window.location.reload();
@@ -100,40 +94,90 @@ export default class Login extends Component {
           <div>
             <form onSubmit={this.createAccount}>
               <br />
-              <input className={themeBack} name="firstName" type="text" placeholder="First Name" required="required" />
+              <input
+                className={themeBack}
+                name="firstName"
+                type="text"
+                placeholder="First Name"
+                required="required"
+              />
               <br />
-              <input className={themeBack} name="lastName" type="text" placeholder="Last Name" required="required" />
+              <input
+                className={themeBack}
+                name="lastName"
+                type="text"
+                placeholder="Last Name"
+                required="required"
+              />
               <br />
-              <input className={themeBack} name="email" type="email" placeholder="Email" required="required" />
+              <input
+                className={themeBack}
+                name="email"
+                type="email"
+                placeholder="Email"
+                required="required"
+              />
               <br />
-              <input className={themeBack} name="password" type="password" placeholder="Password" required="required" />
+              <input
+                className={themeBack}
+                name="password"
+                type="password"
+                placeholder="Password"
+                required="required"
+              />
               <br />
-              <input className={themeBack} name="password2" type="password" placeholder="Password" required="required" />
+              <input
+                className={themeBack}
+                name="password2"
+                type="password"
+                placeholder="Password"
+                required="required"
+              />
               <br />
-              <button className={themeBack + " " + themeHover} type="submit">
+              <button className={`${themeBack} ${themeHover}`} type="submit">
                 Submit
               </button>
             </form>
             <br />
-            <button className={themeBack + " " + themeHover} onClick={() => this.loginState(false)}>
+            <button
+              className={`${themeBack} ${themeHover}`}
+              onClick={() => this.loginState(false)}
+            >
               {' '}
               Login{' '}
             </button>
           </div>
         ) : (
           <div>
-            <form onSubmit={this.saveLogin}>
+            <form onSubmit={(e) => this.saveLogin(e)}>
               <br />
-              <input className={themeBack} name="email" type="email" placeholder="Email" required="required" autoComplete="username" />
+              <input
+                className={themeBack}
+                name="email"
+                type="email"
+                placeholder="Email"
+                required="required"
+                autoComplete="username"
+              />
               <br />
-              <input className={themeBack} name="password" type="password" placeholder="Password" required="required" autoComplete="current-password" />
+              <input
+                className={themeBack}
+                name="password"
+                type="password"
+                placeholder="Password"
+                required="required"
+                autoComplete="current-password"
+              />
               <br />
-              <button className={themeBack + " " + themeHover} type="submit">
+              <button className={`${themeBack} ${themeHover}`} type="submit">
                 Submit
               </button>
             </form>
             <br />
-            <button className={themeBack + " " + themeHover} onClick={() => this.loginState(true)}>
+            <button
+              className={`${themeBack} ${themeHover}`}
+              onClick={() => this.loginState(true)}
+            >
               {' '}
               Sign Up{' '}
             </button>
