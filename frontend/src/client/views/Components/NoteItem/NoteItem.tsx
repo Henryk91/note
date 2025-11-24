@@ -33,6 +33,7 @@ type NoteItemState = {
   editingItem: boolean;
   index?: number;
   type?: string;
+  scrollPos: number;
 };
 
 export default class NoteItem extends Component<NoteItemProps, NoteItemState> {
@@ -42,6 +43,7 @@ export default class NoteItem extends Component<NoteItemProps, NoteItemState> {
     this.state = {
       item,
       editingItem: false,
+      scrollPos: 0,
     };
     this.deleteItem = this.deleteItem.bind(this);
     this.getMarkdownText = this.getMarkdownText.bind(this);
@@ -74,6 +76,7 @@ export default class NoteItem extends Component<NoteItemProps, NoteItemState> {
       delete: false,
     });
     this.setState({ editingItem: false, item: update });
+    this.removeHideClass();
   };
 
   deleteItem = (e) => {
@@ -81,7 +84,7 @@ export default class NoteItem extends Component<NoteItemProps, NoteItemState> {
     const { set, type } = this.props;
     const { item, index } = this.state;
     if (confirm('Are you sure you want to permanently delete this?')) {
-      this.setState({ item: null });
+      this.setState({ item: null, scrollPos: window.scrollY });
       set({
         oldItem: item,
         index,
@@ -100,6 +103,8 @@ export default class NoteItem extends Component<NoteItemProps, NoteItemState> {
     for (let i = 0; i < nodes.length; i++) {
       nodes[i].classList.remove('hidden-noteItemBox');
     }
+    const { scrollPos } = this.state;
+    window.scrollTo({ top: scrollPos });
   };
 
   closeEdit = () => {
@@ -135,7 +140,7 @@ export default class NoteItem extends Component<NoteItemProps, NoteItemState> {
   };
 
   setEditState = () => {
-    this.setState({ editingItem: true });
+    this.setState({ editingItem: true, scrollPos: window.scrollY });
     this.hideLogLines();
     window.scrollTo({ top: 0 });
   };
