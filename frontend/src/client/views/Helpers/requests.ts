@@ -1,4 +1,8 @@
-export function logoutUser(next) {
+import { Note } from './types';
+
+type Callback<T = any> = (data: T) => void;
+
+export function logoutUser(next: Callback) {
   fetch('/api/logout', {
     method: 'POST',
     headers: {
@@ -18,7 +22,7 @@ export function logoutUser(next) {
     });
 }
 
-async function refreshToken() {
+async function refreshToken(): Promise<Response> {
   const res = await fetch('/api/refresh', {
     method: 'POST',
     headers: {
@@ -35,7 +39,7 @@ async function refreshToken() {
   return res;
 }
 
-export async function apiFetch(url, options) {
+export async function apiFetch(url: string, options?: RequestInit): Promise<Response> {
   const res = await fetch(url, {
     credentials: 'include',
     ...options,
@@ -43,27 +47,25 @@ export async function apiFetch(url, options) {
 
   if (res.status === 401) {
     const refRes = await refreshToken();
-    // if (refRes?.ok) return await apiFetch(url, options);
     if (refRes?.ok) return apiFetch(url, options);
-    // return;
   }
 
   return res;
 }
 
-export function getNoteNames(next) {
+export function getNoteNames(next: Callback<string[]>) {
   apiFetch(`/api/note-names`, {
-    credentials: 'include', // send cookies (access_token, refresh_token)
+    credentials: 'include',
   })
     .then((res) => res?.json())
     .then((data) => next(data))
     .catch((error) => {
       console.log('Error:', error);
-      next(error);
+      next([]);
     });
 }
 
-export function getAllNotes(next) {
+export function getAllNotes(next: Callback<Note[]>) {
   apiFetch('/api/note?user=all')
     .then((res) => res?.json())
     .then((data) => next(data))
@@ -73,7 +75,7 @@ export function getAllNotes(next) {
     });
 }
 
-export function getMyNotesRec(user, next) {
+export function getMyNotesRec(user: string, next: Callback<Note[]>) {
   apiFetch(`/api/note?user=${user}`)
     .then((res) => res?.json())
     .then((data) => next(data))
@@ -83,7 +85,7 @@ export function getMyNotesRec(user, next) {
     });
 }
 
-export function getNote(user, noteHeading, next) {
+export function getNote(user: string, noteHeading: string, next: Callback<Note | string>) {
   apiFetch(`/api/note?user=${user}&noteHeading=${noteHeading}`)
     .then((res) => res?.json())
     .then((data) => next(data))
@@ -93,7 +95,7 @@ export function getNote(user, noteHeading, next) {
     });
 }
 
-export function loginRequest(note, next) {
+export function loginRequest(note: any, next: Callback) {
   fetch('/api/login', {
     method: 'POST',
     headers: {
@@ -111,7 +113,7 @@ export function loginRequest(note, next) {
     });
 }
 
-export function createAccount(note, next) {
+export function createAccount(note: any, next: Callback) {
   fetch('/api/register', {
     method: 'POST',
     headers: {
@@ -128,7 +130,7 @@ export function createAccount(note, next) {
     });
 }
 
-export function updateOneNoteRec(note, done) {
+export function updateOneNoteRec(note: any, done: Callback<Response>) {
   const sendData = JSON.parse(JSON.stringify(note));
   const { dataLable } = note.person;
 
@@ -136,7 +138,7 @@ export function updateOneNoteRec(note, done) {
   sendData.person.dataLable = newLable;
 
   const savedItems = localStorage.getItem('updateOneNote');
-  let toUpdate = [];
+  let toUpdate: any[] = [];
   if (savedItems) {
     toUpdate = JSON.parse(savedItems);
     toUpdate.push(sendData);
@@ -158,14 +160,10 @@ export function updateOneNoteRec(note, done) {
         if (updateSavedItems) {
           let saveItemArray = JSON.parse(updateSavedItems);
           saveItemArray = saveItemArray.filter(
-            (item) => JSON.stringify(item) !== JSON.stringify(toUpdateNote),
+            (item: any) => JSON.stringify(item) !== JSON.stringify(toUpdateNote),
           );
-          console.log(saveItemArray);
           if (saveItemArray.length > 0) {
-            localStorage.setItem(
-              'updateOneNote',
-              JSON.stringify(saveItemArray),
-            );
+            localStorage.setItem('updateOneNote', JSON.stringify(saveItemArray));
           } else {
             localStorage.removeItem('updateOneNote');
             done(response);
@@ -178,9 +176,9 @@ export function updateOneNoteRec(note, done) {
   });
 }
 
-export function updateNote(note) {
+export function updateNote(note: any) {
   const savedItems = localStorage.getItem('updateNote');
-  let toUpdate = [];
+  let toUpdate: any[] = [];
   if (savedItems) {
     toUpdate = JSON.parse(savedItems);
     toUpdate.push(note);
@@ -214,7 +212,8 @@ export function updateNote(note) {
     });
   });
 }
-export function saveNewNote(newNote) {
+
+export function saveNewNote(newNote: any) {
   apiFetch('/api/save', {
     method: 'POST',
     headers: {

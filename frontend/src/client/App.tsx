@@ -24,15 +24,31 @@ import {
 } from './views/Helpers/requests';
 
 import { compareSort } from './views/Helpers/utils';
+import { Note } from './views/Helpers/types';
 
-function ProtectedRoutes({ children }) {
+type ProtectedRoutesProps = {
+  children: React.ReactElement;
+};
+
+function ProtectedRoutes({ children }: ProtectedRoutesProps) {
   const loginKey = localStorage.getItem('loginKey');
   if (!loginKey) return <Redirect to="/login" />;
   return children;
 }
 
-export default class App extends Component {
-  constructor(props) {
+type AppState = {
+  notes: Note[] | null;
+  user: string;
+  notesInitialLoad: boolean;
+  noteNames: string[] | null;
+  theme: string;
+  searchTerm: string;
+  freshData: boolean;
+  lastRefresh: number | null;
+};
+
+export default class App extends Component<unknown, AppState> {
+  constructor(props: unknown) {
     super(props);
     this.state = {
       notes: null,
@@ -57,32 +73,26 @@ export default class App extends Component {
   }
 
   componentDidMount() {
-    console.log('componentDidMount');
     this.setRedirect();
     this.checkLoginState();
-    const self = this;
-    window.onfocus = function () {
-      self.setRedirect();
-      const { lastRefresh } = self.state;
+    window.onfocus = () => {
+      this.setRedirect();
+      const { lastRefresh } = this.state;
       const now = new Date().getTime();
+      if (!lastRefresh) {
+        this.setState({ lastRefresh: now });
+        return;
+      }
+
       const minTimeout = 1000 * 60 * 5;
-      if (lastRefresh + minTimeout < now && lastRefresh && self) {
-        console.log('Refresh', new Date());
-        self.setState({ lastRefresh: now });
-        self.checkLoginState();
+      if (lastRefresh + minTimeout < now && lastRefresh) {
+        this.setState({ lastRefresh: now });
+        this.checkLoginState();
       }
-      if (lastRefresh + minTimeout > now && self) {
-        console.log(
-          'Refresh in ',
-          lastRefresh
-            ? (lastRefresh + minTimeout - now) / 1000
-            : minTimeout / 1000,
-          'seconds',
-        );
+      if (lastRefresh + minTimeout > now) {
+        // No-op logging removed for cleanliness
       }
-      if (!lastRefresh && self) {
-        self.setState({ lastRefresh: now });
-      }
+      
     };
   }
 
@@ -122,7 +132,7 @@ export default class App extends Component {
       localStorage.setItem('user', user);
       const data = localStorage.getItem(user);
       if (data && data[0] && data.length > 0) {
-        const pdata = this.addMainNote(JSON.parse(data));
+        const pdata = this.addMainNote(JSON.parse(data) as Note[]);
         if (notes !== pdata) {
           this.setState({
             notes: pdata,
@@ -170,25 +180,24 @@ export default class App extends Component {
 
   getNoteNames(loginKey) {
     const { notesInitialLoad } = this.state;
-    const { noteNames } = this.state;
+    const { noteNames, user } = this.state;
 
     let savedNames = localStorage.getItem('notenames');
 
     if (savedNames) {
-      savedNames = JSON.parse(savedNames);
-      const { user } = this.state;
+      const noteNames = JSON.parse(savedNames);
       const selectedUser = user.length > 1 ? user : null;
-      this.setState({ noteNames: savedNames });
+      this.setState({ noteNames: noteNames });
       if (selectedUser) this.getMyNotes(selectedUser);
     }
     if (loginKey && !notesInitialLoad && !noteNames) {
       getNoteNames((res) => {
-        if (res.length > 0 && res !== 'No notes') {
+        if (res.length > 0) {
           res.push('All');
           res.push('None');
           if (res && res.length > 0) {
             localStorage.setItem('notenames', JSON.stringify(res));
-            let update = { noteNames: res };
+            let update: any = { noteNames: res };
             if (!localStorage.getItem('user')) {
               // update.user = res[0];
               update = { ...update, user: res[0] };
@@ -203,8 +212,12 @@ export default class App extends Component {
 
   updateNote = (update) => {
     const { notes } = this.state;
-    const index = notes.indexOf((val) => val.id === update.id);
-    notes[index] = update;
+    // if (notes){
+    //   const index = notes.indexOf(val => {
+    //     return val.id === update.id
+    // } );
+    //   notes[index] = update;
+    // }
 
     let person = null;
     if (update.updateData) {
@@ -224,7 +237,7 @@ export default class App extends Component {
     const { notes, user, searchTerm } = this.state;
     const usedNewNote = newNote;
     if (user !== '') usedNewNote.note.createdBy = user;
-    let updatedNote = [];
+    let updatedNote: Note[] = [];
 
     if (notes) {
       updatedNote = [...notes, usedNewNote.note];
@@ -233,7 +246,7 @@ export default class App extends Component {
     }
 
     if (searchTerm === '' || searchTerm === null) {
-      saveNewNote(usedNewNote.note, () => alert('setn'));
+      saveNewNote(usedNewNote.note);
       this.setState({ notes: updatedNote });
     } else {
       alert('Cant update in search');
@@ -252,9 +265,9 @@ export default class App extends Component {
     }
   };
 
-  addMainNote(notes) {
+  addMainNote(notes: Note[]) {
     if (notes && notes.length) {
-      const subs = [];
+      const subs: Note[] = [];
       notes.forEach((note) => {
         if (note.heading.startsWith('Sub: ')) {
           subs.push(note);
@@ -345,31 +358,31 @@ export default class App extends Component {
       document.body.style.backgroundColor = '#103762';
       document
         .querySelector('meta[name="theme-color"]')
-        .setAttribute('content', '#103762');
+        ?.setAttribute('content', '#103762');
     }
     if (theme === 'Red') {
       document.body.style.backgroundColor = '#030303';
       document
         .querySelector('meta[name="theme-color"]')
-        .setAttribute('content', '#d00000');
+        ?.setAttribute('content', '#d00000');
     }
     if (theme === 'Ocean') {
       document.body.style.backgroundColor = '#35373D';
       document
         .querySelector('meta[name="theme-color"]')
-        .setAttribute('content', '#38cdb8');
+        ?.setAttribute('content', '#38cdb8');
     }
     if (theme === 'Dark') {
       document.body.style.backgroundColor = '#061f2f';
       document
         .querySelector('meta[name="theme-color"]')
-        .setAttribute('content', '#0090c8');
+        ?.setAttribute('content', '#0090c8');
     }
     if (theme === 'Night') {
       document.body.style.backgroundColor = '#061f2f';
       document
         .querySelector('meta[name="theme-color"]')
-        .setAttribute('content', '#27343b');
+        ?.setAttribute('content', '#27343b');
     }
 
     return (
@@ -377,6 +390,7 @@ export default class App extends Component {
         <Switch>
           <Route path="/login" render={() => <Login Theme={theme} />} />
           <ProtectedRoutes>
+            <>
             <header>
               <SearchBar
                 set={this.setFilterNote}
@@ -404,7 +418,7 @@ export default class App extends Component {
               render={(props) => (
                 <Home
                   {...props}
-                  SearchTerm={searchTerm}
+                  searchTerm={searchTerm}
                   Theme={theme}
                   notes={notes}
                 />
@@ -415,7 +429,7 @@ export default class App extends Component {
               path="/index.html"
               render={(props) => (
                 <NoteDetailPage
-                  SearchTerm={searchTerm}
+                  searchTerm={searchTerm}
                   noteNames={noteNames}
                   Theme={theme}
                   {...props}
@@ -429,7 +443,7 @@ export default class App extends Component {
               path="/"
               render={(props) => (
                 <NoteDetailPage
-                  SearchTerm={searchTerm}
+                  searchTerm={searchTerm}
                   noteNames={noteNames}
                   Theme={theme}
                   {...props}
@@ -443,7 +457,7 @@ export default class App extends Component {
               path="/notes/:id"
               render={(props) => (
                 <NoteDetailPage
-                  SearchTerm={searchTerm}
+                  searchTerm={searchTerm}
                   noteNames={noteNames}
                   Theme={theme}
                   {...props}
@@ -463,6 +477,7 @@ export default class App extends Component {
               path="/memento"
               render={() => <Memento Theme={theme} />}
             />
+            </>
           </ProtectedRoutes>
         </Switch>
       </Router>

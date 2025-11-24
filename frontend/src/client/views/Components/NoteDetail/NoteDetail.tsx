@@ -3,9 +3,47 @@ import { Link } from 'react-router-dom';
 import NoteItem from '../NoteItem/NoteItem';
 import EditNoteCheck from '../EditNoteCheck/EditNoteCheck';
 import { getPerson } from '../../Helpers/utils';
+import { Note } from '../../Helpers/types';
 
-export default class NoteDetail extends Component {
-  constructor(props) {
+type Match = {
+  isExact: boolean;
+  params: {id: string};
+  path: string;
+  url: string;
+}
+
+type NoteDetailProps = {
+  notes: Note[] | null;
+  Theme: string;
+  searchTerm?: string;
+  editName?: boolean;
+  set: (payload: any) => void;
+  openPage: (payload: any) => void;
+  lastPage?: boolean;
+  index?: number;
+  showAddItem: boolean;
+  hideAddItem: () => void;
+  pageCount: number;
+  match: Match;
+};
+
+type NoteDetailState = {
+  person: Note | null;
+  editName: boolean;
+  tags: any;
+  showTag: string | null;
+  addLable: any;
+  displayDate: string | null;
+  continueData: any;
+  showLogDaysBunch: boolean;
+  searchTerm: string;
+  showLink: string[];
+  prevDate: string | null;
+  nextDate: string | null;
+};
+
+export default class NoteDetail extends Component<NoteDetailProps, NoteDetailState> {
+  constructor(props: NoteDetailProps) {
     super(props);
     this.state = {
       person: null,
@@ -41,12 +79,12 @@ export default class NoteDetail extends Component {
     const { searchTerm, editName } = this.state;
     const { notes } = this.props;
     if (
-      searchTerm !== nextProps.SearchTerm ||
+      searchTerm !== nextProps.searchTerm ||
       editName !== nextProps.editName ||
       notes !== nextProps.notes
     ) {
       this.setState({
-        searchTerm: nextProps.SearchTerm,
+        searchTerm: nextProps.searchTerm,
         editName: nextProps.editName,
       });
 
@@ -76,7 +114,6 @@ export default class NoteDetail extends Component {
       notes && notes[0] ? notes.find((note) => note.id === noteId) : null;
 
     const parentId = person.id;
-    console.log('parentId', parentId);
     openPage({ personNext, parentId, hideNote: true });
   }
 
@@ -90,7 +127,7 @@ export default class NoteDetail extends Component {
         const { notes } = this.props;
         const noteHeadings =
           notes && notes[0] ? notes.find((note) => note.id === noteId) : null;
-        const buttons = this.getNoteByTag(noteHeadings.dataLable, '');
+        const buttons = this.getNoteByTag(noteHeadings?.dataLable, '');
         localBunch = buttons;
       }
     }
@@ -193,10 +230,9 @@ export default class NoteDetail extends Component {
       propertyArray.unshift('Log');
     }
 
-    const linkProps = [];
+    let linkProps: string[] = [];
     propertyArray = propertyArray.filter((prop) => {
-      const isLink =
-        sort[prop] && sort[prop][0] && sort[prop][0].startsWith('href:');
+      const isLink = sort?.[prop]?.[0]?.startsWith('href:');
       if (isLink) {
         linkProps.push(prop);
       }
@@ -254,7 +290,7 @@ export default class NoteDetail extends Component {
     allDates = allDates
       .filter((d) => d.includes('"json":true'))
       .sort(
-        (a, b) => new Date(JSON.parse(a).date) - new Date(JSON.parse(b).date),
+        (a, b) => new Date(JSON.parse(a).date).getTime() - new Date(JSON.parse(b).date).getTime(),
       );
 
     return allDates;
@@ -314,7 +350,7 @@ export default class NoteDetail extends Component {
     const lastLink = showLink.length > 1 ? showLink[showLink.length - 1] : null;
     const { notes } = this.props;
     const nextPerson = lastLink
-      ? notes.find((note) => note.id === lastLink)
+      ? notes?.find((note) => note.id === lastLink)
       : null;
 
     this.noteDetailItemClick(nextPerson, person, tagName);
@@ -325,11 +361,11 @@ export default class NoteDetail extends Component {
     const lastLink = showLink.length > 1 ? showLink[showLink.length - 1] : null;
     const { notes, lastPage, openPage } = this.props;
     const nextPerson = lastLink
-      ? notes.find((note) => note.id === lastLink)
+      ? notes?.find((note) => note.id === lastLink)
       : null;
     const tagData = lastLink
-      ? nextPerson.dataLable.find((note) => note.tag === tagName)
-      : person.dataLable.find((note) => note.tag === tagName);
+      ? nextPerson?.dataLable.find((note) => note.tag === tagName)
+      : person?.dataLable.find((note) => note.tag === tagName);
 
     if (
       tagData &&
@@ -354,7 +390,7 @@ export default class NoteDetail extends Component {
       } else if (sessionShowTag && tagName && sessionShowTag !== tagName) {
         localStorage.setItem('showTag', tagName);
         this.setState({ showTag: null });
-        const parentId = person.id;
+        const parentId = person?.id;
         openPage({
           personNext: person,
           parentId,
@@ -411,7 +447,7 @@ export default class NoteDetail extends Component {
     const { set } = this.props;
     const heading = e.target.heading.value;
     const { person } = this.state;
-    if (person.heading !== heading) {
+    if (person && person.heading !== heading) {
       person.heading = heading;
       set({ person });
     } else {
@@ -446,13 +482,13 @@ export default class NoteDetail extends Component {
     if (tag === 'Link') {
       const link = event.target.links.value;
       number = `href:${link}`;
-      const linkHeading = document.getElementById('link-text').value;
+      const linkHeading = (document.getElementById('link-text') as HTMLInputElement)?.value;
       tag = linkHeading.startsWith('Sub: ')
         ? linkHeading.slice(4).trim()
         : linkHeading;
     }
 
-    person.dataLable.push({ tag, data: number });
+    if(person) person.dataLable.push({ tag, data: number });
 
     const updateData = JSON.parse(JSON.stringify(person));
     updateData.dataLable = [{ tag, data: number }];
@@ -460,7 +496,7 @@ export default class NoteDetail extends Component {
 
     this.refreshItems(person);
     this.setState({ addLable: null });
-    hideAddItem({ show: false });
+    hideAddItem();
 
     // Todo: Clear input boxes after submit?
     // if (!number.includes('href:')) {
@@ -555,6 +591,7 @@ export default class NoteDetail extends Component {
       setTimeout(() => {
         const { pageCount } = this.props;
         const localNoteDetailPage = document.getElementById('multiple-pages');
+        if(!localNoteDetailPage) return;
         const pageWidth = localNoteDetailPage.scrollWidth / pageCount;
         const start = localNoteDetailPage.scrollWidth - pageWidth - pageWidth;
         const end = start + pageWidth;
@@ -611,8 +648,7 @@ export default class NoteDetail extends Component {
       if (selectedDate === null) {
         let lastDate = [...allDates].slice(allDates.length - 1);
         if (lastDate[0]) {
-          lastDate = new Date(JSON.parse(lastDate[0]).date);
-          newSelectedDate = lastDate;
+          newSelectedDate = new Date(JSON.parse(lastDate[0]).date);
           this.setState({ displayDate: newSelectedDate });
         }
       }
@@ -809,7 +845,7 @@ export default class NoteDetail extends Component {
 
   cancelAddItemEdit() {
     const { hideAddItem } = this.props;
-    hideAddItem({ show: false });
+    hideAddItem();
     this.setState({ addLable: null });
     localStorage.removeItem('new-folder-edit');
   }
@@ -854,6 +890,7 @@ export default class NoteDetail extends Component {
     const { showTag, addLable } = this.state;
     const themeBack = `${Theme.toLowerCase()}-back`;
     const themeHover = `${Theme.toLowerCase()}-hover`;
+
     return (
       <form onSubmit={this.submitNewItem}>
         <EditNoteCheck
@@ -893,7 +930,7 @@ export default class NoteDetail extends Component {
       : 'note-detail-item';
     const localShowTag = localStorage.getItem('showTag');
     const heading =
-      lastPage && localShowTag && showTag && showTag !== 'null' && index > 1
+      lastPage && localShowTag && showTag && showTag !== 'null' && index && index > 1
         ? showTag
         : person.heading;
 
@@ -927,7 +964,6 @@ export default class NoteDetail extends Component {
     const { tags, editName } = this.state;
     const { match, Theme, showAddItem } = this.props;
     const editNameB = person ? this.editNameBox(person.heading) : null;
-
     const isNoteNames = match.url === '/notes/note-names';
     if (isNoteNames) person = null;
 

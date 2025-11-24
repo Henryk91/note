@@ -1,26 +1,44 @@
 import React, { Component } from 'react';
 import './style.css';
 
-export default class Memento extends Component {
-  constructor(props) {
+type MementoProps = {
+  Theme: string;
+};
+
+type YearProps = {
+  day: number;
+  month: number;
+  year: number;
+  count: number;
+};
+
+type WeekProps = {
+  week: number;
+  dateMilli: number;
+  woy: number;
+  filled?: boolean;
+};
+
+export default class Memento extends Component<MementoProps> {
+  constructor(props: MementoProps) {
     super(props);
     this.year = this.year.bind(this);
   }
 
-  year(props) {
-    const year = [];
-    for (let i = 0; i < 52; i++) {
+  year(props: { count: number; weeks: number; birthDayMilli: number }) {
+    const year: JSX.Element[] = [];
+    for (let i = 0; i < 52; i += 1) {
       const week = props.count * 52 + i + 1;
       const filled = week <= props.weeks;
       const date = week * (1000 * 60 * 60 * 24 * 7) + props.birthDayMilli;
 
       year.push(
         <Week
-          name="Sara"
           filled={filled}
           key={week}
           week={week}
           dateMilli={date}
+          woy={i}
         />,
       );
     }
@@ -38,7 +56,7 @@ export default class Memento extends Component {
     const year = 1991;
     const month = 10;
     const day = 6;
-    const years = [];
+    const years: React.JSX.Element[] = [];
     for (let i = 0; i < 80; i++) {
       years.push(
         <Year count={i} key={i} year={year} month={month} day={day} />,
@@ -66,16 +84,16 @@ export default class Memento extends Component {
     );
   }
 }
-function Year(props) {
+function Year(props: YearProps) {
   const { day, month, year, count } = props;
-  const yearList = [];
-  for (let i = 0; i < 52; i++) {
+  const yearList: React.JSX.Element[] = [];
+  for (let i = 0; i < 52; i += 1) {
     const week = count * 52 + i + 1;
     const startOfYear = new Date(year + count, month, day).getTime();
     const date = i * (1000 * 60 * 60 * 24 * 7) + startOfYear;
 
     yearList.push(
-      <Week name="Sara" key={week} week={week} dateMilli={date} woy={i} />,
+      <Week key={week} week={week} dateMilli={date} woy={i} />,
     );
   }
   const newCount = (count + 1) % 5 === 0 ? count + 1 : null;
@@ -87,7 +105,7 @@ function Year(props) {
   );
 }
 
-function Week(props) {
+function Week(props: WeekProps) {
   const nowMili = new Date().getTime();
   const { week, dateMilli, woy } = props;
   const className =

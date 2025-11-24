@@ -2,9 +2,34 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import NoteDetail from '../NoteDetail/NoteDetail';
 import { logoutUser } from '../../Helpers/requests';
+import { Note } from '../../Helpers/types';
 
-export default class NoteDetailPage extends Component {
-  constructor(props) {
+type Match = {
+  isExact: boolean;
+  params: {id: string};
+  path: string;
+  url: string;
+}
+
+type NoteDetailPageProps = {
+  noteNames: string[] | null;
+  Theme: string;
+  notes: Note[] | null;
+  set: (payload: any) => void;
+  searchTerm?: string;
+  match: Match;
+};
+
+type PageDescriptor = { params: { id: string } };
+
+type NoteDetailPageState = {
+  showAddItem: boolean;
+  editName: boolean;
+  pages: PageDescriptor[];
+};
+
+export default class NoteDetailPage extends Component<NoteDetailPageProps, NoteDetailPageState> {
+  constructor(props: NoteDetailPageProps) {
     super(props);
     this.state = {
       showAddItem: false,
@@ -34,7 +59,7 @@ export default class NoteDetailPage extends Component {
     if (isEditing) {
       this.setState({ showAddItem: true });
       localStorage.removeItem('new-folder-edit');
-      localStorage.setItem('was-new-folder-edit', true);
+      localStorage.setItem('was-new-folder-edit', 'true');
     }
   }
 
@@ -147,7 +172,7 @@ export default class NoteDetailPage extends Component {
       const localPages = localStorage.getItem('saved-pages');
 
       if (msg.showNote && !msg.hideNote) {
-        const locals = JSON.parse(localPages);
+        const locals = localPages? JSON.parse(localPages): [];
         const last = locals[locals.length - 1];
         const secondTolast = locals[locals.length - 2];
 
@@ -358,7 +383,7 @@ export default class NoteDetailPage extends Component {
         <NoteDetail
           pageCount={pageCount}
           hideAddItem={this.hideAddItem}
-          SearchTerm={searchTerm}
+          searchTerm={searchTerm}
           noteNames={noteNames}
           Theme={Theme}
           {...this.props}
@@ -459,7 +484,7 @@ export default class NoteDetailPage extends Component {
       );
     });
     return (
-      <div className="slide-in" key={match.urls}>
+      <div className="slide-in" key={match.url}>
         {this.backButton(Theme)}
         {isNoteNames ? this.sidebarPage(noteNames) : null}
         <div id="multiple-pages">{pagesCont}</div>

@@ -2,8 +2,13 @@ import React, { Component } from 'react';
 import EditNoteCheck from '../EditNoteCheck/EditNoteCheck';
 import { docId } from '../../Helpers/utils';
 
-export default class NewNote extends Component {
-  constructor(props) {
+type NewNoteProps = {
+  Theme: string;
+  set: (payload: any) => void;
+};
+
+export default class NewNote extends Component<NewNoteProps> {
+  constructor(props: NewNoteProps) {
     super(props);
     this.addNewUser = this.addNewUser.bind(this);
   }
@@ -63,7 +68,7 @@ export default class NewNote extends Component {
             name="heading"
             type="text"
             placeholder="Headings"
-            required="required"
+            required={true}
             id="heading"
           />
           <br />

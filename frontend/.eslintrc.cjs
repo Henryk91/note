@@ -12,7 +12,7 @@ module.exports = {
     ecmaVersion: 2021,
     sourceType: 'module',
     babelOptions: {
-      presets: ['@babel/preset-env', '@babel/preset-react'],
+      presets: ['@babel/preset-env', '@babel/preset-react', '@babel/preset-typescript'],
     },
   },
   plugins: ['react', 'prettier', 'unused-imports'],
@@ -20,16 +20,16 @@ module.exports = {
   settings: {
     'import/resolver': {
       node: {
-        extensions: ['.js', '.jsx'],
+        extensions: ['.js', '.jsx', '.ts', '.tsx'],
       },
     },
   },
   rules: {
     'prettier/prettier': ['error', { singleQuote: true }],
-    'react/jsx-filename-extension': [1, { extensions: ['.js', '.jsx'] }],
+    'react/jsx-filename-extension': [1, { extensions: ['.js', '.jsx', '.tsx'] }],
     'react/forbid-prop-types': [0, { forbid: ['any'] }],
     'react/prop-types': 0,
-    'import/extensions': ['error', 'ignorePackages', { js: 'never', jsx: 'never' }],
+    'import/extensions': ['error', 'ignorePackages', { js: 'never', jsx: 'never', ts: 'never', tsx: 'never' }],
     'class-methods-use-this': 'off',
     'react/button-has-type': 'off',
     'jsx-a11y/click-events-have-key-events': 'off',

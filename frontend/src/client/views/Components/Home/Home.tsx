@@ -1,15 +1,15 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import { Note } from '../../Helpers/types';
 
-const onlyUnique = (value, index, self) => self.indexOf(value) === index;
+const onlyUnique = (value: string, index: number, self: string[]) => self.indexOf(value) === index;
 
-const createList = (notes, theme) => {
-  let list = null;
+const createList = (notes: Note[] | null, theme: string) => {
 
   const themeBorder = `${theme.toLowerCase()}-border-thick`;
 
   if (notes) {
-    list = notes.map((person) => {
+    return notes.map((person) => {
       const dataLable = [...person.dataLable].map((dataL) => dataL.tag);
       const noteCount = dataLable.filter(onlyUnique).length;
       return (
@@ -26,11 +26,17 @@ const createList = (notes, theme) => {
       );
     });
   }
-  return list;
+  return null;
 };
 
-export default class Home extends Component {
-  constructor(props) {
+type HomeProps = {
+  notes: Note[] | null;
+  Theme: string;
+  User?: string;
+};
+
+export default class Home extends Component<HomeProps> {
+  constructor(props: HomeProps) {
     super(props);
     this.state = {};
     this.logOut = this.logOut.bind(this);

@@ -1,8 +1,19 @@
 import React, { Component } from 'react';
 import './style.css';
 
-export default class Changer extends Component {
-  constructor(props) {
+type ChangerProps = {
+  runTime: number;
+  breakTime: number;
+  set: (val: { runTime: number; breakTime: number }) => void;
+};
+
+type ChangerState = {
+  runTime: number;
+  breakTime: number;
+};
+
+export default class Changer extends Component<ChangerProps, ChangerState> {
+  constructor(props: ChangerProps) {
     super(props);
     this.state = {
       runTime: 25,

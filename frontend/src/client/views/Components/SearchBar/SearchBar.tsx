@@ -1,7 +1,21 @@
 import React, { Component } from 'react';
+import { Note } from '../../Helpers/types';
 
-export default class SearchBar extends Component {
-  constructor(props) {
+type SearchBarProps = {
+  noteName: string;
+  Theme: string;
+  notes: Note[] | null;
+  set: (payload: any) => void;
+};
+
+type SearchBarState = {
+  showSearch: boolean;
+  currentNoteName: string;
+  editName: boolean;
+};
+
+export default class SearchBar extends Component<SearchBarProps, SearchBarState> {
+  constructor(props: SearchBarProps) {
     super(props);
     this.state = {
       showSearch: false,
@@ -23,10 +37,8 @@ export default class SearchBar extends Component {
   }
 
   toggleSearch = () => {
-    const { showSearch } = this.state;
-    const save = { showSearch: !showSearch };
-    if (this.currentNoteName) save.currentNoteName = this.currentNoteName;
-    this.setState({ ...save });
+    const { showSearch, currentNoteName } = this.state;
+    this.setState({ showSearch: !showSearch, currentNoteName: currentNoteName?? undefined });
   };
 
   toggleEditName = () => {
@@ -37,7 +49,7 @@ export default class SearchBar extends Component {
   editNameClick = () => {
     this.toggleEditName();
     setTimeout(() => {
-      document.getElementById('userNameBox').focus();
+      document.getElementById('userNameBox')?.focus();
     }, 100);
   };
 

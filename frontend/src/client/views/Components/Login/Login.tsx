@@ -1,8 +1,16 @@
 import React, { Component } from 'react';
 import { loginRequest, createAccount } from '../../Helpers/requests';
 
-export default class Login extends Component {
-  constructor(props) {
+type LoginProps = {
+  Theme: string;
+};
+
+type LoginState = {
+  signUp: boolean;
+};
+
+export default class Login extends Component<LoginProps, LoginState> {
+  constructor(props: LoginProps) {
     super(props);
     this.state = {
       signUp: false,
@@ -99,7 +107,7 @@ export default class Login extends Component {
                 name="firstName"
                 type="text"
                 placeholder="First Name"
-                required="required"
+                required={true}
               />
               <br />
               <input
@@ -107,7 +115,7 @@ export default class Login extends Component {
                 name="lastName"
                 type="text"
                 placeholder="Last Name"
-                required="required"
+                required={true}
               />
               <br />
               <input
@@ -115,7 +123,7 @@ export default class Login extends Component {
                 name="email"
                 type="email"
                 placeholder="Email"
-                required="required"
+                required={true}
               />
               <br />
               <input
@@ -123,7 +131,7 @@ export default class Login extends Component {
                 name="password"
                 type="password"
                 placeholder="Password"
-                required="required"
+                required={true}
               />
               <br />
               <input
@@ -131,7 +139,7 @@ export default class Login extends Component {
                 name="password2"
                 type="password"
                 placeholder="Password"
-                required="required"
+                required={true}
               />
               <br />
               <button className={`${themeBack} ${themeHover}`} type="submit">
@@ -156,7 +164,7 @@ export default class Login extends Component {
                 name="email"
                 type="email"
                 placeholder="Email"
-                required="required"
+                required={true}
                 autoComplete="username"
               />
               <br />
@@ -165,7 +173,7 @@ export default class Login extends Component {
                 name="password"
                 type="password"
                 placeholder="Password"
-                required="required"
+                required={true}
                 autoComplete="current-password"
               />
               <br />

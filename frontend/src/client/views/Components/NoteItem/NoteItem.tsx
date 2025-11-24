@@ -1,13 +1,42 @@
 import React, { Component } from 'react';
 import { marked } from 'marked';
 import { getLogDuration } from '../../Helpers/utils';
+import { NoteLabel } from '../../Helpers/types';
 
 marked.setOptions({
   breaks: true,
 });
 
-export default class NoteItem extends Component {
-  constructor(props) {
+type NoteItemProps = {
+  item: NoteLabel | string | null;
+  date: string;
+  show: boolean;
+  prevItem?: string; 
+  nextItem?: string; 
+  index: number;
+  type: string;
+  set: (payload: any) => void;
+  Theme: string;
+  showBack?: boolean;
+  btnClassName?: string;
+  showButtons?: boolean;
+  parent?: any;
+  showLogButton?: boolean;
+  hideButtons?: boolean;
+  showEdit: boolean;
+  count: number;
+  cont: (payload: any) => void;
+};
+
+type NoteItemState = {
+  item: NoteLabel | string | null;
+  editingItem: boolean;
+  index?: number;
+  type?: string;
+};
+
+export default class NoteItem extends Component<NoteItemProps, NoteItemState> {
+  constructor(props: NoteItemProps) {
     super(props);
     const { item } = this.props;
     this.state = {
@@ -82,7 +111,8 @@ export default class NoteItem extends Component {
     e.preventDefault();
     const selectedDate = e.target.value;
     const date = new Date(selectedDate);
-    document.getElementById('text-date').value = date;
+    const textDate = document.getElementById('text-date') as HTMLInputElement;
+    if(textDate) textDate.value = date +"";
   };
 
   dateToInputDisplayDate = (date) => {
@@ -116,8 +146,8 @@ export default class NoteItem extends Component {
     const themeHover = `${Theme.toLowerCase()}-hover`;
     let editText = item;
     const isLog = item.includes('"json":true');
-    let editDate = null;
-    let editInputDate = null;
+    let editDate;
+    let editInputDate;
     if (isLog) {
       const logObj = JSON.parse(item);
       console.log(logObj.date);
@@ -141,7 +171,6 @@ export default class NoteItem extends Component {
               id="text-date"
               className={`editDateArea ${themeBack}`}
               name="itemDate"
-              type="text"
               defaultValue={editDate}
             />
           </>
@@ -149,7 +178,6 @@ export default class NoteItem extends Component {
         <textarea
           className={`editTextarea ${themeBack}`}
           name="item"
-          type="text"
           defaultValue={editText}
         />
         <br />
@@ -210,7 +238,6 @@ export default class NoteItem extends Component {
   displayLogItemBox(item) {
     const { show, date, Theme, prevItem, nextItem } = this.props;
     const parsedItem = JSON.parse(item);
-
     let showItem = show;
     const newDate = parsedItem.date
       .substring(0, parsedItem.date.indexOf('GMT'))
@@ -278,13 +305,10 @@ export default class NoteItem extends Component {
   }
 
   render() {
-    const { item } = this.state;
-    const { itemPrev, editingItem } = this.state;
+    const { item, editingItem } = this.state;
     const { show } = this.props;
     let editing = editingItem;
-    let isLog = false;
-
-    if (item) isLog = item.includes('"json":true');
+    const isLog = (item && typeof item === 'string') ? item.includes('"json":true') : false;
 
     if (editing) {
       if (!show) this.editItemSet(false);
@@ -298,7 +322,7 @@ export default class NoteItem extends Component {
         {item && (
           <div className="noteTagBox">
             {editing && this.editItemBox(item)}
-            {noEditingIsLog && this.displayLogItemBox(item, itemPrev)}
+            {noEditingIsLog && this.displayLogItemBox(item)}
             {noEditingNoLog && this.displayItemBox(item)}
           </div>
         )}

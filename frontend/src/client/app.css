@@ -1,5 +1,13 @@
 @import url('https://fonts.googleapis.com/css?family=Open+Sans');
 
+@import url('./views/Components/SearchBar/style.css');
+@import url('./views/Components/Home/style.css');
+@import url('./views/Components/NoteDetail/style.css');
+@import url('./views/Components/NewNote/style.css');
+@import url('./views/Components/NoteItem/style.css');
+@import url('./views/Components/EditNoteCheck/style.css');
+
+
 header {
   padding-bottom: 1px;
   position: fixed;
@@ -129,13 +137,6 @@ h2 {
   color: white;
 }
 
-@import url('./views/Components/SearchBar/style.css');
-@import url('./views/Components/Home/style.css');
-@import url('./views/Components/NoteDetail/style.css');
-@import url('./views/Components/NewNote/style.css');
-@import url('./views/Components/NoteItem/style.css');
-@import url('./views/Components/EditNoteCheck/style.css');
-@import url('./views/Components/Login/style.css');
 
 .backButton {
   position: fixed;

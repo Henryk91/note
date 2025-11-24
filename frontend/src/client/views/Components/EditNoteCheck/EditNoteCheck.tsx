@@ -1,8 +1,25 @@
 import React, { Component, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Note } from '../../Helpers/types';
 
-export default class EditNoteCheck extends Component {
-  constructor(props) {
+type EditNoteCheckProps = {
+  allNotes?: Note[] | null;
+  note?: Note | null;
+  Theme: string;
+  Save?: (payload: any) => void;
+  showTag?: string | null;
+  lable?: string;
+};
+
+type EditNoteCheckState = {
+  radioType: string;
+  upload: string | null;
+  displayDate: Date | null;
+  inputDisplayDate: string;
+};
+
+export default class EditNoteCheck extends Component<EditNoteCheckProps, EditNoteCheckState> {
+  constructor(props: EditNoteCheckProps) {
     super(props);
     this.state = {
       radioType: 'Note',
@@ -26,7 +43,7 @@ export default class EditNoteCheck extends Component {
       const [file] = event.target.files;
       reader.readAsDataURL(file);
       reader.onload = () => {
-        this.setState({ upload: reader.result.toString() });
+        this.setState({ upload: reader?.result?.toString()  || null });
       };
     }
   };
@@ -35,13 +52,15 @@ export default class EditNoteCheck extends Component {
     const input = event.target.value;
     if (input.length > 17) {
       const divTextArea = document.getElementById('div-text-area');
+      if(divTextArea){
       divTextArea.textContent = input;
       divTextArea.classList.remove('hidden');
-      document.getElementById('input-div-text-area').classList.add('hidden');
+      document.getElementById('input-div-text-area')?.classList.add('hidden');
       divTextArea.focus();
+      }
       // Move cursor to end of line
-      document.execCommand('selectAll', false, null);
-      document.getSelection().collapseToEnd();
+      document.execCommand('selectAll', false, undefined);
+      document.getSelection()?.collapseToEnd();
     }
   }
 
@@ -55,7 +74,8 @@ export default class EditNoteCheck extends Component {
     input = input.replaceAll('%20', ' ');
     input = input.replaceAll('%0A', '\n');
 
-    const element = document.getElementById('dynamic-text-area');
+    const element = document.getElementById('dynamic-text-area') as HTMLInputElement;
+    if (!element) return;
     if (input.length > 17) {
       element.classList.remove('small-text-area');
       element.classList.add('big-text-area');
@@ -72,6 +92,7 @@ export default class EditNoteCheck extends Component {
     let text = '';
     if (typeof window.getSelection !== 'undefined') {
       const sel = window.getSelection();
+      if (!sel) return text;
       const tempRange = sel.getRangeAt(0);
       sel.removeAllRanges();
       const range = document.createRange();
@@ -106,7 +127,8 @@ export default class EditNoteCheck extends Component {
     const { allNotes } = this.props;
     const headings = this.getAllNoteHeadingsWithIds(allNotes);
     const selected = headings.find((heading) => heading.id === e.target.value);
-    document.getElementById('link-text').value = selected.heading;
+    const linkElement = document.getElementById('link-text') as HTMLInputElement;
+    if (linkElement) linkElement.value = selected.heading;
   };
 
   addLeadingZero = (number) => {
@@ -129,7 +151,9 @@ export default class EditNoteCheck extends Component {
       displayDate: date,
       inputDisplayDate: this.dateToInputDisplayDate(date),
     });
-    document.getElementById('text-date').value = date;
+
+    const textDate = document.getElementById('text-date') as HTMLInputElement;
+    if (textDate) textDate.value = date.toString();
   };
 
   newUpload(themeBack, showTag, upload) {
@@ -163,12 +187,12 @@ export default class EditNoteCheck extends Component {
   }
 
   toNewNote() {
-    localStorage.setItem('new-folder-edit', true);
+    localStorage.setItem('new-folder-edit', 'true');
   }
 
   newLink(themeBack, themeHover, notes) {
     const headings = this.getAllNoteHeadingsWithIds(notes);
-    let defaultId = null;
+    let defaultId: string = '';
     const options = headings.map((item, index) => {
       if (index === headings.length - 1) defaultId = item.id;
       return (
@@ -325,6 +349,7 @@ export default class EditNoteCheck extends Component {
     let localRadioType = radioType;
     const { upload } = this.state;
     const { showTag, Theme, lable, allNotes } = this.props;
+
     let defaultNote = true;
     let defaultLog = false;
     let defaultLink = false;
@@ -404,6 +429,17 @@ export default class EditNoteCheck extends Component {
   }
 }
 
+type AutoCompleteTextAreaProps = {
+  elementId: string;
+  className: string;
+  smallClassName: string;
+  bigClassName: string;
+  onChange?: (value: string) => void;
+  placeholder?: string;
+  defaultValue?: string;
+  name?: string;
+};
+
 function AutoCompleteTextArea({
   elementId,
   className,
@@ -413,10 +449,10 @@ function AutoCompleteTextArea({
   placeholder,
   defaultValue,
   name,
-}) {
+}: AutoCompleteTextAreaProps) {
   const [doReload, setDoReload] = useState(false);
-  const [isBig, setIsBig] = useState();
-  const [value, setValue] = useState();
+  const [isBig, setIsBig] = useState<boolean>();
+  const [value, setValue] = useState<string>();
 
   const localChange = (event) => {
     let input = event.target.value;
@@ -438,18 +474,19 @@ function AutoCompleteTextArea({
     setValue(input);
 
     if (input !== event.target.value) {
-      const element = document.getElementById(elementId);
+      const element = document.getElementById(elementId) as HTMLInputElement;
       element.value = input;
     }
     if (onChange) onChange(input);
   };
   const pasteListener = () => {
     const el = document.getElementById(elementId);
+    if (!el) return;
     el.addEventListener('paste', async (event) => {
       if (isBig) return;
       event.preventDefault();
       const text = await navigator.clipboard.readText();
-      const element = document.getElementById(elementId);
+      const element = document.getElementById(elementId) as HTMLInputElement;
       setTimeout(() => {
         // const value = element.value.length < 17? element.value + text: text;
         const localValue = element.value + text;
@@ -462,7 +499,7 @@ function AutoCompleteTextArea({
 
   useEffect(() => {
     if (value) {
-      const element = document.getElementById(elementId);
+      const element = document.getElementById(elementId) as HTMLInputElement;
       element.value = value;
       element.focus();
     }
@@ -475,7 +512,6 @@ function AutoCompleteTextArea({
       className={`${className} ${bigClassName}`}
       onChange={localChange}
       name={name}
-      type="text"
       placeholder={placeholder}
       defaultValue={defaultValue}
     />

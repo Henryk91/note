@@ -1,8 +1,28 @@
 import React, { Component } from 'react';
 import './style.css';
 
-export default class Timer extends Component {
-  constructor(props) {
+type TimerProps = {
+  run: number;
+  breakTime: number;
+  set: (val: unknown) => void;
+};
+
+type TimerState = {
+  time: number;
+  started: boolean;
+  session: string;
+  runTime: number;
+  breakTime: number;
+  secondsLeft: number;
+  run: boolean;
+  remainingTime: string;
+  intervalCounter: any;
+};
+
+export default class Timer extends Component<TimerProps, TimerState> {
+  audio: HTMLAudioElement | null = null;
+
+  constructor(props: TimerProps) {
     super(props);
     const { run, breakTime } = this.props;
     this.state = {
@@ -19,7 +39,6 @@ export default class Timer extends Component {
 
     this.restart = this.restart.bind(this);
     this.starter = this.starter.bind(this);
-    this.audio = this.audio.bind(this);
     this.timeConvert = this.timeConvert.bind(this);
   }
 
@@ -65,12 +84,14 @@ export default class Timer extends Component {
     let digTime;
     if (time > 0) {
       const remaining = time;
-      let remMin = Math.floor(remaining / 60);
-      let remSec = remaining - remMin * 60;
+      const remMin = Math.floor(remaining / 60);
+      const remSec = remaining - remMin * 60;
+      let remMinString = `${remMin}`;
+      let remSecString = `${remSec}`;
 
-      if (remSec < 10) remSec = `0${remSec}`;
-      if (remMin < 10) remMin = `0${remMin}`;
-      digTime = `${remMin}:${remSec}`;
+      if (remSec < 10) remSecString = `0${remSec}`;
+      if (remMin < 10) remMinString = `0${remMin}`;
+      digTime = `${remMinString}:${remSecString}`;
     } else {
       digTime = '00:00';
       time = 0;
@@ -84,7 +105,7 @@ export default class Timer extends Component {
     const { remainingTime, runTime, breakTime } = this.state;
 
     if (remainingTime === '00:00') {
-      this.audio.play();
+      this.audio?.play();
       const { session } = this.state;
 
       let timerVal;
@@ -131,13 +152,13 @@ export default class Timer extends Component {
       intervalCounter: clearInterval(intervalCounter),
     });
 
-    this.audio.pause();
-    this.audio.currentTime = 0;
+    if (this.audio) {
+      this.audio.pause();
+      this.audio.currentTime = 0;
+    }
 
     set('');
   }
-
-  audio() {}
 
   render() {
     const { remainingTime, session } = this.state;

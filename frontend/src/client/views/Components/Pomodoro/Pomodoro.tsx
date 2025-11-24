@@ -4,8 +4,13 @@ import './style.css';
 import Changer from './Changer';
 import Timer from './Timer';
 
-export default class Pomodoro extends Component {
-  constructor(props) {
+type PomodoroState = {
+  runTime: number;
+  breakTime: number;
+};
+
+export default class Pomodoro extends Component<unknown, PomodoroState> {
+  constructor(props: unknown) {
     super(props);
     this.state = {
       runTime: 25,
