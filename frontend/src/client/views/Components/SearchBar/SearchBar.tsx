@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Note } from '../../Helpers/types';
 
 type SearchBarProps = {
@@ -14,131 +14,110 @@ type SearchBarState = {
   editName: boolean;
 };
 
-export default class SearchBar extends Component<SearchBarProps, SearchBarState> {
-  constructor(props: SearchBarProps) {
-    super(props);
-    this.state = {
-      showSearch: false,
-      currentNoteName: '',
-      editName: false,
-    };
-    this.search = this.search.bind(this);
-    this.clearSearch = this.clearSearch.bind(this);
-    this.toggleSearch = this.toggleSearch.bind(this);
-    this.toggleEditName = this.toggleEditName.bind(this);
-    this.editNameClick = this.editNameClick.bind(this);
-  }
+const SearchBar: React.FC<SearchBarProps> = ({ noteName, Theme, notes, set }) => {
+  const [state, setState] = useState<SearchBarState>({
+    showSearch: false,
+    currentNoteName: '',
+    editName: false,
+  });
 
-  componentDidUpdate(prevProps) {
-    const { noteName } = this.props;
-    if (prevProps.noteName !== noteName) {
-      this.setState({ currentNoteName: noteName });
-    }
-  }
+  useEffect(() => {
+    setState((prev) => ({ ...prev, currentNoteName: noteName }));
+  }, [noteName]);
 
-  toggleSearch = () => {
-    const { showSearch, currentNoteName } = this.state;
-    this.setState({ showSearch: !showSearch, currentNoteName: currentNoteName?? undefined });
+  const toggleSearch = () => {
+    setState((prev) => ({
+      ...prev,
+      showSearch: !prev.showSearch,
+      currentNoteName: prev.currentNoteName ?? '',
+    }));
   };
 
-  toggleEditName = () => {
-    const { editName } = this.state;
-    this.setState({ editName: !editName });
+  const toggleEditName = () => {
+    setState((prev) => ({ ...prev, editName: !prev.editName }));
   };
 
-  editNameClick = () => {
-    this.toggleEditName();
+  const editNameClick = () => {
+    toggleEditName();
     setTimeout(() => {
       document.getElementById('userNameBox')?.focus();
     }, 100);
   };
 
-  clearSearch = () => {
-    const { notes, set } = this.props;
-    const { currentNoteName } = this.state;
+  const clearSearch = () => {
     set({
       filteredNotes: notes,
-      user: currentNoteName,
+      user: state.currentNoteName,
       searchTerm: null,
     });
 
-    this.setState({ showSearch: false });
+    setState((prev) => ({ ...prev, showSearch: false }));
   };
 
-  search = (event) => {
-    const { set } = this.props;
-    let { notes } = this.props;
-    const { currentNoteName, showSearch, editName } = this.state;
-    const searchTerm = !editName ? event?.target?.value || '' : null;
-
-    const editingName = !showSearch && editName;
-    const userName = editingName ? event?.target?.value || '' : currentNoteName;
-    if (notes && searchTerm && searchTerm !== '') {
+  const search = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    const searchTerm = !state.editName ? event?.currentTarget?.value || '' : null;
+    const editingName = !state.showSearch && state.editName;
+    const userName = editingName ? event?.currentTarget?.value || '' : state.currentNoteName;
+    let nextNotes = notes;
+    if (nextNotes && searchTerm && searchTerm !== '') {
       const term = searchTerm.toLowerCase();
-      notes = notes.filter((val) => val.heading.toLowerCase().includes(term));
+      nextNotes = nextNotes.filter((val) => val.heading.toLowerCase().includes(term));
     }
     if (userName) localStorage.setItem('user', userName);
     set({
-      filteredNotes: notes,
+      filteredNotes: nextNotes,
       user: userName,
       searchTerm,
     });
   };
 
-  render() {
-    const { noteName, Theme } = this.props;
-    const { showSearch, editName } = this.state;
-    const themeBack = `${Theme.toLowerCase()}-back`;
-    const searching = showSearch && !editName;
+  const themeBack = `${Theme.toLowerCase()}-back`;
+  const searching = state.showSearch && !state.editName;
 
-    return (
-      <header className={themeBack}>
-        {showSearch === false && editName === false && (
-          <div
-            className={themeBack}
-            id="userNameBox"
-            aria-label="User Name"
-            onClick={() => this.editNameClick()}
-          >
-            {' '}
-            {noteName}{' '}
-          </div>
-        )}
-        {showSearch === false && editName === true && (
+  return (
+    <header className={themeBack}>
+      {state.showSearch === false && state.editName === false && (
+        <div className={themeBack} id="userNameBox" aria-label="User Name" onClick={editNameClick}>
+          {' '}
+          {noteName}{' '}
+        </div>
+      )}
+      {state.showSearch === false && state.editName === true && (
+        <input
+          className={themeBack}
+          id="userNameBox"
+          type="text"
+          aria-label="User Name"
+          onKeyUp={(e) => search(e)}
+          defaultValue={noteName}
+          placeholder="Add Note Name"
+          onBlur={toggleEditName}
+        />
+      )}
+      {state.showSearch === true && (
+        <div className="search-box">
           <input
             className={themeBack}
-            id="userNameBox"
+            id="searchBox"
+            aria-label="Search Name"
+            onKeyUp={(e) => search(e)}
             type="text"
-            aria-label="User Name"
-            onKeyUp={(e) => this.search(e)}
-            defaultValue={noteName}
-            placeholder="Add Note Name"
-            onBlur={() => this.toggleEditName()}
+            placeholder="Search..."
           />
-        )}
-        {showSearch === true && (
-          <div className="search-box">
-            <input
-              className={themeBack}
-              id="searchBox"
-              aria-label="Search Name"
-              onKeyUp={(e) => this.search(e)}
-              type="text"
-              placeholder="Search..."
-            />
-          </div>
-        )}
+        </div>
+      )}
 
-        {searching ? (
-          <div className="search-clear" onClick={() => this.clearSearch()}>
-            <i className="fas fa-times" />
-          </div>
-        ) : (
-          <div className="search-clear" onClick={() => this.toggleSearch()}>
-            <i className="fas fa-search" />
-          </div>
-        )}
-      </header>
-    );
-  }
-}
+      {searching ? (
+        <div className="search-clear" onClick={clearSearch}>
+          <i className="fas fa-times" />
+        </div>
+      ) : (
+        <div className="search-clear" onClick={toggleSearch}>
+          <i className="fas fa-search" />
+        </div>
+      )}
+    </header>
+  );
+};
+
+export default SearchBar;

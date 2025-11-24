@@ -1,42 +1,23 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import { loginRequest, createAccount } from '../../Helpers/requests';
 
 type LoginProps = {
   Theme: string;
 };
 
-type LoginState = {
-  signUp: boolean;
-};
+const Login: React.FC<LoginProps> = ({ Theme }) => {
+  const [signUp, setSignUp] = useState(false);
+  const themeBack = `${Theme.toLowerCase()}-back`;
+  const themeHover = `${Theme.toLowerCase()}-hover`;
 
-export default class Login extends Component<LoginProps, LoginState> {
-  constructor(props: LoginProps) {
-    super(props);
-    this.state = {
-      signUp: false,
-    };
-    this.saveLogin = this.saveLogin.bind(this);
-    this.createAccount = this.createAccount.bind(this);
-    this.loginState = this.loginState.bind(this);
-  }
-
-  saveLogin = (event) => {
+  const saveLogin = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    let password = event.target.password.value;
-    let email = event.target.email.value;
-    if (password && email) {
-      password = password.trim();
-      email = email.trim();
-    }
-    const user = {
-      email,
-      password,
-    };
-    console.log('Trying to log in!');
+    const form = event.currentTarget;
+    const password = (form.password as HTMLInputElement).value.trim();
+    const email = (form.email as HTMLInputElement).value.trim();
 
+    const user = { email, password };
     loginRequest(user, (res) => {
-      console.log('Login res', res);
-
       if (res?.id) {
         localStorage.setItem('loginKey', res.id);
         window.location.href = '/notes/main';
@@ -50,148 +31,100 @@ export default class Login extends Component<LoginProps, LoginState> {
     });
   };
 
-  createAccount = (event) => {
+  const createAccountHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const form = event.currentTarget;
+    const password = (form.password as HTMLInputElement).value.trim();
+    const password2 = (form.password2 as HTMLInputElement).value.trim();
 
-    let password = event.target.password.value;
-    const password2 = event.target.password2.value;
-
-    if (password === password2) {
-      let firstName = event.target.firstName.value;
-      let lastName = event.target.lastName.value;
-      let email = event.target.email.value;
-
-      if (password) password = password.trim();
-      if (email) email = email.trim();
-      if (firstName) firstName = firstName.trim();
-      if (lastName) lastName = lastName.trim();
-
-      const user = {
-        email,
-        firstName,
-        lastName,
-        password,
-        tempPass: [''],
-        permId: '',
-      };
-      createAccount(user, (res) => {
-        if (res.id) {
-          localStorage.setItem('loginKey', res.id);
-          window.location.reload();
-        } else {
-          console.log(res);
-        }
-      });
-    } else {
+    if (password !== password2) {
       alert("Passwords don't match");
+      return;
     }
+
+    const firstName = (form.firstName as HTMLInputElement).value.trim();
+    const lastName = (form.lastName as HTMLInputElement).value.trim();
+    const email = (form.email as HTMLInputElement).value.trim();
+
+    const user = {
+      email,
+      firstName,
+      lastName,
+      password,
+      tempPass: [''],
+      permId: '',
+    };
+    createAccount(user, (res) => {
+      if (res.id) {
+        localStorage.setItem('loginKey', res.id);
+        window.location.reload();
+      } else {
+        console.log(res);
+      }
+    });
   };
 
-  loginState(bVal) {
-    this.setState({ signUp: bVal });
-  }
+  return (
+    <div>
+      {signUp ? (
+        <div>
+          <form onSubmit={createAccountHandler}>
+            <br />
+            <input className={themeBack} name="firstName" type="text" placeholder="First Name" required />
+            <br />
+            <input className={themeBack} name="lastName" type="text" placeholder="Last Name" required />
+            <br />
+            <input className={themeBack} name="email" type="email" placeholder="Email" required />
+            <br />
+            <input className={themeBack} name="password" type="password" placeholder="Password" required />
+            <br />
+            <input className={themeBack} name="password2" type="password" placeholder="Password" required />
+            <br />
+            <button className={`${themeBack} ${themeHover}`} type="submit">
+              Submit
+            </button>
+          </form>
+          <br />
+          <button className={`${themeBack} ${themeHover}`} onClick={() => setSignUp(false)}>
+            {' '}
+            Login{' '}
+          </button>
+        </div>
+      ) : (
+        <div>
+          <form onSubmit={saveLogin}>
+            <br />
+            <input
+              className={themeBack}
+              name="email"
+              type="email"
+              placeholder="Email"
+              required
+              autoComplete="username"
+            />
+            <br />
+            <input
+              className={themeBack}
+              name="password"
+              type="password"
+              placeholder="Password"
+              required
+              autoComplete="current-password"
+            />
+            <br />
+            <button className={`${themeBack} ${themeHover}`} type="submit">
+              Submit
+            </button>
+          </form>
+          <br />
+          <button className={`${themeBack} ${themeHover}`} onClick={() => setSignUp(true)}>
+            {' '}
+            Sign Up{' '}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 
-  render() {
-    const { signUp } = this.state;
-    const { Theme } = this.props;
-    const themeBack = `${Theme.toLowerCase()}-back`;
-    const themeHover = `${Theme.toLowerCase()}-hover`;
-    return (
-      <div>
-        {signUp ? (
-          <div>
-            <form onSubmit={this.createAccount}>
-              <br />
-              <input
-                className={themeBack}
-                name="firstName"
-                type="text"
-                placeholder="First Name"
-                required={true}
-              />
-              <br />
-              <input
-                className={themeBack}
-                name="lastName"
-                type="text"
-                placeholder="Last Name"
-                required={true}
-              />
-              <br />
-              <input
-                className={themeBack}
-                name="email"
-                type="email"
-                placeholder="Email"
-                required={true}
-              />
-              <br />
-              <input
-                className={themeBack}
-                name="password"
-                type="password"
-                placeholder="Password"
-                required={true}
-              />
-              <br />
-              <input
-                className={themeBack}
-                name="password2"
-                type="password"
-                placeholder="Password"
-                required={true}
-              />
-              <br />
-              <button className={`${themeBack} ${themeHover}`} type="submit">
-                Submit
-              </button>
-            </form>
-            <br />
-            <button
-              className={`${themeBack} ${themeHover}`}
-              onClick={() => this.loginState(false)}
-            >
-              {' '}
-              Login{' '}
-            </button>
-          </div>
-        ) : (
-          <div>
-            <form onSubmit={(e) => this.saveLogin(e)}>
-              <br />
-              <input
-                className={themeBack}
-                name="email"
-                type="email"
-                placeholder="Email"
-                required={true}
-                autoComplete="username"
-              />
-              <br />
-              <input
-                className={themeBack}
-                name="password"
-                type="password"
-                placeholder="Password"
-                required={true}
-                autoComplete="current-password"
-              />
-              <br />
-              <button className={`${themeBack} ${themeHover}`} type="submit">
-                Submit
-              </button>
-            </form>
-            <br />
-            <button
-              className={`${themeBack} ${themeHover}`}
-              onClick={() => this.loginState(true)}
-            >
-              {' '}
-              Sign Up{' '}
-            </button>
-          </div>
-        )}
-      </div>
-    );
-  }
-}
+export default Login;

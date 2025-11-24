@@ -18,6 +18,7 @@ header {
   justify-content: center;
   align-items: center;
   height: 12vh;
+  z-index: 100;
 }
 
 body {

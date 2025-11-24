@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './style.css';
 
 type TimerProps = {
@@ -7,185 +7,97 @@ type TimerProps = {
   set: (val: unknown) => void;
 };
 
-type TimerState = {
-  time: number;
-  started: boolean;
-  session: string;
-  runTime: number;
-  breakTime: number;
-  secondsLeft: number;
-  run: boolean;
-  remainingTime: string;
-  intervalCounter: any;
+const formatTime = (totalSeconds: number) => {
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = totalSeconds % 60;
+  const m = mins < 10 ? `0${mins}` : `${mins}`;
+  const s = secs < 10 ? `0${secs}` : `${secs}`;
+  return `${m}:${s}`;
 };
 
-export default class Timer extends Component<TimerProps, TimerState> {
-  audio: HTMLAudioElement | null = null;
+const Timer: React.FC<TimerProps> = ({ run, breakTime, set }) => {
+  const [secondsLeft, setSecondsLeft] = useState(run * 60);
+  const [remainingTime, setRemainingTime] = useState(formatTime(run * 60));
+  const [session, setSession] = useState<'Session' | 'Break Time'>('Session');
+  const [running, setRunning] = useState(false);
 
-  constructor(props: TimerProps) {
-    super(props);
-    const { run, breakTime } = this.props;
-    this.state = {
-      time: 0,
-      started: false,
-      session: 'Session',
-      runTime: run,
-      breakTime,
-      secondsLeft: run * 60,
-      run: false,
-      remainingTime: `${run}:00`,
-      intervalCounter: '',
-    };
+  const sessionRef = useRef<'Session' | 'Break Time'>('Session');
+  const runRef = useRef(run);
+  const breakRef = useRef(breakTime);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-    this.restart = this.restart.bind(this);
-    this.starter = this.starter.bind(this);
-    this.timeConvert = this.timeConvert.bind(this);
-  }
+  useEffect(() => {
+    runRef.current = run;
+    breakRef.current = breakTime;
+    setSecondsLeft(run * 60);
+    setRemainingTime(formatTime(run * 60));
+    setSession('Session');
+    sessionRef.current = 'Session';
+    setRunning(false);
+  }, [run, breakTime]);
 
-  componentDidUpdate(prevProps) {
-    const { run, breakTime } = this.props;
-    if (run !== prevProps.run || breakTime !== prevProps.breakTime) {
-      this.setState({
-        runTime: run,
-        breakTime,
-        secondsLeft: run * 60,
-        run: false,
-        remainingTime: `${run}:00`,
+  useEffect(() => {
+    if (!running) return;
+    const id = setInterval(() => {
+      setSecondsLeft((prev) => {
+        if (prev <= 1) {
+          const nextSession = sessionRef.current === 'Session' ? 'Break Time' : 'Session';
+          sessionRef.current = nextSession;
+          setSession(nextSession);
+
+          const nextSeconds = (nextSession === 'Session' ? runRef.current : breakRef.current) * 60;
+          setRemainingTime(formatTime(nextSeconds));
+          audioRef.current?.play();
+          return nextSeconds;
+        }
+        const next = prev - 1;
+        setRemainingTime(formatTime(next));
+        return next;
       });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [running]);
+
+  const starter = () => {
+    setRunning((prev) => !prev);
+  };
+
+  const restart = () => {
+    setRunning(false);
+    setSession('Session');
+    sessionRef.current = 'Session';
+    setSecondsLeft(25 * 60);
+    setRemainingTime('25:00');
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
     }
-  }
-
-  starter() {
-    const { started, intervalCounter, run } = this.state;
-    if (!started) {
-      this.setState({ started: true });
-    } else {
-      this.setState({ started: false });
-      this.setState({
-        intervalCounter: clearInterval(intervalCounter),
-        run: false,
-      });
-    }
-
-    if (!run) {
-      this.setState({
-        run: true,
-        intervalCounter: setInterval(() => {
-          this.tock();
-        }, 1000),
-      });
-    }
-  }
-
-  timeConvert() {
-    const { secondsLeft } = this.state;
-    let time = secondsLeft;
-    time--;
-    let digTime;
-    if (time > 0) {
-      const remaining = time;
-      const remMin = Math.floor(remaining / 60);
-      const remSec = remaining - remMin * 60;
-      let remMinString = `${remMin}`;
-      let remSecString = `${remSec}`;
-
-      if (remSec < 10) remSecString = `0${remSec}`;
-      if (remMin < 10) remMinString = `0${remMin}`;
-      digTime = `${remMinString}:${remSecString}`;
-    } else {
-      digTime = '00:00';
-      time = 0;
-    }
-
-    return [digTime, time];
-  }
-
-  tock() {
-    const time = this.timeConvert();
-    const { remainingTime, runTime, breakTime } = this.state;
-
-    if (remainingTime === '00:00') {
-      this.audio?.play();
-      const { session } = this.state;
-
-      let timerVal;
-      let sessionlabel;
-
-      if (session === 'Break Time') {
-        timerVal = runTime;
-        sessionlabel = 'Session';
-      }
-
-      if (session === 'Session') {
-        timerVal = breakTime;
-        sessionlabel = 'Break Time';
-      }
-
-      let digTime;
-      if (timerVal < 10) {
-        digTime = `0${timerVal}:00`;
-      } else {
-        digTime = `${timerVal}:00`;
-      }
-      this.setState({
-        secondsLeft: timerVal * 60,
-        remainingTime: digTime,
-        session: sessionlabel,
-      });
-    } else {
-      this.setState({ secondsLeft: time[1], remainingTime: time[0] });
-    }
-  }
-
-  restart() {
-    const { intervalCounter } = this.state;
-    const { set } = this.props;
-    this.setState({
-      time: 0,
-      started: false,
-      session: 'Session',
-      runTime: 25,
-      breakTime: 5,
-      secondsLeft: 1500,
-      run: false,
-      remainingTime: '25:00',
-      intervalCounter: clearInterval(intervalCounter),
-    });
-
-    if (this.audio) {
-      this.audio.pause();
-      this.audio.currentTime = 0;
-    }
-
     set('');
-  }
+  };
 
-  render() {
-    const { remainingTime, session } = this.state;
-    return (
-      <div>
-        <div id="timerBox">
-          <h2 id="timer-label">{session}</h2>
-          <h2 id="time-left">{remainingTime}</h2>
-        </div>
-        <div className="timePlay" id="start_stop" onClick={this.starter}>
-          <span className="far fa-play-circle" />
-          <span className="far fa-pause-circle" />
-        </div>
-        <div className="timePlay" id="reset" onClick={this.restart}>
-          <span className="fas fa-sync" />
-        </div>
-        <audio
-          id="beep"
-          preload="auto"
-          src="https://www.myinstants.com/media/sounds/erro.mp3"
-          ref={(audio) => {
-            this.audio = audio;
-          }}
-        >
-          {' '}
-        </audio>
+  return (
+    <div>
+      <div id="timerBox">
+        <h2 id="timer-label">{session}</h2>
+        <h2 id="time-left">{remainingTime}</h2>
       </div>
-    );
-  }
-}
+      <div className="timePlay" id="start_stop" onClick={starter}>
+        <span className="far fa-play-circle" />
+        <span className="far fa-pause-circle" />
+      </div>
+      <div className="timePlay" id="reset" onClick={restart}>
+        <span className="fas fa-sync" />
+      </div>
+      <audio
+        id="beep"
+        preload="auto"
+        src="https://www.myinstants.com/media/sounds/erro.mp3"
+        ref={audioRef}
+      >
+        {' '}
+      </audio>
+    </div>
+  );
+};
+
+export default Timer;
