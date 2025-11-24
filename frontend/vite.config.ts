@@ -9,7 +9,8 @@ export default defineConfig({
     include: /src\/.*\.[tj]sx?$/,
   },
   build: {
-    outDir: path.resolve(__dirname, '../backend/dist'),
+    // Output alongside backend build for easier deploy
+    outDir: path.resolve(__dirname, '../build/client'),
     emptyOutDir: true,
   },
   server: {

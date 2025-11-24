@@ -23,6 +23,7 @@ import incorrectTranslationsRoute from './routes/incorrectTranslations';
 
 // project root is three levels up from compiled server files (backend/src/server)
 const projectRoot = path.resolve(__dirname, '../..');
+const frontendDist = path.resolve(projectRoot, 'build', 'client');
 
 export const app = express();
 
@@ -35,6 +36,7 @@ const isHenrykSubdomain = (origin: string) => {
     if (protocol !== 'https:') return false;
     return hostname === 'henryk.co.za' || hostname.endsWith('.henryk.co.za');
   } catch (err) {
+    console.log('Domain check error', err);
     return false;
   }
 };
@@ -131,7 +133,7 @@ app.options('*', cors(corsOptions));
 
 jwtSetup(app);
 
-app.use(express.static(path.join(projectRoot, 'dist')));
+app.use(express.static(frontendDist));
 app.use('/api/note', getNotes);
 app.use('/api/note-v2', handleNotesV2);
 app.use('/api/note-names', getNoteNames);
@@ -153,7 +155,7 @@ app.get('/sw.js', (_req, res) => {
     'Cache-Control',
     'max-age=0, no-cache, no-store, must-revalidate',
   );
-  res.sendFile(path.join(projectRoot, 'dist', 'sw.js'));
+  res.sendFile(path.join(frontendDist, 'sw.js'));
 });
 
 app.get(/^\/(?!api).*/, (req, res) => {
@@ -162,7 +164,7 @@ app.get(/^\/(?!api).*/, (req, res) => {
   if (req.url !== targetPath) {
     return res.redirect(targetPath);
   }
-  return res.sendFile(path.join(projectRoot, 'dist', 'index.html'));
+  return res.sendFile(path.join(frontendDist, 'index.html'));
 });
 
 app.use((req, res) => {
