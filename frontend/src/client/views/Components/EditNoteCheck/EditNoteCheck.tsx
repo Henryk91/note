@@ -1,6 +1,13 @@
 import React, { Component, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Note } from '../../Helpers/types';
+import {
+  NewEmailField,
+  NewLinkField,
+  NewLogField,
+  NewNoteField,
+  NewNumberField,
+  NewUploadField,
+} from './NoteInputFields';
 
 type EditNoteCheckProps = {
   allNotes?: Note[] | null;
@@ -37,38 +44,37 @@ export default class EditNoteCheck extends Component<EditNoteCheckProps, EditNot
     this.handleChange = this.handleChange.bind(this);
   }
 
-  handleChangeFile = (event) => {
+  handleChangeFile = (event: React.ChangeEvent<HTMLInputElement>) => {
     const reader = new FileReader();
     if (event.target.files && event.target.files.length) {
       const [file] = event.target.files;
       reader.readAsDataURL(file);
       reader.onload = () => {
-        this.setState({ upload: reader?.result?.toString()  || null });
+        this.setState({ upload: reader?.result?.toString() || null });
       };
     }
   };
 
-  handleChange(event) {
+  handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const input = event.target.value;
     if (input.length > 17) {
       const divTextArea = document.getElementById('div-text-area');
-      if(divTextArea){
-      divTextArea.textContent = input;
-      divTextArea.classList.remove('hidden');
-      document.getElementById('input-div-text-area')?.classList.add('hidden');
-      divTextArea.focus();
+      if (divTextArea) {
+        divTextArea.textContent = input;
+        divTextArea.classList.remove('hidden');
+        document.getElementById('input-div-text-area')?.classList.add('hidden');
+        divTextArea.focus();
       }
-      // Move cursor to end of line
       document.execCommand('selectAll', false, undefined);
       document.getSelection()?.collapseToEnd();
     }
   }
 
-  onTodoChange = (value) => {
-    this.setState({ displayDate: value });
+  onTodoChange = (value: string) => {
+    this.setState({ displayDate: new Date(value) });
   };
 
-  onTextChange(value) {
+  onTextChange(value: string) {
     let input = `${value}`;
     input = input.replaceAll('%3A', ':');
     input = input.replaceAll('%20', ' ');
@@ -87,8 +93,7 @@ export default class EditNoteCheck extends Component<EditNoteCheckProps, EditNot
     if (input !== value) element.value = input;
   }
 
-  getTextForFirefox(el) {
-    // Taken from http://stackoverflow.com/a/3908094
+  getTextForFirefox(el: HTMLElement) {
     let text = '';
     if (typeof window.getSelection !== 'undefined') {
       const sel = window.getSelection();
@@ -106,46 +111,45 @@ export default class EditNoteCheck extends Component<EditNoteCheckProps, EditNot
     return text;
   }
 
-  getText(el) {
+  getText(el: HTMLElement) {
     return el.innerText || this.getTextForFirefox(el);
   }
 
-  setRadioType(type) {
+  setRadioType(type: string) {
     this.setState({ radioType: type });
   }
 
-  getAllNoteHeadingsWithIds(notes) {
-    if (notes === undefined) return [];
+  getAllNoteHeadingsWithIds(notes?: Note[] | null) {
+    if (notes === undefined || notes === null) return [];
     return notes.map((note) => ({
       heading: note.heading,
       id: note.id,
     }));
   }
 
-  changeLink = (e) => {
+  changeLink = (e: React.ChangeEvent<HTMLSelectElement>) => {
     e.preventDefault();
     const { allNotes } = this.props;
     const headings = this.getAllNoteHeadingsWithIds(allNotes);
     const selected = headings.find((heading) => heading.id === e.target.value);
     const linkElement = document.getElementById('link-text') as HTMLInputElement;
-    if (linkElement) linkElement.value = selected.heading;
+    if (linkElement && selected) linkElement.value = selected.heading;
   };
 
-  addLeadingZero = (number) => {
+  addLeadingZero = (number: number) => {
     if (number < 10) return `0${number}`;
     return number;
   };
 
-  dateToInputDisplayDate = (date) => {
-    if (!date || Number.isNaN(date)) return '';
+  dateToInputDisplayDate = (date: Date) => {
+    if (!date || Number.isNaN(date.getTime())) return '';
     const minutes = this.addLeadingZero(date.getMinutes());
     const hours = this.addLeadingZero(date.getHours());
     return `${date.toISOString().split('T')[0]}T${hours}:${minutes}`;
   };
 
-  changeDate = (e) => {
-    e.preventDefault();
-    const selectedDate = e.target.value;
+  changeDate = (e: React.FormEvent<HTMLFormElement> | React.ChangeEvent<HTMLInputElement>) => {
+    const selectedDate = (e.target as HTMLInputElement).value;
     const date = new Date(selectedDate);
     this.setState({
       displayDate: date,
@@ -156,198 +160,13 @@ export default class EditNoteCheck extends Component<EditNoteCheckProps, EditNot
     if (textDate) textDate.value = date.toString();
   };
 
-  newUpload(themeBack, showTag, upload) {
-    return (
-      <div>
-        <input
-          className={themeBack}
-          name="tagTypeText"
-          type="text"
-          placeholder="Sub Heading"
-          defaultValue={showTag}
-        />
-        <br />
-        <input
-          onChange={(e) => this.handleChangeFile(e)}
-          className={themeBack}
-          name="upload"
-          type="file"
-        />
-        {upload !== null ? (
-          <input
-            style={{ visibility: 'hidden', height: '0px', width: '0px' }}
-            name="number"
-            type="text"
-            defaultValue={upload}
-          />
-        ) : null}
-        <br />
-      </div>
-    );
-  }
-
-  toNewNote() {
+  toNewNote = () => {
     localStorage.setItem('new-folder-edit', 'true');
-  }
-
-  newLink(themeBack, themeHover, notes) {
-    const headings = this.getAllNoteHeadingsWithIds(notes);
-    let defaultId: string = '';
-    const options = headings.map((item, index) => {
-      if (index === headings.length - 1) defaultId = item.id;
-      return (
-        <option key={item.id} value={item.id}>
-          {item.heading}
-        </option>
-      );
-    });
-    const defaultVal =
-      headings && headings.length
-        ? headings[headings.length - 1].heading.replace('Sub: ', '')
-        : '';
-    return (
-      <div>
-        <br />
-        <Link
-          style={{ textDecoration: 'none', color: 'white' }}
-          className={`${themeHover} ${themeBack}`}
-          to="/new-note/"
-          onClick={this.toNewNote}
-        >
-          New Folder
-        </Link>
-        <br />
-        <select
-          onChange={this.changeLink}
-          className={themeBack}
-          name="number"
-          id="links"
-          defaultValue={defaultId}
-        >
-          {options}
-        </select>
-        <br />
-        <input
-          id="link-text"
-          className={themeBack}
-          name="tagTypeText"
-          type="text"
-          defaultValue={defaultVal}
-        />
-        <br />
-      </div>
-    );
-  }
-
-  newEmail(themeBack) {
-    return (
-      <div>
-        {' '}
-        <input
-          className={themeBack}
-          name="number"
-          type="email"
-          placeholder="Add Email"
-        />
-        <br />
-        <br />
-      </div>
-    );
-  }
-
-  newNumber(themeBack) {
-    return (
-      <div>
-        <input
-          className={themeBack}
-          name="number"
-          type="number"
-          placeholder="Add Number"
-        />
-        <br />
-        <br />
-      </div>
-    );
-  }
-
-  newLog(inputDisplayDate, themeBack, displayDate, lable) {
-    return (
-      <div>
-        <input
-          onChange={this.changeDate}
-          value={inputDisplayDate}
-          className={themeBack}
-          type="datetime-local"
-          name="dateSelector"
-        />
-        <br />
-        <input
-          id="text-date"
-          className={themeBack}
-          name="tagTypeText"
-          type="text"
-          defaultValue={displayDate}
-          onChange={(e) => this.onTodoChange(e.target.value)}
-        />
-        <br />
-        {lable ? (
-          <input
-            className={themeBack}
-            name="number"
-            type="text"
-            defaultValue={lable}
-          />
-        ) : (
-          <AutoCompleteTextArea
-            elementId="dynamic-text-area"
-            className={`${themeBack}`}
-            smallClassName="small-text-area"
-            bigClassName="big-text-area"
-            placeholder="Info"
-            name="number"
-          />
-        )}
-        <br />
-      </div>
-    );
-  }
-
-  newNote(themeBack, showTag) {
-    let localShowTag = showTag;
-    const creatingNewFolder = localStorage.getItem('new-folder-edit');
-    let defaultVal = '';
-    if (creatingNewFolder) {
-      localShowTag = 'Note';
-      defaultVal = '1.';
-    }
-    return (
-      <div>
-        <input
-          className={themeBack}
-          name="tagTypeText"
-          type="text"
-          placeholder="Sub Heading"
-          defaultValue={localShowTag}
-        />
-        <br />
-        <AutoCompleteTextArea
-          elementId="dynamic-text-area-a"
-          className={`${themeBack}`}
-          smallClassName="input-div-text-area"
-          bigClassName="div-text-area"
-          placeholder="eg: Company, Note"
-          defaultValue={defaultVal}
-          name="number"
-        />
-        <br />
-      </div>
-    );
-  }
+  };
 
   render() {
-    const { radioType, displayDate, inputDisplayDate } = this.state;
+    const { radioType, displayDate, inputDisplayDate, upload } = this.state;
     let localRadioType = radioType;
-    const { upload } = this.state;
     const { showTag, Theme, lable, allNotes } = this.props;
 
     let defaultNote = true;
@@ -368,7 +187,7 @@ export default class EditNoteCheck extends Component<EditNoteCheckProps, EditNot
       defaultLog = false;
       defaultNote = false;
       setTimeout(() => {
-        const el = document.getElementById('submit-new-note');
+        const el = document.getElementById('submit-new-note') as HTMLButtonElement;
         if (el) el.click();
         localStorage.removeItem('was-new-folder-edit');
       }, 100);
@@ -412,118 +231,38 @@ export default class EditNoteCheck extends Component<EditNoteCheckProps, EditNot
           />
         </div>
 
-        {localRadioType === 'Note' && this.newNote(themeBack, showTag)}
-        {localRadioType === 'Log'
-          && this.newLog(inputDisplayDate, themeBack, displayDate, lable)
-        }
-        {localRadioType === 'Link'
-          && this.newLink(themeBack, themeHover, allNotes)
-          }
-        {localRadioType === 'Upload'
-          && this.newUpload(themeBack, showTag, upload)
-        }
-        {localRadioType === 'Number' && this.newNumber(themeBack)}
-        {localRadioType === 'Email' && this.newEmail(themeBack)}
+        {localRadioType === 'Note' && <NewNoteField themeBack={themeBack} showTag={showTag ?? undefined} />}
+        {localRadioType === 'Log' && (
+          <NewLogField
+            inputDisplayDate={inputDisplayDate}
+            themeBack={themeBack}
+            displayDate={displayDate}
+            lable={lable}
+            onChangeDate={this.changeDate}
+            onTodoChange={(val) => this.onTodoChange(val)}
+          />
+        )}
+        {localRadioType === 'Link' && (
+          <NewLinkField
+            themeBack={themeBack}
+            themeHover={themeHover}
+            notes={allNotes}
+            onChangeLink={this.changeLink}
+            onNewFolder={this.toNewNote}
+          />
+        )}
+        {localRadioType === 'Upload' && (
+          <NewUploadField
+            themeBack={themeBack}
+            showTag={showTag ?? undefined}
+            upload={upload}
+            onFileChange={this.handleChangeFile}
+          />
+        )}
+        {localRadioType === 'Number' && <NewNumberField themeBack={themeBack} />}
+        {localRadioType === 'Email' && <NewEmailField themeBack={themeBack} />}
       </div>
     );
   }
 }
 
-type AutoCompleteTextAreaProps = {
-  elementId: string;
-  className: string;
-  smallClassName: string;
-  bigClassName: string;
-  onChange?: (value: string) => void;
-  placeholder?: string;
-  defaultValue?: string;
-  name?: string;
-};
-
-function AutoCompleteTextArea({
-  elementId,
-  className,
-  smallClassName,
-  bigClassName,
-  onChange,
-  placeholder,
-  defaultValue,
-  name,
-}: AutoCompleteTextAreaProps) {
-  const [doReload, setDoReload] = useState(false);
-  const [isBig, setIsBig] = useState<boolean>();
-  const [value, setValue] = useState<string>();
-
-  const localChange = (event) => {
-    let input = event.target.value;
-
-    input = input.replaceAll('%3A', ':');
-    input = input.replaceAll('%20', ' ');
-    input = input.replaceAll('%0A', '\n');
-
-    if (input.length > 17) {
-      if (!isBig) {
-        setIsBig(true);
-        setDoReload(!doReload);
-      }
-    } else if (isBig) {
-      setIsBig(false);
-      setDoReload(!doReload);
-    }
-
-    setValue(input);
-
-    if (input !== event.target.value) {
-      const element = document.getElementById(elementId) as HTMLInputElement;
-      element.value = input;
-    }
-    if (onChange) onChange(input);
-  };
-  const pasteListener = () => {
-    const el = document.getElementById(elementId);
-    if (!el) return;
-    el.addEventListener('paste', async (event) => {
-      if (isBig) return;
-      event.preventDefault();
-      const text = await navigator.clipboard.readText();
-      const element = document.getElementById(elementId) as HTMLInputElement;
-      setTimeout(() => {
-        // const value = element.value.length < 17? element.value + text: text;
-        const localValue = element.value + text;
-        setValue(localValue);
-        setIsBig(localValue.length > 17);
-        setDoReload(!doReload);
-      }, 10);
-    });
-  };
-
-  useEffect(() => {
-    if (value) {
-      const element = document.getElementById(elementId) as HTMLInputElement;
-      element.value = value;
-      element.focus();
-    }
-    pasteListener();
-  }, [doReload]);
-
-  return isBig ? (
-    <textarea
-      id={elementId}
-      className={`${className} ${bigClassName}`}
-      onChange={localChange}
-      name={name}
-      placeholder={placeholder}
-      defaultValue={defaultValue}
-    />
-  ) : (
-    <input
-      id={elementId}
-      className={`${className} ${smallClassName}`}
-      onChange={localChange}
-      name={name}
-      type="text"
-      placeholder={placeholder}
-      defaultValue={defaultValue}
-    />
-  );
-}
