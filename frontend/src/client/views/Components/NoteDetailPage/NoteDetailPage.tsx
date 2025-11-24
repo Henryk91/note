@@ -1,221 +1,19 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
-import NoteDetail from '../NoteDetail/NoteDetail';
 import { logoutUser } from '../../Helpers/requests';
 import { Note } from '../../Helpers/types';
-
-type NoteDetailPageItemProps = {
-  searchTerm: string;
-  noteNames: string[] | null;
-  Theme: string;
-  notes: Note[] | null;
-  pageLink: any;
-  showAddItem: boolean;
-  index: number;
-  editName: boolean;
-  lastPage: boolean;
-  pageCount: number;
-  hideAddItem: () => void;
-  set: (payload: any) => void;
-  openPage: (payload: any) => void;
-  initShowtag?: any;
-} & React.ComponentProps<typeof NoteDetail>;
-
-type SidebarProps = {
-  noteNames: string[] | null | undefined;
-  setNoteTheme: (name: string) => void;
-  prepForNote: (name: string) => void;
-};
-
-type ScrollButtonsProps = {
-  Theme: string;
-  showAddItem: boolean;
-  showBackButton: boolean;
-  onEditName: () => void;
-  onAdd: () => void;
-};
-
-type NoteNamesListProps = {
-  names: string[] | null | undefined;
-  onSelect: (name: string) => void;
-};
-
-type NoteThemesListProps = {
-  names: string[];
-  onSelect: (name: string) => void;
-};
-
-type BackButtonProps = {
-  Theme: string;
-  hasPages: boolean;
-  onBack: () => void;
-  onLogout: () => void;
-};
-
-const NoteDetailPageItem: React.FC<NoteDetailPageItemProps> = ({
-  searchTerm,
-  noteNames,
-  Theme,
-  notes,
-  pageLink,
-  showAddItem,
-  index,
-  editName,
-  lastPage,
-  pageCount,
-  hideAddItem,
-  set,
-  openPage,
-  initShowtag,
-  ...rest
-}) => {
-  const key =
-    pageLink && pageLink.params && pageLink.params.id
-      ? pageLink.params.id
-      : 'first';
-  return (
-    <div id="multiple-pages1" key={key + index}>
-      <NoteDetail
-        pageCount={pageCount}
-        hideAddItem={hideAddItem}
-        searchTerm={searchTerm}
-        noteNames={noteNames}
-        Theme={Theme}
-        set={set}
-        openPage={openPage}
-        notes={notes}
-        initShowtag={initShowtag}
-        index={index}
-        showAddItem={showAddItem}
-        editName={editName}
-        lastPage={lastPage}
-        {...rest}
-      />
-    </div>
-  );
-};
-
-const NoteNamesList: React.FC<NoteNamesListProps> = ({ names, onSelect }) => (
-  <>
-    {names?.map((name) => (
-      <Link key={name} style={{ textDecoration: 'none' }} to="/notes/main" title="Note List">
-        <div className="listNameButton" onClick={() => onSelect(name)}>
-          <h3> {name} </h3>
-        </div>
-      </Link>
-    ))}
-  </>
-);
-
-const NoteThemesList: React.FC<NoteThemesListProps> = ({ names, onSelect }) => (
-  <>
-    {names.map((name) => (
-      <Link key={name} style={{ textDecoration: 'none' }} to="/" title="Note List">
-        <div className="listNameButton" onClick={() => onSelect(name)}>
-          <h3> {name} Theme </h3>
-        </div>
-      </Link>
-    ))}
-  </>
-);
-
-const Sidebar: React.FC<SidebarProps> = ({ noteNames, prepForNote, setNoteTheme }) => (
-  <div>
-    <br />
-    <h3 className="page-content-top1">Note Book Names</h3>
-    <NoteNamesList names={noteNames} onSelect={prepForNote} />
-    <br />
-    <h3>Apps</h3>
-    <Link key="memento" style={{ textDecoration: 'none' }} to="/memento" title="Note List">
-      <div className="listNameButton">
-        <h3> Memento </h3>
-      </div>
-    </Link>
-    <Link key="pomodoro" style={{ textDecoration: 'none' }} to="/pomodoro" title="Note List">
-      <div className="listNameButton">
-        <h3> Pomodoro </h3>
-      </div>
-    </Link>
-    <br />
-    <h3>Themes</h3>
-    <NoteThemesList names={['Red', 'Ocean', 'Green', 'Dark', 'Night']} onSelect={setNoteTheme} />
-  </div>
-);
-
-const ScrollButtons: React.FC<ScrollButtonsProps> = ({
-  Theme,
-  showAddItem,
-  showBackButton,
-  onEditName,
-  onAdd,
-}) => {
-  const themeBack = `${Theme.toLowerCase()}-back`;
-  const themeHover = `${Theme.toLowerCase()}-hover`;
-
-  return (
-    <div className="detail-scroll">
-      <button
-        className={`editButtons1 detailUpButton ${themeHover} ${themeBack}`}
-        onClick={onEditName}
-      >
-        <i className="fas fa-pen" />
-      </button>
-      <div
-        className={`detailUpButton ${themeHover} ${themeBack}`}
-        onClick={() => {
-          window.scrollTo(0, 0);
-        }}
-      >
-        <i className="fas fa-arrow-up" />
-      </div>
-      <div
-        className={`detailUpButton ${themeHover} ${themeBack}`}
-        onClick={() => {
-          window.scrollBy(0, document.body.scrollHeight);
-        }}
-      >
-        <i className="fas fa-arrow-down" />
-      </div>
-      {showBackButton === false ? (
-        <div className={`detailAddButton ${themeHover} ${themeBack}`}>
-          <Link style={{ textDecoration: 'none', color: 'white' }} to="/new-note/">
-            <i className="fas fa-plus" />
-          </Link>
-        </div>
-      ) : (
-        <div
-          className={`detailAddButton ${themeHover} ${themeBack}`}
-          onClick={() => {
-            onAdd();
-          }}
-        >
-          <i className="fas fa-plus" />
-        </div>
-      )}
-    </div>
-  );
-};
-
-const BackButton: React.FC<BackButtonProps> = ({ Theme, hasPages, onBack, onLogout }) => {
-  const themeBack = `${Theme.toLowerCase()}-back`;
-  const icon = hasPages ? 'fas fa-arrow-left' : 'fas fa-power-off';
-  const handleClick = () => {
-    if (hasPages) onBack();
-    else onLogout();
-  };
-  return (
-    <button className={`backButton ${themeBack}`} onClick={handleClick}>
-      <i className={icon} />
-    </button>
-  );
-};
+import {
+  NoteDetailPageItem,
+  Sidebar,
+  ScrollButtons,
+  BackButton,
+} from './NoteDetailPageParts';
 
 type Match = {
   isExact: boolean;
-  params: {id: string};
+  params: { id: string };
   path: string;
   url: string;
-}
+};
 
 type NoteDetailPageProps = {
   noteNames: string[] | null;
@@ -267,13 +65,13 @@ export default class NoteDetailPage extends Component<NoteDetailPageProps, NoteD
     }
   }
 
-  setNoteTheme = (name) => {
+  setNoteTheme = (name: string) => {
     const { set } = this.props;
     set({ noteTheme: name });
     localStorage.setItem('theme', name);
   };
 
-  noteDetailSet = (msg) => {
+  noteDetailSet = (msg: any) => {
     const { set } = this.props;
 
     if (msg.forParent) {
@@ -283,18 +81,14 @@ export default class NoteDetailPage extends Component<NoteDetailPageProps, NoteD
     }
   };
 
-  openPage = (msg) => {
+  openPage = (msg: any) => {
     if (!msg.personNext) return;
     const nextPage = { params: { id: msg.personNext.id } };
     const { pages } = this.state;
     let updatePages = pages;
-    const parentPageIndex = updatePages.findIndex(
-      (page) => page.params.id === msg.parentId,
-    );
+    const parentPageIndex = updatePages.findIndex((page) => page.params.id === msg.parentId);
 
-    const pageFoundIndex = updatePages.findIndex(
-      (page) => page.params.id === msg.personNext.id,
-    );
+    const pageFoundIndex = updatePages.findIndex((page) => page.params.id === msg.personNext.id);
     if (parentPageIndex > -1 && pageFoundIndex === -1) {
       updatePages = updatePages.slice(0, parentPageIndex + 1);
     } else if (parentPageIndex > 0 && pageFoundIndex > -1) {
@@ -303,9 +97,7 @@ export default class NoteDetailPage extends Component<NoteDetailPageProps, NoteD
 
     if (pageFoundIndex === -1) {
       const newPages =
-        updatePages.length === 1 && updatePages[0].params.id === ''
-          ? [nextPage]
-          : [...updatePages, nextPage];
+        updatePages.length === 1 && updatePages[0].params.id === '' ? [nextPage] : [...updatePages, nextPage];
 
       this.setState({ pages: newPages });
       localStorage.setItem('saved-pages', JSON.stringify(newPages));
@@ -315,46 +107,25 @@ export default class NoteDetailPage extends Component<NoteDetailPageProps, NoteD
       if (pageFoundIndex + 1 === updatePages.length) {
         this.scrollPageBack();
       } else {
-        this.scrollPagesBackAndSet(
-          updatePages.length,
-          updatePages.length - pageFoundIndex,
-          newPages,
-        );
+        this.scrollPagesBackAndSet(updatePages.length, updatePages.length - pageFoundIndex, newPages);
       }
     } else if (pageFoundIndex > -1) {
       const freshStatePages = pages;
       if (pageFoundIndex === freshStatePages.length - 1) {
-        if (
-          freshStatePages.length + 1 === freshStatePages.length &&
-          msg.hideNote
-        ) {
+        if (freshStatePages.length + 1 === freshStatePages.length && msg.hideNote) {
           this.scrollPageBack();
         } else {
           const last = freshStatePages[freshStatePages.length - 1];
           const secondTolast = freshStatePages[freshStatePages.length - 2];
 
-          if (
-            secondTolast &&
-            last &&
-            last.params.id !== secondTolast.params.id
-          ) {
+          if (secondTolast && last && last.params.id !== secondTolast.params.id) {
             freshStatePages.push(last);
             this.setState({ pages: freshStatePages });
-            localStorage.setItem(
-              'saved-pages',
-              JSON.stringify(freshStatePages),
-            );
+            localStorage.setItem('saved-pages', JSON.stringify(freshStatePages));
           }
-          if (
-            secondTolast &&
-            last &&
-            last.params.id === secondTolast.params.id
-          ) {
+          if (secondTolast && last && last.params.id === secondTolast.params.id) {
             this.setState({ pages: freshStatePages });
-            localStorage.setItem(
-              'saved-pages',
-              JSON.stringify(freshStatePages),
-            );
+            localStorage.setItem('saved-pages', JSON.stringify(freshStatePages));
           }
         }
       }
@@ -362,7 +133,7 @@ export default class NoteDetailPage extends Component<NoteDetailPageProps, NoteD
       const localPages = localStorage.getItem('saved-pages');
 
       if (msg.showNote && !msg.hideNote) {
-        const locals = localPages? JSON.parse(localPages): [];
+        const locals = localPages ? JSON.parse(localPages) : [];
         const last = locals[locals.length - 1];
         const secondTolast = locals[locals.length - 2];
 
@@ -378,7 +149,7 @@ export default class NoteDetailPage extends Component<NoteDetailPageProps, NoteD
     this.setState({ showAddItem: false });
   };
 
-  showAddItemSet = (bVal) => {
+  showAddItemSet = (bVal: boolean) => {
     this.setState({ showAddItem: bVal });
     if (bVal) window.scrollTo(0, 0);
   };
@@ -387,7 +158,7 @@ export default class NoteDetailPage extends Component<NoteDetailPageProps, NoteD
     logoutUser(() => window.location.reload());
   };
 
-  addButtonClicked = (showAddItem) => {
+  addButtonClicked = (showAddItem: boolean) => {
     this.showAddItemSet(!showAddItem);
   };
 
@@ -397,34 +168,12 @@ export default class NoteDetailPage extends Component<NoteDetailPageProps, NoteD
     this.setState({ editName: !editName });
   };
 
-  prepForNote = (name) => {
+  prepForNote = (name: string) => {
     const { set } = this.props;
     set({ noteName: name });
   };
 
-  scrollPagesBackAndSet(currentPageCount, pagesBackCount, pages) {
-    if (pages && pages.length > 1) {
-      const noteDetailPage = document.getElementById('multiple-pages');
-      if (noteDetailPage) {
-        let pageWidth = noteDetailPage.scrollWidth / currentPageCount;
-        pageWidth -= pageWidth / (5 + currentPageCount);
-        const scrollAmount = pageWidth * pagesBackCount * -1;
-
-        noteDetailPage.scrollBy({
-          top: 0,
-          left: scrollAmount,
-          behavior: 'smooth',
-        });
-      }
-      const self = this;
-      setTimeout(() => {
-        localStorage.removeItem('showTag');
-        self.setState({ pages });
-      }, 500);
-    }
-  }
-
-  customScrollBy(element, startPosition, endPosition) {
+  customScrollBy(element: HTMLElement, startPosition: number, endPosition: number) {
     window.scrollTo({ top: 0 });
     const left = startPosition > endPosition;
     let i = startPosition;
@@ -440,6 +189,23 @@ export default class NoteDetailPage extends Component<NoteDetailPageProps, NoteD
     }, 1);
   }
 
+  scrollPagesBackAndSet(currentPageCount: number, pagesBackCount: number, pages: PageDescriptor[]) {
+    if (pages && pages.length > 1) {
+      const noteDetailPage = document.getElementById('multiple-pages');
+      if (noteDetailPage) {
+        let pageWidth = noteDetailPage.scrollWidth / currentPageCount;
+        pageWidth -= pageWidth / (5 + currentPageCount);
+
+        this.customScrollBy(noteDetailPage, noteDetailPage.scrollWidth - pageWidth, noteDetailPage.scrollWidth - pageWidth * pagesBackCount);
+      }
+      const self = this;
+      setTimeout(() => {
+        self.setState({ pages });
+        localStorage.setItem('saved-pages', JSON.stringify(pages));
+      }, 500);
+    }
+  }
+
   scrollPageBack() {
     const { pages } = this.state;
     if (pages && pages.length > 1) {
@@ -448,11 +214,7 @@ export default class NoteDetailPage extends Component<NoteDetailPageProps, NoteD
       if (noteDetailPage) {
         const pageWidth = noteDetailPage.scrollWidth / pageCount;
 
-        this.customScrollBy(
-          noteDetailPage,
-          noteDetailPage.scrollWidth - pageWidth,
-          noteDetailPage.scrollWidth - pageWidth - pageWidth -15,
-        );
+        this.customScrollBy(noteDetailPage, noteDetailPage.scrollWidth - pageWidth, noteDetailPage.scrollWidth - pageWidth - pageWidth - 15);
       }
       const self = this;
       setTimeout(() => {
@@ -473,16 +235,6 @@ export default class NoteDetailPage extends Component<NoteDetailPageProps, NoteD
     const isNoteNames = match.url === '/notes/note-names';
     if (isNoteNames) {
       localPages = [{ params: { id: '' } }];
-    }
-
-    let clone = JSON.parse(JSON.stringify(localPages));
-    if (
-      clone &&
-      clone[0] &&
-      clone[0].params.id !== '' &&
-      clone[0].params.id !== 'main'
-    ) {
-      clone = [{ params: { id: 'main' } }, ...clone];
     }
 
     const lastPageIndex = localPages.length - 1;
@@ -517,7 +269,7 @@ export default class NoteDetailPage extends Component<NoteDetailPageProps, NoteD
         <BackButton
           Theme={Theme}
           hasPages={pages.length > 1}
-          onBack={() => this.scrollPageBack()}
+          onBack={this.scrollPageBack.bind(this)}
           onLogout={this.logOut}
         />
         {isNoteNames && (
