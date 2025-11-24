@@ -412,18 +412,18 @@ export default class EditNoteCheck extends Component<EditNoteCheckProps, EditNot
           />
         </div>
 
-        {localRadioType === 'Note' ? this.newNote(themeBack, showTag) : null}
+        {localRadioType === 'Note' && this.newNote(themeBack, showTag)}
         {localRadioType === 'Log'
-          ? this.newLog(inputDisplayDate, themeBack, displayDate, lable)
-          : null}
+          && this.newLog(inputDisplayDate, themeBack, displayDate, lable)
+        }
         {localRadioType === 'Link'
-          ? this.newLink(themeBack, themeHover, allNotes)
-          : null}
+          && this.newLink(themeBack, themeHover, allNotes)
+          }
         {localRadioType === 'Upload'
-          ? this.newUpload(themeBack, showTag, upload)
-          : null}
-        {localRadioType === 'Number' ? this.newNumber(themeBack) : null}
-        {localRadioType === 'Email' ? this.newEmail(themeBack) : null}
+          && this.newUpload(themeBack, showTag, upload)
+        }
+        {localRadioType === 'Number' && this.newNumber(themeBack)}
+        {localRadioType === 'Email' && this.newEmail(themeBack)}
       </div>
     );
   }

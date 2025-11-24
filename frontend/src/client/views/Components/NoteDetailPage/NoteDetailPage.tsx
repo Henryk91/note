@@ -4,6 +4,212 @@ import NoteDetail from '../NoteDetail/NoteDetail';
 import { logoutUser } from '../../Helpers/requests';
 import { Note } from '../../Helpers/types';
 
+type NoteDetailPageItemProps = {
+  searchTerm: string;
+  noteNames: string[] | null;
+  Theme: string;
+  notes: Note[] | null;
+  pageLink: any;
+  showAddItem: boolean;
+  index: number;
+  editName: boolean;
+  lastPage: boolean;
+  pageCount: number;
+  hideAddItem: () => void;
+  set: (payload: any) => void;
+  openPage: (payload: any) => void;
+  initShowtag?: any;
+} & React.ComponentProps<typeof NoteDetail>;
+
+type SidebarProps = {
+  noteNames: string[] | null | undefined;
+  setNoteTheme: (name: string) => void;
+  prepForNote: (name: string) => void;
+};
+
+type ScrollButtonsProps = {
+  Theme: string;
+  showAddItem: boolean;
+  showBackButton: boolean;
+  onEditName: () => void;
+  onAdd: () => void;
+};
+
+type NoteNamesListProps = {
+  names: string[] | null | undefined;
+  onSelect: (name: string) => void;
+};
+
+type NoteThemesListProps = {
+  names: string[];
+  onSelect: (name: string) => void;
+};
+
+type BackButtonProps = {
+  Theme: string;
+  hasPages: boolean;
+  onBack: () => void;
+  onLogout: () => void;
+};
+
+const NoteDetailPageItem: React.FC<NoteDetailPageItemProps> = ({
+  searchTerm,
+  noteNames,
+  Theme,
+  notes,
+  pageLink,
+  showAddItem,
+  index,
+  editName,
+  lastPage,
+  pageCount,
+  hideAddItem,
+  set,
+  openPage,
+  initShowtag,
+  ...rest
+}) => {
+  const key =
+    pageLink && pageLink.params && pageLink.params.id
+      ? pageLink.params.id
+      : 'first';
+  return (
+    <div id="multiple-pages1" key={key + index}>
+      <NoteDetail
+        pageCount={pageCount}
+        hideAddItem={hideAddItem}
+        searchTerm={searchTerm}
+        noteNames={noteNames}
+        Theme={Theme}
+        set={set}
+        openPage={openPage}
+        notes={notes}
+        initShowtag={initShowtag}
+        index={index}
+        showAddItem={showAddItem}
+        editName={editName}
+        lastPage={lastPage}
+        {...rest}
+      />
+    </div>
+  );
+};
+
+const NoteNamesList: React.FC<NoteNamesListProps> = ({ names, onSelect }) => (
+  <>
+    {names?.map((name) => (
+      <Link key={name} style={{ textDecoration: 'none' }} to="/notes/main" title="Note List">
+        <div className="listNameButton" onClick={() => onSelect(name)}>
+          <h3> {name} </h3>
+        </div>
+      </Link>
+    ))}
+  </>
+);
+
+const NoteThemesList: React.FC<NoteThemesListProps> = ({ names, onSelect }) => (
+  <>
+    {names.map((name) => (
+      <Link key={name} style={{ textDecoration: 'none' }} to="/" title="Note List">
+        <div className="listNameButton" onClick={() => onSelect(name)}>
+          <h3> {name} Theme </h3>
+        </div>
+      </Link>
+    ))}
+  </>
+);
+
+const Sidebar: React.FC<SidebarProps> = ({ noteNames, prepForNote, setNoteTheme }) => (
+  <div>
+    <br />
+    <h3 className="page-content-top1">Note Book Names</h3>
+    <NoteNamesList names={noteNames} onSelect={prepForNote} />
+    <br />
+    <h3>Apps</h3>
+    <Link key="memento" style={{ textDecoration: 'none' }} to="/memento" title="Note List">
+      <div className="listNameButton">
+        <h3> Memento </h3>
+      </div>
+    </Link>
+    <Link key="pomodoro" style={{ textDecoration: 'none' }} to="/pomodoro" title="Note List">
+      <div className="listNameButton">
+        <h3> Pomodoro </h3>
+      </div>
+    </Link>
+    <br />
+    <h3>Themes</h3>
+    <NoteThemesList names={['Red', 'Ocean', 'Green', 'Dark', 'Night']} onSelect={setNoteTheme} />
+  </div>
+);
+
+const ScrollButtons: React.FC<ScrollButtonsProps> = ({
+  Theme,
+  showAddItem,
+  showBackButton,
+  onEditName,
+  onAdd,
+}) => {
+  const themeBack = `${Theme.toLowerCase()}-back`;
+  const themeHover = `${Theme.toLowerCase()}-hover`;
+
+  return (
+    <div className="detail-scroll">
+      <button
+        className={`editButtons1 detailUpButton ${themeHover} ${themeBack}`}
+        onClick={onEditName}
+      >
+        <i className="fas fa-pen" />
+      </button>
+      <div
+        className={`detailUpButton ${themeHover} ${themeBack}`}
+        onClick={() => {
+          window.scrollTo(0, 0);
+        }}
+      >
+        <i className="fas fa-arrow-up" />
+      </div>
+      <div
+        className={`detailUpButton ${themeHover} ${themeBack}`}
+        onClick={() => {
+          window.scrollBy(0, document.body.scrollHeight);
+        }}
+      >
+        <i className="fas fa-arrow-down" />
+      </div>
+      {showBackButton === false ? (
+        <div className={`detailAddButton ${themeHover} ${themeBack}`}>
+          <Link style={{ textDecoration: 'none', color: 'white' }} to="/new-note/">
+            <i className="fas fa-plus" />
+          </Link>
+        </div>
+      ) : (
+        <div
+          className={`detailAddButton ${themeHover} ${themeBack}`}
+          onClick={() => {
+            onAdd();
+          }}
+        >
+          <i className="fas fa-plus" />
+        </div>
+      )}
+    </div>
+  );
+};
+
+const BackButton: React.FC<BackButtonProps> = ({ Theme, hasPages, onBack, onLogout }) => {
+  const themeBack = `${Theme.toLowerCase()}-back`;
+  const icon = hasPages ? 'fas fa-arrow-left' : 'fas fa-power-off';
+  const handleClick = () => {
+    if (hasPages) onBack();
+    else onLogout();
+  };
+  return (
+    <button className={`backButton ${themeBack}`} onClick={handleClick}>
+      <i className={icon} />
+    </button>
+  );
+};
+
 type Match = {
   isExact: boolean;
   params: {id: string};
@@ -38,8 +244,6 @@ export default class NoteDetailPage extends Component<NoteDetailPageProps, NoteD
     };
     this.openPage = this.openPage.bind(this);
     this.noteDetailSet = this.noteDetailSet.bind(this);
-    this.showNoteNames = this.showNoteNames.bind(this);
-    this.showNoteThemes = this.showNoteThemes.bind(this);
     this.showAddItemSet = this.showAddItemSet.bind(this);
     this.hideAddItem = this.hideAddItem.bind(this);
     this.setNoteTheme = this.setNoteTheme.bind(this);
@@ -68,20 +272,6 @@ export default class NoteDetailPage extends Component<NoteDetailPageProps, NoteD
     set({ noteTheme: name });
     localStorage.setItem('theme', name);
   };
-
-  showNoteThemes = (names) =>
-    names.map((name) => (
-      <Link
-        key={name}
-        style={{ textDecoration: 'none' }}
-        to="/"
-        title="Note List"
-      >
-        <div className="listNameButton" onClick={() => this.setNoteTheme(name)}>
-          <h3> {name} Theme </h3>
-        </div>
-      </Link>
-    ));
 
   noteDetailSet = (msg) => {
     const { set } = this.props;
@@ -193,20 +383,6 @@ export default class NoteDetailPage extends Component<NoteDetailPageProps, NoteD
     if (bVal) window.scrollTo(0, 0);
   };
 
-  showNoteNames = (names) =>
-    names?.map((name) => (
-      <Link
-        key={name}
-        style={{ textDecoration: 'none' }}
-        to="/notes/main"
-        title="Note List"
-      >
-        <div className="listNameButton" onClick={() => this.prepForNote(name)}>
-          <h3> {name} </h3>
-        </div>
-      </Link>
-    ));
-
   logOut = () => {
     logoutUser(() => window.location.reload());
   };
@@ -225,80 +401,6 @@ export default class NoteDetailPage extends Component<NoteDetailPageProps, NoteD
     const { set } = this.props;
     set({ noteName: name });
   };
-
-  scrollButtons(Theme, showAddItem) {
-    const themeBack = `${Theme.toLowerCase()}-back`;
-    const themeHover = `${Theme.toLowerCase()}-hover`;
-    const { pages } = this.state;
-
-    const showBackButton = pages.length > 1;
-    return (
-      <div className="detail-scroll">
-        <button
-          className={`editButtons1 detailUpButton ${themeHover} ${themeBack}`}
-          onClick={() => this.editNameSet()}
-        >
-          <i className="fas fa-pen" />
-        </button>
-        <div
-          className={`detailUpButton ${themeHover} ${themeBack}`}
-          onClick={() => {
-            window.scrollTo(0, 0);
-          }}
-        >
-          <i className="fas fa-arrow-up" />
-        </div>
-        <div
-          className={`detailUpButton ${themeHover} ${themeBack}`}
-          onClick={() => {
-            window.scrollBy(0, document.body.scrollHeight);
-          }}
-        >
-          <i className="fas fa-arrow-down" />
-        </div>
-        {showBackButton === false ? (
-          <div className={`detailAddButton ${themeHover} ${themeBack}`}>
-            <Link
-              style={{ textDecoration: 'none', color: 'white' }}
-              to="/new-note/"
-            >
-              <i className="fas fa-plus" />
-            </Link>
-          </div>
-        ) : (
-          <div
-            className={`detailAddButton ${themeHover} ${themeBack}`}
-            onClick={() => {
-              this.addButtonClicked(showAddItem);
-            }}
-          >
-            <i className="fas fa-plus" />
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  backButton(Theme) {
-    const themeBack = `${Theme.toLowerCase()}-back`;
-    const { pages } = this.state;
-    const hasPages = pages.length > 1;
-
-    return (
-      <button
-        className={`backButton ${themeBack}`}
-        onClick={() => {
-          if (hasPages) {
-            this.scrollPageBack();
-          } else {
-            this.logOut();
-          }
-        }}
-      >
-        <i className={hasPages ? 'fas fa-arrow-left' : 'fas fa-power-off'} />
-      </button>
-    );
-  }
 
   scrollPagesBackAndSet(currentPageCount, pagesBackCount, pages) {
     if (pages && pages.length > 1) {
@@ -362,89 +464,6 @@ export default class NoteDetailPage extends Component<NoteDetailPageProps, NoteD
     }
   }
 
-  createNoteDetailPage(
-    searchTerm,
-    noteNames,
-    Theme,
-    notes,
-    pageLink,
-    showAddItem,
-    index,
-    editName,
-    lastPage,
-    pageCount,
-  ) {
-    const key =
-      pageLink && pageLink.params && pageLink.params.id
-        ? pageLink.params.id
-        : 'first';
-    return (
-      <div id="multiple-pages1" key={key + index}>
-        <NoteDetail
-          pageCount={pageCount}
-          hideAddItem={this.hideAddItem}
-          searchTerm={searchTerm}
-          noteNames={noteNames}
-          Theme={Theme}
-          {...this.props}
-          set={this.noteDetailSet}
-          openPage={this.openPage}
-          notes={notes}
-          initShowtag={pageLink}
-          index={index}
-          showAddItem={showAddItem}
-          editName={editName}
-          lastPage={lastPage}
-        />
-      </div>
-    );
-  }
-
-  sidebarPage(noteNames) {
-    const noteNameBlock = this.showNoteNames(noteNames);
-    const noteThemeBlock = this.showNoteThemes([
-      'Red',
-      'Ocean',
-      'Green',
-      'Dark',
-      'Night',
-    ]);
-    return (
-      <div>
-        <br />
-        <h3 className="page-content-top1">Note Book Names</h3>
-        {noteNameBlock}
-        <br />
-        <h3>Apps</h3>
-        <Link
-          key="memento"
-          style={{ textDecoration: 'none' }}
-          to="/memento"
-          title="Note List"
-        >
-          <div className="listNameButton">
-            {' '}
-            <h3> Memento </h3>
-          </div>
-        </Link>
-        <Link
-          key="pomodoro"
-          style={{ textDecoration: 'none' }}
-          to="/pomodoro"
-          title="Note List"
-        >
-          <div className="listNameButton">
-            {' '}
-            <h3> Pomodoro </h3>
-          </div>
-        </Link>
-        <br />
-        <h3>Themes</h3>
-        {noteThemeBlock}
-      </div>
-    );
-  }
-
   render() {
     const { pages } = this.state;
     let localPages = pages;
@@ -470,25 +489,48 @@ export default class NoteDetailPage extends Component<NoteDetailPageProps, NoteD
     const pagesCont = localPages.map((pageLink, index) => {
       const lastPageShowAddItem = showAddItem && index === lastPageIndex;
       const lastPage = index === lastPageIndex;
-      return this.createNoteDetailPage(
-        searchTerm,
-        noteNames,
-        Theme,
-        notes,
-        pageLink,
-        lastPageShowAddItem,
-        index,
-        editName,
-        lastPage,
-        localPages.length,
+      return (
+        <NoteDetailPageItem
+          key={(pageLink?.params?.id ?? 'first') + index}
+          searchTerm={searchTerm}
+          noteNames={noteNames}
+          Theme={Theme}
+          notes={notes}
+          pageLink={pageLink}
+          showAddItem={lastPageShowAddItem}
+          index={index}
+          editName={editName}
+          lastPage={lastPage}
+          pageCount={localPages.length}
+          hideAddItem={this.hideAddItem}
+          set={this.noteDetailSet}
+          openPage={this.openPage}
+          initShowtag={pageLink}
+          {...this.props}
+        />
       );
     });
+
+    const showBackButton = pages.length > 1;
     return (
       <div className="slide-in" key={match.url}>
-        {this.backButton(Theme)}
-        {isNoteNames ? this.sidebarPage(noteNames) : null}
+        <BackButton
+          Theme={Theme}
+          hasPages={pages.length > 1}
+          onBack={() => this.scrollPageBack()}
+          onLogout={this.logOut}
+        />
+        {isNoteNames && (
+          <Sidebar noteNames={noteNames} prepForNote={this.prepForNote} setNoteTheme={this.setNoteTheme} />
+        )}
         <div id="multiple-pages">{pagesCont}</div>
-        {false ? '' : this.scrollButtons(Theme, showAddItem)}
+        <ScrollButtons
+          Theme={Theme}
+          showAddItem={showAddItem}
+          showBackButton={showBackButton}
+          onEditName={this.editNameSet}
+          onAdd={() => this.addButtonClicked(showAddItem)}
+        />
         <br />
         <br />
         <br />

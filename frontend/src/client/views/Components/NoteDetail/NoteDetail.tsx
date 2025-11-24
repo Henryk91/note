@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import NoteItem from '../NoteItem/NoteItem';
-import EditNoteCheck from '../EditNoteCheck/EditNoteCheck';
 import { getPerson } from '../../Helpers/utils';
 import { Note } from '../../Helpers/types';
+import PageContent from './PageContent';
+import { NoteDetailListItem } from './forms';
 
 type Match = {
   isExact: boolean;
@@ -25,6 +25,8 @@ type NoteDetailProps = {
   hideAddItem: () => void;
   pageCount: number;
   match: Match;
+  noteNames: string[] | null;
+  initShowtag?: boolean;
 };
 
 type NoteDetailState = {
@@ -59,13 +61,10 @@ export default class NoteDetail extends Component<NoteDetailProps, NoteDetailSta
       prevDate: null,
       nextDate: null,
     };
-    this.addItem = this.addItem.bind(this);
     this.submitNewItem = this.submitNewItem.bind(this);
     this.getNoteByTag = this.getNoteByTag.bind(this);
-    this.editNameBox = this.editNameBox.bind(this);
     this.showTagChange = this.showTagChange.bind(this);
     this.showHideBox = this.showHideBox.bind(this);
-    this.showNoteThemes = this.showNoteThemes.bind(this);
     this.setNoteTheme = this.setNoteTheme.bind(this);
     this.createNoteItemBunch = this.createNoteItemBunch.bind(this);
     this.showLogDays = this.showLogDays.bind(this);
@@ -199,19 +198,26 @@ export default class NoteDetail extends Component<NoteDetailProps, NoteDetailSta
       const key = prop + i;
       return (
         <div className={className} key={key}>
-          {showOnlyNote
-            ? null
-            : this.noteDetailListItem(
-                linkBorder,
-                showTag,
-                prop,
-                themeBorder,
-                isLink,
-                bunch,
-                showDateSelector,
-                themeBack,
-                themeHover,
-              )}
+          {!showOnlyNote && (
+            <NoteDetailListItem
+              linkBorder={linkBorder}
+              showTag={showTag}
+              prop={prop}
+              themeBorder={themeBorder}
+              isLink={isLink}
+              bunch={bunch}
+              showDateSelector={showDateSelector}
+              themeBack={themeBack}
+              themeHover={themeHover}
+              continueData={this.state.continueData}
+              onShowHide={() => this.showHideBox(showTag, prop)}
+              onShowLogDays={() => this.showLogDays(prop)}
+              onShowLogTag={(tag) => this.showLogTagChange(tag)}
+              onChangeDate={this.changeDate}
+              onDateBackForward={(e, dir) => this.dateBackForward(e, dir)}
+              onContinueLog={(payload) => this.continueLog(payload)}
+            />
+          )}
           {this.noteItemsBunch(animate, logDaysBunch, bunch, showLogDaysBunch)}
         </div>
       );
@@ -330,20 +336,6 @@ export default class NoteDetail extends Component<NoteDetailProps, NoteDetailSta
     //   this.showTagChange('');
     // }
   };
-
-  showNoteThemes = (names) =>
-    names.map((name) => (
-      <Link
-        key={name}
-        style={{ textDecoration: 'none' }}
-        to="/"
-        title="Note List"
-      >
-        <div className="listNameButton" onClick={() => this.setNoteTheme(name)}>
-          <h3> {name} Theme </h3>
-        </div>
-      </Link>
-    ));
 
   showLogTagChange = (tagName) => {
     const { person, showLink } = this.state;
@@ -686,112 +678,6 @@ export default class NoteDetail extends Component<NoteDetailProps, NoteDetailSta
     return { selectedDate: newSelectedDate, logDaysBunch: newLogDaysBunch };
   }
 
-  noteDetailListItem(
-    linkBorder,
-    showTag,
-    prop,
-    themeBorder,
-    isLink,
-    bunch,
-    showDateSelector,
-    themeBack,
-    themeHover,
-  ) {
-    const className = showDateSelector ? 'detailLogBoxTitle' : 'detailBoxTitle';
-    const dateCounterId = showDateSelector ? 'date-selector-counter' : '';
-
-    const { continueData } = this.state;
-    return (
-      <>
-        <div
-          className={`detailTitleBox dark-hover ${linkBorder}`}
-          onClick={() => this.showHideBox(showTag, prop)}
-        >
-          <div
-            id={`${dateCounterId}`}
-            className={`listCountBox white-color ${themeBorder}`}
-            onClick={() => this.showLogDays(prop)}
-          >
-            <span className="list-count-item">
-              {' '}
-              {isLink ? <i className="fas fa-folder" /> : bunch.length}{' '}
-            </span>
-          </div>
-          <h3 className={`${className} white-color`}>{prop} </h3>
-          {showDateSelector ? (
-            <form
-              className={`${className} dateSelector`}
-              onSubmit={this.changeDate}
-            >
-              <input
-                id="note-detail-date"
-                onChange={this.changeDate}
-                className={themeBack}
-                type="date"
-                name="dateSelector"
-              />
-            </form>
-          ) : (
-            ''
-          )}
-          {showTag === 'Log' && prop === 'Log' && (
-            <button
-              className={`detailBoxTitleButton ${themeBack} ${themeHover}`}
-              onClick={() => this.showLogTagChange('')}
-            >
-              Hide
-            </button>
-          )}
-          {showTag !== 'Log' && prop === 'Log' ? (
-            <div>
-              <button
-                className={`detailBoxTitleButton ${themeBack} ${themeHover}`}
-                onClick={() => this.showLogTagChange(prop)}
-              >
-                Show
-              </button>
-            </div>
-          ) : null}
-        </div>
-        <div
-          className={`logToggleHeader detailTitleBox dark-hover ${linkBorder}`}
-        >
-          {showTag === 'Log' && prop === 'Log'
-            ? this.logHeader(themeBack, themeHover, continueData)
-            : null}
-        </div>
-      </>
-    );
-  }
-
-  logHeader(themeBack, themeHover, continueData) {
-    return (
-      <div>
-        <div className="day-forward-back">
-          <button
-            className={`forward-back-button ${themeBack} ${themeHover}`}
-            onClick={(event) => this.dateBackForward(event, 'back')}
-          >
-            <i className="fas fa-arrow-left" />
-          </button>
-          <button
-            className={`forward-back-button ${themeBack} ${themeHover}`}
-            onClick={(event) => this.dateBackForward(event, 'forward')}
-          >
-            <i className="fas fa-arrow-right" />
-          </button>
-        </div>
-        <button
-          className={`editButtons continue-button ${themeBack} ${themeHover}`}
-          onClick={() => this.continueLog({ cont: continueData })}
-        >
-          Continue Previous Task
-        </button>
-        <br />
-      </div>
-    );
-  }
-
   showLogDays(showTag) {
     const { showLogDaysBunch, person } = this.state;
     if (person && showTag === 'Log') {
@@ -850,135 +736,32 @@ export default class NoteDetail extends Component<NoteDetailProps, NoteDetailSta
     localStorage.removeItem('new-folder-edit');
   }
 
-  editNameBox(heading) {
-    const { Theme } = this.props;
-    const themeBack = `${Theme.toLowerCase()}-back`;
-    const themeHover = `${Theme.toLowerCase()}-hover`;
-    return (
-      <form onSubmit={this.submitNameChange}>
-        <br />
-        <input
-          className={`changeNameHeading ${themeHover} ${themeBack}`}
-          name="heading"
-          type="text"
-          defaultValue={heading}
-        />
-        <br />
-        <br />
-        <button
-          className={`submit-button ${themeHover} ${themeBack}`}
-          type="submit"
-        >
-          {' '}
-          <i className="fas fa-check" />
-        </button>
-        <button
-          className={`submit-button ${themeHover} ${themeBack}`}
-          type="submit"
-        >
-          {' '}
-          <i className="fas fa-times" />
-        </button>
-        <br />
-        <br />
-      </form>
-    );
-  }
-
-  addItem() {
-    const { Theme, notes } = this.props;
-    const { showTag, addLable } = this.state;
-    const themeBack = `${Theme.toLowerCase()}-back`;
-    const themeHover = `${Theme.toLowerCase()}-hover`;
-
-    return (
-      <form onSubmit={this.submitNewItem}>
-        <EditNoteCheck
-          Theme={Theme}
-          showTag={showTag}
-          lable={addLable}
-          allNotes={notes}
-        />
-        <br />
-        <button
-          className={`submit-button ${themeHover} ${themeBack}`}
-          type="submit"
-          id="submit-new-note"
-        >
-          <i className="fas fa-check" />
-        </button>
-
-        <button
-          type="reset"
-          className={`submit-button ${themeHover} ${themeBack}`}
-          onClick={() => this.cancelAddItemEdit()}
-        >
-          {' '}
-          <i className="fas fa-times" />{' '}
-        </button>
-        <br />
-      </form>
-    );
-  }
-
-  pageContent(person, editName, editNameB, showAddItem, Theme, tags) {
-    const { showTag } = this.state;
-    const { index, lastPage } = this.props;
-    const isFirstPage = index === 0;
-    const className = isFirstPage
-      ? 'note-detail-item first-note-detail-item'
-      : 'note-detail-item';
-    const localShowTag = localStorage.getItem('showTag');
-    const heading =
-      lastPage && localShowTag && showTag && showTag !== 'null' && index && index > 1
-        ? showTag
-        : person.heading;
-
-    return (
-      <div
-        id={isFirstPage ? 'isFirstPage' : ''}
-        className={className}
-        key={person.id}
-      >
-        {editName ? (
-          <div>{editNameB}</div>
-        ) : (
-          <div id="personContainer" className="page-content-top1">
-            <h1 id="personHead" className="nameBox">
-              {heading}
-            </h1>
-          </div>
-        )}
-
-        {showAddItem ? (
-          <div className="add-item-comp"> {this.addItem()}</div>
-        ) : null}
-        {tags ? <div> {tags} </div> : null}
-        <br />
-      </div>
-    );
-  }
-
   render() {
     let { person } = this.state;
     const { tags, editName } = this.state;
     const { match, Theme, showAddItem } = this.props;
-    const editNameB = person ? this.editNameBox(person.heading) : null;
     const isNoteNames = match.url === '/notes/note-names';
     if (isNoteNames) person = null;
 
     return (
       <div className="slide-in">
-        {person
-          ? this.pageContent(
-              person,
-              editName,
-              editNameB,
-              showAddItem,
-              Theme,
-              tags,
-            )
-          : null}
+        {person && (
+          <PageContent
+            person={person}
+            editName={editName}
+            showAddItem={showAddItem}
+            Theme={Theme}
+            tags={tags}
+            showTag={this.state.showTag}
+            addLable={this.state.addLable}
+            notes={this.props.notes}
+            index={this.props.index}
+            lastPage={this.props.lastPage}
+            submitNameChange={this.submitNameChange}
+            submitNewItem={this.submitNewItem}
+            cancelAddItemEdit={() => this.cancelAddItemEdit()}
+          />
+        )}
       </div>
     );
   }
