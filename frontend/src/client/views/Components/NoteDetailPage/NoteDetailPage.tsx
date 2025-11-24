@@ -349,7 +349,7 @@ export default class NoteDetailPage extends Component<NoteDetailPageProps, NoteD
         this.customScrollBy(
           noteDetailPage,
           noteDetailPage.scrollWidth - pageWidth,
-          noteDetailPage.scrollWidth - pageWidth - pageWidth,
+          noteDetailPage.scrollWidth - pageWidth - pageWidth -15,
         );
       }
       const self = this;
