@@ -508,8 +508,8 @@ export default class NoteDetail extends Component<NoteDetailProps, NoteDetailSta
   noteItemsBunch(animate, logDaysBunch, bunch, showLogDaysBunch) {
     return (
       <div className={`${animate}`}>
-        {showLogDaysBunch ? logDaysBunch : null}
-        {showLogDaysBunch ? null : bunch}
+        {showLogDaysBunch && logDaysBunch}
+        {!showLogDaysBunch  && bunch}
       </div>
     );
   }
@@ -553,7 +553,7 @@ export default class NoteDetail extends Component<NoteDetailProps, NoteDetailSta
     const { openPage } = self.props;
     const { noteNames } = self.props;
     if (self.props.initShowtag) {
-      if (self.props.match.url.includes('subs')) {
+      if (self.props.match?.url.includes('subs')) {
         const person = this.getSubs(self.props.notes);
         this.refreshItems(person);
         return;
@@ -740,7 +740,7 @@ export default class NoteDetail extends Component<NoteDetailProps, NoteDetailSta
     let { person } = this.state;
     const { tags, editName } = this.state;
     const { match, Theme, showAddItem } = this.props;
-    const isNoteNames = match.url === '/notes/note-names';
+    const isNoteNames = match?.url === '/notes/note-names';
     if (isNoteNames) person = null;
 
     return (
