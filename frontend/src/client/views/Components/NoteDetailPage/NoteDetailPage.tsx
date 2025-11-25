@@ -244,10 +244,6 @@ export default class NoteDetailPage extends Component<NoteDetailPageProps, NoteD
       return (
         <NoteDetailPageItem
           key={(pageLink?.params?.id ?? 'first') + index}
-          searchTerm={searchTerm}
-          noteNames={noteNames}
-          Theme={Theme}
-          notes={notes}
           pageLink={pageLink}
           showAddItem={lastPageShowAddItem}
           index={index}
@@ -255,10 +251,14 @@ export default class NoteDetailPage extends Component<NoteDetailPageProps, NoteD
           lastPage={lastPage}
           pageCount={localPages.length}
           hideAddItem={this.hideAddItem}
-          set={this.noteDetailSet}
           openPage={this.openPage}
           initShowtag={pageLink}
           {...this.props}
+          set={this.noteDetailSet}
+          searchTerm={searchTerm ?? ''}
+          noteNames={noteNames}
+          Theme={Theme}
+          notes={notes}
         />
       );
     });
