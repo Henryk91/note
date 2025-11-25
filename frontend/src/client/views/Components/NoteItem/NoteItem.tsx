@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { marked } from 'marked';
 import { getLogDuration } from '../../Helpers/utils';
 import { NoteLabel } from '../../Helpers/types';
@@ -11,8 +11,8 @@ type NoteItemProps = {
   item: NoteLabel | string | null;
   date: string;
   show: boolean;
-  prevItem?: string; 
-  nextItem?: string; 
+  prevItem?: string;
+  nextItem?: string;
   index: number;
   type: string;
   set: (payload: any) => void;
@@ -28,46 +28,286 @@ type NoteItemProps = {
   cont: (payload: any) => void;
 };
 
-type NoteItemState = {
-  item: NoteLabel | string | null;
-  editingItem: boolean;
-  index?: number;
-  type?: string;
-  scrollPos: number;
+type EditItemBoxProps = {
+  item: string;
+  Theme: string;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  onClose: () => void;
+  onDelete: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  changeDate: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  dateToInputDisplayDate: (date: Date) => string;
 };
 
-export default class NoteItem extends Component<NoteItemProps, NoteItemState> {
-  constructor(props: NoteItemProps) {
-    super(props);
-    const { item } = this.props;
-    this.state = {
-      item,
-      editingItem: false,
-      scrollPos: 0,
-    };
-    this.deleteItem = this.deleteItem.bind(this);
-    this.getMarkdownText = this.getMarkdownText.bind(this);
-    this.editItemSet = this.editItemSet.bind(this);
+type DisplayItemBoxProps = {
+  item: string;
+  Theme: string;
+  showEdit: boolean;
+  count: number;
+  show: boolean;
+  onEdit: () => void;
+};
+
+type DisplayLogItemBoxProps = {
+  item: string;
+  show: boolean;
+  date: string;
+  Theme: string;
+  prevItem?: string;
+  nextItem?: string;
+  cont: (payload: any) => void;
+  onEdit: () => void;
+};
+
+const getMarkdownText = (input: string) => {
+  const rawMarkup = marked(input, { sanitize: false });
+  return { __html: rawMarkup };
+};
+
+const EditItemBox: React.FC<EditItemBoxProps> = ({
+  item,
+  Theme,
+  onSubmit,
+  onClose,
+  onDelete,
+  changeDate,
+  dateToInputDisplayDate,
+}) => {
+  const themeBack = `${Theme.toLowerCase()}-back`;
+  const themeHover = `${Theme.toLowerCase()}-hover`;
+  let editText = item;
+  const isLog = item.includes('"json":true');
+  let editDate;
+  let editInputDate;
+
+  if (isLog) {
+    const logObj = JSON.parse(item);
+    editDate = logObj.date;
+    editText = logObj.data;
+    editInputDate = dateToInputDisplayDate(new Date(editDate));
   }
 
-  getMarkdownText(input) {
-    const rawMarkup = marked(input, { sanitize: false });
-    return { __html: rawMarkup };
-  }
+  return (
+    <form onSubmit={onSubmit} className="noteItemEditBox">
+      {isLog && (
+        <>
+          <input
+            onChange={changeDate}
+            defaultValue={editInputDate}
+            className={themeBack}
+            type="datetime-local"
+            name="dateSelector"
+          />
+          <textarea
+            id="text-date"
+            className={`editDateArea ${themeBack}`}
+            name="itemDate"
+            defaultValue={editDate}
+          />
+        </>
+      )}
+      <textarea
+        className={`editTextarea ${themeBack}`}
+        name="item"
+        defaultValue={editText}
+      />
+      <br />
+      <button className={`submit-button ${themeBack} ${themeHover}`} type="submit">
+        {' '}
+        <i className="fas fa-check" />
+      </button>
+      <button className={`submit-button ${themeBack} ${themeHover}`} onClick={onClose}>
+        <i className="fas fa-times" />
+      </button>
+      <button className={`submit-button ${themeBack} ${themeHover}`} onClick={onDelete}>
+        {' '}
+        <i className="far fa-trash-alt" />{' '}
+      </button>
+      <hr />
+      <br />
+    </form>
+  );
+};
 
-  submitChange = (e) => {
+const DisplayItemBox: React.FC<DisplayItemBoxProps> = ({
+  item,
+  Theme,
+  showEdit,
+  count,
+  show,
+  onEdit,
+}) => {
+  const themeBorder = `${Theme.toLowerCase()}-border-thick`;
+  const noteItemClass = count > 0 ? 'noteItemHasCount' : 'noteItem';
+
+  return (
+    <div className="noteItemBox" onClick={onEdit}>
+      {show && (
+        <>
+          <div className="logLine">
+            {showEdit ? null : (
+              <div className={`listCountBox noteItemCount ${themeBorder}`}>
+                {' '}
+                <span className="list-count-item">{count}</span>{' '}
+              </div>
+            )}
+            <div
+              className={`${noteItemClass} white-color`}
+              dangerouslySetInnerHTML={getMarkdownText(item)}
+            />
+          </div>
+          <hr />
+        </>
+      )}
+    </div>
+  );
+};
+
+const DisplayLogItemBox: React.FC<DisplayLogItemBoxProps> = ({
+  item,
+  show,
+  date,
+  Theme,
+  prevItem,
+  nextItem,
+  cont,
+  onEdit,
+}) => {
+  const parsedItem = JSON.parse(item);
+  let showItem = show;
+  const newDate = parsedItem.date.substring(0, parsedItem.date.indexOf('GMT')).trim();
+  let selectedDate = date;
+
+  if (selectedDate) {
+    selectedDate = `${new Date(selectedDate)}`;
+    selectedDate = selectedDate.substring(0, 16);
+    if (showItem && !newDate.includes(selectedDate)) {
+      showItem = false;
+    }
+  }
+  if (!showItem) return null;
+
+  const themeBack = `${Theme.toLowerCase()}-back`;
+  const themeBackHover = `${Theme.toLowerCase()}-hover`;
+
+  const hasBreak = ['Break', 'Pause', 'Lunch'].includes(parsedItem.data)
+    ? 'logNoteItem'
+    : null;
+
+  let prevData = null;
+
+  if (prevItem !== null && prevItem !== undefined) {
+    prevData = JSON.parse(prevItem).data;
+  }
+  let duration = showItem ? getLogDuration(nextItem, parsedItem) : '';
+
+  if (!showItem) duration = '';
+
+  return (
+    <div className="noteItemBox">
+      {showItem && (
+        <div>
+          <div>
+            <span className="flex">
+              <span className="noteItem white-color log-noteItem">
+                {newDate} {duration}
+              </span>
+              <button
+                className={`editButtons ${themeBack} ${themeBackHover}`}
+                onClick={onEdit}
+              >
+                <i className="fas fa-pen" />
+              </button>
+              {hasBreak && prevData && (
+                <button
+                  className={`editButtons ${themeBack} ${themeBackHover}`}
+                  onClick={() => cont({ cont: prevData })}
+                >
+                  Cont
+                </button>
+              )}
+            </span>
+            <div
+              className={`noteItem ${hasBreak} dangerous-text`}
+              dangerouslySetInnerHTML={getMarkdownText(parsedItem.data)}
+            />
+          </div>
+          <hr />
+        </div>
+      )}
+    </div>
+  );
+};
+
+const NoteItem: React.FC<NoteItemProps> = ({
+  item: initialItem,
+  index,
+  type,
+  set,
+  show,
+  date,
+  Theme,
+  prevItem,
+  nextItem,
+  count,
+  showEdit,
+  cont,
+}) => {
+  const [item, setItem] = useState(initialItem);
+  const [editingItem, setEditingItem] = useState(false);
+  const [scrollPos, setScrollPos] = useState(0);
+
+  const addLeadingZero = (number: number) => {
+    if (number < 10) return `0${number}`;
+    return number;
+  };
+
+  const dateToInputDisplayDate = (inputDate: Date) => {
+    if (!inputDate || Number.isNaN(inputDate)) return '';
+    const minutes = addLeadingZero(inputDate.getMinutes());
+    const hours = addLeadingZero(inputDate.getHours());
+    return `${inputDate.toISOString().split('T')[0]}T${hours}:${minutes}`;
+  };
+
+  const removeHideClass = useCallback(() => {
+    const nodes = document.querySelectorAll('.hidden-noteItemBox');
+    nodes.forEach((node) => node.classList.remove('hidden-noteItemBox'));
+    window.scrollTo({ top: scrollPos });
+  }, [scrollPos]);
+
+  const hideLogLines = () => {
+    const nodes = document.querySelectorAll('.noteItemBox');
+    nodes.forEach((node) => node.classList.add('hidden-noteItemBox'));
+  };
+
+  const setEditState = () => {
+    setEditingItem(true);
+    setScrollPos(window.scrollY);
+    hideLogLines();
+    window.scrollTo({ top: 0 });
+  };
+
+  const closeEdit = useCallback(() => {
+    setEditingItem(false);
+    removeHideClass();
+  }, [removeHideClass]);
+
+  const submitChange = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    let update = e.target.item.value;
-    if (e.target.itemDate) {
+    const target = e.target as typeof e.target & {
+      item: { value: string };
+      itemDate?: { value: string };
+    };
+    let update: string | { json: boolean; date: string; data: string } = target.item.value;
+
+    if (target.itemDate) {
       update = {
         json: true,
-        date: e.target.itemDate.value,
-        data: e.target.item.value,
+        date: target.itemDate.value,
+        data: target.item.value,
       };
       update = JSON.stringify(update);
     }
-    const { item } = this.state;
-    const { index, type, set } = this.props;
+
     set({
       item: update,
       oldItem: item,
@@ -75,263 +315,87 @@ export default class NoteItem extends Component<NoteItemProps, NoteItemState> {
       type,
       delete: false,
     });
-    this.setState({ editingItem: false, item: update });
-    this.removeHideClass();
+    setEditingItem(false);
+    setItem(update);
+    removeHideClass();
   };
 
-  deleteItem = (e) => {
+  const deleteItem = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    const { set, type } = this.props;
-    const { item, index } = this.state;
     if (confirm('Are you sure you want to permanently delete this?')) {
-      this.setState({ item: null, scrollPos: window.scrollY });
+      setItem(null);
+      setScrollPos(window.scrollY);
       set({
         oldItem: item,
         index,
         type,
         delete: true,
       });
+      removeHideClass();
     }
   };
 
-  editItemSet = (bVal) => {
-    this.setState({ editingItem: bVal });
-  };
-
-  removeHideClass = () => {
-    const nodes = document.querySelectorAll('.hidden-noteItemBox');
-    for (let i = 0; i < nodes.length; i++) {
-      nodes[i].classList.remove('hidden-noteItemBox');
-    }
-    const { scrollPos } = this.state;
-    window.scrollTo({ top: scrollPos });
-  };
-
-  closeEdit = () => {
-    this.setState({ editingItem: false });
-    this.removeHideClass();
-  };
-
-  changeDate = (e) => {
+  const changeDate = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     const selectedDate = e.target.value;
-    const date = new Date(selectedDate);
+    const newDate = new Date(selectedDate);
     const textDate = document.getElementById('text-date') as HTMLInputElement;
-    if(textDate) textDate.value = date +"";
+    if (textDate) textDate.value = `${newDate}`;
   };
 
-  dateToInputDisplayDate = (date) => {
-    if (!date || Number.isNaN(date)) return '';
-    const minutes = this.addLeadingZero(date.getMinutes());
-    const hours = this.addLeadingZero(date.getHours());
-    return `${date.toISOString().split('T')[0]}T${hours}:${minutes}`;
-  };
-
-  addLeadingZero = (number) => {
-    if (number < 10) return `0${number}`;
-    return number;
-  };
-
-  hideLogLines = () => {
-    const nodes = document.querySelectorAll('.noteItemBox');
-    for (let i = 0; i < nodes.length; i++) {
-      nodes[i].classList.add('hidden-noteItemBox');
+  useEffect(() => {
+    if (!show && editingItem) {
+      setEditingItem(false);
     }
-  };
+  }, [show, editingItem]);
 
-  setEditState = () => {
-    this.setState({ editingItem: true, scrollPos: window.scrollY });
-    this.hideLogLines();
-    window.scrollTo({ top: 0 });
-  };
+  const itemIsString = item && typeof item === 'string';
+  const isLog = itemIsString ? item.includes('"json":true') : false;
+  const editing = editingItem && show;
+  const noEditingIsLog = !editing && isLog;
+  const noEditingNoLog = !editing && !isLog;
 
-  editItemBox(item) {
-    const { Theme } = this.props;
-    const themeBack = `${Theme.toLowerCase()}-back`;
-    const themeHover = `${Theme.toLowerCase()}-hover`;
-    let editText = item;
-    const isLog = item.includes('"json":true');
-    let editDate;
-    let editInputDate;
-    if (isLog) {
-      const logObj = JSON.parse(item);
-      console.log(logObj.date);
-      editDate = logObj.date;
-      editText = logObj.data;
-      console.log(logObj.data);
-      editInputDate = this.dateToInputDisplayDate(new Date(editDate));
-    }
-    return (
-      <form onSubmit={this.submitChange} className="noteItemEditBox">
-        {isLog ? (
-          <>
-            <input
-              onChange={this.changeDate}
-              defaultValue={editInputDate}
-              className={themeBack}
-              type="datetime-local"
-              name="dateSelector"
+  if (!item) return <></>;
+
+  return (  
+    <div>
+        <div className="noteTagBox">
+          {editing && itemIsString && (
+            <EditItemBox
+              item={item}
+              Theme={Theme}
+              onSubmit={submitChange}
+              onClose={closeEdit}
+              onDelete={deleteItem}
+              changeDate={changeDate}
+              dateToInputDisplayDate={dateToInputDisplayDate}
             />
-            <textarea
-              id="text-date"
-              className={`editDateArea ${themeBack}`}
-              name="itemDate"
-              defaultValue={editDate}
+          )}
+          {noEditingIsLog && itemIsString && (
+            <DisplayLogItemBox
+              item={item}
+              show={show}
+              date={date}
+              Theme={Theme}
+              prevItem={prevItem}
+              nextItem={nextItem}
+              cont={cont}
+              onEdit={() => setEditingItem(true)}
             />
-          </>
-        ) : null}
-        <textarea
-          className={`editTextarea ${themeBack}`}
-          name="item"
-          defaultValue={editText}
-        />
-        <br />
-        <button
-          className={`submit-button ${themeBack} ${themeHover}`}
-          type="submit"
-        >
-          {' '}
-          <i className="fas fa-check" />
-        </button>
-        <button
-          className={`submit-button ${themeBack} ${themeHover}`}
-          onClick={() => this.closeEdit()}
-        >
-          <i className="fas fa-times" />
-        </button>
-        <button
-          className={`submit-button ${themeBack} ${themeHover}`}
-          onClick={this.deleteItem}
-        >
-          {' '}
-          <i className="far fa-trash-alt" />{' '}
-        </button>
-        <hr />
-        <br />
-      </form>
-    );
-  }
+          )}
+          {noEditingNoLog && itemIsString && (
+            <DisplayItemBox
+              item={item}
+              Theme={Theme}
+              showEdit={showEdit}
+              count={count}
+              show={show}
+              onEdit={setEditState}
+            />
+          )}
+        </div>
+    </div>
+  );
+};
 
-  displayItemBox(item) {
-    const { Theme, showEdit, count, show } = this.props;
-    const themeBorder = `${Theme.toLowerCase()}-border-thick`;
-    const noteItemClass = count > 0 ? 'noteItemHasCount' : 'noteItem';
-
-    return (
-      <div className="noteItemBox" onClick={() => this.setEditState()}>
-        {show && (
-          <>
-            <div className="logLine">
-              {showEdit ? null : (
-                <div className={`listCountBox noteItemCount ${themeBorder}`}>
-                  {' '}
-                  <span className="list-count-item">{count}</span>{' '}
-                </div>
-              )}
-              <div
-                className={`${noteItemClass} white-color`}
-                dangerouslySetInnerHTML={this.getMarkdownText(item)}
-              />
-            </div>
-            <hr />
-          </>
-        )}
-      </div>
-    );
-  }
-
-  displayLogItemBox(item) {
-    const { show, date, Theme, prevItem, nextItem } = this.props;
-    const parsedItem = JSON.parse(item);
-    let showItem = show;
-    const newDate = parsedItem.date
-      .substring(0, parsedItem.date.indexOf('GMT'))
-      .trim();
-    let selectedDate = date;
-    if (selectedDate) {
-      selectedDate = `${new Date(selectedDate)}`;
-      selectedDate = selectedDate.substring(0, 16);
-      if (showItem && !newDate.includes(selectedDate)) {
-        showItem = false;
-      }
-    }
-    if (!showItem) return '';
-
-    const themeBack = `${Theme.toLowerCase()}-back`;
-    const themeBackHover = `${Theme.toLowerCase()}-hover`;
-
-    const hasBreak = ['Break', 'Pause', 'Lunch'].includes(parsedItem.data)
-      ? 'logNoteItem'
-      : null;
-
-    let prevData = null;
-
-    if (prevItem !== null && prevItem !== undefined) {
-      prevData = JSON.parse(prevItem).data;
-    }
-    let duration = showItem ? getLogDuration(nextItem, parsedItem) : '';
-
-    if (!showItem) duration = '';
-    const { cont } = this.props;
-    return (
-      <div className="noteItemBox">
-        {showItem && (
-          <div>
-            <div>
-              <span className="flex">
-                <span className="noteItem white-color log-noteItem">
-                  {newDate} {duration}
-                </span>
-                <button
-                  className={`editButtons ${themeBack} ${themeBackHover}`}
-                  onClick={() => this.setState({ editingItem: true })}
-                >
-                  <i className="fas fa-pen" />
-                </button>
-                {hasBreak && prevData ? (
-                  <button
-                    className={`editButtons ${themeBack} ${themeBackHover}`}
-                    onClick={() => cont({ cont: prevData })}
-                  >
-                    Cont
-                  </button>
-                ) : null}
-              </span>
-              <div
-                className={`noteItem ${hasBreak} dangerous-text`}
-                dangerouslySetInnerHTML={this.getMarkdownText(parsedItem.data)}
-              />
-            </div>
-            <hr />
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  render() {
-    const { item, editingItem } = this.state;
-    const { show } = this.props;
-    let editing = editingItem;
-    const isLog = (item && typeof item === 'string') ? item.includes('"json":true') : false;
-
-    if (editing) {
-      if (!show) this.editItemSet(false);
-      editing = show;
-    }
-
-    const noEditingIsLog = !editing && isLog;
-    const noEditingNoLog = !editing && !isLog;
-    return (
-      <div>
-        {item && (
-          <div className="noteTagBox">
-            {editing && this.editItemBox(item)}
-            {noEditingIsLog && this.displayLogItemBox(item)}
-            {noEditingNoLog && this.displayItemBox(item)}
-          </div>
-        )}
-      </div>
-    );
-  }
-}
+export default NoteItem;
