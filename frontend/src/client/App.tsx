@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import {
   BrowserRouter as Router,
   Route,
@@ -25,6 +26,8 @@ import {
 
 import { compareSort } from './views/Helpers/utils';
 import { Note } from './views/Helpers/types';
+import { RootState } from '../store';
+import { setTheme } from '../store/themeSlice';
 
 type ProtectedRoutesProps = {
   children: React.ReactElement;
@@ -41,21 +44,24 @@ type AppState = {
   user: string;
   notesInitialLoad: boolean;
   noteNames: string[] | null;
-  theme: string;
   searchTerm: string;
   freshData: boolean;
   lastRefresh: number | null;
 };
 
-export default class App extends Component<unknown, AppState> {
-  constructor(props: unknown) {
+type AppProps = {
+  theme: string;
+  setTheme: (theme: string) => void;
+};
+
+class App extends Component<AppProps, AppState> {
+  constructor(props: AppProps) {
     super(props);
     this.state = {
       notes: null,
       user: '',
       notesInitialLoad: false,
       noteNames: null,
-      theme: 'Dark',
       searchTerm: '',
       freshData: false,
       lastRefresh: null,
@@ -259,7 +265,7 @@ export default class App extends Component<unknown, AppState> {
       this.setState({ user: noteName, notes: null });
       this.getMyNotes(noteName);
     } else if (msg.noteTheme) {
-      this.setState({ theme: msg.noteTheme });
+      this.props.setTheme(msg.noteTheme);
     } else {
       this.updateNote(msg);
     }
@@ -340,9 +346,8 @@ export default class App extends Component<unknown, AppState> {
   }
 
   render() {
-    const { theme, notes, user, searchTerm, freshData } = this.state;
-
-    const { noteNames } = this.state;
+    const { theme } = this.props;
+    const { notes, user, searchTerm, freshData, noteNames } = this.state;
     const themeBack = `${theme.toLowerCase()}-back`;
 
     const menuButton = document.getElementById('menuButton');
@@ -484,3 +489,13 @@ export default class App extends Component<unknown, AppState> {
     );
   }
 }
+
+const mapStateToProps = (state: RootState) => ({
+  theme: state.theme.value,
+});
+
+const mapDispatchToProps = {
+  setTheme,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
