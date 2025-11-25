@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { logoutUser } from '../../Helpers/requests';
 import { Note } from '../../Helpers/types';
 import {
@@ -26,154 +26,57 @@ type NoteDetailPageProps = {
 
 type PageDescriptor = { params: { id: string } };
 
-type NoteDetailPageState = {
-  showAddItem: boolean;
-  editName: boolean;
-  pages: PageDescriptor[];
-};
+const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
+  match,
+  noteNames,
+  Theme,
+  searchTerm,
+  notes,
+  set,
+  ...rest
+}) => {
+  const [showAddItem, setShowAddItem] = useState(false);
+  const [editName, setEditName] = useState(false);
+  const [pages, setPages] = useState<PageDescriptor[]>([{ params: { id: 'main' } }]);
 
-export default class NoteDetailPage extends Component<NoteDetailPageProps, NoteDetailPageState> {
-  constructor(props: NoteDetailPageProps) {
-    super(props);
-    this.state = {
-      showAddItem: false,
-      editName: false,
-      pages: [{ params: { id: 'main' } }],
-    };
-    this.openPage = this.openPage.bind(this);
-    this.noteDetailSet = this.noteDetailSet.bind(this);
-    this.showAddItemSet = this.showAddItemSet.bind(this);
-    this.hideAddItem = this.hideAddItem.bind(this);
-    this.setNoteTheme = this.setNoteTheme.bind(this);
-    this.editNameSet = this.editNameSet.bind(this);
-    this.prepForNote = this.prepForNote.bind(this);
-  }
-
-  componentDidMount() {
+  useEffect(() => {
     const localPages = localStorage.getItem('saved-pages');
     if (localPages) {
-      let pages = JSON.parse(localPages);
-      pages = pages.filter((page) => page.params.id !== '');
-      if (pages.length > 1) this.setState({ pages: JSON.parse(localPages) });
+      let savedPages = JSON.parse(localPages);
+      savedPages = savedPages.filter((page: PageDescriptor) => page.params.id !== '');
+      if (savedPages.length > 1) setPages(JSON.parse(localPages));
     }
 
     const isEditing = localStorage.getItem('new-folder-edit');
     if (isEditing) {
-      this.setState({ showAddItem: true });
+      setShowAddItem(true);
       localStorage.removeItem('new-folder-edit');
       localStorage.setItem('was-new-folder-edit', 'true');
     }
-  }
+  }, []);
 
-  setNoteTheme = (name: string) => {
-    const { set } = this.props;
-    set({ noteTheme: name });
-    localStorage.setItem('theme', name);
-  };
+  const setNoteTheme = useCallback(
+    (name: string) => {
+      set({ noteTheme: name });
+      localStorage.setItem('theme', name);
+    },
+    [set],
+  );
 
-  noteDetailSet = (msg: any) => {
-    const { set } = this.props;
-
-    if (msg.forParent) {
-      this.setState({ ...msg });
-    } else {
-      set(msg);
-    }
-  };
-
-  openPage = (msg: any) => {
-    if (!msg.personNext) return;
-    const nextPage = { params: { id: msg.personNext.id } };
-    const { pages } = this.state;
-    let updatePages = pages;
-    const parentPageIndex = updatePages.findIndex((page) => page.params.id === msg.parentId);
-
-    const pageFoundIndex = updatePages.findIndex((page) => page.params.id === msg.personNext.id);
-    if (parentPageIndex > -1 && pageFoundIndex === -1) {
-      updatePages = updatePages.slice(0, parentPageIndex + 1);
-    } else if (parentPageIndex > 0 && pageFoundIndex > -1) {
-      updatePages = updatePages.slice(0, pageFoundIndex + 1);
-    }
-
-    if (pageFoundIndex === -1) {
-      const newPages =
-        updatePages.length === 1 && updatePages[0].params.id === '' ? [nextPage] : [...updatePages, nextPage];
-
-      this.setState({ pages: newPages });
-      localStorage.setItem('saved-pages', JSON.stringify(newPages));
-    } else if (pageFoundIndex > -1 && !msg.showNote) {
-      const localPageFoundIndex = pageFoundIndex === 0 ? 1 : pageFoundIndex;
-      const newPages = updatePages.slice(0, localPageFoundIndex);
-      if (pageFoundIndex + 1 === updatePages.length) {
-        this.scrollPageBack();
+  const noteDetailSet = useCallback(
+    (msg: any) => {
+      if (msg.forParent) {
+        if (Object.prototype.hasOwnProperty.call(msg, 'showAddItem')) setShowAddItem(msg.showAddItem);
+        if (Object.prototype.hasOwnProperty.call(msg, 'editName')) setEditName(msg.editName);
+        if (Object.prototype.hasOwnProperty.call(msg, 'pages')) setPages(msg.pages);
       } else {
-        this.scrollPagesBackAndSet(updatePages.length, updatePages.length - pageFoundIndex, newPages);
+        set(msg);
       }
-    } else if (pageFoundIndex > -1) {
-      const freshStatePages = pages;
-      if (pageFoundIndex === freshStatePages.length - 1) {
-        if (freshStatePages.length + 1 === freshStatePages.length && msg.hideNote) {
-          this.scrollPageBack();
-        } else {
-          const last = freshStatePages[freshStatePages.length - 1];
-          const secondTolast = freshStatePages[freshStatePages.length - 2];
+    },
+    [set],
+  );
 
-          if (secondTolast && last && last.params.id !== secondTolast.params.id) {
-            freshStatePages.push(last);
-            this.setState({ pages: freshStatePages });
-            localStorage.setItem('saved-pages', JSON.stringify(freshStatePages));
-          }
-          if (secondTolast && last && last.params.id === secondTolast.params.id) {
-            this.setState({ pages: freshStatePages });
-            localStorage.setItem('saved-pages', JSON.stringify(freshStatePages));
-          }
-        }
-      }
-
-      const localPages = localStorage.getItem('saved-pages');
-
-      if (msg.showNote && !msg.hideNote) {
-        const locals = localPages ? JSON.parse(localPages) : [];
-        const last = locals[locals.length - 1];
-        const secondTolast = locals[locals.length - 2];
-
-        if (secondTolast && last && last.params.id === secondTolast.params.id) {
-          this.setState({ pages: locals });
-          localStorage.setItem('saved-pages', JSON.stringify(locals));
-        }
-      }
-    }
-  };
-
-  hideAddItem = () => {
-    this.setState({ showAddItem: false });
-  };
-
-  showAddItemSet = (bVal: boolean) => {
-    this.setState({ showAddItem: bVal });
-    if (bVal) window.scrollTo(0, 0);
-  };
-
-  logOut = () => {
-    logoutUser(() => window.location.reload());
-  };
-
-  addButtonClicked = (showAddItem: boolean) => {
-    this.showAddItemSet(!showAddItem);
-  };
-
-  editNameSet = () => {
-    window.scrollTo(0, 0);
-    const { editName } = this.state;
-    this.setState({ editName: !editName });
-  };
-
-  prepForNote = (name: string) => {
-    const { set } = this.props;
-    set({ noteName: name });
-  };
-
-  customScrollBy(element: HTMLElement, startPosition: number, endPosition: number) {
+  const customScrollBy = useCallback((element: HTMLElement, startPosition: number, endPosition: number) => {
     window.scrollTo({ top: 0 });
     const left = startPosition > endPosition;
     let i = startPosition;
@@ -187,114 +90,212 @@ export default class NoteDetailPage extends Component<NoteDetailPageProps, NoteD
       if (left && i <= endPosition) clearInterval(int);
       if (!left && i >= endPosition) clearInterval(int);
     }, 1);
-  }
+  }, []);
 
-  scrollPagesBackAndSet(currentPageCount: number, pagesBackCount: number, pages: PageDescriptor[]) {
-    if (pages && pages.length > 1) {
-      const noteDetailPage = document.getElementById('multiple-pages');
-      if (noteDetailPage) {
-        let pageWidth = noteDetailPage.scrollWidth / currentPageCount;
-        pageWidth -= pageWidth / (5 + currentPageCount);
+  const scrollPagesBackAndSet = useCallback(
+    (currentPageCount: number, pagesBackCount: number, nextPages: PageDescriptor[]) => {
+      if (nextPages && nextPages.length > 1) {
+        const noteDetailPage = document.getElementById('multiple-pages');
+        if (noteDetailPage) {
+          let pageWidth = noteDetailPage.scrollWidth / currentPageCount;
+          pageWidth -= pageWidth / (5 + currentPageCount);
 
-        this.customScrollBy(noteDetailPage, noteDetailPage.scrollWidth - pageWidth, noteDetailPage.scrollWidth - pageWidth * pagesBackCount);
+          customScrollBy(
+            noteDetailPage,
+            noteDetailPage.scrollWidth - pageWidth,
+            noteDetailPage.scrollWidth - pageWidth * pagesBackCount,
+          );
+        }
+        setTimeout(() => {
+          setPages(nextPages);
+          localStorage.setItem('saved-pages', JSON.stringify(nextPages));
+        }, 500);
       }
-      const self = this;
-      setTimeout(() => {
-        self.setState({ pages });
-        localStorage.setItem('saved-pages', JSON.stringify(pages));
-      }, 500);
-    }
-  }
+    },
+    [customScrollBy],
+  );
 
-  scrollPageBack() {
-    const { pages } = this.state;
+  const scrollPageBack = useCallback(() => {
     if (pages && pages.length > 1) {
       const pageCount = pages.length;
       const noteDetailPage = document.getElementById('multiple-pages');
       if (noteDetailPage) {
         const pageWidth = noteDetailPage.scrollWidth / pageCount;
 
-        this.customScrollBy(noteDetailPage, noteDetailPage.scrollWidth - pageWidth, noteDetailPage.scrollWidth - pageWidth - pageWidth - 15);
+        customScrollBy(
+          noteDetailPage,
+          noteDetailPage.scrollWidth - pageWidth,
+          noteDetailPage.scrollWidth - pageWidth - pageWidth - 15,
+        );
       }
-      const self = this;
       setTimeout(() => {
         const remainingPages = pages.slice(0, pageCount - 1);
         localStorage.removeItem('showTag');
-        self.setState({ pages: remainingPages });
+        setPages(remainingPages);
         localStorage.setItem('saved-pages', JSON.stringify(remainingPages));
       }, 500);
     }
+  }, [customScrollBy, pages]);
+
+  const openPage = useCallback(
+    (msg: any) => {
+      if (!msg.personNext) return;
+      const nextPage = { params: { id: msg.personNext.id } };
+      let updatePages = pages;
+      const parentPageIndex = updatePages.findIndex((page) => page.params.id === msg.parentId);
+
+      const pageFoundIndex = updatePages.findIndex((page) => page.params.id === msg.personNext.id);
+      if (parentPageIndex > -1 && pageFoundIndex === -1) {
+        updatePages = updatePages.slice(0, parentPageIndex + 1);
+      } else if (parentPageIndex > 0 && pageFoundIndex > -1) {
+        updatePages = updatePages.slice(0, pageFoundIndex + 1);
+      }
+
+      if (pageFoundIndex === -1) {
+        const newPages =
+          updatePages.length === 1 && updatePages[0].params.id === '' ? [nextPage] : [...updatePages, nextPage];
+
+        setPages(newPages);
+        localStorage.setItem('saved-pages', JSON.stringify(newPages));
+      } else if (pageFoundIndex > -1 && !msg.showNote) {
+        const localPageFoundIndex = pageFoundIndex === 0 ? 1 : pageFoundIndex;
+        const newPages = updatePages.slice(0, localPageFoundIndex);
+        if (pageFoundIndex + 1 === updatePages.length) {
+          scrollPageBack();
+        } else {
+          scrollPagesBackAndSet(updatePages.length, updatePages.length - pageFoundIndex, newPages);
+        }
+      } else if (pageFoundIndex > -1) {
+        const freshStatePages = [...pages];
+        if (pageFoundIndex === freshStatePages.length - 1) {
+          if (freshStatePages.length + 1 === freshStatePages.length && msg.hideNote) {
+            scrollPageBack();
+          } else {
+            const last = freshStatePages[freshStatePages.length - 1];
+            const secondTolast = freshStatePages[freshStatePages.length - 2];
+
+            if (secondTolast && last && last.params.id !== secondTolast.params.id) {
+              const updated = [...freshStatePages, last];
+              setPages(updated);
+              localStorage.setItem('saved-pages', JSON.stringify(updated));
+            }
+            if (secondTolast && last && last.params.id === secondTolast.params.id) {
+              setPages(freshStatePages);
+              localStorage.setItem('saved-pages', JSON.stringify(freshStatePages));
+            }
+          }
+        }
+
+        const localPages = localStorage.getItem('saved-pages');
+
+        if (msg.showNote && !msg.hideNote) {
+          const locals = localPages ? JSON.parse(localPages) : [];
+          const last = locals[locals.length - 1];
+          const secondTolast = locals[locals.length - 2];
+
+          if (secondTolast && last && last.params.id === secondTolast.params.id) {
+            setPages(locals);
+            localStorage.setItem('saved-pages', JSON.stringify(locals));
+          }
+        }
+      }
+    },
+    [pages, scrollPageBack, scrollPagesBackAndSet],
+  );
+
+  const hideAddItem = useCallback(() => {
+    setShowAddItem(false);
+  }, []);
+
+  const showAddItemSet = useCallback((bVal: boolean) => {
+    setShowAddItem(bVal);
+    if (bVal) window.scrollTo(0, 0);
+  }, []);
+
+  const logOut = useCallback(() => {
+    logoutUser(() => window.location.reload());
+  }, []);
+
+  const addButtonClicked = useCallback(
+    (currentShowAddItem: boolean) => {
+      showAddItemSet(!currentShowAddItem);
+    },
+    [showAddItemSet],
+  );
+
+  const editNameSet = useCallback(() => {
+    window.scrollTo(0, 0);
+    setEditName((prev) => !prev);
+  }, []);
+
+  const prepForNote = useCallback(
+    (name: string) => {
+      set({ noteName: name });
+    },
+    [set],
+  );
+
+  let localPages = pages;
+
+  const isNoteNames = match?.url === '/notes/note-names';
+  if (isNoteNames) {
+    localPages = [{ params: { id: '' } }];
   }
 
-  render() {
-    const { pages } = this.state;
-    let localPages = pages;
-    const { showAddItem, editName } = this.state;
-    const { match, noteNames, Theme, searchTerm, notes } = this.props;
-
-    const isNoteNames = match.url === '/notes/note-names';
-    if (isNoteNames) {
-      localPages = [{ params: { id: '' } }];
-    }
-
-    const lastPageIndex = localPages.length - 1;
-    const pagesCont = localPages.map((pageLink, index) => {
-      const lastPageShowAddItem = showAddItem && index === lastPageIndex;
-      const lastPage = index === lastPageIndex;
-      return (
-        <NoteDetailPageItem
-          key={(pageLink?.params?.id ?? 'first') + index}
-          pageLink={pageLink}
-          showAddItem={lastPageShowAddItem}
-          index={index}
-          editName={editName}
-          lastPage={lastPage}
-          pageCount={localPages.length}
-          hideAddItem={this.hideAddItem}
-          openPage={this.openPage}
-          initShowtag={pageLink}
-          {...this.props}
-          set={this.noteDetailSet}
-          searchTerm={searchTerm ?? ''}
-          noteNames={noteNames}
-          Theme={Theme}
-          notes={notes}
-        />
-      );
-    });
-
-    const showBackButton = pages.length > 1;
+  const lastPageIndex = localPages.length - 1;
+  const pagesCont = localPages.map((pageLink, index) => {
+    const lastPageShowAddItem = showAddItem && index === lastPageIndex;
+    const lastPage = index === lastPageIndex;
     return (
-      <div className="slide-in" key={match.url}>
-        <BackButton
-          Theme={Theme}
-          hasPages={pages.length > 1}
-          onBack={this.scrollPageBack.bind(this)}
-          onLogout={this.logOut}
-        />
-        {isNoteNames && (
-          <Sidebar noteNames={noteNames} prepForNote={this.prepForNote} setNoteTheme={this.setNoteTheme} />
-        )}
-        <div id="multiple-pages">{pagesCont}</div>
-        <ScrollButtons
-          Theme={Theme}
-          showAddItem={showAddItem}
-          showBackButton={showBackButton}
-          onEditName={this.editNameSet}
-          onAdd={() => this.addButtonClicked(showAddItem)}
-        />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-      </div>
+      <NoteDetailPageItem
+        key={(pageLink?.params?.id ?? 'first') + index}
+        pageLink={pageLink}
+        showAddItem={lastPageShowAddItem}
+        index={index}
+        editName={editName}
+        lastPage={lastPage}
+        pageCount={localPages.length}
+        hideAddItem={hideAddItem}
+        openPage={openPage}
+        initShowtag={pageLink}
+        {...rest}
+        set={noteDetailSet}
+        searchTerm={searchTerm ?? ''}
+        noteNames={noteNames}
+        Theme={Theme}
+        notes={notes}
+      />
     );
-  }
-}
+  });
+
+  const showBackButton = pages.length > 1;
+  return (
+    <div className="slide-in" key={match.url}>
+      <BackButton Theme={Theme} hasPages={pages.length > 1} onBack={scrollPageBack} onLogout={logOut} />
+      {isNoteNames && (
+        <Sidebar noteNames={noteNames} prepForNote={prepForNote} setNoteTheme={setNoteTheme} />
+      )}
+      <div id="multiple-pages">{pagesCont}</div>
+      <ScrollButtons
+        Theme={Theme}
+        showAddItem={showAddItem}
+        showBackButton={showBackButton}
+        onEditName={editNameSet}
+        onAdd={() => addButtonClicked(showAddItem)}
+      />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+    </div>
+  );
+};
+
+export default NoteDetailPage;
