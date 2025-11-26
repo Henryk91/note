@@ -1,16 +1,20 @@
-import React, { Component } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import NoteItem from '../NoteItem/NoteItem';
-import { getPerson } from '../../Helpers/utils';
+import { getPerson, getPersonNoteType } from '../../Helpers/utils';
 import { Note } from '../../Helpers/types';
 import PageContent from './PageContent';
 import { NoteDetailListItem } from './forms';
 
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../../../store';
+import { getAllPersonById, selectPersonById, setPersonById } from '../../../../store/personSlice';
+
 type Match = {
   isExact: boolean;
-  params: {id: string};
+  params: { id: string };
   path: string;
   url: string;
-}
+};
 
 type NoteDetailProps = {
   notes: Note[] | null;
@@ -29,204 +33,91 @@ type NoteDetailProps = {
   initShowtag?: boolean;
 };
 
-type NoteDetailState = {
-  person: Note | null;
-  editName: boolean;
-  tags: any;
-  showTag: string | null;
-  addLable: any;
-  displayDate: string | null;
-  continueData: any;
-  showLogDaysBunch: boolean;
-  searchTerm: string;
-  showLink: string[];
-  prevDate: string | null;
-  nextDate: string | null;
-};
+type LogDay = { date: string; count: number };
 
-export default class NoteDetail extends Component<NoteDetailProps, NoteDetailState> {
-  constructor(props: NoteDetailProps) {
-    super(props);
-    this.state = {
-      person: null,
-      editName: false,
-      tags: null,
-      showTag: '',
-      addLable: null,
-      displayDate: null,
-      continueData: null,
-      showLogDaysBunch: false,
-      searchTerm: '',
-      showLink: [''],
-      prevDate: null,
-      nextDate: null,
-    };
-    this.submitNewItem = this.submitNewItem.bind(this);
-    this.getNoteByTag = this.getNoteByTag.bind(this);
-    this.showTagChange = this.showTagChange.bind(this);
-    this.showHideBox = this.showHideBox.bind(this);
-    this.setNoteTheme = this.setNoteTheme.bind(this);
-    this.createNoteItemBunch = this.createNoteItemBunch.bind(this);
-    this.showLogDays = this.showLogDays.bind(this);
+const NoteDetail: React.FC<NoteDetailProps> = ({
+  notes,
+  Theme,
+  searchTerm,
+  editName: editNameProp,
+  set,
+  openPage,
+  lastPage,
+  index,
+  showAddItem,
+  hideAddItem,
+  pageCount,
+  match,
+  noteNames,
+  initShowtag,
+}) => {
+  const dispatch = useDispatch();
+  const personId = `${index ?? 0}`;
+  const person = useSelector((state: RootState) => selectPersonById(state, personId));
+  const allPerson = useSelector((state: RootState) => getAllPersonById(state));
+  const [editName, setEditName] = useState(false);
+  const [tags, setTags] = useState<any>(null);
+  const [showTag, setShowTag] = useState<string | null>('');
+  const [addLable, setAddLable] = useState<any>(null);
+  const [displayDate, setDisplayDate] = useState<Date | string | null>(null);
+  const [continueData, setContinueData] = useState<any>(null);
+  const [showLogDaysBunch, setShowLogDaysBunch] = useState(false);
+  const [searchTermState, setSearchTermState] = useState<string | undefined>(searchTerm);
+  const [showLink, setShowLink] = useState<string[]>(['']);
+  const [prevDate, setPrevDate] = useState<string | null>(null);
+  const [nextDate, setNextDate] = useState<string | null>(null);
+
+  function enableAnimationCheck(tag: string | null, prop: string) {
+    let animate = '';
+    if (tag === prop && tag !== '' && prop !== 'Log') animate = 'grow';
+    if (tag === prop && tag !== '' && prop === 'Log') animate = 'growb';
+    return animate;
   }
 
-  componentDidMount() {
-    this.initPage3(this);
+  function isLinkCheck(sort: Record<string, string[]>, prop: string) {
+    return sort?.[prop]?.[0]?.startsWith('href:');
   }
 
-  componentDidUpdate(nextProps) {
-    const { searchTerm, editName } = this.state;
-    const { notes } = this.props;
-    if (
-      searchTerm !== nextProps.searchTerm ||
-      editName !== nextProps.editName ||
-      notes !== nextProps.notes
-    ) {
-      this.setState({
-        searchTerm: nextProps.searchTerm,
-        editName: nextProps.editName,
-      });
+  const noteItemsBunch = (animate, logDaysBunch, bunch, showLogDaysBunchLocal) => (
+    <div className={`${animate}`}>
+      {showLogDaysBunchLocal && logDaysBunch}
+      {!showLogDaysBunchLocal && bunch}
+    </div>
+  );
 
-      // const self = this;
-      setTimeout(() => {
-        this.initPage(nextProps, this);
-      }, 5);
-    }
-  }
-
-  handleLinkInLinkClick(showLink, nextPerson, tagName) {
-    console.log('Should open sub list here', showLink[1]);
-    window.history.pushState(
-      nextPerson.heading,
-      'Sub Dir',
-      `/notes/${nextPerson.id}`,
-    );
-    localStorage.setItem('showTag', tagName);
-    this.setState({ showTag: tagName, showLink: [''] });
-    this.refreshItems(nextPerson);
-  }
-
-  handleLinkClick(tagData, person) {
-    const noteId = tagData.data.substring(5);
-    const { notes, openPage } = this.props;
-    const personNext =
-      notes && notes[0] ? notes.find((note) => note.id === noteId) : null;
-
-    const parentId = person.id;
-    openPage({ personNext, parentId, hideNote: true });
-  }
-
-  handleLinkButtons(animate, isLink, allDates, bunch) {
-    const { editName } = this.state;
-    let localBunch = bunch;
-    if (animate === 'grow' && isLink && !editName) {
-      if (allDates && allDates[0] && allDates[0].startsWith('href:')) {
-        // Is link
-        const noteId = allDates[0].substring(5);
-        const { notes } = this.props;
-        const noteHeadings =
-          notes && notes[0] ? notes.find((note) => note.id === noteId) : null;
-        const buttons = this.getNoteByTag(noteHeadings?.dataLable, '');
-        localBunch = buttons;
-      }
-    }
-    return localBunch;
-  }
-
-  getNoteByTag = (items, showTag) => {
-    const sort = {};
-    items.forEach((tag) => {
-      if (sort[tag.tag]) {
-        sort[tag.tag].push(tag.data);
+  function customScrollBy(element, startPosition, endPosition) {
+    window.scrollTo({ top: 0 });
+    const left = startPosition > endPosition;
+    let i = startPosition;
+    const int = setInterval(() => {
+      element.scrollTo({ top: 0, left: i });
+      if (left) {
+        i -= 8;
       } else {
-        sort[tag.tag] = [tag.data];
+        i += 8;
       }
-    });
+      if (left && i <= endPosition) clearInterval(int);
+      if (!left && i >= endPosition) clearInterval(int);
+    }, 1);
+  }
 
-    const listHasShowTag = items.some((item) => item.tag === showTag);
+  function getDataFilteredAndSorted(sort: Record<string, string[]>, prop: string, term?: string) {
+    let allDates = [...sort[prop]];
 
-    const { linkProps, propertyArray } = this.setLogAndLinksAtTop(sort);
-    const { Theme, lastPage } = this.props;
-    const { displayDate, searchTerm, showLogDaysBunch } = this.state;
-    const all = [...linkProps, ...propertyArray].map((prop, i) => {
-      const showDateSelector = prop === 'Log';
+    if (term) {
+      const lowerSearch = term.toLowerCase();
+      allDates = allDates.filter((item) => item?.toLowerCase()?.includes(lowerSearch));
+    }
 
-      const showButton = showTag === prop;
+    if (prop !== 'Log') return allDates;
+    allDates = allDates
+      .filter((d) => d.includes('"json":true'))
+      .sort((a, b) => new Date(JSON.parse(a).date).getTime() - new Date(JSON.parse(b).date).getTime());
 
-      let allDates = this.getDataFilteredAndSorted(sort, prop, searchTerm);
-      // let allDates = showDateSelector
-      //   ? this.getDataFilteredAndSorted(sort, prop, searchTerm)
-      //   : [...sort[prop]];
+    return allDates;
+  }
 
-      const { selectedDate, logDaysBunch } = this.logDayBunchLogic(
-        prop,
-        displayDate,
-        allDates,
-      );
-
-      const isLink = this.isLinkCheck(sort, prop);
-
-      const animate = this.enableAnimationCheck(showTag, prop);
-
-      if (showTag === 'Log' && !showLogDaysBunch) {
-        const checkSate = `${selectedDate}`.substring(0, 15).trim();
-        allDates = allDates.filter((item) => item.includes(checkSate));
-      }
-
-      let bunch = this.createNoteItemBunch(
-        allDates,
-        prop,
-        selectedDate,
-        showButton,
-      );
-
-      bunch = this.handleLinkButtons(animate, isLink, allDates, bunch);
-
-      const linkBorder = isLink ? 'link-border' : '';
-      const themeBack = `${Theme.toLowerCase()}-back`;
-      const themeBorder = `${Theme.toLowerCase()}-border-thick`;
-      const themeHover = `${Theme.toLowerCase()}-hover`;
-
-      const className = 'detailedBox';
-      const showOnlyNote =
-        lastPage &&
-        listHasShowTag &&
-        showTag &&
-        showTag !== 'Log' &&
-        !showLogDaysBunch;
-
-      const key = prop + i;
-      return (
-        <div className={className} key={key}>
-          {!showOnlyNote && (
-            <NoteDetailListItem
-              linkBorder={linkBorder}
-              showTag={showTag}
-              prop={prop}
-              themeBorder={themeBorder}
-              isLink={isLink}
-              bunch={bunch}
-              showDateSelector={showDateSelector}
-              themeBack={themeBack}
-              themeHover={themeHover}
-              continueData={this.state.continueData}
-              onShowHide={() => this.showHideBox(showTag, prop)}
-              onShowLogDays={() => this.showLogDays(prop)}
-              onShowLogTag={(tag) => this.showLogTagChange(tag)}
-              onChangeDate={this.changeDate}
-              onDateBackForward={(e, dir) => this.dateBackForward(e, dir)}
-              onContinueLog={(payload) => this.continueLog(payload)}
-            />
-          )}
-          {this.noteItemsBunch(animate, logDaysBunch, bunch, showLogDaysBunch)}
-        </div>
-      );
-    });
-    return all;
-  };
-
-  setLogAndLinksAtTop(sort) {
-    const { index } = this.props;
+  function setLogAndLinksAtTop(sort: Record<string, string[]>) {
     let propertyArray = Object.keys(sort);
     const isFirstPage = index === 0;
     if (isFirstPage) propertyArray.sort();
@@ -247,25 +138,8 @@ export default class NoteDetail extends Component<NoteDetailProps, NoteDetailSta
     return { linkProps, propertyArray };
   }
 
-  setDate = (prop, date) => {
-    if (prop === 'Log Days') {
-      this.setState({ displayDate: date, showLogDaysBunch: false });
-      // const self = this;
-      setTimeout(() => {
-        window.scrollTo(0, 0);
-        this.showLogTagChange('Log');
-      }, 10);
-    }
-  };
-
-  setNoteTheme = (name) => {
-    const { set } = this.props;
-    set({ noteTheme: name });
-    localStorage.setItem('theme', name);
-  };
-
-  getSubs(notes) {
-    const subs = notes.filter((note) => note.heading.startsWith('Sub: '));
+  function getSubs(notesList: Note[]) {
+    const subs = notesList.filter((note) => note.heading.startsWith('Sub: '));
 
     if (subs.length > 0) {
       const headings = subs.map((sub) => ({
@@ -282,31 +156,381 @@ export default class NoteDetail extends Component<NoteDetailProps, NoteDetailSta
     return null;
   }
 
-  getDataFilteredAndSorted(sort, prop, searchTerm) {
-    let allDates = [...sort[prop]];
-
-    if (searchTerm) {
-      const lowerSearch = searchTerm.toLowerCase();
-      allDates = allDates.filter((item) =>
-        item?.toLowerCase()?.includes(lowerSearch),
-      );
+  function refreshItems(currentPerson: Note | null) {
+    if (currentPerson) {
+      const sessionShowTag = localStorage.getItem('showTag');
+      const newTags = getNoteByTag(currentPerson.dataLable, sessionShowTag);
+      dispatch(setPersonById({ id: `${index}`, person: {...currentPerson} }));
+      setTags(newTags);
+      setShowTag(sessionShowTag);
     }
-
-    if (prop !== 'Log') return allDates;
-    allDates = allDates
-      .filter((d) => d.includes('"json":true'))
-      .sort(
-        (a, b) => new Date(JSON.parse(a).date).getTime() - new Date(JSON.parse(b).date).getTime(),
-      );
-
-    return allDates;
   }
 
-  dateBackForward = (event, direction) => {
+  function clearShowTag() {
+    localStorage.removeItem('showTag');
+    setShowTag(null);
+  }
+
+  function setDate(prop: string, date: string | Date) {
+    if (prop === 'Log Days') {
+      if(date) setDisplayDate(date);
+      setShowLogDaysBunch(false);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        showLogTagChange('Log');
+      }, 10);
+    }
+  }
+
+  function openDetailOnNewPage(personParam: Note | null) {
+    if (!personParam) return;
+    const parentId = personParam.id;
+
+    openPage({
+      personNext: personParam,
+      parentId,
+      showNote: true,
+      hideNote: true,
+    });
+  }
+
+  function handleLinkClick(tagData, currentPerson) {
+    
+    const noteId = tagData.data.substring(5);
+    const personNext = notes && notes[0] ? notes.find((note) => note.id === noteId) : null;
+
+    const parentId = currentPerson.id;
+    openPage({ personNext, parentId, hideNote: true });
+  }
+
+  function handleLinkInLinkClick(showLinkArr: string[], nextPerson: Note, tagName: string) {
+    window.history.pushState(nextPerson.heading, 'Sub Dir', `/notes/${nextPerson.id}`);
+    localStorage.setItem('showTag', tagName);
+    setShowTag(tagName);
+    setShowLink(['']);
+    refreshItems(nextPerson);
+  }
+
+  function handleLinkButtons(animate: string, isLink: boolean, allDates: any[], bunch: any[]) {
+    let localBunch = bunch;
+    if (animate === 'grow' && isLink && !editName) {
+      if (allDates && allDates[0] && allDates[0].startsWith('href:')) {
+        const noteId = allDates[0].substring(5);
+        const noteHeadings = notes && notes[0] ? notes.find((note) => note.id === noteId) : null;
+        const buttons = getNoteByTag(noteHeadings?.dataLable, '');
+        localBunch = buttons;
+      }
+    }
+    return localBunch;
+  }
+
+  function createNoteItemBunch(items: any[], prop: string, selectedDate: Date | string | null, showButton: boolean) {
+    const showEdit = prop !== 'Log Days';
+    const max = items.length;
+    const selectedDateString = `${selectedDate}`.substring(0, 15).trim();
+    return items.map((item, ind) => {
+      const prevItemLocal = ind > -1 ? items[ind - 1] : null;
+      const nextItemLocal = ind < max ? items[ind + 1] : null;
+
+      if ((item as LogDay).date === selectedDateString) {
+        setPrevDate(prevItemLocal?.date ?? null);
+        setNextDate(nextItemLocal?.date ?? null);
+      }
+
+      let count = 0;
+      let dateItem: any = item;
+      if (prop === 'Log Days') {
+        count = (item as LogDay).count;
+        dateItem = (item as LogDay).date;
+      }
+      const key = dateItem + prop + ind;
+      return (
+        <div onClick={() => setDate(prop, dateItem)} key={key}>
+          <NoteItem
+            nextItem={nextItemLocal}
+            prevItem={prevItemLocal}
+            item={dateItem}
+            date={selectedDate}
+            Theme={Theme}
+            show={showButton && lastPage}
+            set={updateNoteItem}
+            cont={continueLog}
+            type={prop}
+            index={ind}
+            showEdit={showEdit}
+            count={count}
+          />
+        </div>
+      );
+    });
+  }
+
+  function logDayBunchLogic(prop: string, selectedDate: Date | string | null, allDates: any[]) {
+    let newSelectedDate = selectedDate;
+    let newLogDaysBunch;
+
+    if (prop === 'Log') {
+      if (selectedDate === null) {
+        let lastDate = [...allDates].slice(allDates.length - 1);
+        if (lastDate[0]) {
+          newSelectedDate = new Date(JSON.parse(lastDate[0]).date);
+          if(newSelectedDate)setDisplayDate(newSelectedDate);
+        }
+      }
+      const allLogDays = [...allDates].map((day) => JSON.parse(day).date.substring(0, 15).trim());
+
+      const logDaysTemp = [...allLogDays].filter((v, ind, s) => s.indexOf(v) === ind);
+
+      const logDays = [...logDaysTemp].map((day) => {
+        const total = allLogDays.filter((allDay) => allDay === day).length;
+
+        return { date: day, count: total };
+      });
+
+      let selDate = `${new Date(newSelectedDate as any)}`;
+      selDate = selDate.substring(0, 15).trim();
+      const logDaysBunch = createNoteItemBunch(logDays.reverse(), 'Log Days', newSelectedDate, showLogDaysBunch);
+
+      let selDates = [...allDates].filter((val) => val.includes(selDate));
+      if (selDates.length > 0) {
+        selDates = selDates.slice(selDates.length - 2);
+        const contData = JSON.parse(selDates[0]).data;
+        setContinueData(contData);
+      }
+      newLogDaysBunch = logDaysBunch;
+    }
+    return { selectedDate: newSelectedDate, logDaysBunch: newLogDaysBunch };
+  }
+
+  const  getNoteByTag = (items, showTagValue: string | null) => {
+    if (!items) return [];
+    const sort: Record<string, any[]> = {};
+    items.forEach((tag) => {
+      if (sort[tag.tag]) {
+        sort[tag.tag].push(tag.data);
+      } else {
+        sort[tag.tag] = [tag.data];
+      }
+    });
+
+    const listHasShowTag = items.some((item) => item.tag === showTagValue);
+
+    const { linkProps, propertyArray } = setLogAndLinksAtTop(sort);
+    const all = [...linkProps, ...propertyArray].map((prop, i) => {
+      const showDateSelector = prop === 'Log';
+
+      const showButton = showTagValue === prop;
+
+      let allDates = getDataFilteredAndSorted(sort, prop, searchTermState);
+      const { selectedDate, logDaysBunch } = logDayBunchLogic(prop, displayDate, allDates);
+
+      const isLink = isLinkCheck(sort, prop);
+      const animate = enableAnimationCheck(showTagValue, prop);
+
+      if (showTagValue === 'Log' && !showLogDaysBunch) {
+        const checkSate = `${selectedDate}`.substring(0, 15).trim();
+        allDates = allDates.filter((item) => item.includes(checkSate));
+      }
+
+      let bunch = createNoteItemBunch(allDates, prop, selectedDate, showButton);
+
+      bunch = handleLinkButtons(animate, isLink, allDates, bunch);
+
+      const linkBorder = isLink ? 'link-border' : '';
+      const themeBack = `${Theme.toLowerCase()}-back`;
+      const themeBorder = `${Theme.toLowerCase()}-border-thick`;
+      const themeHover = `${Theme.toLowerCase()}-hover`;
+
+      const className = 'detailedBox';
+      const showOnlyNote =
+        lastPage && listHasShowTag && showTagValue && showTagValue !== 'Log' && !showLogDaysBunch;
+
+      const key = prop + i;
+      return (
+        <div className={className} key={key}>
+          {!showOnlyNote && (
+            <NoteDetailListItem
+              linkBorder={linkBorder}
+              showTag={showTagValue}
+              prop={prop}
+              themeBorder={themeBorder}
+              isLink={isLink}
+              bunch={bunch}
+              showDateSelector={showDateSelector}
+              themeBack={themeBack}
+              themeHover={themeHover}
+              continueData={continueData}
+              onShowHide={() => showHideBox(showTagValue, prop, person)}
+              onShowLogDays={() => showLogDays(prop)}
+              onShowLogTag={(tag) => showLogTagChange(tag)}
+              onChangeDate={changeDate}
+              onDateBackForward={(e, dir) => dateBackForward(e, dir)}
+              onContinueLog={(payload) => continueLog(payload)}
+            />
+          )}
+          {noteItemsBunch(animate, logDaysBunch, bunch, showLogDaysBunch)}
+        </div>
+      );
+    });
+    return all;
+  };
+
+  function noteDetailItemClick(nextPerson: Note | null, currentPerson: Note | null, tagName: string) {
+    const showPerson = nextPerson ? currentPerson : currentPerson;
+    if (!showPerson) return;
+
+    const newTags = getNoteByTag(showPerson.dataLable, tagName);
+    localStorage.setItem('showTag', tagName);
+    setShowTag(tagName);
+    setTags(newTags);
+  }
+
+  function showLogTagChange(tagName: string) {
+    const lastLink = showLink.length > 1 ? showLink[showLink.length - 1] : null;
+    const nextPerson = lastLink ? notes?.find((note) => note.id === lastLink) : null;
+    const propForId = initShowtag ?? match;
+    const localPerson = person? person: getPersonNoteType(notes, propForId)
+    noteDetailItemClick(nextPerson ?? null, localPerson ?? null, tagName);
+  }
+
+  function showHideBox(currentShowTag: string | null, prop: string, person: Note) {
+    if (prop !== 'Log') {
+      showTagChange(prop);
+    }
+  }
+
+  function showTagChange(tagName: string) {
+
+    const lastLinkId = showLink.length > 1 ? showLink[showLink.length - 1] : null;
+    const nextPerson = lastLinkId ? notes?.find((note) => note.id === lastLinkId) : null;
+    const propForId = initShowtag ?? match;
+
+    const localPerson = person? person: getPerson(notes, propForId, null)
+
+    const tagData = lastLinkId
+      ? nextPerson?.dataLable.find((note) => note.tag === tagName)
+      : localPerson?.dataLable.find((note) => note.tag === tagName);
+
+    if (tagData?.data?.startsWith('href:') && editName === false) {
+      handleLinkClick(tagData, localPerson);
+      clearShowTag();
+    } else if (nextPerson && tagData !== undefined) {
+      handleLinkInLinkClick(showLink, nextPerson, tagName);
+    } else {
+      const sessionShowTag = localStorage.getItem('showTag');
+      if (lastPage && sessionShowTag) {
+        openDetailOnNewPage(localPerson);
+      }
+      if (lastPage) {
+        localStorage.setItem('showTag', tagName);
+        openDetailOnNewPage(localPerson);
+      } else if (sessionShowTag && tagName && sessionShowTag !== tagName) {
+        localStorage.setItem('showTag', tagName);
+
+        const parentId = localPerson?.id;
+        openPage({
+          personNext: localPerson,
+          parentId,
+          showNote: true,
+          hideNote: tagName === '',
+        });
+      } else {
+        clearShowTag();
+        openDetailOnNewPage(localPerson);
+      }
+    }
+  }
+
+  function changeDate(e) {
+    e.preventDefault();
+    const selectedDate = e.target.value;
+
+    const dateObj = new Date(selectedDate);
+    let dateToChangeTo = `${dateObj}`;
+    dateToChangeTo = dateToChangeTo.substring(0, 16).trim();
+
+    if(dateToChangeTo) setDisplayDate(dateToChangeTo);
+    showLogTagChange('');
+
+    setTimeout(() => {
+      showLogTagChange('Log');
+    }, 10);
+  }
+
+  function updateNoteItem(val) {
+    const updateData = JSON.parse(JSON.stringify(person));
+    if (updateData) {
+      updateData.dataLable = [{ tag: val.type, data: val.oldItem, edit: val.item }];
+      if (!val.delete) {
+        set({ updateData, edit: val.item });
+      } else {
+        set({ updateData, delete: true });
+      }
+    }
+  }
+
+  function continueLog(val) {
+    setAddLable(val.cont);
+    set({ forParent: true, showAddItem: true });
+    window.scrollTo(0, 0);
+  }
+
+  function submitNameChange(e) {
+    e.preventDefault();
+    const heading = e.target.heading.value;
+    const updatedPerson = person ? { ...person } : null;
+    if (updatedPerson && updatedPerson.heading !== heading) {
+      updatedPerson.heading = heading;
+      set({ person: updatedPerson });
+    } else {
+      set({ forParent: true, editName: false });
+    }
+    setEditName(false);
+  }
+
+  function submitNewItem(event) {
     event.preventDefault();
-    const { displayDate, prevDate, nextDate } = this.state;
+    let currentPerson = person ? { ...person } : null;
+    if (!currentPerson) return;
+
+    let number = event.target.number.value;
+    let tag = event.target.tagType.value;
+    const textTag = event.target.tagTypeText ? event.target.tagTypeText.value : '';
+
+    if (tag === 'Note' || tag === 'Upload') tag = textTag;
+
+    if (tag === 'Log') {
+      number = JSON.stringify({ json: true, date: textTag, data: number });
+    }
+
+    if (number.includes(';base64,')) {
+      const b64 = number.substring(number.indexOf('base64') + 7);
+      number = `${window.atob(b64)}<br />${number}`;
+    }
+
+    if (tag === 'Link') {
+      const link = event.target.links.value;
+      number = `href:${link}`;
+      const linkHeading = (document.getElementById('link-text') as HTMLInputElement)?.value;
+      tag = linkHeading.startsWith('Sub: ') ? linkHeading.slice(4).trim() : linkHeading;
+    }
+
+    const dataLable = [...currentPerson.dataLable];
+    dataLable.push({ tag, data: number });
+    currentPerson.dataLable = dataLable;
+    const updateData = JSON.parse(JSON.stringify(currentPerson));
+    updateData.dataLable = [{ tag, data: number }];
+    set({ updateData });
+
+    refreshItems(currentPerson);
+    setAddLable(null);
+    hideAddItem();
+  }
+
+  function dateBackForward(event, direction) {
+    event.preventDefault();
     if (displayDate) {
-      let dateObj = new Date(displayDate);
+      let dateObj = new Date(displayDate as any);
       if (direction === 'back') {
         if (nextDate) {
           dateObj = new Date(nextDate);
@@ -321,448 +545,155 @@ export default class NoteDetail extends Component<NoteDetailProps, NoteDetailSta
 
       let dateToChangeTo = `${dateObj}`;
       dateToChangeTo = dateToChangeTo.substring(0, 16).trim();
-      this.setDate('Log Days', dateToChangeTo);
+      setDate('Log Days', dateToChangeTo);
     }
-  };
-
-  showHideBox = (showTag, prop) => {
-    // TODO: Fix this logic
-    if (prop !== 'Log') {
-      this.showTagChange(prop);
-    }
-    // if (prop !== 'Log') {
-    //   this.showTagChange(prop);
-    // } else if (showTag !== '' && prop !== 'Log') {
-    //   this.showTagChange('');
-    // }
-  };
-
-  showLogTagChange = (tagName) => {
-    const { person, showLink } = this.state;
-    const lastLink = showLink.length > 1 ? showLink[showLink.length - 1] : null;
-    const { notes } = this.props;
-    const nextPerson = lastLink
-      ? notes?.find((note) => note.id === lastLink)
-      : null;
-
-    this.noteDetailItemClick(nextPerson, person, tagName);
-  };
-
-  showTagChange = (tagName) => {
-    const { person, editName, showLink } = this.state;
-    const lastLink = showLink.length > 1 ? showLink[showLink.length - 1] : null;
-    const { notes, lastPage, openPage } = this.props;
-    const nextPerson = lastLink
-      ? notes?.find((note) => note.id === lastLink)
-      : null;
-    const tagData = lastLink
-      ? nextPerson?.dataLable.find((note) => note.tag === tagName)
-      : person?.dataLable.find((note) => note.tag === tagName);
-
-    if (
-      tagData &&
-      tagData.data &&
-      tagData.data.startsWith('href:') &&
-      editName === false
-    ) {
-      // Is link
-      this.clearShowTag();
-      this.handleLinkClick(tagData, person);
-    } else if (nextPerson && tagData !== undefined) {
-      this.handleLinkInLinkClick(showLink, nextPerson, tagName);
-    } else {
-      // Not A link
-      const sessionShowTag = localStorage.getItem('showTag');
-      if (lastPage && sessionShowTag) {
-        this.openDetailOnNewPage(person);
-      }
-      if (lastPage) {
-        localStorage.setItem('showTag', tagName);
-        this.openDetailOnNewPage(person);
-      } else if (sessionShowTag && tagName && sessionShowTag !== tagName) {
-        localStorage.setItem('showTag', tagName);
-        this.setState({ showTag: null });
-        const parentId = person?.id;
-        openPage({
-          personNext: person,
-          parentId,
-          showNote: true,
-          hideNote: tagName === '',
-        });
-      } else {
-        this.clearShowTag();
-        this.openDetailOnNewPage(person);
-      }
-    }
-  };
-
-  changeDate = (e) => {
-    e.preventDefault();
-    const selectedDate = e.target.value;
-
-    const dateObj = new Date(selectedDate);
-    let dateToChangeTo = `${dateObj}`;
-    dateToChangeTo = dateToChangeTo.substring(0, 16).trim();
-
-    this.setState({ displayDate: dateToChangeTo });
-    this.showLogTagChange('');
-    // const self = this;
-
-    setTimeout(() => {
-      this.showLogTagChange('Log');
-    }, 10);
-  };
-
-  updateNoteItem = (val) => {
-    const { person } = this.state;
-    const { set } = this.props;
-    const updateData = JSON.parse(JSON.stringify(person));
-    updateData.dataLable = [
-      { tag: val.type, data: val.oldItem, edit: val.item },
-    ];
-    if (!val.delete) {
-      set({ updateData, edit: val.item });
-    } else {
-      set({ updateData, delete: true });
-    }
-  };
-
-  continueLog = (val) => {
-    const { set } = this.props;
-    this.setState({ addLable: val.cont });
-    set({ forParent: true, showAddItem: true });
-    window.scrollTo(0, 0);
-  };
-
-  submitNameChange = (e) => {
-    e.preventDefault();
-    const { set } = this.props;
-    const heading = e.target.heading.value;
-    const { person } = this.state;
-    if (person && person.heading !== heading) {
-      person.heading = heading;
-      set({ person });
-    } else {
-      set({ forParent: true, editName: false });
-    }
-    this.setState({ person, editName: false });
-  };
-
-  submitNewItem = (event) => {
-    event.preventDefault();
-    const { person } = this.state;
-    const { set, hideAddItem } = this.props;
-
-    let number = event.target.number.value;
-    let tag = event.target.tagType.value;
-    const textTag = event.target.tagTypeText
-      ? event.target.tagTypeText.value
-      : '';
-
-    if (tag === 'Note' || tag === 'Upload') tag = textTag;
-
-    if (tag === 'Log') {
-      number = JSON.stringify({ json: true, date: textTag, data: number });
-    }
-
-    if (number.includes(';base64,')) {
-      const b64 = number.substring(number.indexOf('base64') + 7);
-      console.log(b64);
-      number = `${window.atob(b64)}<br />${number}`;
-    }
-
-    if (tag === 'Link') {
-      const link = event.target.links.value;
-      number = `href:${link}`;
-      const linkHeading = (document.getElementById('link-text') as HTMLInputElement)?.value;
-      tag = linkHeading.startsWith('Sub: ')
-        ? linkHeading.slice(4).trim()
-        : linkHeading;
-    }
-
-    if(person) person.dataLable.push({ tag, data: number });
-
-    const updateData = JSON.parse(JSON.stringify(person));
-    updateData.dataLable = [{ tag, data: number }];
-    set({ updateData });
-
-    this.refreshItems(person);
-    this.setState({ addLable: null });
-    hideAddItem();
-
-    // Todo: Clear input boxes after submit?
-    // if (!number.includes('href:')) {
-    //   event.target.number.value = '';
-    //   event.target.tagTypeText.value = '';
-    // }
-  };
-
-  refreshItems = (person) => {
-    if (person) {
-      const sessionShowTag = localStorage.getItem('showTag');
-      const tags = this.getNoteByTag(person.dataLable, sessionShowTag);
-      this.setState({ person, tags, showTag: sessionShowTag });
-    }
-  };
-
-  noteItemsBunch(animate, logDaysBunch, bunch, showLogDaysBunch) {
-    return (
-      <div className={`${animate}`}>
-        {showLogDaysBunch && logDaysBunch}
-        {!showLogDaysBunch  && bunch}
-      </div>
-    );
   }
 
-  enableAnimationCheck(showTag, prop) {
-    let animate = '';
-    if (showTag === prop && showTag !== '' && prop !== 'Log') animate = 'grow';
-    if (showTag === prop && showTag !== '' && prop === 'Log') animate = 'growb';
-    return animate;
-  }
-
-  isLinkCheck(sort, prop) {
-    return sort[prop] && sort[prop][0] && sort[prop][0].startsWith('href:');
-  }
-
-  openDetailOnNewPage(person) {
-    const { openPage } = this.props;
-
-    const parentId = person.id;
-    openPage({
-      personNext: person,
-      parentId,
-      showNote: true,
-      hideNote: true,
-    });
-  }
-
-  noteDetailItemClick(nextPerson, person, tagName) {
-    const showPerson = nextPerson ? person : person;
-    const tags = this.getNoteByTag(showPerson.dataLable, tagName);
-    localStorage.setItem('showTag', tagName);
-    this.setState({ showTag: tagName, person, tags });
-  }
-
-  clearShowTag() {
-    localStorage.removeItem('showTag');
-    this.setState({ showTag: null });
-  }
-
-  initPage3(self) {
-    const { openPage } = self.props;
-    const { noteNames } = self.props;
-    if (self.props.initShowtag) {
-      if (self.props.match?.url.includes('subs')) {
-        const person = this.getSubs(self.props.notes);
-        this.refreshItems(person);
-        return;
-      }
-      const person = getPerson(
-        self.props.notes,
-        self.props.initShowtag,
-        noteNames,
-      );
-      if (person) {
-        this.refreshItems(person);
-      } else {
-        const nextPerson = getPerson(
-          self.props.notes,
-          self.props.match,
-          noteNames,
-        );
-        openPage({ personNext: nextPerson });
-        self.refreshItems(nextPerson);
-      }
-    } else {
-      const person = getPerson(self.props.notes, self.props.match, noteNames);
-      self.refreshItems(person);
-    }
-    const noteDetailPage = document.getElementById('multiple-pages');
-    if (noteDetailPage)
+  function showLogDays(tag) {
+    if (person && tag === 'Log') {
+      setShowLogDaysBunch((prev) => !prev);
       setTimeout(() => {
-        const { pageCount } = this.props;
-        const localNoteDetailPage = document.getElementById('multiple-pages');
-        if(!localNoteDetailPage) return;
-        const pageWidth = localNoteDetailPage.scrollWidth / pageCount;
-        const start = localNoteDetailPage.scrollWidth - pageWidth - pageWidth;
-        const end = start + pageWidth;
-        this.customScrollBy(localNoteDetailPage, start, end);
-      }, 30);
-  }
-
-  customScrollBy(element, startPosition, endPosition) {
-    window.scrollTo({ top: 0 });
-    const left = startPosition > endPosition;
-    let i = startPosition;
-    const int = setInterval(() => {
-      element.scrollTo({ top: 0, left: i });
-      if (left) {
-        i -= 8;
-      } else {
-        i += 8;
-      }
-      if (left && i <= endPosition) clearInterval(int);
-      if (!left && i >= endPosition) clearInterval(int);
-    }, 1);
-  }
-
-  // eslint-disable-next-line react/no-unused-class-component-methods
-  initPage(nextProps, self) {
-    const { noteNames } = self.props;
-    if (self?.props?.initShowtag) {
-      const person = getPerson(
-        self.props.notes,
-        self.props.initShowtag,
-        noteNames,
-      );
-      if (person) {
-        this.refreshItems(person);
-      } else {
-        const { openPage } = self.props;
-        const newPerson = getPerson(
-          self.props.notes,
-          self.props.match,
-          noteNames,
-        );
-        openPage({ personNext: newPerson });
-      }
-    } else {
-      const person = getPerson(self.props.notes, self.props.match, noteNames);
-      self.refreshItems(person);
-    }
-  }
-
-  logDayBunchLogic(prop, selectedDate, allDates) {
-    let newSelectedDate = selectedDate;
-    let newLogDaysBunch;
-    if (prop === 'Log') {
-      if (selectedDate === null) {
-        let lastDate = [...allDates].slice(allDates.length - 1);
-        if (lastDate[0]) {
-          newSelectedDate = new Date(JSON.parse(lastDate[0]).date);
-          this.setState({ displayDate: newSelectedDate });
-        }
-      }
-      const allLogDays = [...allDates].map((day) =>
-        JSON.parse(day).date.substring(0, 15).trim(),
-      );
-
-      const logDaysTemp = [...allLogDays].filter(
-        (v, ind, s) => s.indexOf(v) === ind,
-      );
-
-      const logDays = [...logDaysTemp].map((day) => {
-        const total = allLogDays.filter((allDay) => allDay === day).length;
-
-        return { date: day, count: total };
-      });
-
-      let selDate = `${new Date(newSelectedDate)}`;
-      selDate = selDate.substring(0, 15).trim();
-      const { showLogDaysBunch } = this.state;
-      newLogDaysBunch = this.createNoteItemBunch(
-        logDays.reverse(),
-        'Log Days',
-        newSelectedDate,
-        showLogDaysBunch,
-      );
-
-      let selDates = [...allDates].filter((val) => val.includes(selDate));
-      if (selDates.length > 0) {
-        selDates = selDates.slice(selDates.length - 2);
-        const contData = JSON.parse(selDates[0]).data;
-        this.setState({ continueData: contData });
-      }
-    }
-    return { selectedDate: newSelectedDate, logDaysBunch: newLogDaysBunch };
-  }
-
-  showLogDays(showTag) {
-    const { showLogDaysBunch, person } = this.state;
-    if (person && showTag === 'Log') {
-      this.setState({ showLogDaysBunch: !showLogDaysBunch });
-      // const self = this;
-      setTimeout(() => {
-        this.showLogTagChange('');
+        showLogTagChange('');
       }, 10);
     }
   }
 
-  createNoteItemBunch(items, prop, selectedDate, showButton) {
-    const showEdit = prop !== 'Log Days';
-    const max = items.length;
-    const { Theme, lastPage } = this.props;
-    const selectedDateString = `${selectedDate}`.substring(0, 15).trim();
-    return items.map((item, ind) => {
-      const prevItem = ind > -1 ? items[ind - 1] : null;
-      const nextItem = ind < max ? items[ind + 1] : null;
-
-      if (item.date === selectedDateString)
-        this.setState({ prevDate: prevItem?.date, nextDate: nextItem?.date });
-
-      let count = 0;
-      let dateItem = item;
-      if (prop === 'Log Days') {
-        count = item.count;
-        dateItem = item.date;
+  function initPage(nextProps: NoteDetailProps) {
+    if (nextProps?.initShowtag) {
+      const personFound = getPerson(nextProps.notes, nextProps.initShowtag, noteNames);
+      if (personFound) {
+        refreshItems(personFound);
+      } else {
+        const newPerson = getPerson(nextProps.notes, nextProps.match, noteNames);
+        openPage({ personNext: newPerson });
       }
-      const key = dateItem + prop + ind;
-      return (
-        <div onClick={() => this.setDate(prop, dateItem)} key={key}>
-          <NoteItem
-            nextItem={nextItem}
-            prevItem={prevItem}
-            item={dateItem}
-            date={selectedDate}
-            Theme={Theme}
-            show={showButton && lastPage}
-            set={this.updateNoteItem}
-            cont={this.continueLog}
-            type={prop}
-            index={ind}
-            showEdit={showEdit}
-            count={count}
-          />
-        </div>
-      );
-    });
+    } else {
+      const personFound = getPerson(nextProps.notes, nextProps.match, noteNames);
+      refreshItems(personFound);
+    }
   }
 
-  cancelAddItemEdit() {
-    const { hideAddItem } = this.props;
+  function getPersonManually() {
+    if (initShowtag) {
+      if (match?.url.includes('subs')) {
+        return notes ? getSubs(notes) : null;
+      }
+      const personFound = getPerson(notes, initShowtag, noteNames);
+      if (personFound) {
+        return personFound
+      } else {
+        const nextPerson = getPerson(notes, match, noteNames);
+        return nextPerson
+      }
+    } else {
+      const personFound = getPerson(notes, match, noteNames);
+      return personFound
+    }
+  }
+
+  function initPage3() {
+    if (initShowtag) {
+      if (match?.url.includes('subs')) {
+        const subPerson = notes ? getSubs(notes) : null;
+        refreshItems(subPerson);
+        return;
+      }
+      const personFound = getPerson(notes, initShowtag, noteNames);
+      if (personFound) {
+        refreshItems(personFound);
+      } else {
+        // Displaying List of Names and Theme types
+        const nextPerson = getPerson(notes, match, noteNames);
+        refreshItems(nextPerson);
+        // openPage({ personNext: nextPerson }); 
+      }
+    } else {
+      const personFound = getPerson(notes, match, noteNames);
+      refreshItems(personFound);
+    }
+    const noteDetailPage = document.getElementById('multiple-pages');
+    if (noteDetailPage)
+      setTimeout(() => {
+        const localNoteDetailPage = document.getElementById('multiple-pages');
+        if (!localNoteDetailPage) return;
+        const pageWidth = localNoteDetailPage.scrollWidth / pageCount;
+        const start = localNoteDetailPage.scrollWidth - pageWidth - pageWidth;
+        const end = start + pageWidth;
+        customScrollBy(localNoteDetailPage, start, end);
+      }, 30);
+  }
+
+  function cancelAddItemEdit() {
     hideAddItem();
-    this.setState({ addLable: null });
+    setAddLable(null);
     localStorage.removeItem('new-folder-edit');
   }
 
-  render() {
-    let { person } = this.state;
-    const { tags, editName } = this.state;
-    const { match, Theme, showAddItem } = this.props;
-    const isNoteNames = match?.url === '/notes/note-names';
-    if (isNoteNames) person = null;
+  useEffect(() => {
+    initPage3();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    return (
-      <div className="slide-in">
-        {person && (
-          <PageContent
-            person={person}
-            editName={editName}
-            showAddItem={showAddItem}
-            Theme={Theme}
-            tags={tags}
-            showTag={this.state.showTag}
-            addLable={this.state.addLable}
-            notes={this.props.notes}
-            index={this.props.index}
-            lastPage={this.props.lastPage}
-            submitNameChange={this.submitNameChange}
-            submitNewItem={this.submitNewItem}
-            cancelAddItemEdit={() => this.cancelAddItemEdit()}
-          />
-        )}
-      </div>
-    );
-  }
-}
+  useEffect(() => {
+    setSearchTermState(searchTerm);
+    setEditName(editNameProp ?? false);
+    const timeout = setTimeout(() => {
+      initPage({
+        notes,
+        Theme,
+        searchTerm,
+        editName: editNameProp,
+        set,
+        openPage,
+        lastPage,
+        index,
+        showAddItem,
+        hideAddItem,
+        pageCount,
+        match,
+        noteNames,
+        initShowtag,
+      });
+    }, 5);
+    return () => clearTimeout(timeout);
+  }, [
+    editNameProp,
+    searchTerm,
+    notes,
+  ]);
+
+  const isNoteNames = match?.url === '/notes/note-names';
+  const personToRender = isNoteNames ? null : person;
+
+  const sessionShowTag = localStorage.getItem('showTag');
+
+  const getNotesWithMemo = useMemo(() => {
+    return person?.dataLable? getNoteByTag(person.dataLable, sessionShowTag ?? 'main'): null
+  }, [person?.dataLable, sessionShowTag, displayDate, nextDate, prevDate, showLogDaysBunch])
+
+  const tagsB = getNotesWithMemo;
+
+  return (
+    <div className="slide-in">
+      {personToRender && (
+        <PageContent
+          person={personToRender}
+          editName={editName}
+          showAddItem={showAddItem}
+          Theme={Theme}
+          tags={tagsB}
+          showTag={showTag}
+          addLable={addLable}
+          notes={notes}
+          index={index}
+          lastPage={lastPage}
+          submitNameChange={submitNameChange}
+          submitNewItem={submitNewItem}
+          cancelAddItemEdit={cancelAddItemEdit}
+        />
+      )}
+    </div>
+  );
+};
+
+export default NoteDetail;

@@ -11,18 +11,30 @@ export const docId = (): string => {
   return text;
 };
 
+export const getPersonNoteType = (
+  notes: Note[] | null,
+  propForId: any,
+): Note  | null => {
+
+  const personFound = notes?.filter((val) => val.id === propForId?.params.id)?.[0];
+  let person = personFound? {... personFound}: null
+  if (person?.id === 'main' && person.dataLable) {
+    person.dataLable = person.dataLable.filter((note) => !note.tag.startsWith('Sub: '));
+  }
+  return person;
+};
+
 export const getPerson = (
   notes: Note[] | null,
   propForId: any,
-  propNoteNames: Note | null,
-): Note | null => {
+  propNoteNames: string[] | null,
+): Note | string[] | undefined | null => {
   if (propForId === 'note-name') {
     return propNoteNames;
   }
-  const person =
-    notes && notes[0] ? notes.filter((val) => val.id === propForId?.params.id)[0] : null;
-
-  if (person && person.id === 'main' && person.dataLable) {
+  const personFound = notes?.filter((val) => val.id === propForId?.params.id)?.[0];
+  let person = personFound? {... personFound}: undefined
+  if (person?.id === 'main' && person.dataLable) {
     person.dataLable = person.dataLable.filter((note) => !note.tag.startsWith('Sub: '));
   }
   return person;

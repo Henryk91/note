@@ -280,7 +280,7 @@ const NoteItem: React.FC<NoteItemProps> = ({
   };
 
   const setEditState = () => {
-    setEditingItem(true);
+      setEditingItem(true);
     setScrollPos(window.scrollY);
     hideLogLines();
     window.scrollTo({ top: 0 });

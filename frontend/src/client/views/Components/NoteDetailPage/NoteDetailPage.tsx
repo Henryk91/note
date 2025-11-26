@@ -8,6 +8,10 @@ import {
   BackButton,
 } from './NoteDetailPageParts';
 
+
+import { useDispatch } from 'react-redux';
+import { removePersonById, setPersonById } from '../../../../store/personSlice';
+
 type Match = {
   isExact: boolean;
   params: { id: string };
@@ -24,7 +28,7 @@ type NoteDetailPageProps = {
   match: Match;
 };
 
-type PageDescriptor = { params: { id: string } };
+type PageDescriptor = { params: { id: string, tempId: string } };
 
 const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
   match,
@@ -37,14 +41,15 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
 }) => {
   const [showAddItem, setShowAddItem] = useState(false);
   const [editName, setEditName] = useState(false);
-  const [pages, setPages] = useState<PageDescriptor[]>([{ params: { id: 'main' } }]);
+  const [pages, setPages] = useState<PageDescriptor[]>([{ params: { id: 'main', tempId: 'main' } }]);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const localPages = localStorage.getItem('saved-pages');
     if (localPages) {
       let savedPages = JSON.parse(localPages);
       savedPages = savedPages.filter((page: PageDescriptor) => page.params.id !== '');
-      if (savedPages.length > 1) setPages(JSON.parse(localPages));
+      if (savedPages.length > 0) setPages(JSON.parse(localPages));
     }
 
     const isEditing = localStorage.getItem('new-folder-edit');
@@ -109,7 +114,7 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
         setTimeout(() => {
           setPages(nextPages);
           localStorage.setItem('saved-pages', JSON.stringify(nextPages));
-        }, 500);
+        }, 50);
       }
     },
     [customScrollBy],
@@ -117,6 +122,9 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
 
   const scrollPageBack = useCallback(() => {
     if (pages && pages.length > 1) {
+      setTimeout(() => {
+        dispatch(removePersonById({id: `${pages.length -1}`}))
+      }, 500)
       const pageCount = pages.length;
       const noteDetailPage = document.getElementById('multiple-pages');
       if (noteDetailPage) {
@@ -140,21 +148,24 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
   const openPage = useCallback(
     (msg: any) => {
       if (!msg.personNext) return;
-      const nextPage = { params: { id: msg.personNext.id } };
-      let updatePages = pages;
-      const parentPageIndex = updatePages.findIndex((page) => page.params.id === msg.parentId);
+      dispatch(setPersonById({ id: `${pages.length}`, person: {...msg?.personNext} }));
 
+      const nextPage = { params: { id: msg.personNext.id, tempId: `${msg.personNext.id}-${msg.personNext.heading}` } };
+
+      const localPages = localStorage.getItem('saved-pages');
+
+      let updatePages = pages;
+      if(localPages) updatePages = JSON.parse(localPages);
+      const parentPageIndex = updatePages.findIndex((page) => page.params.id === msg.parentId);
       const pageFoundIndex = updatePages.findIndex((page) => page.params.id === msg.personNext.id);
       if (parentPageIndex > -1 && pageFoundIndex === -1) {
         updatePages = updatePages.slice(0, parentPageIndex + 1);
       } else if (parentPageIndex > 0 && pageFoundIndex > -1) {
         updatePages = updatePages.slice(0, pageFoundIndex + 1);
       }
-
       if (pageFoundIndex === -1) {
         const newPages =
           updatePages.length === 1 && updatePages[0].params.id === '' ? [nextPage] : [...updatePages, nextPage];
-
         setPages(newPages);
         localStorage.setItem('saved-pages', JSON.stringify(newPages));
       } else if (pageFoundIndex > -1 && !msg.showNote) {
@@ -243,11 +254,13 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
   }
 
   const lastPageIndex = localPages.length - 1;
-  const pagesCont = localPages.map((pageLink, index) => {
+  const pagesCont = (notes && noteNames)? localPages.map((pageLink, index) => {
     const lastPageShowAddItem = showAddItem && index === lastPageIndex;
     const lastPage = index === lastPageIndex;
     return (
       <NoteDetailPageItem
+        {...rest}
+        match={match}
         key={(pageLink?.params?.id ?? 'first') + index}
         pageLink={pageLink}
         showAddItem={lastPageShowAddItem}
@@ -257,8 +270,7 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
         pageCount={localPages.length}
         hideAddItem={hideAddItem}
         openPage={openPage}
-        initShowtag={pageLink}
-        {...rest}
+        initShowtag={pageLink}        
         set={noteDetailSet}
         searchTerm={searchTerm ?? ''}
         noteNames={noteNames}
@@ -266,7 +278,7 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
         notes={notes}
       />
     );
-  });
+  }) : null
 
   const showBackButton = pages.length > 1;
   return (
