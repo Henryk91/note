@@ -10,7 +10,6 @@ export type EditNameFormProps = {
 };
 
 export type AddItemFormProps = {
-  showTag: string | null;
   addLable: any;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   onCancel: () => void;
@@ -18,7 +17,6 @@ export type AddItemFormProps = {
 
 export type NoteDetailListItemProps = {
   linkBorder: string;
-  showTag: string | null;
   prop: string;
   isLink: boolean;
   bunch: any[];
@@ -62,7 +60,6 @@ export const EditNameForm: React.FC<EditNameFormProps> = ({ heading, onSubmit })
 };
 
 export const AddItemForm: React.FC<AddItemFormProps> = ({
-  showTag,
   addLable,
   onSubmit,
   onCancel,
@@ -72,7 +69,7 @@ export const AddItemForm: React.FC<AddItemFormProps> = ({
   const themeHover = `${theme}-hover`;
   return (
     <form onSubmit={onSubmit}>
-      <EditNoteCheck showTag={showTag} lable={addLable} />
+      <EditNoteCheck lable={addLable} />
       <br />
       <button className={`submit-button ${themeHover} ${themeBack}`} type="submit" id="submit-new-note">
         <i className="fas fa-check" />
@@ -115,7 +112,6 @@ export const LogHeader: React.FC<{
 
 export const NoteDetailListItem: React.FC<NoteDetailListItemProps> = ({
   linkBorder,
-  showTag,
   prop,
   isLink,
   bunch,
@@ -129,6 +125,7 @@ export const NoteDetailListItem: React.FC<NoteDetailListItemProps> = ({
   onContinueLog,
 }) => {
   const theme = useSelector((state: RootState) => state.theme.themeLower);
+  const showTag = useSelector((state: RootState) => state.person.showTag);
   const themeBack = `${theme}-back`;
   const themeBorder = `${theme}-border-thick`;
   const themeHover = `${theme}-hover`;

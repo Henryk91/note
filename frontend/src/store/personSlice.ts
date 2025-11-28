@@ -11,6 +11,7 @@ type PersonState = {
   notes: Note[] | null;
   noteNames?: string[];
   selectedNoteName?: string;
+  showTag: string | null;
 };
 
 type SetPersonPayload = {
@@ -22,6 +23,7 @@ const initialState: PersonState = {
   byId: {},
   notes: null,
   selectedNoteName: localStorage.getItem('user') || undefined,
+  showTag: localStorage.getItem('showTag') || null,
 };
 
 const personSlice = createSlice({
@@ -46,11 +48,19 @@ const personSlice = createSlice({
     setSelectedNoteName(state, action: PayloadAction<string>) {
       state.selectedNoteName = action.payload;
       localStorage.setItem('user', action.payload);
+    },
+    setShowTag(state, action: PayloadAction<string | null>) {
+      state.showTag = action.payload;
+      if(action.payload) {
+        localStorage.setItem('showTag', action.payload);
+      } else {
+       localStorage.removeItem('showTag');
+      }
     }
   },
 });
 
-export const { setPersonById, removePersonById, setNotes, setNoteNames, setSelectedNoteName } = personSlice.actions;
+export const { setPersonById, removePersonById, setNotes, setNoteNames, setSelectedNoteName, setShowTag } = personSlice.actions;
 
 export const selectPersonById = (state: { person: PersonState }, id: string) => state.person.byId[id] || null;
 export const getAllPersonById = (state: { person: PersonState }) => state.person.byId || null;

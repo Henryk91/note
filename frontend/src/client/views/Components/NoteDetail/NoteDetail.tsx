@@ -7,7 +7,7 @@ import { NoteDetailListItem } from './forms';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
-import { getAllPersonById, selectPersonById, setPersonById } from '../../../../store/personSlice';
+import { getAllPersonById, selectPersonById, setPersonById, setShowTag } from '../../../../store/personSlice';
 
 type Match = {
   isExact: boolean;
@@ -50,8 +50,8 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   const person = useSelector((state: RootState) => selectPersonById(state, personId));
   const notes = useSelector((state: RootState) => state.person.notes);
   const noteNames = useSelector((state: RootState) => state.person.noteNames);
+  const showTag = useSelector((state: RootState) => state.person.showTag);
   const [editName, setEditName] = useState(false);
-  const [showTag, setShowTag] = useState<string | null>('');
   const [addLable, setAddLable] = useState<any>(null);
   const [displayDate, setDisplayDate] = useState<Date | string | null>(null);
   const [continueData, setContinueData] = useState<any>(null);
@@ -131,17 +131,9 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     return { linkProps, propertyArray };
   }
 
-  function refreshItems(currentPerson: Note | null) {
-    if (currentPerson) {
-      const sessionShowTag = localStorage.getItem('showTag');
-      // dispatch(setPersonById({ id: `${index}`, person: {...currentPerson} }));
-      setShowTag(sessionShowTag);
-    }
-  }
-
   function clearShowTag() {
     localStorage.removeItem('showTag');
-    setShowTag(null);
+    dispatch(setShowTag(null));
   }
 
   function setDate(prop: string, date: string | Date) {
@@ -173,12 +165,6 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     const personNext = notes?.find((note) => note.id === noteId) ?? null;
     const parentId = currentPerson.id;
     openPage({ personNext, parentId, hideNote: true });
-  }
-
-  function handleLinkInLinkClick(nextPerson: Note, tagName: string) {
-    window.history.pushState(nextPerson.heading, 'Sub Dir', `/notes/${nextPerson.id}`);
-    saveShowTag(tagName)
-    refreshItems(nextPerson);
   }
 
   function handleLinkButtons(animate: string, isLink: boolean, allDates: string[], bunch: React.JSX.Element[]) {
@@ -313,7 +299,6 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
           {!showOnlyNote && (
             <NoteDetailListItem
               linkBorder={linkBorder}
-              showTag={showTagValue}
               prop={prop}
               isLink={isLink}
               bunch={bunch}
@@ -336,8 +321,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
 
   function saveShowTag(tagName: string) {
     if (!person) return;
-    localStorage.setItem('showTag', tagName);
-    setShowTag(tagName);
+    dispatch(setShowTag(tagName));
   }
 
   function showHideBox(prop: string) {
@@ -354,17 +338,16 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
       clearShowTag();
     } else {
       const sessionShowTag = localStorage.getItem('showTag');
-
       if (lastPage) {
-        localStorage.setItem('showTag', tagName);
+        dispatch(setShowTag(tagName));
         openDetailOnNewPage(localPerson);
       } else if (sessionShowTag && tagName && sessionShowTag !== tagName) {
-        localStorage.setItem('showTag', tagName);
 
-        const parentId = localPerson?.id;
+        dispatch(setShowTag(tagName));
+
         openPage({
           personNext: localPerson,
-          parentId,
+          parentId: localPerson?.id,
           showNote: true,
           hideNote: tagName === '',
         });
@@ -455,8 +438,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     const updateData = JSON.parse(JSON.stringify(currentPerson));
     updateData.dataLable = [{ tag, data: number }];
     set({ updateData });
-
-    refreshItems(currentPerson);
+  
     setAddLable(null);
     hideAddItem();
   }
@@ -496,11 +478,10 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     if (initShowtag) {
       const personFound = getPersonNoteType(notes, initShowtag);
       if (personFound) {
-        refreshItems(personFound);
         dispatch(setPersonById({ id: `${index}`, person: {...personFound} }));
       } else if (noteNames) {
         // Displaying List of Names and Theme types
-        setShowTag(null);
+        dispatch(setShowTag(null));
       }
     }
     const noteDetailPage = document.getElementById('multiple-pages');
@@ -537,13 +518,9 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   const isNoteNames = match?.url === '/notes/note-names';
   const personToRender = isNoteNames ? null : person;
 
-  const sessionShowTag = localStorage.getItem('showTag');
-
   const getNotesWithMemo = useMemo(() => {
-    return person?.dataLable? getNoteByTag(person.dataLable, sessionShowTag ?? 'main'): null
-  }, [person?.dataLable, sessionShowTag, displayDate, nextDate, prevDate, showLogDaysBunch, searchTermState])
-
-  const tagsB = getNotesWithMemo;
+    return person?.dataLable? getNoteByTag(person.dataLable, showTag || 'main'): null
+  }, [person?.dataLable, showTag, displayDate, nextDate, prevDate, showLogDaysBunch, searchTermState, lastPage])
 
   return (
     <div className="slide-in">
@@ -552,8 +529,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
           person={personToRender}
           editName={editName}
           showAddItem={showAddItem}
-          tags={tagsB}
-          showTag={showTag}
+          tags={getNotesWithMemo}
           addLable={addLable}
           index={index}
           lastPage={lastPage}

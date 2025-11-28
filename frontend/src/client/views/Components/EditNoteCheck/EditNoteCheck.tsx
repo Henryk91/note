@@ -14,7 +14,6 @@ import { RootState } from '../../../../store';
 type EditNoteCheckProps = {
   note?: Note | null;
   Save?: (payload: any) => void;
-  showTag?: string | null;
   lable?: string;
 };
 
@@ -30,9 +29,10 @@ const dateToInputDisplayDate = (date: Date) => {
   return `${date.toISOString().split('T')[0]}T${hours}:${minutes}`;
 };
 
-const EditNoteCheck: React.FC<EditNoteCheckProps> = ({ showTag, lable }) => {
+const EditNoteCheck: React.FC<EditNoteCheckProps> = ({ lable }) => {
   const allNotes = useSelector((state: RootState) => state.person.notes);
   const theme = useSelector((state: RootState) => state.theme.themeLower);
+  const showTag = useSelector((state: RootState) => state.person.showTag);
 
   const [radioType, setRadioType] = useState('Note');
   const [upload, setUpload] = useState<string | null>(null);
@@ -91,7 +91,6 @@ const EditNoteCheck: React.FC<EditNoteCheckProps> = ({ showTag, lable }) => {
   }, []);
 
   const themeBack = `${theme}-back`;
-  const themeHover = `${theme}-hover`;
 
   const effectiveRadioType = useMemo(() => {
     let localRadioType = radioType;
@@ -164,7 +163,7 @@ const EditNoteCheck: React.FC<EditNoteCheckProps> = ({ showTag, lable }) => {
         />
       </div>
 
-      {effectiveRadioType === 'Note' && <NewNoteField themeBack={themeBack} showTag={showTag ?? undefined} />}
+      {effectiveRadioType === 'Note' && <NewNoteField />}
       {effectiveRadioType === 'Log' && (
         <NewLogField
           inputDisplayDate={inputDisplayDate}
@@ -177,8 +176,6 @@ const EditNoteCheck: React.FC<EditNoteCheckProps> = ({ showTag, lable }) => {
       )}
       {effectiveRadioType === 'Link' && (
         <NewLinkField
-          themeBack={themeBack}
-          themeHover={themeHover}
           onChangeLink={changeLink}
           onNewFolder={toNewNote}
         />

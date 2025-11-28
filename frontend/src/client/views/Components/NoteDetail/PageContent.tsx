@@ -1,13 +1,14 @@
 import React from 'react';
 import { Note } from '../../Helpers/types';
 import { AddItemForm, EditNameForm } from './forms';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../../store';
 
 type PageContentProps = {
   person: Note;
   editName: boolean;
   showAddItem: boolean;
   tags: React.ReactNode;
-  showTag: string | null;
   addLable: any;
   index?: number;
   lastPage?: boolean;
@@ -21,7 +22,6 @@ const PageContent: React.FC<PageContentProps> = ({
   editName,
   showAddItem,
   tags,
-  showTag,
   addLable,
   index = 0,
   lastPage,
@@ -29,6 +29,7 @@ const PageContent: React.FC<PageContentProps> = ({
   submitNewItem,
   cancelAddItemEdit,
 }) => {
+  const showTag = useSelector((state: RootState) => state.person.showTag);
   const isFirstPage = index === 0;
   const className = isFirstPage ? 'note-detail-item first-note-detail-item' : 'note-detail-item';
   const localShowTag = localStorage.getItem('showTag');
@@ -54,7 +55,6 @@ const PageContent: React.FC<PageContentProps> = ({
       {showAddItem && (
         <div className="add-item-comp">
           <AddItemForm
-            showTag={showTag}
             addLable={addLable}
             onSubmit={submitNewItem}
             onCancel={cancelAddItemEdit}

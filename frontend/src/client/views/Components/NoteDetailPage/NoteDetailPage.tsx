@@ -10,7 +10,7 @@ import {
 
 
 import { useDispatch, useSelector } from 'react-redux';
-import { removePersonById, setPersonById } from '../../../../store/personSlice';
+import { removePersonById, setPersonById, setShowTag } from '../../../../store/personSlice';
 import { RootState } from '../../../../store';
 
 type Match = {
@@ -129,7 +129,7 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
       }
       setTimeout(() => {
         const remainingPages = pages.slice(0, pageCount - 1);
-        localStorage.removeItem('showTag');
+        dispatch(setShowTag(null));
         setPages(remainingPages);
         localStorage.setItem('saved-pages', JSON.stringify(remainingPages));
       }, 500);

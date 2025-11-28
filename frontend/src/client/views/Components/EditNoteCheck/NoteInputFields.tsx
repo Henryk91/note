@@ -87,11 +87,9 @@ export const NewLogField: React.FC<NewLogFieldProps> = ({
   </div>
 );
 
-type NewNoteFieldProps = BaseProps & {
-  showTag?: string | null;
-};
-
-export const NewNoteField: React.FC<NewNoteFieldProps> = ({ themeBack, showTag }) => {
+export const NewNoteField: React.FC = () => {
+  const theme = useSelector((state: RootState) => state.theme.themeLower);
+  const showTag = useSelector((state: RootState) => state.person.showTag);
   let localShowTag = showTag ?? '';
   const creatingNewFolder = localStorage.getItem('new-folder-edit');
   let defaultVal = '';
@@ -99,6 +97,8 @@ export const NewNoteField: React.FC<NewNoteFieldProps> = ({ themeBack, showTag }
     localShowTag = 'Note';
     defaultVal = '1.';
   }
+
+  const themeBack = `${theme}-back`;
   return (
     <div>
       <input
@@ -123,19 +123,20 @@ export const NewNoteField: React.FC<NewNoteFieldProps> = ({ themeBack, showTag }
   );
 };
 
-type NewLinkFieldProps = BaseProps & {
-  themeHover: string;
+type NewLinkFieldProps = {
   onChangeLink: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   onNewFolder: () => void;
 };
 
 export const NewLinkField: React.FC<NewLinkFieldProps> = ({
-  themeBack,
-  themeHover,
   onChangeLink,
   onNewFolder,
 }) => {
   const notes = useSelector((state: RootState) => state.person.notes);
+  const theme = useSelector((state: RootState) => state.theme.themeLower);
+  const themeBack = `${theme}-back`;
+  const themeHover = `${theme}-hover`;
+
   const headings =
     notes?.map((note) => ({ heading: note.heading, id: note.id })) ?? [];
 
