@@ -27,7 +27,7 @@ import { compareSort } from './views/Helpers/utils';
 import { Note } from './views/Helpers/types';
 import { RootState } from '../store';
 import { setTheme } from '../store/themeSlice';
-import { setNotes, setNoteNames } from '../store/personSlice';
+import { setNotes, setNoteNames, setSelectedNoteName } from '../store/personSlice';
 
 type ProtectedRoutesProps = {
   children: React.ReactElement;
@@ -43,13 +43,14 @@ type AppProps = {
   notes: Note[] | null,
   theme: string;
   noteNames: string[] | undefined;
+  selectedNoteName?: string,
   setTheme: (theme: string) => void;
   setNotes: (notes: Note[] | null) => void;
   setNoteNames: (notes: string[]) => void;
+  setSelectedNoteName: (notes: string) => void;
 };
 
-const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames, setNoteNames}) => {
-  const [user, setUser] = useState('');
+const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames, setNoteNames, selectedNoteName, setSelectedNoteName}) => {
   const [notesInitialLoad, setNotesInitialLoad] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [freshData, setFreshData] = useState(false);
@@ -108,18 +109,16 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
   const setRedirect = useCallback(() => {
     const path = window.location.pathname;
     if (path === '/' || window.location.href.includes('index.html')) {
-      const storedUser = localStorage.getItem('user');
-      if ((notes && noteNames) || storedUser) window.history.pushState('', '', './notes/main');
+      if ((notes && noteNames) || selectedNoteName) window.history.pushState('', '', './notes/main');
     }
-  }, [noteNames, notes]);
+  }, [noteNames, notes, selectedNoteName]);
 
   const getMyNotes = useCallback(
     (noteName?: string | null) => {
-      let currentUser = user;
+      let currentUser = selectedNoteName;
       if (noteName) currentUser = noteName;
 
-      if (currentUser !== '') {
-        localStorage.setItem('user', currentUser);
+      if (currentUser && currentUser !== '') {
         const data = localStorage.getItem(currentUser);
         if (data && data[0] && data.length > 0) {
           const pdata = addMainNote(JSON.parse(data) as Note[]);
@@ -153,7 +152,7 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
         });
       }
     },
-    [addMainNote, notes, setRedirect, user],
+    [addMainNote, notes, setRedirect, selectedNoteName],
   );
 
   const getNotesOnLoad = useCallback(
@@ -170,13 +169,13 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
 
   const setFilterNote = useCallback(
     (val) => {
-      if (user !== val.user) {
+      if (selectedNoteName !== val.user) {
         getMyNotes(val.user);
       }
-      setUser(val.user);
+      setSelectedNoteName(val.user);
       setSearchTerm(val.searchTerm);
     },
-    [getMyNotes, user],
+    [getMyNotes, selectedNoteName],
   );
 
   const getNoteNamesHandler = useCallback(
@@ -185,7 +184,7 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
 
       if (savedNames) {
         const savedNoteNames = JSON.parse(savedNames);
-        const selectedUser = user.length > 1 ? user : null;
+        const selectedUser = selectedNoteName || null;
         setNoteNames(savedNoteNames);
         if (selectedUser) getMyNotes(selectedUser);
       }
@@ -197,18 +196,18 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
             if (res && res.length > 0) {
               localStorage.setItem('notenames', JSON.stringify(res));
               let update: any = { noteNames: res };
-              if (!localStorage.getItem('user')) {
+              if (!selectedNoteName) {
                 update = { ...update, user: res[0] };
                 getMyNotes(res[0]);
               }
               setNoteNames(update.noteNames);
-              if (update.user) setUser(update.user);
+              if (update.user) setSelectedNoteName(update.user);
             }
           }
         });
       }
     },
-    [getMyNotes, noteNames, notesInitialLoad, user],
+    [getMyNotes, noteNames, notesInitialLoad, selectedNoteName],
   );
 
   const updateNote = useCallback(
@@ -222,17 +221,16 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
         person = update;
       }
       updateOneNoteRec({ person, delete: update.delete }, () => {
-        const noteUser = localStorage.getItem('user');
-        getMyNotes(noteUser);
+        getMyNotes(selectedNoteName);
       });
     },
-    [getMyNotes],
+    [getMyNotes, selectedNoteName],
   );
 
   const addNewNote = useCallback(
     (newNote) => {
       const usedNewNote = newNote;
-      if (user !== '') usedNewNote.note.createdBy = user;
+      if (selectedNoteName !== '') usedNewNote.note.createdBy = selectedNoteName;
       let updatedNote: Note[] = [];
 
       if (notes) {
@@ -248,14 +246,14 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
         alert('Cant update in search');
       }
     },
-    [notes, searchTerm, user],
+    [notes, searchTerm, selectedNoteName],
   );
 
   const noteDetailSet = useCallback(
     (msg) => {
       if (msg.noteName) {
         const { noteName } = msg;
-        setUser(noteName);
+        setSelectedNoteName(noteName);
         setNotes(null);
         getMyNotes(noteName);
       } else {
@@ -267,13 +265,12 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
 
   const checkLoginState = useCallback(() => {
     const loginKey = localStorage.getItem('loginKey');
-    const storedUser = localStorage.getItem('user');
-    if (storedUser !== null && storedUser !== user) setUser(storedUser);
+
     if (loginKey !== null) {
       getNoteNamesHandler(loginKey);
-      getNotesOnLoad(loginKey, storedUser);
+      getNotesOnLoad(loginKey, selectedNoteName);
     }
-  }, [getNoteNamesHandler, getNotesOnLoad, setTheme, user]);
+  }, [getNoteNamesHandler, getNotesOnLoad, setTheme, selectedNoteName]);
 
   const menuButton = useCallback(
     (event) => {
@@ -354,7 +351,7 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
         <ProtectedRoutes>
           <>
             <header>
-              <SearchBar set={setFilterNote} noteName={user} />
+              <SearchBar set={setFilterNote} />
               <nav className="bigScreen" id="links">
                 <Link
                   style={{ textDecoration: 'none' }}
@@ -421,12 +418,14 @@ const mapStateToProps = (state: RootState) => ({
   theme: state.theme.value,
   notes: state.person.notes,
   noteNames: state.person.noteNames,
+  selectedNoteName: state.person.selectedNoteName,
 });
 
 const mapDispatchToProps = {
   setTheme,
   setNotes,
   setNoteNames,
+  setSelectedNoteName
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

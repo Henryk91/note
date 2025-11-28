@@ -4,19 +4,19 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
 
 type SearchBarProps = {
-  noteName: string;
   set: (payload: any) => void;
 };
 
 type SearchBarState = {
   showSearch: boolean;
-  currentNoteName: string;
+  currentNoteName?: string;
   editName: boolean;
 };
 
-const SearchBar: React.FC<SearchBarProps> = ({ noteName, set }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ set }) => {
   const notes = useSelector((state: RootState) => state.person.notes);
   const theme = useSelector((state: RootState) => state.theme.themeLower);
+  const selectedNoteName = useSelector((state: RootState) => state.person.selectedNoteName);
   const [state, setState] = useState<SearchBarState>({
     showSearch: false,
     currentNoteName: '',
@@ -24,8 +24,8 @@ const SearchBar: React.FC<SearchBarProps> = ({ noteName, set }) => {
   });
 
   useEffect(() => {
-    setState((prev) => ({ ...prev, currentNoteName: noteName }));
-  }, [noteName]);
+    setState((prev) => ({ ...prev, currentNoteName: selectedNoteName }));
+  }, [selectedNoteName]);
 
   const toggleSearch = () => {
     setState((prev) => ({
@@ -81,7 +81,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ noteName, set }) => {
       {state.showSearch === false && state.editName === false && (
         <div className={themeBack} id="userNameBox" aria-label="User Name" onClick={editNameClick}>
           {' '}
-          {noteName}{' '}
+          {selectedNoteName}{' '}
         </div>
       )}
       {state.showSearch === false && state.editName === true && (
@@ -91,7 +91,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ noteName, set }) => {
           type="text"
           aria-label="User Name"
           onKeyUp={(e) => search(e)}
-          defaultValue={noteName}
+          defaultValue={selectedNoteName}
           placeholder="Add Note Name"
           onBlur={toggleEditName}
         />

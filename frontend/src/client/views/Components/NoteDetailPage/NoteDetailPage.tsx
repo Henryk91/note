@@ -239,7 +239,7 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
   const prepForNote = useCallback(
     (name: string) => {
       const user = localStorage.getItem('user')
-      if(name !== user) resetPages()
+      if(name !== user) resetPages();
       set({ noteName: name });
     },
     [set],
@@ -249,7 +249,7 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
 
   const isNoteNames = match?.url === '/notes/note-names';
   if (isNoteNames) {
-    localPages = [{ params: { id: '' } }];
+    localPages = [{ params: { id: '', tempId: '' } }];
   }
 
   const lastPageIndex = localPages.length - 1;
