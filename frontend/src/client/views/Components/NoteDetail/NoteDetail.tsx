@@ -187,7 +187,6 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
       if (allDates?.[0]?.startsWith('href:')) {
         const noteId = allDates[0].substring(5);
         const noteHeadings = notes?.find((note) => note.id === noteId) ?? null;
-        console.log('noteHeadings',noteHeadings);
         const buttons = getNoteByTag(noteHeadings?.dataLable, '');
         localBunch = buttons;
       }
