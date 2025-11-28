@@ -6,8 +6,8 @@ type ThemeState = {
 };
 
 const initialState: ThemeState = {
-  value: 'Dark',
-  themeLower: 'dark',
+  value: localStorage.getItem('theme') ?? 'Dark',
+  themeLower: localStorage.getItem('theme')?.toLowerCase() ?? 'dark',
 };
 
 const themeSlice = createSlice({
@@ -17,6 +17,7 @@ const themeSlice = createSlice({
     setTheme(state, action: PayloadAction<string>) {
       state.value = action.payload;
       state.themeLower = action.payload.toLowerCase();
+      localStorage.setItem('theme', action.payload);
     },
   },
 });

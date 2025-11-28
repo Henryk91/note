@@ -1,0 +1,1 @@
+export const THEMES = ['Red', 'Ocean', 'Green', 'Dark', 'Night']

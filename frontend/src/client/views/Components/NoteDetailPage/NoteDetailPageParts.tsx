@@ -5,6 +5,7 @@ import { Note } from '../../Helpers/types';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
 import { setTheme } from '../../../../store/themeSlice';
+import { THEMES } from '../../Helpers/const';
 
 export type NoteDetailPageItemProps = {
   searchTerm: string;
@@ -102,7 +103,7 @@ const NoteNamesList: React.FC<NoteNamesListProps> = ({ names, onSelect }) => (
 const NoteThemesList: React.FC<NoteThemesListProps> = ({ names, onSelect }) => (
   <>
     {names.map((name) => (
-      <Link key={name} style={{ textDecoration: 'none' }} to="/" title="Note List">
+      <Link key={name} style={{ textDecoration: 'none' }} to="/notes/main" title="Theme List">
         <div className="listNameButton" onClick={() => onSelect(name)}>
           <h3> {name} Theme </h3>
         </div>
@@ -113,10 +114,8 @@ const NoteThemesList: React.FC<NoteThemesListProps> = ({ names, onSelect }) => (
 
 export const Sidebar: React.FC<SidebarProps> = ({ noteNames, prepForNote }) => {
   const dispatch = useDispatch();
-  const setNoteTheme = (name: string) => {
-    dispatch(setTheme(name));
-    localStorage.setItem('theme', name);
-  }
+  const setSelectedTheme = (name: string) => dispatch(setTheme(name));
+  
   return (
   <div>
     <br />
@@ -136,7 +135,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ noteNames, prepForNote }) => {
     </Link>
     <br />
     <h3>Themes</h3>
-    <NoteThemesList names={['Red', 'Ocean', 'Green', 'Dark', 'Night']} onSelect={setNoteTheme} />
+    <NoteThemesList names={THEMES} onSelect={setSelectedTheme} />
   </div>
 )}
 

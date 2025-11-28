@@ -279,10 +279,6 @@ const App: React.FC<AppProps> = ({ theme, setTheme }) => {
     if (loginKey !== null) {
       getNoteNamesHandler(loginKey);
       getNotesOnLoad(loginKey, storedUser);
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme) {
-        setTheme(savedTheme);
-      }
     }
   }, [getNoteNamesHandler, getNotesOnLoad, setTheme, user]);
 
