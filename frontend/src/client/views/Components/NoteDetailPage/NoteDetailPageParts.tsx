@@ -28,7 +28,6 @@ export type SidebarProps = {
 };
 
 export type ScrollButtonsProps = {
-  showAddItem: boolean;
   showBackButton: boolean;
   onEditName: () => void;
   onAdd: () => void;
@@ -142,7 +141,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ noteNames, prepForNote }) => {
 )}
 
 export const ScrollButtons: React.FC<ScrollButtonsProps> = ({
-  showAddItem,
   showBackButton,
   onEditName,
   onAdd,
@@ -172,7 +170,7 @@ export const ScrollButtons: React.FC<ScrollButtonsProps> = ({
       >
         <i className="fas fa-arrow-down" />
       </div>
-      {showBackButton === false ? (
+      {!showBackButton ? (
         <div className={`detailAddButton ${themeHover} ${themeBack}`}>
           <Link style={{ textDecoration: 'none', color: 'white' }} to="/new-note/">
             <i className="fas fa-plus" />

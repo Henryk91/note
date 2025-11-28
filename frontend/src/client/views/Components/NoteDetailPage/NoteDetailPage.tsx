@@ -288,7 +288,6 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
       )}
       <div id="multiple-pages">{pagesCont}</div>
       <ScrollButtons
-        showAddItem={showAddItem}
         showBackButton={showBackButton}
         onEditName={editNameSet}
         onAdd={() => addButtonClicked(showAddItem)}
