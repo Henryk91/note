@@ -500,6 +500,10 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   }, []);
 
   useEffect(() => {
+    initPage();
+  }, [notes]);
+
+  useEffect(() => {
     setSearchTermState(searchTerm);
   }, [searchTerm,notes]);
 
