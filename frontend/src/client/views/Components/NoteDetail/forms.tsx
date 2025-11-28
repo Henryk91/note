@@ -1,4 +1,6 @@
 import React from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowLeft, faArrowRight, faCheck, faFolder, faTimes } from '@fortawesome/free-solid-svg-icons';
 import EditNoteCheck from '../EditNoteCheck/EditNoteCheck';
 import { Note } from '../../Helpers/types';
 import { RootState } from '../../../../store';
@@ -47,11 +49,11 @@ export const EditNameForm: React.FC<EditNameFormProps> = ({ heading, onSubmit })
       <br />
       <button className={`submit-button ${themeHover} ${themeBack}`} type="submit">
         {' '}
-        <i className="fas fa-check" />
+        <FontAwesomeIcon icon={faCheck} />
       </button>
       <button className={`submit-button ${themeHover} ${themeBack}`} type="submit">
         {' '}
-        <i className="fas fa-times" />
+        <FontAwesomeIcon icon={faTimes} />
       </button>
       <br />
       <br />
@@ -72,12 +74,12 @@ export const AddItemForm: React.FC<AddItemFormProps> = ({
       <EditNoteCheck lable={addLable} />
       <br />
       <button className={`submit-button ${themeHover} ${themeBack}`} type="submit" id="submit-new-note">
-        <i className="fas fa-check" />
+        <FontAwesomeIcon icon={faCheck} />
       </button>
 
       <button type="reset" className={`submit-button ${themeHover} ${themeBack}`} onClick={onCancel}>
         {' '}
-        <i className="fas fa-times" />{' '}
+        <FontAwesomeIcon icon={faTimes} />{' '}
       </button>
       <br />
     </form>
@@ -97,10 +99,10 @@ export const LogHeader: React.FC<{
   <div>
     <div className="day-forward-back">
       <button className={`forward-back-button ${themeBack} ${themeHover}`} onClick={(event) => onDateBackForward(event, 'back')}>
-        <i className="fas fa-arrow-left" />
+        <FontAwesomeIcon icon={faArrowLeft} />
       </button>
       <button className={`forward-back-button ${themeBack} ${themeHover}`} onClick={(event) => onDateBackForward(event, 'forward')}>
-        <i className="fas fa-arrow-right" />
+        <FontAwesomeIcon icon={faArrowRight} />
       </button>
     </div>
     <button className={`editButtons continue-button ${themeBack} ${themeHover}`} onClick={() => onContinueLog({ cont: continueData })}>
@@ -137,7 +139,7 @@ export const NoteDetailListItem: React.FC<NoteDetailListItemProps> = ({
     <>
       <div className={`detailTitleBox dark-hover ${linkBorder}`} onClick={onShowHide}>
         <div id={`${dateCounterId}`} className={`listCountBox white-color ${themeBorder}`} onClick={onShowLogDays}>
-          <span className="list-count-item"> {isLink ? <i className="fas fa-folder" /> : bunch.length} </span>
+          <span className="list-count-item"> {isLink ? <FontAwesomeIcon icon={faFolder} /> : bunch.length} </span>
         </div>
         <h3 className={`${className} white-color`}>{prop} </h3>
         {showDateSelector && (

@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { Note } from '../../Helpers/types';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
@@ -27,7 +29,8 @@ const SearchBar: React.FC<SearchBarProps> = ({ set }) => {
     setState((prev) => ({ ...prev, currentNoteName: selectedNoteName }));
   }, [selectedNoteName]);
 
-  const toggleSearch = () => {
+  const toggleSearch = (e) => {
+    e.stopPropagation()
     setState((prev) => ({
       ...prev,
       showSearch: !prev.showSearch,
@@ -80,8 +83,10 @@ const SearchBar: React.FC<SearchBarProps> = ({ set }) => {
     <header className={themeBack}>
       {state.showSearch === false && state.editName === false && (
         <div className={themeBack} id="userNameBox" aria-label="User Name" onClick={editNameClick}>
-          {' '}
-          {selectedNoteName}{' '}
+          <div className="center-text">{selectedNoteName}</div>
+          <div className="search-clear" onClick={(e) => toggleSearch(e)}>
+            <FontAwesomeIcon icon={faSearch}  />
+          </div>
         </div>
       )}
       {state.showSearch === false && state.editName === true && (
@@ -97,7 +102,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ set }) => {
         />
       )}
       {state.showSearch === true && (
-        <div className="search-box">
+        <div  id="userNameBox">
           <input
             className={themeBack}
             id="searchBox"
@@ -106,16 +111,9 @@ const SearchBar: React.FC<SearchBarProps> = ({ set }) => {
             type="text"
             placeholder="Search..."
           />
-        </div>
-      )}
-
-      {searching ? (
-        <div className="search-clear" onClick={clearSearch}>
-          <i className="fas fa-times" />
-        </div>
-      ) : (
-        <div className="search-clear" onClick={toggleSearch}>
-          <i className="fas fa-search" />
+          <div className="search-clear" onClick={clearSearch}>
+            <FontAwesomeIcon icon={faTimes} size="lg" />
+          </div>
         </div>
       )}
     </header>

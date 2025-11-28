@@ -1,4 +1,6 @@
 import React, { useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowLeft, faCheck } from '@fortawesome/free-solid-svg-icons';
 import EditNoteCheck from '../EditNoteCheck/EditNoteCheck';
 import { docId } from '../../Helpers/utils';
 import { useSelector } from 'react-redux';
@@ -57,7 +59,7 @@ const NewNote: React.FC<NewNoteProps> = ({ set }) => {
           window.history.back();
         }}
       >
-        <i className="fas fa-arrow-left" />
+        <FontAwesomeIcon icon={faArrowLeft} />
       </button>
       <form onSubmit={addNewUser}>
         <br />
@@ -73,7 +75,7 @@ const NewNote: React.FC<NewNoteProps> = ({ set }) => {
         <EditNoteCheck />
         <button className={`submit-button ${themeHover} ${themeBack}`} type="submit">
           {' '}
-          <i className="fas fa-check" />
+          <FontAwesomeIcon icon={faCheck} />
         </button>
       </form>
     </div>

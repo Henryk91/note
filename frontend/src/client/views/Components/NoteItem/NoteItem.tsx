@@ -1,4 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPen, faCheck, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faTrashAlt } from '@fortawesome/free-regular-svg-icons';
 import { marked } from 'marked';
 import { getLogDuration } from '../../Helpers/utils';
 import { NoteLabel } from '../../Helpers/types';
@@ -110,14 +113,14 @@ const EditItemBox: React.FC<EditItemBoxProps> = ({
       <br />
       <button className={`submit-button ${themeBack} ${themeHover}`} type="submit">
         {' '}
-        <i className="fas fa-check" />
+        <FontAwesomeIcon icon={faCheck} />
       </button>
       <button className={`submit-button ${themeBack} ${themeHover}`} onClick={onClose}>
-        <i className="fas fa-times" />
+        <FontAwesomeIcon icon={faTimes} />
       </button>
       <button className={`submit-button ${themeBack} ${themeHover}`} onClick={onDelete}>
         {' '}
-        <i className="far fa-trash-alt" />{' '}
+        <FontAwesomeIcon icon={faTrashAlt} />{' '}
       </button>
       <hr />
       <br />
@@ -206,7 +209,7 @@ const DisplayLogItemBox: React.FC<DisplayLogItemBoxProps> = ({
                 className={`editButtons ${themeBack} ${themeBackHover}`}
                 onClick={onEdit}
               >
-                <i className="fas fa-pen" />
+                <FontAwesomeIcon icon={faPen} />
               </button>
               {hasBreak && prevData && (
                 <button

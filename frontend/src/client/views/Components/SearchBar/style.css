@@ -1,27 +1,36 @@
 #searchBox{
   /* display: inline; */
   font-size: 25px;
-  border-bottom: 1px solid white;
   margin-bottom: 0px !important;
 }
-#userNameBox{
+#userNameBox {
+  display: flex;
+  align-items: center;
+  position: relative;
   font-size: 25px;
   margin: 1px;
-  /* margin-top: 10px; */
   border-bottom: 1px solid white;
   text-align: center;
   color: white;
-  border-radius: 2px;
   width: 250px;
 }
 
-.search-clear{
-  color: white;
-  float: right;
-  margin-top: 1vh;;
-  margin-left: 1vw;
-  z-index: 50000;
+#userNameBox .center-text {
+  flex: 1;
+  text-align: center;
 }
+
+#userNameBox .search-clear {
+  position: absolute;
+  right: 0px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 20px;
+  z-index: 50000;
+  height: 30px;
+  width: 30px;
+}
+
 
 .search-box{
   width: fit-content;

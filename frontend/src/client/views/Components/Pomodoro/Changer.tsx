@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowDown, faArrowUp } from '@fortawesome/free-solid-svg-icons';
 import './style.css';
 
 type ChangerProps = {
@@ -55,16 +57,24 @@ const Changer: React.FC<ChangerProps> = ({ runTime, breakTime, set }) => {
       <div className="timeChangers">
         <label id="break-label">Break Length</label>
         <br />
-        <span id="break-decrement" className="fas fa-arrow-down" onClick={subBreak} />
+        <span id="break-decrement" onClick={subBreak}>
+          <FontAwesomeIcon icon={faArrowDown} />
+        </span>
         <label id="break-length">{state.breakTime}</label>
-        <span id="break-increment" className="fas fa-arrow-up" onClick={addBreak} />
+        <span id="break-increment" onClick={addBreak}>
+          <FontAwesomeIcon icon={faArrowUp} />
+        </span>
       </div>
       <div className="timeChangers">
         <label id="session-label">Session Length</label>
         <br />
-        <span id="session-decrement" className="fas fa-arrow-down" onClick={subSession} />
+        <span id="session-decrement" onClick={subSession}>
+          <FontAwesomeIcon icon={faArrowDown} />
+        </span>
         <label id="session-length">{state.runTime}</label>
-        <span id="session-increment" className="fas fa-arrow-up" onClick={addSession} />
+        <span id="session-increment" onClick={addSession}>
+          <FontAwesomeIcon icon={faArrowUp} />
+        </span>
       </div>
     </div>
   );

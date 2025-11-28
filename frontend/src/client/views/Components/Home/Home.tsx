@@ -1,4 +1,6 @@
 import React from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 import { Note } from '../../Helpers/types';
 import { useSelector } from 'react-redux';
@@ -54,7 +56,7 @@ const Home: React.FC<HomeProps> = ({ User }) => {
           logOut();
         }}
       >
-        <i className="fas fa-times" />
+        <FontAwesomeIcon icon={faTimes} />
       </button>
       {User !== 'None' ? (
         <div className="detail-scroll">
@@ -63,7 +65,7 @@ const Home: React.FC<HomeProps> = ({ User }) => {
             className={`detailAddButton ${themeHover} ${themeBack}`}
             to="/new-note/"
           >
-            <i className="fas fa-plus" />
+            <FontAwesomeIcon icon={faPlus} />
           </Link>
         </div>
       ) : null}

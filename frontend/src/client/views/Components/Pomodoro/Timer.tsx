@@ -1,4 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPauseCircle, faPlayCircle } from '@fortawesome/free-regular-svg-icons';
+import { faSync } from '@fortawesome/free-solid-svg-icons';
 import './style.css';
 
 type TimerProps = {
@@ -82,11 +85,11 @@ const Timer: React.FC<TimerProps> = ({ run, breakTime, set }) => {
         <h2 id="time-left">{remainingTime}</h2>
       </div>
       <div className="timePlay" id="start_stop" onClick={starter}>
-        <span className="far fa-play-circle" />
-        <span className="far fa-pause-circle" />
+        <FontAwesomeIcon icon={faPlayCircle} />
+        <FontAwesomeIcon icon={faPauseCircle} />
       </div>
       <div className="timePlay" id="reset" onClick={restart}>
-        <span className="fas fa-sync" />
+        <FontAwesomeIcon icon={faSync} className="sync-icon" />
       </div>
       <audio
         id="beep"

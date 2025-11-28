@@ -1,5 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faArrowDown,
+  faArrowLeft,
+  faArrowUp,
+  faPen,
+  faPlus,
+  faPowerOff,
+} from '@fortawesome/free-solid-svg-icons';
+import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import NoteDetail from '../NoteDetail/NoteDetail';
 import { Match } from '../../Helpers/types';
 import { useDispatch, useSelector } from 'react-redux';
@@ -152,8 +162,8 @@ export const ScrollButtons: React.FC<ScrollButtonsProps> = ({
 
   return (
     <div className="detail-scroll">
-      <button className={`editButtons1 detailUpButton ${themeHover} ${themeBack}`} onClick={editNameClick}>
-        <i className="fas fa-pen" />
+      <button  className={`editButtons1 detailUpButton ${themeHover} ${themeBack}`} onClick={editNameClick}>
+        <FontAwesomeIcon icon={faPen} />
       </button>
       <div
         className={`detailUpButton ${themeHover} ${themeBack}`}
@@ -161,7 +171,7 @@ export const ScrollButtons: React.FC<ScrollButtonsProps> = ({
           window.scrollTo(0, 0);
         }}
       >
-        <i className="fas fa-arrow-up" />
+        <FontAwesomeIcon icon={faArrowUp} size="lg" />
       </div>
       <div
         className={`detailUpButton ${themeHover} ${themeBack}`}
@@ -169,12 +179,12 @@ export const ScrollButtons: React.FC<ScrollButtonsProps> = ({
           window.scrollBy(0, document.body.scrollHeight);
         }}
       >
-        <i className="fas fa-arrow-down" />
+        <FontAwesomeIcon icon={faArrowDown} size="lg" />
       </div>
       {!showBackButton ? (
         <div className={`detailAddButton ${themeHover} ${themeBack}`}>
           <Link style={{ textDecoration: 'none', color: 'white' }} to="/new-note/">
-            <i className="fas fa-plus" />
+            <FontAwesomeIcon icon={faPlus}/>
           </Link>
         </div>
       ) : (
@@ -182,7 +192,7 @@ export const ScrollButtons: React.FC<ScrollButtonsProps> = ({
           className={`detailAddButton ${themeHover} ${themeBack}`}
           onClick={() => addButtonClicked()}
         >
-          <i className="fas fa-plus" />
+          <FontAwesomeIcon icon={faPlus} />
         </div>
       )}
     </div>
@@ -192,14 +202,14 @@ export const ScrollButtons: React.FC<ScrollButtonsProps> = ({
 export const BackButton: React.FC<BackButtonProps> = ({  hasPages, onBack, onLogout }) => {
   const theme = useSelector((state: RootState) => state.theme.themeLower);
   const themeBack = `${theme}-back`;
-  const icon = hasPages ? 'fas fa-arrow-left' : 'fas fa-power-off';
+  const icon: IconProp = hasPages ? faArrowLeft : faPowerOff;
   const handleClick = () => {
     if (hasPages) onBack();
     else onLogout();
   };
   return (
     <button className={`backButton ${themeBack}`} onClick={handleClick}>
-      <i className={icon} />
+      <FontAwesomeIcon icon={icon} />
     </button>
   );
 };

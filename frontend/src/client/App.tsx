@@ -1,4 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBars } from '@fortawesome/free-solid-svg-icons';
 import { connect } from 'react-redux';
 import {
   BrowserRouter as Router,
@@ -354,13 +356,11 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
                 <Link
                   style={{ textDecoration: 'none' }}
                   className={`dark-hover ${themeBack}`}
-                  onClick={(e) => {
-                    menuButton(e);
-                  }}
+                  onClick={(e) => menuButton(e)}
                   id="menuButton"
                   to="/notes/note-names"
                 >
-                  <i className="fas fa-bars " />
+                  <FontAwesomeIcon icon={faBars} />
                 </Link>
               </nav>
             </header>
