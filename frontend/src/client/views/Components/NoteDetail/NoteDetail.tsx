@@ -187,7 +187,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     refreshItems(nextPerson);
   }
 
-  function handleLinkButtons(animate: string, isLink: boolean, allDates: any[], bunch: any[]) {
+  function handleLinkButtons(animate: string, isLink: boolean, allDates: string[], bunch: React.JSX.Element[]) {
     let localBunch = bunch;
     if (animate === 'grow' && isLink && !editName) {
       if (allDates && allDates[0] && allDates[0].startsWith('href:')) {
@@ -257,7 +257,6 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
 
       const logDays = [...logDaysTemp].map((day) => {
         const total = allLogDays.filter((allDay) => allDay === day).length;
-
         return { date: day, count: total };
       });
 
@@ -315,13 +314,12 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
       const themeBorder = `${Theme.toLowerCase()}-border-thick`;
       const themeHover = `${Theme.toLowerCase()}-hover`;
 
-      const className = 'detailedBox';
       const showOnlyNote =
         lastPage && listHasShowTag && showTagValue && showTagValue !== 'Log' && !showLogDaysBunch;
 
       const key = prop + i;
       return (
-        <div className={className} key={key}>
+        <div className={'detailedBox'} key={key}>
           {!showOnlyNote && (
             <NoteDetailListItem
               linkBorder={linkBorder}
