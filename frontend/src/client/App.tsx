@@ -27,6 +27,7 @@ import { compareSort } from './views/Helpers/utils';
 import { Note } from './views/Helpers/types';
 import { RootState } from '../store';
 import { setTheme } from '../store/themeSlice';
+import { setNotes, setNoteNames } from '../store/personSlice';
 
 type ProtectedRoutesProps = {
   children: React.ReactElement;
@@ -38,26 +39,18 @@ function ProtectedRoutes({ children }: ProtectedRoutesProps) {
   return children;
 }
 
-type AppState = {
-  notes: Note[] | null;
-  user: string;
-  notesInitialLoad: boolean;
-  noteNames: string[] | null;
-  searchTerm: string;
-  freshData: boolean;
-  lastRefresh: number | null;
-};
-
 type AppProps = {
+  notes: Note[] | null,
   theme: string;
+  noteNames: string[] | undefined;
   setTheme: (theme: string) => void;
+  setNotes: (notes: Note[] | null) => void;
+  setNoteNames: (notes: string[]) => void;
 };
 
-const App: React.FC<AppProps> = ({ theme, setTheme }) => {
-  const [notes, setNotes] = useState<Note[] | null>(null);
+const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames, setNoteNames}) => {
   const [user, setUser] = useState('');
   const [notesInitialLoad, setNotesInitialLoad] = useState(false);
-  const [noteNames, setNoteNamesState] = useState<string[] | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [freshData, setFreshData] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<number | null>(null);
@@ -193,7 +186,7 @@ const App: React.FC<AppProps> = ({ theme, setTheme }) => {
       if (savedNames) {
         const savedNoteNames = JSON.parse(savedNames);
         const selectedUser = user.length > 1 ? user : null;
-        setNoteNamesState(savedNoteNames);
+        setNoteNames(savedNoteNames);
         if (selectedUser) getMyNotes(selectedUser);
       }
       if (loginKey && !notesInitialLoad && !noteNames) {
@@ -208,7 +201,7 @@ const App: React.FC<AppProps> = ({ theme, setTheme }) => {
                 update = { ...update, user: res[0] };
                 getMyNotes(res[0]);
               }
-              setNoteNamesState(update.noteNames);
+              setNoteNames(update.noteNames);
               if (update.user) setUser(update.user);
             }
           }
@@ -432,10 +425,14 @@ const App: React.FC<AppProps> = ({ theme, setTheme }) => {
 
 const mapStateToProps = (state: RootState) => ({
   theme: state.theme.value,
+  notes: state.person.notes,
+  noteNames: state.person.noteNames,
 });
 
 const mapDispatchToProps = {
   setTheme,
+  setNotes,
+  setNoteNames,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
