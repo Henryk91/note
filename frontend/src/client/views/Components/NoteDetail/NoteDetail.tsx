@@ -17,7 +17,6 @@ type Match = {
 };
 
 type NoteDetailProps = {
-  notes: Note[] | null;
   searchTerm?: string;
   editName?: boolean;
   set: (payload: any) => void;
@@ -28,14 +27,12 @@ type NoteDetailProps = {
   hideAddItem: () => void;
   pageCount: number;
   match: Match;
-  noteNames: string[] | null;
   initShowtag?: boolean;
 };
 
 type LogDay = { date: string; count: number };
 
 const NoteDetail: React.FC<NoteDetailProps> = ({
-  notes,
   searchTerm,
   editName: editNameProp,
   set,
@@ -46,13 +43,13 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   hideAddItem,
   pageCount,
   match,
-  noteNames,
   initShowtag,
 }) => {
   const dispatch = useDispatch();
   const personId = `${index ?? 0}`;
   const person = useSelector((state: RootState) => selectPersonById(state, personId));
-  const allPerson = useSelector((state: RootState) => getAllPersonById(state));
+  const notes = useSelector((state: RootState) => state.person.notes);
+  const noteNames = useSelector((state: RootState) => state.person.noteNames);
   const [editName, setEditName] = useState(false);
   const [showTag, setShowTag] = useState<string | null>('');
   const [addLable, setAddLable] = useState<any>(null);
@@ -173,8 +170,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   function handleLinkClick(tagData, currentPerson) {
     
     const noteId = tagData.data.substring(5);
-    const personNext = notes && notes[0] ? notes.find((note) => note.id === noteId) : null;
-
+    const personNext = notes?.find((note) => note.id === noteId) ?? null;
     const parentId = currentPerson.id;
     openPage({ personNext, parentId, hideNote: true });
   }
@@ -188,9 +184,10 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   function handleLinkButtons(animate: string, isLink: boolean, allDates: string[], bunch: React.JSX.Element[]) {
     let localBunch = bunch;
     if (animate === 'grow' && isLink && !editName) {
-      if (allDates && allDates[0] && allDates[0].startsWith('href:')) {
+      if (allDates?.[0]?.startsWith('href:')) {
         const noteId = allDates[0].substring(5);
-        const noteHeadings = notes && notes[0] ? notes.find((note) => note.id === noteId) : null;
+        const noteHeadings = notes?.find((note) => note.id === noteId) ?? null;
+        console.log('noteHeadings',noteHeadings);
         const buttons = getNoteByTag(noteHeadings?.dataLable, '');
         localBunch = buttons;
       }
@@ -349,14 +346,8 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   }
 
   function showTagChange(tagName: string) {
-
-    // const lastLinkId = showLink.length > 1 ? showLink[showLink.length - 1] : null;
-    // const nextPerson = lastLinkId ? notes?.find((note) => note.id === lastLinkId) : null;
-    const nextPerson = null;
     const propForId = initShowtag ?? match;
-
     const localPerson = person? person: getPersonNoteType(notes, propForId)
-
     const tagData = localPerson?.dataLable.find((note) => note.tag === tagName);
 
     if (tagData?.data?.startsWith('href:') && editName === false) {
@@ -565,7 +556,6 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
           tags={tagsB}
           showTag={showTag}
           addLable={addLable}
-          notes={notes}
           index={index}
           lastPage={lastPage}
           submitNameChange={submitNameChange}

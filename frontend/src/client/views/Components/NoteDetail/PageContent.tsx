@@ -9,7 +9,6 @@ type PageContentProps = {
   tags: React.ReactNode;
   showTag: string | null;
   addLable: any;
-  notes: Note[] | null;
   index?: number;
   lastPage?: boolean;
   submitNameChange: (e: React.FormEvent<HTMLFormElement>) => void;
@@ -24,14 +23,12 @@ const PageContent: React.FC<PageContentProps> = ({
   tags,
   showTag,
   addLable,
-  notes,
   index = 0,
   lastPage,
   submitNameChange,
   submitNewItem,
   cancelAddItemEdit,
 }) => {
-
   const isFirstPage = index === 0;
   const className = isFirstPage ? 'note-detail-item first-note-detail-item' : 'note-detail-item';
   const localShowTag = localStorage.getItem('showTag');
@@ -59,7 +56,6 @@ const PageContent: React.FC<PageContentProps> = ({
           <AddItemForm
             showTag={showTag}
             addLable={addLable}
-            notes={notes}
             onSubmit={submitNewItem}
             onCancel={cancelAddItemEdit}
           />

@@ -9,8 +9,6 @@ import { THEMES } from '../../Helpers/const';
 
 export type NoteDetailPageItemProps = {
   searchTerm: string;
-  noteNames: string[] | null;
-  notes: Note[] | null;
   pageLink: any;
   showAddItem: boolean;
   index: number;
@@ -24,7 +22,6 @@ export type NoteDetailPageItemProps = {
 } & React.ComponentProps<typeof NoteDetail>;
 
 export type SidebarProps = {
-  noteNames: string[] | null | undefined;
   prepForNote: (name: string) => void;
 };
 
@@ -35,7 +32,6 @@ export type ScrollButtonsProps = {
 };
 
 export type NoteNamesListProps = {
-  names: string[] | null | undefined;
   onSelect: (name: string) => void;
 };
 
@@ -52,8 +48,6 @@ export type BackButtonProps = {
 
 export const NoteDetailPageItem: React.FC<NoteDetailPageItemProps> = ({
   searchTerm,
-  noteNames,
-  notes,
   pageLink,
   showAddItem,
   index,
@@ -73,10 +67,8 @@ export const NoteDetailPageItem: React.FC<NoteDetailPageItemProps> = ({
         pageCount={pageCount}
         hideAddItem={hideAddItem}
         searchTerm={searchTerm}
-        noteNames={noteNames}
         set={set}
         openPage={openPage}
-        notes={notes}
         initShowtag={initShowtag}
         index={index}
         showAddItem={showAddItem}
@@ -88,9 +80,11 @@ export const NoteDetailPageItem: React.FC<NoteDetailPageItemProps> = ({
   );
 };
 
-const NoteNamesList: React.FC<NoteNamesListProps> = ({ names, onSelect }) => (
+const NoteNamesList: React.FC<NoteNamesListProps> = ({ onSelect }) => {
+  const noteNames = useSelector((state: RootState) => state.person.noteNames);
+  return (
   <>
-    {names?.map((name) => (
+    {noteNames?.map((name) => (
       <Link key={name} style={{ textDecoration: 'none' }} to="/notes/main" title="Note List">
         <div className="listNameButton" onClick={() => onSelect(name)}>
           <h3> {name} </h3>
@@ -98,7 +92,7 @@ const NoteNamesList: React.FC<NoteNamesListProps> = ({ names, onSelect }) => (
       </Link>
     ))}
   </>
-);
+)};
 
 const NoteThemesList: React.FC<NoteThemesListProps> = ({ names, onSelect }) => (
   <>
@@ -112,7 +106,7 @@ const NoteThemesList: React.FC<NoteThemesListProps> = ({ names, onSelect }) => (
   </>
 );
 
-export const Sidebar: React.FC<SidebarProps> = ({ noteNames, prepForNote }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ prepForNote }) => {
   const dispatch = useDispatch();
   const setSelectedTheme = (name: string) => dispatch(setTheme(name));
   
@@ -120,7 +114,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ noteNames, prepForNote }) => {
   <div>
     <br />
     <h3 className="page-content-top1">Note Book Names</h3>
-    <NoteNamesList names={noteNames} onSelect={prepForNote} />
+    <NoteNamesList onSelect={prepForNote} />
     <br />
     <h3>Apps</h3>
     <Link key="memento" style={{ textDecoration: 'none' }} to="/memento" title="Note List">

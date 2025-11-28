@@ -12,7 +12,6 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
 
 type EditNoteCheckProps = {
-  allNotes?: Note[] | null;
   note?: Note | null;
   Save?: (payload: any) => void;
   showTag?: string | null;
@@ -31,7 +30,8 @@ const dateToInputDisplayDate = (date: Date) => {
   return `${date.toISOString().split('T')[0]}T${hours}:${minutes}`;
 };
 
-const EditNoteCheck: React.FC<EditNoteCheckProps> = ({ allNotes, showTag, lable }) => {
+const EditNoteCheck: React.FC<EditNoteCheckProps> = ({ showTag, lable }) => {
+  const allNotes = useSelector((state: RootState) => state.person.notes);
   const theme = useSelector((state: RootState) => state.theme.themeLower);
 
   const [radioType, setRadioType] = useState('Note');
@@ -179,7 +179,6 @@ const EditNoteCheck: React.FC<EditNoteCheckProps> = ({ allNotes, showTag, lable 
         <NewLinkField
           themeBack={themeBack}
           themeHover={themeHover}
-          notes={allNotes}
           onChangeLink={changeLink}
           onNewFolder={toNewNote}
         />

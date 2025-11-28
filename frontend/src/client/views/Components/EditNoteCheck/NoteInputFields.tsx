@@ -2,6 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Note } from '../../Helpers/types';
 import AutoCompleteTextArea from './AutoCompleteTextArea';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../../store';
 
 type BaseProps = {
   themeBack: string;
@@ -65,7 +67,7 @@ export const NewLogField: React.FC<NewLogFieldProps> = ({
       className={themeBack}
       name="tagTypeText"
       type="text"
-      defaultValue={displayDate || undefined}
+      defaultValue={displayDate?.toDateString() || undefined}
       onChange={(e) => onTodoChange(e.target.value)}
     />
     <br />
@@ -123,7 +125,6 @@ export const NewNoteField: React.FC<NewNoteFieldProps> = ({ themeBack, showTag }
 
 type NewLinkFieldProps = BaseProps & {
   themeHover: string;
-  notes?: Note[] | null;
   onChangeLink: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   onNewFolder: () => void;
 };
@@ -131,10 +132,10 @@ type NewLinkFieldProps = BaseProps & {
 export const NewLinkField: React.FC<NewLinkFieldProps> = ({
   themeBack,
   themeHover,
-  notes,
   onChangeLink,
   onNewFolder,
 }) => {
+  const notes = useSelector((state: RootState) => state.person.notes);
   const headings =
     notes?.map((note) => ({ heading: note.heading, id: note.id })) ?? [];
 

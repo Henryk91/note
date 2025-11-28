@@ -5,7 +5,6 @@ import { RootState } from '../../../../store';
 
 type SearchBarProps = {
   noteName: string;
-  notes: Note[] | null;
   set: (payload: any) => void;
 };
 
@@ -15,7 +14,8 @@ type SearchBarState = {
   editName: boolean;
 };
 
-const SearchBar: React.FC<SearchBarProps> = ({ noteName, notes, set }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ noteName, set }) => {
+  const notes = useSelector((state: RootState) => state.person.notes);
   const theme = useSelector((state: RootState) => state.theme.themeLower);
   const [state, setState] = useState<SearchBarState>({
     showSearch: false,

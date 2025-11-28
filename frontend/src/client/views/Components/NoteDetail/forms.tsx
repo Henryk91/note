@@ -12,7 +12,6 @@ export type EditNameFormProps = {
 export type AddItemFormProps = {
   showTag: string | null;
   addLable: any;
-  notes: Note[] | null;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   onCancel: () => void;
 };
@@ -65,7 +64,6 @@ export const EditNameForm: React.FC<EditNameFormProps> = ({ heading, onSubmit })
 export const AddItemForm: React.FC<AddItemFormProps> = ({
   showTag,
   addLable,
-  notes,
   onSubmit,
   onCancel,
 }) => {
@@ -74,7 +72,7 @@ export const AddItemForm: React.FC<AddItemFormProps> = ({
   const themeHover = `${theme}-hover`;
   return (
     <form onSubmit={onSubmit}>
-      <EditNoteCheck showTag={showTag} lable={addLable} allNotes={notes} />
+      <EditNoteCheck showTag={showTag} lable={addLable} />
       <br />
       <button className={`submit-button ${themeHover} ${themeBack}`} type="submit" id="submit-new-note">
         <i className="fas fa-check" />

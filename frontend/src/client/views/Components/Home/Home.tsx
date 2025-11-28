@@ -31,11 +31,11 @@ const createList = (notes: Note[] | null, theme: string) => {
 };
 
 type HomeProps = {
-  notes: Note[] | null;
   User?: string;
 };
 
-const Home: React.FC<HomeProps> = ({ notes, User }) => {
+const Home: React.FC<HomeProps> = ({ User }) => {
+  const notes = useSelector((state: RootState) => state.person.notes);
   const theme = useSelector((state: RootState) => state.theme.themeLower);
   const themeBack = `${theme}-back`;
   const themeHover = `${theme}-hover`;

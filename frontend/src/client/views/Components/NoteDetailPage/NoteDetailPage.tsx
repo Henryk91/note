@@ -9,8 +9,9 @@ import {
 } from './NoteDetailPageParts';
 
 
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { removePersonById, setPersonById } from '../../../../store/personSlice';
+import { RootState } from '../../../../store';
 
 type Match = {
   isExact: boolean;
@@ -20,8 +21,6 @@ type Match = {
 };
 
 type NoteDetailPageProps = {
-  noteNames: string[] | null;
-  notes: Note[] | null;
   set: (payload: any) => void;
   searchTerm?: string;
   match: Match;
@@ -33,12 +32,12 @@ const DEFAULT_PAGE = [{ params: { id: 'main', tempId: 'main' } }]
 
 const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
   match,
-  noteNames,
   searchTerm,
-  notes,
   set,
   ...rest
 }) => {
+  const notes = useSelector((state: RootState) => state.person.notes);
+  const noteNames = useSelector((state: RootState) => state.person.noteNames);
   const [showAddItem, setShowAddItem] = useState(false);
   const [editName, setEditName] = useState(false);
   const [pages, setPages] = useState<PageDescriptor[]>(DEFAULT_PAGE);
@@ -273,8 +272,6 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
         initShowtag={pageLink}        
         set={noteDetailSet}
         searchTerm={searchTerm ?? ''}
-        noteNames={noteNames}
-        notes={notes}
       />
     );
   }) : null
@@ -284,7 +281,7 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
     <div className="slide-in" key={match.url}>
       <BackButton hasPages={pages.length > 1} onBack={scrollPageBack} onLogout={logOut} />
       {isNoteNames && (
-        <Sidebar noteNames={noteNames} prepForNote={prepForNote} />
+        <Sidebar prepForNote={prepForNote} />
       )}
       <div id="multiple-pages">{pagesCont}</div>
       <ScrollButtons

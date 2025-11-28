@@ -354,7 +354,7 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
         <ProtectedRoutes>
           <>
             <header>
-              <SearchBar set={setFilterNote} noteName={user} notes={notes} />
+              <SearchBar set={setFilterNote} noteName={user} />
               <nav className="bigScreen" id="links">
                 <Link
                   style={{ textDecoration: 'none' }}
@@ -380,10 +380,8 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
               render={(props) => (
                 <NoteDetailPage
                   searchTerm={searchTerm}
-                  noteNames={noteNames}
                   {...props}
                   set={noteDetailSet}
-                  notes={notes}
                 />
               )}
             />
@@ -393,10 +391,8 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
               render={(props) => (
                 <NoteDetailPage
                   searchTerm={searchTerm}
-                  noteNames={noteNames}
                   {...props}
                   set={noteDetailSet}
-                  notes={notes}
                 />
               )}
             />
@@ -406,10 +402,8 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
               render={(props) => (
                 <NoteDetailPage
                   searchTerm={searchTerm}
-                  noteNames={noteNames}
                   {...props}
                   set={noteDetailSet}
-                  notes={notes}
                 />
               )}
             />
