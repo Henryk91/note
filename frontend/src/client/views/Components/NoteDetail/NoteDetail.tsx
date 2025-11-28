@@ -301,7 +301,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
       const isLink = isLinkCheck(sort, prop);
       const animate = enableAnimationCheck(showTagValue, prop);
 
-      if (showTagValue === 'Log' && !showLogDaysBunch) {
+      if (showDateSelector && showTagValue === 'Log' && !showLogDaysBunch) {
         const checkSate = `${selectedDate}`.substring(0, 15).trim();
         allDates = allDates.filter((item) => item.includes(checkSate));
       }
