@@ -30,6 +30,8 @@ type NoteDetailPageProps = {
 
 type PageDescriptor = { params: { id: string, tempId: string } };
 
+const DEFAULT_PAGE = [{ params: { id: 'main', tempId: 'main' } }]
+
 const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
   match,
   noteNames,
@@ -41,7 +43,7 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
 }) => {
   const [showAddItem, setShowAddItem] = useState(false);
   const [editName, setEditName] = useState(false);
-  const [pages, setPages] = useState<PageDescriptor[]>([{ params: { id: 'main', tempId: 'main' } }]);
+  const [pages, setPages] = useState<PageDescriptor[]>(DEFAULT_PAGE);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -239,8 +241,16 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
     setEditName((prev) => !prev);
   }, []);
 
+
+  const resetPages = () => {
+    setPages(DEFAULT_PAGE);
+    localStorage.setItem('saved-pages', JSON.stringify(DEFAULT_PAGE));
+  }
+
   const prepForNote = useCallback(
     (name: string) => {
+      const user = localStorage.getItem('user')
+      if(name !== user) resetPages()
       set({ noteName: name });
     },
     [set],

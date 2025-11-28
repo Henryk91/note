@@ -23,7 +23,6 @@ type NoteItemProps = {
   parent?: any;
   showLogButton?: boolean;
   hideButtons?: boolean;
-  showEdit: boolean;
   count: number;
   cont: (payload: any) => void;
 };
@@ -144,7 +143,7 @@ const DisplayItemBox: React.FC<DisplayItemBoxProps> = ({
       {show && (
         <>
           <div className="logLine">
-            {showEdit ? null : (
+            {!showEdit && (
               <div className={`listCountBox noteItemCount ${themeBorder}`}>
                 {' '}
                 <span className="list-count-item">{count}</span>{' '}
@@ -193,14 +192,8 @@ const DisplayLogItemBox: React.FC<DisplayLogItemBoxProps> = ({
     ? 'logNoteItem'
     : null;
 
-  let prevData = null;
-
-  if (prevItem !== null && prevItem !== undefined) {
-    prevData = JSON.parse(prevItem).data;
-  }
-  let duration = showItem ? getLogDuration(nextItem, parsedItem) : '';
-
-  if (!showItem) duration = '';
+  const prevData = (prevItem !== null && prevItem !== undefined)? JSON.parse(prevItem).data: null;
+  const duration = showItem ? getLogDuration(nextItem, parsedItem) : '';
 
   return (
     <div className="noteItemBox">
@@ -249,12 +242,13 @@ const NoteItem: React.FC<NoteItemProps> = ({
   prevItem,
   nextItem,
   count,
-  showEdit,
   cont,
 }) => {
   const [item, setItem] = useState(initialItem);
   const [editingItem, setEditingItem] = useState(false);
   const [scrollPos, setScrollPos] = useState(0);
+
+  const showEdit = type !== 'Log Days';
 
   const addLeadingZero = (number: number) => {
     if (number < 10) return `0${number}`;
