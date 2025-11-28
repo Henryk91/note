@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Note } from '../../Helpers/types';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../../store';
 
 const onlyUnique = (value: string, index: number, self: string[]) => self.indexOf(value) === index;
 
@@ -30,13 +32,13 @@ const createList = (notes: Note[] | null, theme: string) => {
 
 type HomeProps = {
   notes: Note[] | null;
-  Theme: string;
   User?: string;
 };
 
-const Home: React.FC<HomeProps> = ({ notes, Theme, User }) => {
-  const themeBack = `${Theme.toLowerCase()}-back`;
-  const themeHover = `${Theme.toLowerCase()}-hover`;
+const Home: React.FC<HomeProps> = ({ notes, User }) => {
+  const theme = useSelector((state: RootState) => state.theme.themeLower);
+  const themeBack = `${theme}-back`;
+  const themeHover = `${theme}-hover`;
 
   const logOut = () => {
     console.log('logOut localStorage.clear()');
@@ -68,7 +70,7 @@ const Home: React.FC<HomeProps> = ({ notes, Theme, User }) => {
       {notes ? (
         <div className="slide-in">
           <div key="page-content-top" className="page-content-top1" />
-          {createList(notes, Theme)}
+          {createList(notes, theme)}
           <br />
         </div>
       ) : (

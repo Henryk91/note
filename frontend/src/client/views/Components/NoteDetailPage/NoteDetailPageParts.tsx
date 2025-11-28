@@ -2,11 +2,13 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import NoteDetail from '../NoteDetail/NoteDetail';
 import { Note } from '../../Helpers/types';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../../../store';
+import { setTheme } from '../../../../store/themeSlice';
 
 export type NoteDetailPageItemProps = {
   searchTerm: string;
   noteNames: string[] | null;
-  Theme: string;
   notes: Note[] | null;
   pageLink: any;
   showAddItem: boolean;
@@ -22,12 +24,10 @@ export type NoteDetailPageItemProps = {
 
 export type SidebarProps = {
   noteNames: string[] | null | undefined;
-  setNoteTheme: (name: string) => void;
   prepForNote: (name: string) => void;
 };
 
 export type ScrollButtonsProps = {
-  Theme: string;
   showAddItem: boolean;
   showBackButton: boolean;
   onEditName: () => void;
@@ -45,7 +45,6 @@ export type NoteThemesListProps = {
 };
 
 export type BackButtonProps = {
-  Theme: string;
   hasPages: boolean;
   onBack: () => void;
   onLogout: () => void;
@@ -54,7 +53,6 @@ export type BackButtonProps = {
 export const NoteDetailPageItem: React.FC<NoteDetailPageItemProps> = ({
   searchTerm,
   noteNames,
-  Theme,
   notes,
   pageLink,
   showAddItem,
@@ -76,7 +74,6 @@ export const NoteDetailPageItem: React.FC<NoteDetailPageItemProps> = ({
         hideAddItem={hideAddItem}
         searchTerm={searchTerm}
         noteNames={noteNames}
-        Theme={Theme}
         set={set}
         openPage={openPage}
         notes={notes}
@@ -115,7 +112,13 @@ const NoteThemesList: React.FC<NoteThemesListProps> = ({ names, onSelect }) => (
   </>
 );
 
-export const Sidebar: React.FC<SidebarProps> = ({ noteNames, prepForNote, setNoteTheme }) => (
+export const Sidebar: React.FC<SidebarProps> = ({ noteNames, prepForNote }) => {
+  const dispatch = useDispatch();
+  const setNoteTheme = (name: string) => {
+    dispatch(setTheme(name));
+    localStorage.setItem('theme', name);
+  }
+  return (
   <div>
     <br />
     <h3 className="page-content-top1">Note Book Names</h3>
@@ -136,17 +139,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ noteNames, prepForNote, setNot
     <h3>Themes</h3>
     <NoteThemesList names={['Red', 'Ocean', 'Green', 'Dark', 'Night']} onSelect={setNoteTheme} />
   </div>
-);
+)}
 
 export const ScrollButtons: React.FC<ScrollButtonsProps> = ({
-  Theme,
   showAddItem,
   showBackButton,
   onEditName,
   onAdd,
 }) => {
-  const themeBack = `${Theme.toLowerCase()}-back`;
-  const themeHover = `${Theme.toLowerCase()}-hover`;
+  const theme = useSelector((state: RootState) => state.theme.themeLower);
+  const themeBack = `${theme}-back`;
+  const themeHover = `${theme}-hover`;
 
   return (
     <div className="detail-scroll">
@@ -189,8 +192,9 @@ export const ScrollButtons: React.FC<ScrollButtonsProps> = ({
   );
 };
 
-export const BackButton: React.FC<BackButtonProps> = ({ Theme, hasPages, onBack, onLogout }) => {
-  const themeBack = `${Theme.toLowerCase()}-back`;
+export const BackButton: React.FC<BackButtonProps> = ({  hasPages, onBack, onLogout }) => {
+  const theme = useSelector((state: RootState) => state.theme.themeLower);
+  const themeBack = `${theme}-back`;
   const icon = hasPages ? 'fas fa-arrow-left' : 'fas fa-power-off';
   const handleClick = () => {
     if (hasPages) onBack();

@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { loginRequest, createAccount } from '../../Helpers/requests';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../../store';
 
-type LoginProps = {
-  Theme: string;
-};
-
-const Login: React.FC<LoginProps> = ({ Theme }) => {
+const Login: React.FC= () => {
+  const theme = useSelector((state: RootState) => state.theme.themeLower);
   const [signUp, setSignUp] = useState(false);
-  const themeBack = `${Theme.toLowerCase()}-back`;
-  const themeHover = `${Theme.toLowerCase()}-hover`;
+  const themeBack = `${theme}-back`;
+  const themeHover = `${theme}-hover`;
 
   const saveLogin = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

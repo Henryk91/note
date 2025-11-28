@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { marked } from 'marked';
 import { getLogDuration } from '../../Helpers/utils';
 import { NoteLabel } from '../../Helpers/types';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../../store';
 
 marked.setOptions({
   breaks: true,
@@ -16,7 +18,6 @@ type NoteItemProps = {
   index: number;
   type: string;
   set: (payload: any) => void;
-  Theme: string;
   showBack?: boolean;
   btnClassName?: string;
   showButtons?: boolean;
@@ -29,7 +30,6 @@ type NoteItemProps = {
 
 type EditItemBoxProps = {
   item: string;
-  Theme: string;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   onClose: () => void;
   onDelete: (e: React.MouseEvent<HTMLButtonElement>) => void;
@@ -39,7 +39,6 @@ type EditItemBoxProps = {
 
 type DisplayItemBoxProps = {
   item: string;
-  Theme: string;
   showEdit: boolean;
   count: number;
   show: boolean;
@@ -50,7 +49,6 @@ type DisplayLogItemBoxProps = {
   item: string;
   show: boolean;
   date: string;
-  Theme: string;
   prevItem?: string;
   nextItem?: string;
   cont: (payload: any) => void;
@@ -64,15 +62,15 @@ const getMarkdownText = (input: string) => {
 
 const EditItemBox: React.FC<EditItemBoxProps> = ({
   item,
-  Theme,
   onSubmit,
   onClose,
   onDelete,
   changeDate,
   dateToInputDisplayDate,
 }) => {
-  const themeBack = `${Theme.toLowerCase()}-back`;
-  const themeHover = `${Theme.toLowerCase()}-hover`;
+  const theme = useSelector((state: RootState) => state.theme.themeLower);
+  const themeBack = `${theme}-back`;
+  const themeHover = `${theme}-hover`;
   let editText = item;
   const isLog = item.includes('"json":true');
   let editDate;
@@ -129,13 +127,13 @@ const EditItemBox: React.FC<EditItemBoxProps> = ({
 
 const DisplayItemBox: React.FC<DisplayItemBoxProps> = ({
   item,
-  Theme,
   showEdit,
   count,
   show,
   onEdit,
 }) => {
-  const themeBorder = `${Theme.toLowerCase()}-border-thick`;
+  const theme = useSelector((state: RootState) => state.theme.themeLower);
+  const themeBorder = `${theme}-border-thick`;
   const noteItemClass = count > 0 ? 'noteItemHasCount' : 'noteItem';
 
   return (
@@ -165,12 +163,12 @@ const DisplayLogItemBox: React.FC<DisplayLogItemBoxProps> = ({
   item,
   show,
   date,
-  Theme,
   prevItem,
   nextItem,
   cont,
   onEdit,
 }) => {
+  const theme = useSelector((state: RootState) => state.theme.themeLower);
   const parsedItem = JSON.parse(item);
   let showItem = show;
   const newDate = parsedItem.date.substring(0, parsedItem.date.indexOf('GMT')).trim();
@@ -185,8 +183,8 @@ const DisplayLogItemBox: React.FC<DisplayLogItemBoxProps> = ({
   }
   if (!showItem) return null;
 
-  const themeBack = `${Theme.toLowerCase()}-back`;
-  const themeBackHover = `${Theme.toLowerCase()}-hover`;
+  const themeBack = `${theme}-back`;
+  const themeBackHover = `${theme}-hover`;
 
   const hasBreak = ['Break', 'Pause', 'Lunch'].includes(parsedItem.data)
     ? 'logNoteItem'
@@ -238,7 +236,6 @@ const NoteItem: React.FC<NoteItemProps> = ({
   set,
   show,
   date,
-  Theme,
   prevItem,
   nextItem,
   count,
@@ -357,7 +354,6 @@ const NoteItem: React.FC<NoteItemProps> = ({
           {editing && itemIsString && (
             <EditItemBox
               item={item}
-              Theme={Theme}
               onSubmit={submitChange}
               onClose={closeEdit}
               onDelete={deleteItem}
@@ -370,7 +366,6 @@ const NoteItem: React.FC<NoteItemProps> = ({
               item={item}
               show={show}
               date={date}
-              Theme={Theme}
               prevItem={prevItem}
               nextItem={nextItem}
               cont={cont}
@@ -380,7 +375,6 @@ const NoteItem: React.FC<NoteItemProps> = ({
           {noEditingNoLog && itemIsString && (
             <DisplayItemBox
               item={item}
-              Theme={Theme}
               showEdit={showEdit}
               count={count}
               show={show}

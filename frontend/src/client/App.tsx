@@ -265,8 +265,6 @@ const App: React.FC<AppProps> = ({ theme, setTheme }) => {
         setUser(noteName);
         setNotes(null);
         getMyNotes(noteName);
-      } else if (msg.noteTheme) {
-        setTheme(msg.noteTheme);
       } else {
         updateNote(msg);
       }
@@ -363,11 +361,11 @@ const App: React.FC<AppProps> = ({ theme, setTheme }) => {
   return (
     <Router>
       <Switch>
-        <Route path="/login" render={() => <Login Theme={theme} />} />
+        <Route path="/login" render={() => <Login />} />
         <ProtectedRoutes>
           <>
             <header>
-              <SearchBar set={setFilterNote} noteName={user} Theme={theme} notes={notes} />
+              <SearchBar set={setFilterNote} noteName={user} notes={notes} />
               <nav className="bigScreen" id="links">
                 <Link
                   style={{ textDecoration: 'none' }}
@@ -385,7 +383,7 @@ const App: React.FC<AppProps> = ({ theme, setTheme }) => {
             <Route
               exact
               path="/all"
-              render={(props) => <Home {...props} searchTerm={searchTerm} Theme={theme} notes={notes} />}
+              render={(props) => <Home {...props} searchTerm={searchTerm} notes={notes} />}
             />
             <Route
               exact
@@ -394,7 +392,6 @@ const App: React.FC<AppProps> = ({ theme, setTheme }) => {
                 <NoteDetailPage
                   searchTerm={searchTerm}
                   noteNames={noteNames}
-                  Theme={theme}
                   {...props}
                   set={noteDetailSet}
                   notes={notes}
@@ -408,7 +405,6 @@ const App: React.FC<AppProps> = ({ theme, setTheme }) => {
                 <NoteDetailPage
                   searchTerm={searchTerm}
                   noteNames={noteNames}
-                  Theme={theme}
                   {...props}
                   set={noteDetailSet}
                   notes={notes}
@@ -422,16 +418,15 @@ const App: React.FC<AppProps> = ({ theme, setTheme }) => {
                 <NoteDetailPage
                   searchTerm={searchTerm}
                   noteNames={noteNames}
-                  Theme={theme}
                   {...props}
                   set={noteDetailSet}
                   notes={notes}
                 />
               )}
             />
-            <Route exact path="/new-note" render={() => <NewNote Theme={theme} set={addNewNote} />} />
+            <Route exact path="/new-note" render={() => <NewNote set={addNewNote} />} />
             <Route exact path="/pomodoro" render={() => <Pomodoro />} />
-            <Route exact path="/memento" render={() => <Memento Theme={theme} />} />
+            <Route exact path="/memento" render={() => <Memento />} />
           </>
         </ProtectedRoutes>
       </Switch>

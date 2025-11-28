@@ -1,15 +1,15 @@
 import React from 'react';
 import EditNoteCheck from '../EditNoteCheck/EditNoteCheck';
 import { Note } from '../../Helpers/types';
+import { RootState } from '../../../../store';
+import { useSelector } from 'react-redux';
 
 export type EditNameFormProps = {
-  Theme: string;
   heading: string;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 };
 
 export type AddItemFormProps = {
-  Theme: string;
   showTag: string | null;
   addLable: any;
   notes: Note[] | null;
@@ -21,12 +21,9 @@ export type NoteDetailListItemProps = {
   linkBorder: string;
   showTag: string | null;
   prop: string;
-  themeBorder: string;
   isLink: boolean;
   bunch: any[];
   showDateSelector: boolean;
-  themeBack: string;
-  themeHover: string;
   continueData: any;
   onShowHide: () => void;
   onShowLogDays: () => void;
@@ -36,9 +33,10 @@ export type NoteDetailListItemProps = {
   onContinueLog: (payload: any) => void;
 };
 
-export const EditNameForm: React.FC<EditNameFormProps> = ({ Theme, heading, onSubmit }) => {
-  const themeBack = `${Theme.toLowerCase()}-back`;
-  const themeHover = `${Theme.toLowerCase()}-hover`;
+export const EditNameForm: React.FC<EditNameFormProps> = ({ heading, onSubmit }) => {
+  const theme = useSelector((state: RootState) => state.theme.themeLower);
+  const themeBack = `${theme}-back`;
+  const themeHover = `${theme}-hover`;
   return (
     <form onSubmit={onSubmit}>
       <br />
@@ -65,18 +63,18 @@ export const EditNameForm: React.FC<EditNameFormProps> = ({ Theme, heading, onSu
 };
 
 export const AddItemForm: React.FC<AddItemFormProps> = ({
-  Theme,
   showTag,
   addLable,
   notes,
   onSubmit,
   onCancel,
 }) => {
-  const themeBack = `${Theme.toLowerCase()}-back`;
-  const themeHover = `${Theme.toLowerCase()}-hover`;
+  const theme = useSelector((state: RootState) => state.theme.themeLower);
+  const themeBack = `${theme}-back`;
+  const themeHover = `${theme}-hover`;
   return (
     <form onSubmit={onSubmit}>
-      <EditNoteCheck Theme={Theme} showTag={showTag} lable={addLable} allNotes={notes} />
+      <EditNoteCheck showTag={showTag} lable={addLable} allNotes={notes} />
       <br />
       <button className={`submit-button ${themeHover} ${themeBack}`} type="submit" id="submit-new-note">
         <i className="fas fa-check" />
@@ -92,12 +90,15 @@ export const AddItemForm: React.FC<AddItemFormProps> = ({
 };
 
 export const LogHeader: React.FC<{
-  themeBack: string;
-  themeHover: string;
   continueData: any;
   onDateBackForward: (e: React.MouseEvent<HTMLButtonElement>, dir: 'back' | 'forward') => void;
   onContinueLog: (payload: any) => void;
-}> = ({ themeBack, themeHover, continueData, onDateBackForward, onContinueLog }) => (
+}> = ({ continueData, onDateBackForward, onContinueLog }) => {
+  const theme = useSelector((state: RootState) => state.theme.themeLower);
+  const themeBack = `${theme}-back`;
+  const themeHover = `${theme}-hover`;
+
+  return (
   <div>
     <div className="day-forward-back">
       <button className={`forward-back-button ${themeBack} ${themeHover}`} onClick={(event) => onDateBackForward(event, 'back')}>
@@ -112,18 +113,15 @@ export const LogHeader: React.FC<{
     </button>
     <br />
   </div>
-);
+)};
 
 export const NoteDetailListItem: React.FC<NoteDetailListItemProps> = ({
   linkBorder,
   showTag,
   prop,
-  themeBorder,
   isLink,
   bunch,
   showDateSelector,
-  themeBack,
-  themeHover,
   continueData,
   onShowHide,
   onShowLogDays,
@@ -132,6 +130,11 @@ export const NoteDetailListItem: React.FC<NoteDetailListItemProps> = ({
   onDateBackForward,
   onContinueLog,
 }) => {
+  const theme = useSelector((state: RootState) => state.theme.themeLower);
+  const themeBack = `${theme}-back`;
+  const themeBorder = `${theme}-border-thick`;
+  const themeHover = `${theme}-hover`;
+
   const className = showDateSelector ? 'detailLogBoxTitle' : 'detailBoxTitle';
   const dateCounterId = showDateSelector ? 'date-selector-counter' : '';
 
@@ -163,8 +166,6 @@ export const NoteDetailListItem: React.FC<NoteDetailListItemProps> = ({
       <div className={`logToggleHeader detailTitleBox dark-hover ${linkBorder}`}>
         {showTag === 'Log' && prop === 'Log' && (
           <LogHeader
-            themeBack={themeBack}
-            themeHover={themeHover}
             continueData={continueData}
             onDateBackForward={onDateBackForward}
             onContinueLog={onContinueLog}

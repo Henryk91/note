@@ -8,11 +8,12 @@ import {
   NewNumberField,
   NewUploadField,
 } from './NoteInputFields';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../../store';
 
 type EditNoteCheckProps = {
   allNotes?: Note[] | null;
   note?: Note | null;
-  Theme: string;
   Save?: (payload: any) => void;
   showTag?: string | null;
   lable?: string;
@@ -30,7 +31,9 @@ const dateToInputDisplayDate = (date: Date) => {
   return `${date.toISOString().split('T')[0]}T${hours}:${minutes}`;
 };
 
-const EditNoteCheck: React.FC<EditNoteCheckProps> = ({ allNotes, Theme, showTag, lable }) => {
+const EditNoteCheck: React.FC<EditNoteCheckProps> = ({ allNotes, showTag, lable }) => {
+  const theme = useSelector((state: RootState) => state.theme.themeLower);
+
   const [radioType, setRadioType] = useState('Note');
   const [upload, setUpload] = useState<string | null>(null);
   const [displayDate, setDisplayDate] = useState<Date | null>(new Date());
@@ -87,8 +90,8 @@ const EditNoteCheck: React.FC<EditNoteCheckProps> = ({ allNotes, Theme, showTag,
     localStorage.setItem('new-folder-edit', 'true');
   }, []);
 
-  const themeBack = `${Theme.toLowerCase()}-back`;
-  const themeHover = `${Theme.toLowerCase()}-hover`;
+  const themeBack = `${theme}-back`;
+  const themeHover = `${theme}-hover`;
 
   const effectiveRadioType = useMemo(() => {
     let localRadioType = radioType;

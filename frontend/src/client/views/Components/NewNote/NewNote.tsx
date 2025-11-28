@@ -1,15 +1,17 @@
 import React, { useEffect } from 'react';
 import EditNoteCheck from '../EditNoteCheck/EditNoteCheck';
 import { docId } from '../../Helpers/utils';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../../store';
 
 type NewNoteProps = {
-  Theme: string;
   set: (payload: any) => void;
 };
 
-const NewNote: React.FC<NewNoteProps> = ({ Theme, set }) => {
-  const themeBack = `${Theme.toLowerCase()}-back`;
-  const themeHover = `${Theme.toLowerCase()}-hover`;
+const NewNote: React.FC<NewNoteProps> = ({ set }) => {
+  const theme = useSelector((state: RootState) => state.theme.themeLower);
+  const themeBack = `${theme}-back`;
+  const themeHover = `${theme}-hover`;
 
   useEffect(() => {
     const id = setTimeout(() => {
@@ -68,7 +70,7 @@ const NewNote: React.FC<NewNoteProps> = ({ Theme, set }) => {
           id="heading"
         />
         <br />
-        <EditNoteCheck Theme={Theme} />
+        <EditNoteCheck />
         <button className={`submit-button ${themeHover} ${themeBack}`} type="submit">
           {' '}
           <i className="fas fa-check" />

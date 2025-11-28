@@ -6,7 +6,6 @@ type PageContentProps = {
   person: Note;
   editName: boolean;
   showAddItem: boolean;
-  Theme: string;
   tags: React.ReactNode;
   showTag: string | null;
   addLable: any;
@@ -22,7 +21,6 @@ const PageContent: React.FC<PageContentProps> = ({
   person,
   editName,
   showAddItem,
-  Theme,
   tags,
   showTag,
   addLable,
@@ -33,6 +31,7 @@ const PageContent: React.FC<PageContentProps> = ({
   submitNewItem,
   cancelAddItemEdit,
 }) => {
+
   const isFirstPage = index === 0;
   const className = isFirstPage ? 'note-detail-item first-note-detail-item' : 'note-detail-item';
   const localShowTag = localStorage.getItem('showTag');
@@ -45,7 +44,7 @@ const PageContent: React.FC<PageContentProps> = ({
     <div id={isFirstPage ? 'isFirstPage' : ''} className={className} key={person.id}>
       {editName ? (
         <div>
-          <EditNameForm Theme={Theme} heading={person.heading} onSubmit={submitNameChange} />
+          <EditNameForm heading={person.heading} onSubmit={submitNameChange} />
         </div>
       ) : (
         <div id="personContainer" className="page-content-top1">
@@ -58,7 +57,6 @@ const PageContent: React.FC<PageContentProps> = ({
       {showAddItem && (
         <div className="add-item-comp">
           <AddItemForm
-            Theme={Theme}
             showTag={showTag}
             addLable={addLable}
             notes={notes}

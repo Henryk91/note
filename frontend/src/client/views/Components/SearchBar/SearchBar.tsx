@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Note } from '../../Helpers/types';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../../store';
 
 type SearchBarProps = {
   noteName: string;
-  Theme: string;
   notes: Note[] | null;
   set: (payload: any) => void;
 };
@@ -14,7 +15,8 @@ type SearchBarState = {
   editName: boolean;
 };
 
-const SearchBar: React.FC<SearchBarProps> = ({ noteName, Theme, notes, set }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ noteName, notes, set }) => {
+  const theme = useSelector((state: RootState) => state.theme.themeLower);
   const [state, setState] = useState<SearchBarState>({
     showSearch: false,
     currentNoteName: '',
@@ -71,7 +73,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ noteName, Theme, notes, set }) =>
     });
   };
 
-  const themeBack = `${Theme.toLowerCase()}-back`;
+  const themeBack = `${theme}-back`;
   const searching = state.showSearch && !state.editName;
 
   return (

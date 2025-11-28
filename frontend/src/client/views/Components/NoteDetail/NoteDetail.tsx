@@ -18,7 +18,6 @@ type Match = {
 
 type NoteDetailProps = {
   notes: Note[] | null;
-  Theme: string;
   searchTerm?: string;
   editName?: boolean;
   set: (payload: any) => void;
@@ -37,7 +36,6 @@ type LogDay = { date: string; count: number };
 
 const NoteDetail: React.FC<NoteDetailProps> = ({
   notes,
-  Theme,
   searchTerm,
   editName: editNameProp,
   set,
@@ -226,7 +224,6 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
             prevItem={prevItemLocal}
             item={dateItem}
             date={selectedDate}
-            Theme={Theme}
             show={showButton && lastPage}
             set={updateNoteItem}
             cont={continueLog}
@@ -310,9 +307,6 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
       bunch = handleLinkButtons(animate, isLink, allDates, bunch);
 
       const linkBorder = isLink ? 'link-border' : '';
-      const themeBack = `${Theme.toLowerCase()}-back`;
-      const themeBorder = `${Theme.toLowerCase()}-border-thick`;
-      const themeHover = `${Theme.toLowerCase()}-hover`;
 
       const showOnlyNote =
         lastPage && listHasShowTag && showTagValue && showTagValue !== 'Log' && !showLogDaysBunch;
@@ -325,12 +319,9 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
               linkBorder={linkBorder}
               showTag={showTagValue}
               prop={prop}
-              themeBorder={themeBorder}
               isLink={isLink}
               bunch={bunch}
               showDateSelector={showDateSelector}
-              themeBack={themeBack}
-              themeHover={themeHover}
               continueData={continueData}
               onShowHide={() => showHideBox(prop)}
               onShowLogDays={() => showLogDays(prop)}
@@ -571,7 +562,6 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
           person={personToRender}
           editName={editName}
           showAddItem={showAddItem}
-          Theme={Theme}
           tags={tagsB}
           showTag={showTag}
           addLable={addLable}

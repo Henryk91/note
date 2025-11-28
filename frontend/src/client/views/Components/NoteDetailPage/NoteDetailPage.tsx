@@ -21,7 +21,6 @@ type Match = {
 
 type NoteDetailPageProps = {
   noteNames: string[] | null;
-  Theme: string;
   notes: Note[] | null;
   set: (payload: any) => void;
   searchTerm?: string;
@@ -35,7 +34,6 @@ const DEFAULT_PAGE = [{ params: { id: 'main', tempId: 'main' } }]
 const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
   match,
   noteNames,
-  Theme,
   searchTerm,
   notes,
   set,
@@ -61,14 +59,6 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
       localStorage.setItem('was-new-folder-edit', 'true');
     }
   }, []);
-
-  const setNoteTheme = useCallback(
-    (name: string) => {
-      set({ noteTheme: name });
-      localStorage.setItem('theme', name);
-    },
-    [set],
-  );
 
   const noteDetailSet = useCallback(
     (msg: any) => {
@@ -284,7 +274,6 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
         set={noteDetailSet}
         searchTerm={searchTerm ?? ''}
         noteNames={noteNames}
-        Theme={Theme}
         notes={notes}
       />
     );
@@ -293,13 +282,12 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
   const showBackButton = pages.length > 1;
   return (
     <div className="slide-in" key={match.url}>
-      <BackButton Theme={Theme} hasPages={pages.length > 1} onBack={scrollPageBack} onLogout={logOut} />
+      <BackButton hasPages={pages.length > 1} onBack={scrollPageBack} onLogout={logOut} />
       {isNoteNames && (
-        <Sidebar noteNames={noteNames} prepForNote={prepForNote} setNoteTheme={setNoteTheme} />
+        <Sidebar noteNames={noteNames} prepForNote={prepForNote} />
       )}
       <div id="multiple-pages">{pagesCont}</div>
       <ScrollButtons
-        Theme={Theme}
         showAddItem={showAddItem}
         showBackButton={showBackButton}
         onEditName={editNameSet}

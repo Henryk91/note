@@ -1,5 +1,7 @@
 import React from 'react';
 import './style.css';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../../store';
 
 type YearProps = {
   day: number;
@@ -48,7 +50,9 @@ const Year = ({ day, month, year, count }: YearProps) => {
   );
 };
 
-const Memento: React.FC<{ Theme: string }> = ({ Theme }) => {
+const Memento: React.FC = () => {
+  const theme = useSelector((state: RootState) => state.theme.themeLower);
+  
   const year = 1991;
   const month = 10;
   const day = 6;
@@ -56,10 +60,10 @@ const Memento: React.FC<{ Theme: string }> = ({ Theme }) => {
   for (let i = 0; i < 80; i += 1) {
     years.push(<Year count={i} key={i} year={year} month={month} day={day} />);
   }
-  const themeBorderColor = `${Theme.toLowerCase()}-border-color`;
+
   return (
     <div id="memento-wrapper">
-      <div id="memento-main" className={themeBorderColor}>
+      <div id="memento-main" className={`${theme}-border-color`}>
         <p id="title">MEMENTO MORI</p>
         <div id="life-box">
           <div className="frame">{years}</div>
