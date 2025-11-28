@@ -67,7 +67,7 @@ export const NewLogField: React.FC<NewLogFieldProps> = ({
       className={themeBack}
       name="tagTypeText"
       type="text"
-      defaultValue={displayDate?.toDateString() || undefined}
+      defaultValue={displayDate?.toString() || undefined}
       onChange={(e) => onTodoChange(e.target.value)}
     />
     <br />
