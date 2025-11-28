@@ -6,7 +6,6 @@ import { RootState } from '../../../../store';
 
 type PageContentProps = {
   person: Note;
-  editName: boolean;
   showAddItem: boolean;
   tags: React.ReactNode;
   addLable: any;
@@ -19,7 +18,6 @@ type PageContentProps = {
 
 const PageContent: React.FC<PageContentProps> = ({
   person,
-  editName,
   showAddItem,
   tags,
   addLable,
@@ -29,7 +27,7 @@ const PageContent: React.FC<PageContentProps> = ({
   submitNewItem,
   cancelAddItemEdit,
 }) => {
-  const showTag = useSelector((state: RootState) => state.person.showTag);
+  const { showTag, editName} = useSelector((state: RootState) => state.person);
   const isFirstPage = index === 0;
   const className = isFirstPage ? 'note-detail-item first-note-detail-item' : 'note-detail-item';
   const localShowTag = localStorage.getItem('showTag');

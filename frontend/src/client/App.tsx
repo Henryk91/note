@@ -124,10 +124,8 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
           const pdata = addMainNote(JSON.parse(data) as Note[]);
           if (notes !== pdata) {
             setNotes(pdata);
-            setFreshData(false);
-          } else {
-            setFreshData(false);
           }
+          setFreshData(false);
         }
 
         getMyNotesRec(currentUser, (resp) => {
@@ -145,7 +143,6 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
               ? JSON.stringify(res) !== JSON.stringify(stateNotes)
               : res && res.length > 0;
           if (reRender && res.length > 0) {
-            localStorage.setItem(currentUser, JSON.stringify(res));
             setNotes(res);
             setRedirect();
           }
@@ -222,6 +219,7 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
       }
       updateOneNoteRec({ person, delete: update.delete }, () => {
         getMyNotes(selectedNoteName);
+
       });
     },
     [getMyNotes, selectedNoteName],

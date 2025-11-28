@@ -12,3 +12,12 @@ export type Note = {
   createdBy?: string;
   userId?: string;
 };
+
+export type Match = {
+  isExact: boolean;
+  params: { id: string };
+  path: string;
+  url: string;
+};
+
+export type PageDescriptor = { params: { id: string, tempId: string } };

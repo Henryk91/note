@@ -1,10 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Note } from '../client/views/Helpers/types';
+import { Note, PageDescriptor } from '../client/views/Helpers/types';
+import { DEFAULT_PAGE } from '../client/views/Helpers/const';
 
 type KeyValue<T = any> = {
   [key: string]: T;
 };
-
 
 type PersonState = {
   byId: KeyValue<Note>;
@@ -12,6 +12,9 @@ type PersonState = {
   noteNames?: string[];
   selectedNoteName?: string;
   showTag: string | null;
+  showAddItem: boolean;
+  editName: boolean;
+  pages: PageDescriptor[];
 };
 
 type SetPersonPayload = {
@@ -24,6 +27,9 @@ const initialState: PersonState = {
   notes: null,
   selectedNoteName: localStorage.getItem('user') || undefined,
   showTag: localStorage.getItem('showTag') || null,
+  showAddItem: !!localStorage.getItem('new-folder-edit'),
+  editName: false,
+  pages: localStorage.getItem('saved-pages')? JSON.parse(localStorage.getItem('saved-pages')+"") :DEFAULT_PAGE,
 };
 
 const personSlice = createSlice({
@@ -35,12 +41,13 @@ const personSlice = createSlice({
       if (!person) return;
       state.byId[id] = person;
     },
-    removePersonById(state, action: PayloadAction<{id: string}>) {
+    removePersonById(state, action: PayloadAction<{ id: string }>) {
       const { id } = action.payload;
       delete state.byId[id];
     },
     setNotes(state, action: PayloadAction<Note[] | null>) {
       state.notes = action.payload;
+      if(state.selectedNoteName) localStorage.setItem(state.selectedNoteName, JSON.stringify(action.payload));
     },
     setNoteNames(state, action: PayloadAction<string[]>) {
       state.noteNames = action.payload;
@@ -51,16 +58,57 @@ const personSlice = createSlice({
     },
     setShowTag(state, action: PayloadAction<string | null>) {
       state.showTag = action.payload;
-      if(action.payload) {
+      if (action.payload) {
         localStorage.setItem('showTag', action.payload);
       } else {
-       localStorage.removeItem('showTag');
+        localStorage.removeItem('showTag');
       }
-    }
+    },
+    setShowAddItem(state, action: PayloadAction<boolean>) {
+      state.showAddItem = action.payload;
+      if(!action.payload) localStorage.removeItem('new-folder-edit');
+    },
+    setEditName(state, action: PayloadAction<boolean>) {
+      state.editName = action.payload;
+    },
+    setPages(state, action: PayloadAction<PageDescriptor[]>) {
+      state.pages = action.payload
+      localStorage.setItem('saved-pages', JSON.stringify(state.pages));
+    },
+    addPage(state, action: PayloadAction<PageDescriptor>) {
+      state.pages.push(action.payload);
+      localStorage.setItem('saved-pages', JSON.stringify(state.pages));
+    },
+    removePage(state, action: PayloadAction<PageDescriptor>) {
+      state.pages = state.pages.filter((page) => page.params.id !== action.payload.params.id);
+      localStorage.setItem('saved-pages', JSON.stringify(state.pages));
+    },
+    removeLastPage(state) {
+      state.pages = state.pages.slice(0, state.pages.length - 1);
+      localStorage.setItem('saved-pages', JSON.stringify(state.pages));
+    },
+    resetPages(state) {
+      state.pages = DEFAULT_PAGE;
+      localStorage.setItem('saved-pages', JSON.stringify(DEFAULT_PAGE));
+    },
   },
 });
 
-export const { setPersonById, removePersonById, setNotes, setNoteNames, setSelectedNoteName, setShowTag } = personSlice.actions;
+export const {
+  setPersonById,
+  removePersonById,
+  setNotes,
+  setNoteNames,
+  setSelectedNoteName,
+  setShowTag,
+  setShowAddItem,
+  setEditName,
+  addPage,
+  removePage,
+  removeLastPage,
+  resetPages,
+  setPages,
+} = personSlice.actions;
 
 export const selectPersonById = (state: { person: PersonState }, id: string) => state.person.byId[id] || null;
 export const getAllPersonById = (state: { person: PersonState }) => state.person.byId || null;

@@ -7,7 +7,7 @@ import { NoteDetailListItem } from './forms';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
-import { getAllPersonById, selectPersonById, setPersonById, setShowTag } from '../../../../store/personSlice';
+import { selectPersonById, setEditName, setPersonById, setShowAddItem, setShowTag } from '../../../../store/personSlice';
 
 type Match = {
   isExact: boolean;
@@ -18,13 +18,11 @@ type Match = {
 
 type NoteDetailProps = {
   searchTerm?: string;
-  editName?: boolean;
   set: (payload: any) => void;
   openPage: (payload: any) => void;
   lastPage: boolean;
   index?: number;
   showAddItem: boolean;
-  hideAddItem: () => void;
   pageCount: number;
   match: Match;
   initShowtag?: boolean;
@@ -34,13 +32,11 @@ type LogDay = { date: string; count: number };
 
 const NoteDetail: React.FC<NoteDetailProps> = ({
   searchTerm,
-  editName: editNameProp,
   set,
   openPage,
   lastPage,
   index,
   showAddItem,
-  hideAddItem,
   pageCount,
   match,
   initShowtag,
@@ -48,10 +44,8 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   const dispatch = useDispatch();
   const personId = `${index ?? 0}`;
   const person = useSelector((state: RootState) => selectPersonById(state, personId));
-  const notes = useSelector((state: RootState) => state.person.notes);
-  const noteNames = useSelector((state: RootState) => state.person.noteNames);
-  const showTag = useSelector((state: RootState) => state.person.showTag);
-  const [editName, setEditName] = useState(false);
+  const { notes, noteNames, showTag, editName } = useSelector((state: RootState) => state.person);
+
   const [addLable, setAddLable] = useState<any>(null);
   const [displayDate, setDisplayDate] = useState<Date | string | null>(null);
   const [continueData, setContinueData] = useState<any>(null);
@@ -254,7 +248,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     return { selectedDate: newSelectedDate, logDaysBunch: newLogDaysBunch };
   }
 
-  const  getNoteByTag = (items, showTagValue: string | null) => {
+  const getNoteByTag = (items, showTagValue: string | null) => {
     if (!items) return [];
     const sort: Record<string, any[]> = {};
     items.forEach((tag) => {
@@ -388,7 +382,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
 
   function continueLog(val) {
     setAddLable(val.cont);
-    set({ forParent: true, showAddItem: true });
+    dispatch(setShowAddItem(true));
     window.scrollTo(0, 0);
   }
 
@@ -400,9 +394,8 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
       updatedPerson.heading = heading;
       set({ person: updatedPerson });
     } else {
-      set({ forParent: true, editName: false });
+      dispatch(setEditName(false))
     }
-    setEditName(false);
   }
 
   function submitNewItem(event) {
@@ -440,7 +433,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     set({ updateData });
   
     setAddLable(null);
-    hideAddItem();
+    dispatch(setShowAddItem(false));
   }
 
   function dateBackForward(event, direction) {
@@ -497,7 +490,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   }
 
   function cancelAddItemEdit() {
-    hideAddItem();
+    dispatch(setShowAddItem(false));
     setAddLable(null);
     localStorage.removeItem('new-folder-edit');
   }
@@ -508,12 +501,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
 
   useEffect(() => {
     setSearchTermState(searchTerm);
-    setEditName(editNameProp ?? false);
-  }, [
-    editNameProp,
-    searchTerm,
-    notes,
-  ]);
+  }, [searchTerm,notes]);
 
   const isNoteNames = match?.url === '/notes/note-names';
   const personToRender = isNoteNames ? null : person;
@@ -527,7 +515,6 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
       {personToRender && (
         <PageContent
           person={personToRender}
-          editName={editName}
           showAddItem={showAddItem}
           tags={getNotesWithMemo}
           addLable={addLable}

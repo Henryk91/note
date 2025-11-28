@@ -1,11 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import NoteDetail from '../NoteDetail/NoteDetail';
-import { Note } from '../../Helpers/types';
+import { Match } from '../../Helpers/types';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
 import { setTheme } from '../../../../store/themeSlice';
 import { THEMES } from '../../Helpers/const';
+import { setEditName, setShowAddItem } from '../../../../store/personSlice';
 
 export type NoteDetailPageItemProps = {
   searchTerm: string;
@@ -15,11 +16,11 @@ export type NoteDetailPageItemProps = {
   editName: boolean;
   lastPage: boolean;
   pageCount: number;
-  hideAddItem: () => void;
   set: (payload: any) => void;
   openPage: (payload: any) => void;
   initShowtag?: any;
-} & React.ComponentProps<typeof NoteDetail>;
+  match: Match
+}
 
 export type SidebarProps = {
   prepForNote: (name: string) => void;
@@ -27,8 +28,6 @@ export type SidebarProps = {
 
 export type ScrollButtonsProps = {
   showBackButton: boolean;
-  onEditName: () => void;
-  onAdd: () => void;
 };
 
 export type NoteNamesListProps = {
@@ -54,18 +53,17 @@ export const NoteDetailPageItem: React.FC<NoteDetailPageItemProps> = ({
   editName,
   lastPage,
   pageCount,
-  hideAddItem,
   set,
   openPage,
   initShowtag,
-  ...rest
+  match,
 }) => {
-  const key = pageLink && pageLink.params && pageLink.params.id ? pageLink.params.id : 'first';
+
+  const key = pageLink?.params?.id ?? 'first';
   return (
     <div id="multiple-pages1" key={key + index}>
       <NoteDetail
         pageCount={pageCount}
-        hideAddItem={hideAddItem}
         searchTerm={searchTerm}
         set={set}
         openPage={openPage}
@@ -74,7 +72,7 @@ export const NoteDetailPageItem: React.FC<NoteDetailPageItemProps> = ({
         showAddItem={showAddItem}
         editName={editName}
         lastPage={lastPage}
-        {...rest}
+        match={match}
       />
     </div>
   );
@@ -135,16 +133,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ prepForNote }) => {
 
 export const ScrollButtons: React.FC<ScrollButtonsProps> = ({
   showBackButton,
-  onEditName,
-  onAdd,
 }) => {
+  const dispatch = useDispatch();
   const theme = useSelector((state: RootState) => state.theme.themeLower);
+  const { showAddItem, editName} = useSelector((state: RootState) => state.person);
   const themeBack = `${theme}-back`;
   const themeHover = `${theme}-hover`;
 
+  const addButtonClicked = () => {
+    dispatch(setShowAddItem(!showAddItem));
+    if (!showAddItem) window.scrollTo(0, 0);
+  }
+
+  const editNameClick = () => {
+      window.scrollTo(0, 0);
+      dispatch(setEditName(!editName));
+    }
+
   return (
     <div className="detail-scroll">
-      <button className={`editButtons1 detailUpButton ${themeHover} ${themeBack}`} onClick={onEditName}>
+      <button className={`editButtons1 detailUpButton ${themeHover} ${themeBack}`} onClick={editNameClick}>
         <i className="fas fa-pen" />
       </button>
       <div
@@ -172,9 +180,7 @@ export const ScrollButtons: React.FC<ScrollButtonsProps> = ({
       ) : (
         <div
           className={`detailAddButton ${themeHover} ${themeBack}`}
-          onClick={() => {
-            onAdd();
-          }}
+          onClick={() => addButtonClicked()}
         >
           <i className="fas fa-plus" />
         </div>

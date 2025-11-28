@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { logoutUser } from '../../Helpers/requests';
-import { Note } from '../../Helpers/types';
+import { Match, PageDescriptor } from '../../Helpers/types';
 import {
   NoteDetailPageItem,
   Sidebar,
@@ -10,15 +10,9 @@ import {
 
 
 import { useDispatch, useSelector } from 'react-redux';
-import { removePersonById, setPersonById, setShowTag } from '../../../../store/personSlice';
+import { removePersonById, setPersonById, setShowTag, removeLastPage, resetPages, setEditName, setShowAddItem, setPages } from '../../../../store/personSlice';
 import { RootState } from '../../../../store';
 
-type Match = {
-  isExact: boolean;
-  params: { id: string };
-  path: string;
-  url: string;
-};
 
 type NoteDetailPageProps = {
   set: (payload: any) => void;
@@ -26,51 +20,13 @@ type NoteDetailPageProps = {
   match: Match;
 };
 
-type PageDescriptor = { params: { id: string, tempId: string } };
-
-const DEFAULT_PAGE = [{ params: { id: 'main', tempId: 'main' } }]
-
 const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
   match,
   searchTerm,
-  set,
-  ...rest
+  set
 }) => {
-  const notes = useSelector((state: RootState) => state.person.notes);
-  const noteNames = useSelector((state: RootState) => state.person.noteNames);
-  const [showAddItem, setShowAddItem] = useState(false);
-  const [editName, setEditName] = useState(false);
-  const [pages, setPages] = useState<PageDescriptor[]>(DEFAULT_PAGE);
+  const { notes, noteNames, showAddItem, editName, pages} = useSelector((state: RootState) => state.person);
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    const localPages = localStorage.getItem('saved-pages');
-    if (localPages) {
-      let savedPages = JSON.parse(localPages);
-      savedPages = savedPages.filter((page: PageDescriptor) => page.params.id !== '');
-      if (savedPages.length > 0) setPages(JSON.parse(localPages));
-    }
-
-    const isEditing = localStorage.getItem('new-folder-edit');
-    if (isEditing) {
-      setShowAddItem(true);
-      localStorage.removeItem('new-folder-edit');
-      localStorage.setItem('was-new-folder-edit', 'true');
-    }
-  }, []);
-
-  const noteDetailSet = useCallback(
-    (msg: any) => {
-      if (msg.forParent) {
-        if (Object.prototype.hasOwnProperty.call(msg, 'showAddItem')) setShowAddItem(msg.showAddItem);
-        if (Object.prototype.hasOwnProperty.call(msg, 'editName')) setEditName(msg.editName);
-        if (Object.prototype.hasOwnProperty.call(msg, 'pages')) setPages(msg.pages);
-      } else {
-        set(msg);
-      }
-    },
-    [set],
-  );
 
   const customScrollBy = useCallback((element: HTMLElement, startPosition: number, endPosition: number) => {
     window.scrollTo({ top: 0 });
@@ -103,8 +59,7 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
           );
         }
         setTimeout(() => {
-          setPages(nextPages);
-          localStorage.setItem('saved-pages', JSON.stringify(nextPages));
+          dispatch(setPages(nextPages));
         }, 50);
       }
     },
@@ -130,7 +85,7 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
       setTimeout(() => {
         const remainingPages = pages.slice(0, pageCount - 1);
         dispatch(setShowTag(null));
-        setPages(remainingPages);
+        dispatch(removeLastPage());
         localStorage.setItem('saved-pages', JSON.stringify(remainingPages));
       }, 500);
     }
@@ -155,11 +110,12 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
         updatePages = updatePages.slice(0, pageFoundIndex + 1);
       }
       if (pageFoundIndex === -1) {
+        // New Page not in pages
         const newPages =
           updatePages.length === 1 && updatePages[0].params.id === '' ? [nextPage] : [...updatePages, nextPage];
-        setPages(newPages);
-        localStorage.setItem('saved-pages', JSON.stringify(newPages));
+        dispatch(setPages(newPages));
       } else if (pageFoundIndex > -1 && !msg.showNote) {
+        // New Page in pages but not open note
         const localPageFoundIndex = pageFoundIndex === 0 ? 1 : pageFoundIndex;
         const newPages = updatePages.slice(0, localPageFoundIndex);
         if (pageFoundIndex + 1 === updatePages.length) {
@@ -168,8 +124,10 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
           scrollPagesBackAndSet(updatePages.length, updatePages.length - pageFoundIndex, newPages);
         }
       } else if (pageFoundIndex > -1) {
+        // New Page in pages Should show note
         const freshStatePages = [...pages];
-        if (pageFoundIndex === freshStatePages.length - 1) {
+        const newPageIsLast = pageFoundIndex === freshStatePages.length - 1;
+        if (newPageIsLast) {
           if (freshStatePages.length + 1 === freshStatePages.length && msg.hideNote) {
             scrollPageBack();
           } else {
@@ -178,12 +136,10 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
 
             if (secondTolast && last && last.params.id !== secondTolast.params.id) {
               const updated = [...freshStatePages, last];
-              setPages(updated);
-              localStorage.setItem('saved-pages', JSON.stringify(updated));
+              dispatch(setPages(updated));
             }
             if (secondTolast && last && last.params.id === secondTolast.params.id) {
-              setPages(freshStatePages);
-              localStorage.setItem('saved-pages', JSON.stringify(freshStatePages));
+              dispatch(setPages(freshStatePages))
             }
           }
         }
@@ -196,8 +152,7 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
           const secondTolast = locals[locals.length - 2];
 
           if (secondTolast && last && last.params.id === secondTolast.params.id) {
-            setPages(locals);
-            localStorage.setItem('saved-pages', JSON.stringify(locals));
+            dispatch(setPages(locals));
           }
         }
       }
@@ -205,41 +160,14 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
     [pages, scrollPageBack, scrollPagesBackAndSet],
   );
 
-  const hideAddItem = useCallback(() => {
-    setShowAddItem(false);
-  }, []);
-
-  const showAddItemSet = useCallback((bVal: boolean) => {
-    setShowAddItem(bVal);
-    if (bVal) window.scrollTo(0, 0);
-  }, []);
-
   const logOut = useCallback(() => {
     logoutUser(() => window.location.reload());
   }, []);
 
-  const addButtonClicked = useCallback(
-    (currentShowAddItem: boolean) => {
-      showAddItemSet(!currentShowAddItem);
-    },
-    [showAddItemSet],
-  );
-
-  const editNameSet = useCallback(() => {
-    window.scrollTo(0, 0);
-    setEditName((prev) => !prev);
-  }, []);
-
-
-  const resetPages = () => {
-    setPages(DEFAULT_PAGE);
-    localStorage.setItem('saved-pages', JSON.stringify(DEFAULT_PAGE));
-  }
-
   const prepForNote = useCallback(
     (name: string) => {
       const user = localStorage.getItem('user')
-      if(name !== user) resetPages();
+      if(name !== user) dispatch(resetPages());
       set({ noteName: name });
     },
     [set],
@@ -258,7 +186,6 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
     const lastPage = index === lastPageIndex;
     return (
       <NoteDetailPageItem
-        {...rest}
         match={match}
         key={(pageLink?.params?.id ?? 'first') + index}
         pageLink={pageLink}
@@ -267,10 +194,9 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
         editName={editName}
         lastPage={lastPage}
         pageCount={localPages.length}
-        hideAddItem={hideAddItem}
         openPage={openPage}
         initShowtag={pageLink}        
-        set={noteDetailSet}
+        set={set}
         searchTerm={searchTerm ?? ''}
       />
     );
@@ -284,11 +210,7 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
         <Sidebar prepForNote={prepForNote} />
       )}
       <div id="multiple-pages">{pagesCont}</div>
-      <ScrollButtons
-        showBackButton={showBackButton}
-        onEditName={editNameSet}
-        onAdd={() => addButtonClicked(showAddItem)}
-      />
+      <ScrollButtons showBackButton={showBackButton} />
       <br />
       <br />
       <br />
