@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, lazy, Suspense } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars } from '@fortawesome/free-solid-svg-icons';
 import { connect } from 'react-redux';
@@ -9,15 +9,7 @@ import {
   Redirect,
   Switch,
 } from 'react-router-dom';
-import {
-  Home,
-  SearchBar,
-  NoteDetailPage,
-  NewNote,
-  Login,
-  Pomodoro,
-  Memento,
-} from './views/Components/index';
+import { SearchBar, NoteDetailPage } from './views/Components/index';
 import {
   getMyNotesRec,
   saveNewNote,
@@ -30,6 +22,12 @@ import { Note } from './views/Helpers/types';
 import { RootState } from '../store';
 import { setTheme } from '../store/themeSlice';
 import { setNotes, setNoteNames, setSelectedNoteName } from '../store/personSlice';
+
+const Home = lazy(() => import('./views/Components/Home/Home'));
+const NewNote = lazy(() => import('./views/Components/NewNote/NewNote'));
+const Login = lazy(() => import('./views/Components/Login/Login'));
+const Pomodoro = lazy(() => import('./views/Components/Pomodoro/Pomodoro'));
+const Memento = lazy(() => import('./views/Components/Memento/Memento'));
 
 type ProtectedRoutesProps = {
   children: React.ReactElement;
@@ -346,68 +344,70 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
 
   return (
     <Router>
-      <Switch>
-        <Route path="/login" render={() => <Login />} />
-        <ProtectedRoutes>
-          <>
-            <header>
-              <SearchBar set={setFilterNote} />
-              <nav className="bigScreen" id="links">
-                <Link
-                  style={{ textDecoration: 'none' }}
-                  className={`dark-hover ${themeBack}`}
-                  onClick={(e) => menuButton(e)}
-                  id="menuButton"
-                  to="/notes/note-names"
-                >
-                  <FontAwesomeIcon icon={faBars} />
-                </Link>
-              </nav>
-            </header>
-            <Route
-              exact
-              path="/all"
-              render={(props) => <Home {...props} searchTerm={searchTerm} notes={notes} />}
-            />
-            <Route
-              exact
-              path="/index.html"
-              render={(props) => (
-                <NoteDetailPage
-                  searchTerm={searchTerm}
-                  {...props}
-                  set={noteDetailSet}
-                />
-              )}
-            />
-            <Route
-              exact
-              path="/"
-              render={(props) => (
-                <NoteDetailPage
-                  searchTerm={searchTerm}
-                  {...props}
-                  set={noteDetailSet}
-                />
-              )}
-            />
-            <Route
-              exact
-              path="/notes/:id"
-              render={(props) => (
-                <NoteDetailPage
-                  searchTerm={searchTerm}
-                  {...props}
-                  set={noteDetailSet}
-                />
-              )}
-            />
-            <Route exact path="/new-note" render={() => <NewNote set={addNewNote} />} />
-            <Route exact path="/pomodoro" render={() => <Pomodoro />} />
-            <Route exact path="/memento" render={() => <Memento />} />
-          </>
-        </ProtectedRoutes>
-      </Switch>
+      <Suspense fallback={<div>Loading...</div>}>
+        <Switch>
+          <Route path="/login" render={() => <Login />} />
+          <ProtectedRoutes>
+            <>
+              <header>
+                <SearchBar set={setFilterNote} />
+                <nav className="bigScreen" id="links">
+                  <Link
+                    style={{ textDecoration: 'none' }}
+                    className={`dark-hover ${themeBack}`}
+                    onClick={(e) => menuButton(e)}
+                    id="menuButton"
+                    to="/notes/note-names"
+                  >
+                    <FontAwesomeIcon icon={faBars} />
+                  </Link>
+                </nav>
+              </header>
+              <Route
+                exact
+                path="/all"
+                render={(props) => <Home {...props} searchTerm={searchTerm} notes={notes} />}
+              />
+              <Route
+                exact
+                path="/index.html"
+                render={(props) => (
+                  <NoteDetailPage
+                    searchTerm={searchTerm}
+                    {...props}
+                    set={noteDetailSet}
+                  />
+                )}
+              />
+              <Route
+                exact
+                path="/"
+                render={(props) => (
+                  <NoteDetailPage
+                    searchTerm={searchTerm}
+                    {...props}
+                    set={noteDetailSet}
+                  />
+                )}
+              />
+              <Route
+                exact
+                path="/notes/:id"
+                render={(props) => (
+                  <NoteDetailPage
+                    searchTerm={searchTerm}
+                    {...props}
+                    set={noteDetailSet}
+                  />
+                )}
+              />
+              <Route exact path="/new-note" render={() => <NewNote set={addNewNote} />} />
+              <Route exact path="/pomodoro" render={() => <Pomodoro />} />
+              <Route exact path="/memento" render={() => <Memento />} />
+            </>
+          </ProtectedRoutes>
+        </Switch>
+      </Suspense>
     </Router>
   );
 };
