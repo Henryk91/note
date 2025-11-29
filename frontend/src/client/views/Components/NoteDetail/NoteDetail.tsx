@@ -431,7 +431,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     const updateData = JSON.parse(JSON.stringify(currentPerson));
     updateData.dataLable = [{ tag, data: number }];
     set({ updateData });
-  
+    dispatch(setPersonById({ id: `${index}`, person: {...currentPerson} }));
     setAddLable(null);
     dispatch(setShowAddItem(false));
   }
@@ -498,10 +498,6 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   useEffect(() => {
     initPage();
   }, []);
-
-  useEffect(() => {
-    initPage();
-  }, [notes]);
 
   useEffect(() => {
     setSearchTermState(searchTerm);
