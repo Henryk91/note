@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Note, PageDescriptor } from '../client/views/Helpers/types';
 import { DEFAULT_PAGE } from '../client/views/Helpers/const';
+import { getPersonNoteType } from '../client/views/Helpers/utils';
 
 type KeyValue<T = any> = {
   [key: string]: T;
@@ -48,6 +49,10 @@ const personSlice = createSlice({
     setNotes(state, action: PayloadAction<Note[] | null>) {
       state.notes = action.payload;
       if(state.selectedNoteName) localStorage.setItem(state.selectedNoteName, JSON.stringify(action.payload));
+      if(action.payload) {
+        const personFound = getPersonNoteType(state.notes, DEFAULT_PAGE[0]);
+        if(personFound) state.byId['0'] = personFound;
+      }
     },
     setNoteNames(state, action: PayloadAction<string[]>) {
       state.noteNames = action.payload;
@@ -55,6 +60,14 @@ const personSlice = createSlice({
     setSelectedNoteName(state, action: PayloadAction<string>) {
       state.selectedNoteName = action.payload;
       localStorage.setItem('user', action.payload);
+      const localNoteData = localStorage.getItem(action.payload);
+      if(localNoteData) {
+        state.notes = JSON.parse(localNoteData);
+        const personFound = getPersonNoteType(state.notes, DEFAULT_PAGE[0]);
+        if(personFound) state.byId['0'] = personFound;
+      } else {
+        state.byId = {}
+      }
     },
     setShowTag(state, action: PayloadAction<string | null>) {
       state.showTag = action.payload;
