@@ -75,7 +75,7 @@ module.exports = {
       favicon: './public/favicon.ico'
     }),
     ,
-    ...(isProd
+    ...(false
       ? [
           new InjectManifest({
         swSrc: path.join(__dirname, './src/sw.js'),
