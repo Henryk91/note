@@ -70,7 +70,7 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
     if (pages && pages.length > 1) {
       setTimeout(() => {
         dispatch(removePersonById({id: `${pages.length -1}`}))
-      }, 250)
+      }, 350)
       const pageCount = pages.length;
       const noteDetailPage = document.getElementById('multiple-pages');
       if (noteDetailPage) {
@@ -85,16 +85,17 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
       setTimeout(() => {
         dispatch(setShowTag(null));
         dispatch(removeLastPage());
-      }, 250);
+      }, 350);
     }
   }, [customScrollBy, pages]);
 
   const openPage = useCallback(
     (msg: any) => {
       if (!msg.personNext) return;
-      dispatch(setPersonById({ id: `${pages.length}`, person: {...msg?.personNext} }));
+      const tempId = `${msg.personNext.id}-${msg.personNext.heading}`
+      dispatch(setPersonById({ id: tempId, person: {...msg?.personNext} }));
 
-      const nextPage = { params: { id: msg.personNext.id, tempId: `${msg.personNext.id}-${msg.personNext.heading}` } };
+      const nextPage = { params: { id: msg.personNext.id, tempId: tempId } };
 
       const localPages = localStorage.getItem('saved-pages');
 

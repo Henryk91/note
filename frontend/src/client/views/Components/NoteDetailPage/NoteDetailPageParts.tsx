@@ -11,7 +11,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import NoteDetail from '../NoteDetail/NoteDetail';
-import { Match } from '../../Helpers/types';
+import { Match, PageDescriptor } from '../../Helpers/types';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
 import { setTheme } from '../../../../store/themeSlice';
@@ -28,7 +28,7 @@ export type NoteDetailPageItemProps = {
   pageCount: number;
   set: (payload: any) => void;
   openPage: (payload: any) => void;
-  initShowtag?: any;
+  initShowtag: PageDescriptor;
   match: Match
 }
 

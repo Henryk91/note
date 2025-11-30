@@ -51,7 +51,7 @@ const personSlice = createSlice({
       if(state.selectedNoteName) localStorage.setItem(state.selectedNoteName, JSON.stringify(action.payload));
       if(action.payload) {
         const personFound = getPersonNoteType(state.notes, DEFAULT_PAGE[0]);
-        if(personFound) state.byId['0'] = personFound;
+        if(personFound) state.byId['main'] = personFound;
       }
     },
     setNoteNames(state, action: PayloadAction<string[]>) {
@@ -64,7 +64,7 @@ const personSlice = createSlice({
       if(localNoteData) {
         state.notes = JSON.parse(localNoteData);
         const personFound = getPersonNoteType(state.notes, DEFAULT_PAGE[0]);
-        if(personFound) state.byId['0'] = personFound;
+        if(personFound) state.byId['main'] = personFound;
       } else {
         state.byId = {}
       }

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import NoteItem from '../NoteItem/NoteItem';
-import { getPerson, getPersonNoteType } from '../../Helpers/utils';
-import { Note } from '../../Helpers/types';
+import { getPersonNoteType } from '../../Helpers/utils';
+import { Note, PageDescriptor } from '../../Helpers/types';
 import PageContent from './PageContent';
 import { NoteDetailListItem } from './forms';
 
@@ -25,7 +25,7 @@ type NoteDetailProps = {
   showAddItem: boolean;
   pageCount: number;
   match: Match;
-  initShowtag?: boolean;
+  initShowtag: PageDescriptor;
 };
 
 type LogDay = { date: string; count: number };
@@ -42,8 +42,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   initShowtag,
 }) => {
   const dispatch = useDispatch();
-  const personId = `${index ?? 0}`;
-  const person = useSelector((state: RootState) => selectPersonById(state, personId));
+  const person = useSelector((state: RootState) => selectPersonById(state, initShowtag?.params.tempId));
   const { notes, noteNames, showTag, editName } = useSelector((state: RootState) => state.person);
 
   const [addLable, setAddLable] = useState<any>(null);
@@ -431,7 +430,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     const updateData = JSON.parse(JSON.stringify(currentPerson));
     updateData.dataLable = [{ tag, data: number }];
     set({ updateData });
-    dispatch(setPersonById({ id: `${index}`, person: {...currentPerson} }));
+    dispatch(setPersonById({ id: `${initShowtag?.params.tempId}`, person: {...currentPerson} }));
     setAddLable(null);
     dispatch(setShowAddItem(false));
   }
@@ -471,7 +470,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     if (initShowtag) {
       const personFound = getPersonNoteType(notes, initShowtag);
       if (personFound) {
-        dispatch(setPersonById({ id: `${index}`, person: {...personFound} }));
+        dispatch(setPersonById({ id: `${initShowtag?.params.tempId}`, person: {...personFound} }));
       } else if (noteNames) {
         // Displaying List of Names and Theme types
         dispatch(setShowTag(null));
