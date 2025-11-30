@@ -11,5 +11,5 @@ function registerSW() {
 }
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => registerSW());
+  // window.addEventListener('load', () => registerSW());
 }
