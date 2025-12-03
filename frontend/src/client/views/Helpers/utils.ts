@@ -60,8 +60,8 @@ const checkIsToday = (dateString: string): boolean => {
   );
 };
 
-export const getLogDuration = (nextItem: string | undefined, parsedItem: NoteLabel) => {
-  const parsedNextItem = nextItem ? JSON.parse(nextItem) : null;
+export const getLogDuration = (nextItem: NoteItemType, parsedItem: NoteLabel) => {
+  const parsedNextItem = nextItem ? nextItem : null;
 
   const getTimeDifference = (start: string, end: string) => {
     const startDate = new Date(start);
@@ -117,7 +117,7 @@ function convertDataLableToType(item, label, userId, newNotes, subSubFolderNames
             name:  label?.tag+"",//+"-test",
             parentId: item.id,
             type: ItemType.FOLDER,
-            tag: label.tag,
+            // tag: label.tag,
           };
           // newFolders.push(subSubFolder);
           forReturn = {subSubFolder}
@@ -130,22 +130,22 @@ function convertDataLableToType(item, label, userId, newNotes, subSubFolderNames
           noteType = ItemType.LOG;
           const jsonData = label.data ? JSON.parse(label.data) : { data: "", date: "" };
           content = { data: jsonData.data, date: jsonData.date };
-          const logDay = jsonData.date ? formatDate(jsonData.date.substring(0, 16).trim()) : "unknown";
+          // const logDay = jsonData.date ? formatDate(jsonData.date.substring(0, 16).trim()) : "unknown";
   
           // const logDayId = (subSubFolderId + "::" + logDay).trim().replaceAll(" ", "-");
           const logDayId = (subSubFolderId ).trim().replaceAll(" ", "-");
   
-          const newLogDay = {
-            userId,
-            id: logDayId,
-            name: logDay,
-            parentId: subSubFolderId,
-            type: ItemType.FOLDER,
-            tag: label.tag,
-            data: label.data
-          };
+          // const newLogDay = {
+          //   userId,
+          //   id: logDayId,
+          //   name: logDay,
+          //   parentId: subSubFolderId,
+          //   type: ItemType.FOLDER,
+          //   tag: label.tag,
+          //   data: label.data
+          // };
           // logDays[logDayId] = newLogDay
-          forReturn = {...forReturn, newLogDay}
+          // forReturn = {...forReturn, newLogDay}
           parentId = logDayId;
 
         }
@@ -155,7 +155,7 @@ function convertDataLableToType(item, label, userId, newNotes, subSubFolderNames
           content: content,
           parentId: parentId,
           type: noteType,
-          tag: label.tag,
+          // tag: label.tag,
           data: label.data
         };
         // logDays
@@ -165,6 +165,97 @@ function convertDataLableToType(item, label, userId, newNotes, subSubFolderNames
         }
       return forReturn
     }
+
+export function processGetAllNotesA(data: any) {
+  let logDays: any = {};
+  let createdByList: string[] = [];
+  let newFolders: NoteItemType[] = [];
+  let newNotes: NoteItemType[] = [];
+  const userId = localStorage.getItem("userId") ?? "";
+  data?.forEach((item: any) => {
+    if (!createdByList.includes(item.createdBy)) {
+      const mainFolder: NoteItemType = {
+        userId,
+        id: item.createdBy,
+        name: item.createdBy,
+        parentId: "",
+        type: ItemType.FOLDER,
+      };
+      newFolders.push(mainFolder);
+      createdByList.push(item.createdBy);
+    }
+
+    if (!item.heading?.startsWith("Sub: ")) {
+      const subFolder: NoteItemType = {
+        userId,
+        id: item.id,
+        name: item.heading === "" ? "Unnamed" : item.heading,
+        parentId: item.createdBy,
+        type: ItemType.FOLDER,
+      };
+      newFolders.push(subFolder);
+    }
+
+    let subSubFolderNames: string[] = [];
+    item?.dataLable.forEach((label: any) => {
+      const subSubFolderId = (item.id + "::" + label.tag).replaceAll(" ", "-");
+      if (!subSubFolderNames.includes(label.tag)) {
+        subSubFolderNames.push(label.tag);
+        const subSubFolder: NoteItemType = {
+          userId,
+          id: label.data.startsWith("href:") ? label.data.replace("href:", "") : subSubFolderId,
+          // name: label.tag === "" || !label.tag ? "Unnamed" : label.tag,
+          name:  label?.tag+"",//+"-test",
+          parentId: item.id,
+          type: ItemType.FOLDER,
+        };
+        newFolders.push(subSubFolder);
+      }
+      let content = { data: label.data, date: item.date };
+      let noteType = ItemType.NOTE;
+
+      let parentId = subSubFolderId;
+      if (label.data.includes('"json":true')) {
+        noteType = ItemType.LOG;
+        const jsonData = label.data ? JSON.parse(label.data) : { data: "", date: "" };
+        content = { data: jsonData.data, date: jsonData.date };
+        // const logDay = jsonData.date ? formatDate(jsonData.date.substring(0, 16).trim()) : "unknown";
+
+        // const logDayId = (subSubFolderId + "::" + logDay).trim().replaceAll(" ", "-");
+        const logDayId = (subSubFolderId ).trim().replaceAll(" ", "-");
+
+        // logDays[logDayId] = {
+        //   userId,
+        //   id: logDayId,
+        //   name: logDay,
+        //   parentId: subSubFolderId,
+        //   type: ItemType.FOLDER,
+        // };
+
+        parentId = logDayId;
+      }
+      const newNote: NoteItemType = {
+        userId,
+        id: parentId + "::" + noteType + "::" + newNotes.length.toString(),
+        content: content,
+        parentId: parentId,
+        type: noteType,
+      };
+      // logDays
+      if (!label.data.startsWith("href:")) {
+        newNotes.push(newNote);
+      }
+    });
+  });
+  if (newFolders?.length) {
+    const logDayFolders: NoteItemType[] = Object.values(logDays);
+
+    const sortedLogDayFolders = logDayFolders.sort((a, b) => (b?.name ?? "").localeCompare(a?.name ?? ""));
+    const itemsToSet = [...newFolders, ...newNotes, ...sortedLogDayFolders];
+    return itemsToSet;
+  }
+  return [];
+}
 
 export function processGetAllNotes(data: any): NoteItemType[] {
   let logDays: any = {};
@@ -192,7 +283,7 @@ export function processGetAllNotes(data: any): NoteItemType[] {
         id: item.id,
         data: "href:" + item.id,
         name: item.heading === "" ? "Unnamed" : item.heading +"",
-        tag: item.heading === "" ? "Unnamed" : item.heading,
+        // tag: item.heading === "" ? "Unnamed" : item.heading,
         parentId: item.createdBy,
         type: ItemType.FOLDER,
       };

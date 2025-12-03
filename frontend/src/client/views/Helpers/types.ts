@@ -3,7 +3,7 @@
 export type Note = {
   id: string;
   heading: string;
-  dataLable: NoteLabel[] | NoteItemType[];
+  dataLable: NoteItemType[];
   createdBy?: string;
   userId?: string;
 };
@@ -37,6 +37,19 @@ export type NoteContent = {
   data: string;
 };
 
+export type NoteItemTypeA = {
+  userId?: string;
+  id: string;
+  type: ItemType;
+  name?: string;
+  content?: NoteContent;
+  parentId: string;
+  // data?: string;
+  // tag?: string;
+  edit?: string;
+  // date?: string;
+};
+
 export type NoteItemType = {
   userId?: string;
   id: string;
@@ -44,10 +57,6 @@ export type NoteItemType = {
   name?: string;
   content?: NoteContent;
   parentId: string;
-  data?: string;
-  tag?: string;
-  edit?: string;
-  date?: string;
 };
 
 export type NoteLabel = {

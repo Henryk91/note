@@ -4,7 +4,7 @@ import { faPen, faCheck, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { faTrashAlt } from '@fortawesome/free-regular-svg-icons';
 import { marked } from 'marked';
 import { getLogDuration } from '../../Helpers/utils';
-import { NoteLabel } from '../../Helpers/types';
+import { NoteItemType, NoteLabel } from '../../Helpers/types';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
 
@@ -49,11 +49,11 @@ type DisplayItemBoxProps = {
 };
 
 type DisplayLogItemBoxProps = {
-  item: string;
+  item: NoteLabel;
   show: boolean;
   date: string;
-  prevItem?: string;
-  nextItem?: string;
+  prevItem: NoteItemType;
+  nextItem: NoteItemType;
   cont: (payload: any) => void;
   onEdit: () => void;
 };
@@ -172,15 +172,15 @@ const DisplayLogItemBox: React.FC<DisplayLogItemBoxProps> = ({
   onEdit,
 }) => {
   const theme = useSelector((state: RootState) => state.theme.themeLower);
-  const parsedItem = JSON.parse(item);
+  const parsedItem = item// JSON.parse(item);
   let showItem = show;
-  const newDate = parsedItem.date.substring(0, parsedItem.date.indexOf('GMT')).trim();
+  const newDate = parsedItem?.date?.substring(0, parsedItem?.date.indexOf('GMT')).trim();
   let selectedDate = date;
 
   if (selectedDate) {
     selectedDate = `${new Date(selectedDate)}`;
     selectedDate = selectedDate.substring(0, 16);
-    if (showItem && !newDate.includes(selectedDate)) {
+    if (showItem && !newDate?.includes(selectedDate)) {
       showItem = false;
     }
   }
@@ -193,7 +193,8 @@ const DisplayLogItemBox: React.FC<DisplayLogItemBoxProps> = ({
     ? 'logNoteItem'
     : null;
 
-  const prevData = (prevItem !== null && prevItem !== undefined)? JSON.parse(prevItem).data: null;
+  const prevData = (prevItem !== null && prevItem !== undefined)? prevItem?.content?.data: null;
+  // console.log('nextItem',nextItem);
   const duration = showItem ? getLogDuration(nextItem, parsedItem) : '';
 
   return (
@@ -344,7 +345,9 @@ const NoteItem: React.FC<NoteItemProps> = ({
   }, [show, editingItem]);
   // console.log('item',item);
   const itemIsString = item && typeof item === 'string';
-  const isLog = itemIsString ? item.includes('"json":true') : false;
+  // console.log('item.date',item.date);
+  const isLog = !!(item as NoteLabel)?.date;
+  // const isLog = itemIsString ? item.includes('"json":true') : false;
   const editing = editingItem && show;
   const noEditingIsLog = !editing && isLog;
   const noEditingNoLog = !editing && !isLog;
@@ -366,7 +369,7 @@ const NoteItem: React.FC<NoteItemProps> = ({
               dateToInputDisplayDate={dateToInputDisplayDate}
             />
           )}
-          {noEditingIsLog && itemIsString && (
+          {noEditingIsLog && (
             <DisplayLogItemBox
               item={item}
               show={show}

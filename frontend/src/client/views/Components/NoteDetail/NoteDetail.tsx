@@ -46,12 +46,12 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   // console.log(index, 'initShowtag?.params.tempId',initShowtag?.params.tempId);
   // const person = useSelector((state: RootState) => selectPersonById(state, initShowtag?.params.tempId));
   const person = useSelector((state: RootState) => selectPersonById(state, initShowtag?.params.id));
-  console.log(index, 'useSelector person',person);
+  // console.log(index, 'useSelector person',person);
   const persons = useSelector((state: RootState) => getAllPersonById(state));
-  console.error('');
-  console.error('Error');
-  console.error('Error');
-  console.error('persons',persons);
+  // console.error('');
+  // console.error('Error');
+  // console.error('Error');
+  // console.error('persons',persons);
   const { notes, noteNames, showTag, editName, selectedNoteName } = useSelector((state: RootState) => state.person);
 
   const [addLable, setAddLable] = useState<any>(null);
@@ -100,7 +100,8 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   }
 
   function getDataFilteredAndSorted(sort: Record<string, string[]>, prop: string, term?: string) {
-    let allDates = [...sort[prop]];
+    console.log('prop, sort', prop,sort);
+    let allDates = sort[prop]? [...sort[prop]]: []
 
     if (term) {
       const lowerSearch = term.toLowerCase();
@@ -111,6 +112,25 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     allDates = allDates
       .filter((d) => d?.includes('"json":true'))
       .sort((a, b) => new Date(JSON.parse(a).date).getTime() - new Date(JSON.parse(b).date).getTime());
+
+    return allDates;
+  }
+
+  function getDataLableFilteredAndSorted(dataLable: NoteItemType[], prop: string, term?: string) {
+
+    let allDates = dataLable? [...dataLable]: []
+
+    if (term) {
+      const lowerSearch = term.toLowerCase();
+      allDates = allDates.filter((item) => {
+        return (item?.content?.data.toLowerCase()?.includes(lowerSearch) || item?.content?.date?.toLowerCase()?.includes(lowerSearch))
+      });
+    }
+
+    if (prop !== 'Log') return allDates;
+    allDates = allDates
+      .filter((d) => d?.content?.date)
+      .sort((a, b) => new Date(a?.content?.date +"").getTime() - new Date(b?.content?.date +"").getTime());
 
     return allDates;
   }
@@ -234,6 +254,52 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     });
   }
 
+  function createNoteItemBunchB(items: NoteItemType[], prop: string, selectedDate: string, showButton: boolean) {
+    const max = items.length;
+    const selectedDateString = `${selectedDate}`.substring(0, 15).trim();
+    if (items[0] === undefined) return ""
+    // console.log('createNoteItemBunch items',items);
+    return items?.map((item, ind) => {
+      const prevItemLocal = ind > -1 ? items[ind - 1] : null;
+      const nextItemLocal = ind < max ? items[ind + 1] : null;
+      // console.log('item',item);
+      // if ((item as LogDay).date === selectedDateString) {
+      // console.log('prevItemLocal',prevItemLocal);
+      // console.log('nextItemLocal',nextItemLocal);
+      if (item?.content?.date === selectedDateString) {
+        setPrevDate(prevItemLocal?.content?.date ?? null);
+        setNextDate(nextItemLocal?.content?.date ?? null);
+      }
+
+      let count = 0;
+      let dateItem: any = item;
+      // console.log('prop',prop);
+      if (prop === 'Log Days') {
+        count = (item as LogDay).count;
+        dateItem = (item as LogDay).date;
+        // count = (item as LogDay).count;
+        // dateItem = (item as LogDay).date;
+      }
+      const key = dateItem + prop + ind;
+      return (
+        <div onClick={() => setDate(prop, dateItem)} key={key}>
+          <NoteItem
+            nextItem={nextItemLocal}
+            prevItem={prevItemLocal}
+            item={dateItem?.content}
+            date={selectedDate}
+            show={showButton && lastPage}
+            set={updateNoteItem}
+            cont={continueLog}
+            type={prop}
+            index={ind}
+            count={count}
+          />
+        </div>
+      );
+    });
+  }
+
   function logDayBunchLogic(prop: string, selectedDate: Date | string | null, allDates: any[]) {
     let newSelectedDate = selectedDate;
     let newLogDaysBunch;
@@ -242,12 +308,13 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
       // console.log('prop',prop);
       if (selectedDate === null) {
         let lastDate = [...allDates].slice(allDates.length - 1);
+        console.log('lastDate',lastDate);
         if (lastDate[0]) {
-          newSelectedDate = new Date(JSON.parse(lastDate[0]).date);
+          newSelectedDate = new Date(lastDate[0].content.date);
           if(newSelectedDate)setDisplayDate(newSelectedDate);
         }
       }
-      const allLogDays = [...allDates].map((day) => JSON.parse(day).date.substring(0, 15).trim());
+      const allLogDays = [...allDates].map((item) => item.content.date.substring(0, 15).trim());
 
       const logDaysTemp = [...allLogDays].filter((v, ind, s) => s.indexOf(v) === ind);
 
@@ -260,10 +327,10 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
       selDate = selDate.substring(0, 15).trim();
       const logDaysBunch = createNoteItemBunch(logDays.reverse(), 'Log Days', newSelectedDate?.toString() ?? '', showLogDaysBunch);
 
-      let selDates = [...allDates].filter((val) => val.includes(selDate));
+      let selDates = [...allDates].filter((val) => val.content.date.includes(selDate));
       if (selDates.length > 0) {
         selDates = selDates.slice(selDates.length - 2);
-        const contData = JSON.parse(selDates[0]).data;
+        const contData = selDates[0].content.data;
         setContinueData(contData);
       }
       newLogDaysBunch = logDaysBunch;
@@ -276,13 +343,16 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     // console.log('items',items);
     const sort: Record<string, any[]> = {};
     items.forEach((tag) => {
-      // console.log('tag',tag);
+      // console.error('tag',tag);
       if (sort[tag.tag]) {
         sort[tag.tag].push(tag.data);
       } else {
         sort[tag.tag] = [tag.data];
       }
     });
+
+    // const x = items.map(item => item.data)
+    // const sort = {'Tag': x}
     // console.log('sort',sort);
 
     const listHasShowTag = items.some((item) => item.tag === showTagValue);
@@ -322,7 +392,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
       // console.log('allDates',allDates);
       
       let bunch = createNoteItemBunch(allDates, prop, selectedDate?.toString() ?? '', showButton);
-
+      
       bunch = handleLinkButtons(animate, isLink, allDates, bunch);
 
       const linkBorder = isLink ? 'link-border' : '';
@@ -361,18 +431,19 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   }
 
   function showHideBox(prop: string) {
-    console.error('showHideBox',prop);
+    // console.error('showHideBox',prop);
     if (prop !== 'Log') showTagChange(prop);
   }
 
   function showTagChange(tagName: string) {
-    const propForId = initShowtag ?? match;
+    // const propForId = initShowtag ?? match;
     // const localPerson = person? person: getPersonNoteType(notes, propForId)
     const localPerson = person//? person: getPersonNoteType(notes, propForId)
     // console.log('tagName',tagName);
     // console.log('localPerson',localPerson);
-    const tagData = localPerson?.dataLable.find((note) => note.tag === tagName);
-    console.log('tagData',tagData);
+    const tagData = localPerson?.dataLable.find((note) => note.name === tagName);
+    // console.error('ocalPerson?.dataLable',localPerson?.dataLable);
+    // console.log('tagData',tagData);
     // console.log('tagData?.type',tagData?.type,tagData?.type === "FOLDER");
     // if (tagData?.data?.startsWith('href:') && editName === false) {
     if (tagData?.type === "FOLDER" && editName === false) {
@@ -575,16 +646,21 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   // console.log('personToRender',personToRender);
 
   const createSort = (items) => {
-    const sort: Record<string, any[]> = {};
-    items.forEach((tag) => {
-      // console.log('tag',tag);
-      if (sort[tag.tag]) {
-        sort[tag.tag].push(tag.data);
-      } else {
-        sort[tag.tag] = [tag.data];
-      }
-    });
-    return sort
+    // const sort: Record<string, any[]> = {};
+    // items.forEach((tag) => {
+    //   console.error('tag',tag);
+    //   // console.log('tag',tag);
+    //   if (sort[tag.tag]) {
+    //     sort[tag.tag].push(tag.data);
+    //   } else {
+    //     sort[tag.tag] = [tag.data];
+    //   }
+    // });
+
+    const x = items.map(item => item.data)
+    // const sort = {'Log': x}
+    // console.log('sort',sort);
+    return {'Log': x}
   }
 
   const completeLogContent = (noteItem) => {
@@ -623,12 +699,13 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     
     const sort: Record<string, any[]> = createSort(persons?.[noteItem.id]?.dataLable ?? []);
     // console.log('sorty',sort);
-    let allDates = sort? getDataFilteredAndSorted(sort, prop, searchTermState): []
+    let allDates = getDataLableFilteredAndSorted(persons?.[noteItem.id]?.dataLable, prop, searchTermState)
+    // let allDates = sort? getDataFilteredAndSorted(sort, prop, searchTermState): []
     // if (isLog) {
-    //   console.error('ERROR');
-    //   console.error('ERROR');
-    //   console.error('ERROR');
-    //   console.error('ERROR');
+    //   // console.error('ERROR');
+    //   // console.error('ERROR');
+    //   // console.error('ERROR');
+    //   // console.error('ERROR');
     //   if (displayDate === null) {
     //     let lastDate = [...allDates].slice(allDates.length - 1);
     //     if (lastDate[0]) {
@@ -648,7 +725,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     // const showTagValue = showTag ?? selectedNoteName?? 'main'
       // const showButton = showTagValue === prop;
       // console.log('allDates',allDates);
-      let bunch = createNoteItemBunch(allDates, prop, selectedDate?.toString() ?? '', showTagValue === prop);
+      let bunch = createNoteItemBunchB(allDates, prop, selectedDate?.toString() ?? '', showTagValue === prop);
       // let bunch = createNoteItemBunch(allDates, prop, selectedDate?.toString() ?? '', showButton);
     // console.log('isLink', isLink);
     // console.log('bunch',bunch);
@@ -765,7 +842,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   // }, [initShowtag.params?.id])
   }, [person?.dataLable, showTag, displayDate, nextDate, prevDate, showLogDaysBunch, searchTermState, lastPage, selectedNoteName])
   // }, [person?.dataLable, showTag, displayDate, nextDate, prevDate, showLogDaysBunch, searchTermState, lastPage, selectedNoteName, notes])
-  console.log('initShowtag?.id',initShowtag.params?.id);
+  // console.log('initShowtag?.id',initShowtag.params?.id);
   return (
     <div className="slide-in">
       {/* <p>{initShowtag.params?.id}</p> */}

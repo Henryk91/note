@@ -151,6 +151,7 @@ export const ScrollButtons: React.FC<ScrollButtonsProps> = ({
   const themeHover = `${theme}-hover`;
 
   const addButtonClicked = () => {
+    // console.log('addButtonClickedaddButtonClicked');
     dispatch(setShowAddItem(!showAddItem));
     if (!showAddItem) window.scrollTo(0, 0);
   }

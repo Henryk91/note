@@ -17,7 +17,7 @@ import {
   getNoteNames,
 } from './views/Helpers/requests';
 
-import { allNotesToItems, compareSort, processGetAllNotes } from './views/Helpers/utils';
+import { allNotesToItems, compareSort, processGetAllNotes, processGetAllNotesA } from './views/Helpers/utils';
 import { KeyValue, Note } from './views/Helpers/types';
 import { RootState } from '../store';
 import { setTheme } from '../store/themeSlice';
@@ -147,12 +147,13 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
           // }
           let res = resp;
           // console.log('resprespresp',resp);
-          const newData = processGetAllNotes(resp);
+          // const newData = processGetAllNotes(resp);
+          const newData = processGetAllNotesA(resp);
           console.log('newData',newData);
           const items = allNotesToItems(newData);
-          console.error('items',items);
+          // console.error('items',items);
           setPerson(items)
-          console.error('items[0]',items[10]);
+          // console.error('items[0]',items[10]);
           const newRes: Note[] = Object.keys(items).map(key => {
             return {...items[key], heading: items[key]?.heading ?? "Placeholder"}
           })

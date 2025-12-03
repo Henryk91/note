@@ -40,7 +40,7 @@ const personSlice = createSlice({
     setPerson(state, action: PayloadAction<KeyValue<Note>>) {
       const p = action.payload;
       if (!p) return;
-      console.error('p', p);
+      // console.error('p', p);
       state.byId = p;
     },
     setPersonById(state, action: PayloadAction<SetPersonPayload>) {
@@ -50,7 +50,7 @@ const personSlice = createSlice({
     },
     removePersonById(state, action: PayloadAction<{ id: string }>) {
       const { id } = action.payload;
-      console.error('delete id', id);
+      // console.error('delete id', id);
       delete state.byId[id];
     },
     setNotes(state, action: PayloadAction<Note[] | null>) {
@@ -62,14 +62,14 @@ const personSlice = createSlice({
         // const personFound = getPersonNoteType(state.notes, DEFAULT_PAGE[0]);
         const initPage = createInitPage(state.selectedNoteName)
         // console.log('initPage',initPage);
-        const personFound = getPersonNoteType(state.notes, initPage, state.selectedNoteName);
+        // const personFound = getPersonNoteType(state.notes, initPage, state.selectedNoteName);
         // console.log('state.selectedNoteName',state.selectedNoteName);
         // console.log('personFound',personFound);
-        if(personFound) {
-          // state.byId[state.selectedNoteName ?? 'main'] = personFound;
-          const keys = Object.keys(state.byId)
-          console.error(wasKeys.length, 'personFound', keys.length, state.selectedNoteName ?? 'main', personFound);
-        }
+        // if(personFound) {
+        //   // state.byId[state.selectedNoteName ?? 'main'] = personFound;
+        //   const keys = Object.keys(state.byId)
+        //   // console.error(wasKeys.length, 'personFound', keys.length, state.selectedNoteName ?? 'main', personFound);
+        // }
       }
     },
     setNoteNames(state, action: PayloadAction<string[]>) {
@@ -86,25 +86,25 @@ const personSlice = createSlice({
         state.notes = JSON.parse(localNoteData);
         // const personFound = getPersonNoteType(state.notes, DEFAULT_PAGE[0]);
         // console.log('state.pages[0]',state.pages[0]);
-        const personFound = getPersonNoteType(state.notes, state.pages[0], state.selectedNoteName);
-        // console.error('personFound',personFound);
-        if(personFound) {
-          // state.byId[state.selectedNoteName ?? 'main'] = personFound;
-          console.error( 'state.selectedNoteName', personFound);
-        }
+        // const personFound = getPersonNoteType(state.notes, state.pages[0], state.selectedNoteName);
+        // // console.error('personFound',personFound);
+        // if(personFound) {
+        //   // state.byId[state.selectedNoteName ?? 'main'] = personFound;
+        //   // console.error( 'state.selectedNoteName', personFound);
+        // }
         
       } else {
         // console.error('Here', state.pages[0], state.selectedNoteName);
         // console.log('state.notes',state.notes);
-        const personFound = getPersonNoteType(state.notes, state.pages[0], state.selectedNoteName);
-        // console.error('personFound',personFound);
-        if(personFound) {
-          // state.byId[state.selectedNoteName ?? 'main'] = personFound;
-          console.error('state.selectedNoteName', personFound);
-        } else {
-          console.error('Deleteing state.byId');
-          // state.byId = {}
-        }
+        // const personFound = getPersonNoteType(state.notes, state.pages[0], state.selectedNoteName);
+        // // console.error('personFound',personFound);
+        // if(personFound) {
+        //   // state.byId[state.selectedNoteName ?? 'main'] = personFound;
+        //   // console.error('state.selectedNoteName', personFound);
+        // } else {
+        //   // console.error('Deleteing state.byId');
+        //   // state.byId = {}
+        // }
         
       }
     },
