@@ -367,7 +367,8 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
 
   function showTagChange(tagName: string) {
     const propForId = initShowtag ?? match;
-    const localPerson = person? person: getPersonNoteType(notes, propForId)
+    // const localPerson = person? person: getPersonNoteType(notes, propForId)
+    const localPerson = person//? person: getPersonNoteType(notes, propForId)
     // console.log('tagName',tagName);
     // console.log('localPerson',localPerson);
     const tagData = localPerson?.dataLable.find((note) => note.tag === tagName);
@@ -516,15 +517,15 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   }
 
   function initPage() {
-    if (initShowtag) {
-      const personFound = getPersonNoteType(notes, initShowtag, selectedNoteName);
-      if (personFound) {
-        dispatch(setPersonById({ id: `${initShowtag?.params.tempId}`, person: {...personFound} }));
-      } else if (noteNames) {
-        // Displaying List of Names and Theme types
-        dispatch(setShowTag(null));
-      }
-    }
+    // if (initShowtag) {
+    //   const personFound = getPersonNoteType(notes, initShowtag, selectedNoteName);
+    //   if (personFound) {
+    //     // dispatch(setPersonById({ id: `${initShowtag?.params.tempId}`, person: {...personFound} }));
+    //   } else if (noteNames) {
+    //     // Displaying List of Names and Theme types
+    //     // dispatch(setShowTag(null));
+    //   }
+    // }
     const noteDetailPage = document.getElementById('multiple-pages');
     console.log('lastPage',lastPage);
     if (noteDetailPage)
@@ -556,7 +557,8 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
 
   useEffect(() => {
     setSearchTermState(searchTerm);
-  }, [searchTerm,notes]);
+  }, [searchTerm]);
+  // }, [searchTerm,notes]);
 
   const isNoteNames = match?.url === '/notes/note-names';
   const personToRender = isNoteNames ? null : person;
@@ -761,7 +763,8 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     })
     return ret
   // }, [initShowtag.params?.id])
-  }, [person?.dataLable, showTag, displayDate, nextDate, prevDate, showLogDaysBunch, searchTermState, lastPage, selectedNoteName, notes])
+  }, [person?.dataLable, showTag, displayDate, nextDate, prevDate, showLogDaysBunch, searchTermState, lastPage, selectedNoteName])
+  // }, [person?.dataLable, showTag, displayDate, nextDate, prevDate, showLogDaysBunch, searchTermState, lastPage, selectedNoteName, notes])
   console.log('initShowtag?.id',initShowtag.params?.id);
   return (
     <div className="slide-in">

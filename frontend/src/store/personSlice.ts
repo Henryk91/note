@@ -89,7 +89,7 @@ const personSlice = createSlice({
         const personFound = getPersonNoteType(state.notes, state.pages[0], state.selectedNoteName);
         // console.error('personFound',personFound);
         if(personFound) {
-          state.byId[state.selectedNoteName ?? 'main'] = personFound;
+          // state.byId[state.selectedNoteName ?? 'main'] = personFound;
           console.error( 'state.selectedNoteName', personFound);
         }
         
@@ -99,7 +99,7 @@ const personSlice = createSlice({
         const personFound = getPersonNoteType(state.notes, state.pages[0], state.selectedNoteName);
         // console.error('personFound',personFound);
         if(personFound) {
-          state.byId[state.selectedNoteName ?? 'main'] = personFound;
+          // state.byId[state.selectedNoteName ?? 'main'] = personFound;
           console.error('state.selectedNoteName', personFound);
         } else {
           console.error('Deleteing state.byId');
