@@ -19,7 +19,8 @@ export type PageDescriptor = { params: { id: string, tempId: string } };
 
 
 export type NoteItemMap = {
-  [key: string]: {id: string, dataLable: NoteLabel[] | NoteItemType[], heading?: string, other?: any};
+  [key: string]: Note;
+  // [key: string]: {id: string, dataLable: NoteLabel[] | NoteItemType[], heading?: string, other?: any};
 };
 // export type NoteItemMap = {
 //   [key: string]: {id: string, dataLable: NoteItemType[], heading?: string};
@@ -54,4 +55,8 @@ export type NoteLabel = {
   data: string;
   edit?: string;
   date?: string;
+};
+
+export type KeyValue<T = any> = {
+  [key: string]: T;
 };

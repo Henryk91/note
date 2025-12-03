@@ -22,7 +22,6 @@ export type NoteDetailListItemProps = {
   prop: string;
   isLink: boolean;
   contentCount: number;
-  showDateSelector: boolean;
   continueData: any;
   onShowHide: () => void;
   onShowLogDays: () => void;
@@ -117,7 +116,6 @@ export const NoteDetailListItem: React.FC<NoteDetailListItemProps> = ({
   prop,
   isLink,
   contentCount,
-  showDateSelector,
   continueData,
   onShowHide,
   onShowLogDays,
@@ -132,6 +130,7 @@ export const NoteDetailListItem: React.FC<NoteDetailListItemProps> = ({
   const themeBorder = `${theme}-border-thick`;
   const themeHover = `${theme}-hover`;
 
+  const showDateSelector = prop === 'Log';
   const className = showDateSelector ? 'detailLogBoxTitle' : 'detailBoxTitle';
   const dateCounterId = showDateSelector ? 'date-selector-counter' : '';
 

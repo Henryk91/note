@@ -1,11 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Note, PageDescriptor } from '../client/views/Helpers/types';
-import { DEFAULT_PAGE } from '../client/views/Helpers/const';
+import { KeyValue, Note, PageDescriptor } from '../client/views/Helpers/types';
 import { getPersonNoteType } from '../client/views/Helpers/utils';
-
-type KeyValue<T = any> = {
-  [key: string]: T;
-};
 
 type PersonState = {
   byId: KeyValue<Note>;
@@ -45,6 +40,7 @@ const personSlice = createSlice({
     setPerson(state, action: PayloadAction<KeyValue<Note>>) {
       const p = action.payload;
       if (!p) return;
+      console.error('p', p);
       state.byId = p;
     },
     setPersonById(state, action: PayloadAction<SetPersonPayload>) {
@@ -54,9 +50,12 @@ const personSlice = createSlice({
     },
     removePersonById(state, action: PayloadAction<{ id: string }>) {
       const { id } = action.payload;
+      console.error('delete id', id);
       delete state.byId[id];
     },
     setNotes(state, action: PayloadAction<Note[] | null>) {
+      const wasKeys = Object.keys(state.byId)
+
       state.notes = action.payload;
       if(state.selectedNoteName) localStorage.setItem(state.selectedNoteName, JSON.stringify(action.payload));
       if(action.payload) {
@@ -66,7 +65,11 @@ const personSlice = createSlice({
         const personFound = getPersonNoteType(state.notes, initPage, state.selectedNoteName);
         // console.log('state.selectedNoteName',state.selectedNoteName);
         // console.log('personFound',personFound);
-        if(personFound) state.byId[state.selectedNoteName ?? 'main'] = personFound;
+        if(personFound) {
+          // state.byId[state.selectedNoteName ?? 'main'] = personFound;
+          const keys = Object.keys(state.byId)
+          console.error(wasKeys.length, 'personFound', keys.length, state.selectedNoteName ?? 'main', personFound);
+        }
       }
     },
     setNoteNames(state, action: PayloadAction<string[]>) {
@@ -85,7 +88,10 @@ const personSlice = createSlice({
         // console.log('state.pages[0]',state.pages[0]);
         const personFound = getPersonNoteType(state.notes, state.pages[0], state.selectedNoteName);
         // console.error('personFound',personFound);
-        if(personFound) state.byId[state.selectedNoteName ?? 'main'] = personFound;
+        if(personFound) {
+          state.byId[state.selectedNoteName ?? 'main'] = personFound;
+          console.error( 'state.selectedNoteName', personFound);
+        }
         
       } else {
         // console.error('Here', state.pages[0], state.selectedNoteName);
@@ -94,8 +100,10 @@ const personSlice = createSlice({
         // console.error('personFound',personFound);
         if(personFound) {
           state.byId[state.selectedNoteName ?? 'main'] = personFound;
+          console.error('state.selectedNoteName', personFound);
         } else {
-          state.byId = {}
+          console.error('Deleteing state.byId');
+          // state.byId = {}
         }
         
       }

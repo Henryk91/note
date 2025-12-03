@@ -46,9 +46,12 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   // console.log(index, 'initShowtag?.params.tempId',initShowtag?.params.tempId);
   // const person = useSelector((state: RootState) => selectPersonById(state, initShowtag?.params.tempId));
   const person = useSelector((state: RootState) => selectPersonById(state, initShowtag?.params.id));
-  // console.log(index, 'useSelector person',person);
+  console.log(index, 'useSelector person',person);
   const persons = useSelector((state: RootState) => getAllPersonById(state));
-  // console.log('persons',persons);
+  console.error('');
+  console.error('Error');
+  console.error('Error');
+  console.error('persons',persons);
   const { notes, noteNames, showTag, editName, selectedNoteName } = useSelector((state: RootState) => state.person);
 
   const [addLable, setAddLable] = useState<any>(null);
@@ -168,6 +171,8 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     // console.log('notes',notes);
     // console.log('tagData',tagData);
     const noteId = tagData?.data ? tagData.data.substring(5): tagData.id
+    console.log('persons',persons);
+    console.log('noteId',noteId);
     const personNext = persons[noteId]//notes?.find((note) => note.id === noteId) ?? null;
 
     // console.log('personNextpersonNextpersonNextpersonNextpersonNext',personNext, persons[noteId]);
@@ -334,7 +339,6 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
               prop={prop}
               isLink={isLink}
               contentCount={bunch.length}
-              showDateSelector={showDateSelector}
               continueData={continueData}
               onShowHide={() => showHideBox(prop)}
               onShowLogDays={() => showLogDays(prop)}
@@ -367,7 +371,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     // console.log('tagName',tagName);
     // console.log('localPerson',localPerson);
     const tagData = localPerson?.dataLable.find((note) => note.tag === tagName);
-    // console.log('tagData',tagData);
+    console.log('tagData',tagData);
     // console.log('tagData?.type',tagData?.type,tagData?.type === "FOLDER");
     // if (tagData?.data?.startsWith('href:') && editName === false) {
     if (tagData?.type === "FOLDER" && editName === false) {
@@ -522,15 +526,22 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
       }
     }
     const noteDetailPage = document.getElementById('multiple-pages');
+    console.log('lastPage',lastPage);
     if (noteDetailPage)
       setTimeout(() => {
         const localNoteDetailPage = document.getElementById('multiple-pages');
-        if (!localNoteDetailPage) return;
-        const pageWidth = localNoteDetailPage.scrollWidth / pageCount;
-        const start = localNoteDetailPage.scrollWidth - pageWidth - pageWidth;
-        const end = start + pageWidth;
-        customScrollBy(localNoteDetailPage, start, end);
+        // console.log('localNoteDetailPage',localNoteDetailPage);
+        if (!localNoteDetailPage || !lastPage) return;
+        // const pageWidth = localNoteDetailPage.scrollWidth / pageCount;
+        // const start = localNoteDetailPage.scrollWidth - pageWidth - pageWidth;
+        // const end = start + pageWidth;
+        // customScrollBy(localNoteDetailPage, start, end);
+        localNoteDetailPage.scrollTo({
+          left: localNoteDetailPage.scrollWidth,//document.body.scrollWidth,
+          behavior: "smooth" // optional
+        });
       }, 30);
+      // }, 2000);
   }
 
   function cancelAddItemEdit() {
@@ -550,15 +561,15 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   const isNoteNames = match?.url === '/notes/note-names';
   const personToRender = isNoteNames ? null : person;
   // console.log('person',person);
-  const getNotesWithMemo = useMemo(() => {
-    return []
-    // console.log(index, 'person.dataLable',person?.dataLable);
-    // console.log('notes',notes);
-    // console.error('showTag',showTag);
-    const ret = person?.dataLable? getNoteByTag(person.dataLable, showTag ?? selectedNoteName?? 'main'): null
-    // console.log('retretretret',ret);
-    return ret
-  }, [person?.dataLable, showTag, displayDate, nextDate, prevDate, showLogDaysBunch, searchTermState, lastPage, selectedNoteName, notes])
+  // const getNotesWithMemo = useMemo(() => {
+  //   return []
+  //   // console.log(index, 'person.dataLable',person?.dataLable);
+  //   // console.log('notes',notes);
+  //   // console.error('showTag',showTag);
+  //   const ret = person?.dataLable? getNoteByTag(person.dataLable, showTag ?? selectedNoteName?? 'main'): null
+  //   // console.log('retretretret',ret);
+  //   return ret
+  // }, [person?.dataLable, showTag, displayDate, nextDate, prevDate, showLogDaysBunch, searchTermState, lastPage, selectedNoteName, notes])
   // console.log('personToRender',personToRender);
 
   const createSort = (items) => {
@@ -574,56 +585,61 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     return sort
   }
 
-  const tags = useMemo(() => {
-    // console.log(index , 'person',person);
-    const ret = person?.dataLable?.map((noteItem, i) => {
+  const completeLogContent = (noteItem) => {
+    const prop = noteItem.name ?? noteItem.content.data 
+    // const showDateSelector = prop === 'Log' //isLog
+    if(prop !== 'Log') return {}
+    // const isLog = noteItem.type === 'LOG';
+    // console.error('isLog',isLog);
 
-      const isLog = noteItem.type === 'LOG';
-      let isLink = noteItem.type === 'FOLDER';
-      let isNote = noteItem.type === 'NOTE';
-      const linkBorder = isLink ? 'link-border' : '';
-      const prop = noteItem.name ?? noteItem.content.data 
+    
       // let bunch = createNoteItemBunch(allDates, prop, selectedDate?.toString() ?? '', showButton);
       // let bunch = []
       
-      const key = prop + i;
+      // const key = prop + i;
       // console.log('key',key, noteItem.type);
 
       const showTagValue = showTag ?? selectedNoteName?? 'main'
-      const showButton = true//showTagValue === prop;
+      // const showButton = true//showTagValue === prop;
 
 
-      const prevItemLocal = null;
-      const nextItemLocal = null;
-      let count = 0;
-      let dateItem: any = noteItem.content?.data;
-      if (isLog) {
-        count = (item as LogDay).count;
-        dateItem = (item as LogDay).date;
-      }
+      // const prevItemLocal = null;
+      // const nextItemLocal = null;
+      // let count = 0;
+      // let dateItem: any = noteItem.content?.data;
+      // if (isLog) {
+      //   count = (item as LogDay).count;
+      //   dateItem = (item as LogDay).date;
+      // }
 
-    let newSelectedDate = displayDate;
+    // let newSelectedDate = displayDate;
     // let allDates = [];
     // const sort: Record<string, any[]> = {};
 
-    const showDateSelector = prop === 'Log' //isLog
     
-    const sort: Record<string, any[]> | null = showDateSelector? createSort(persons?.[noteItem.id]?.dataLable ?? []): null;
+    // console.log('showDateSelector',showDateSelector);
+    
+    const sort: Record<string, any[]> = createSort(persons?.[noteItem.id]?.dataLable ?? []);
     // console.log('sorty',sort);
     let allDates = sort? getDataFilteredAndSorted(sort, prop, searchTermState): []
-    if (isLog) {
-      if (displayDate === null) {
-        let lastDate = [...allDates].slice(allDates.length - 1);
-        if (lastDate[0]) {
-          newSelectedDate = new Date(JSON.parse(lastDate[0]).date);
-          if(newSelectedDate)setDisplayDate(newSelectedDate);
-        }
-      }
-    }
+    // if (isLog) {
+    //   console.error('ERROR');
+    //   console.error('ERROR');
+    //   console.error('ERROR');
+    //   console.error('ERROR');
+    //   if (displayDate === null) {
+    //     let lastDate = [...allDates].slice(allDates.length - 1);
+    //     if (lastDate[0]) {
+    //       newSelectedDate = new Date(JSON.parse(lastDate[0]).date);
+    //       if(newSelectedDate)setDisplayDate(newSelectedDate);
+    //     }
+    //   }
+    // }
 
     
 
-    const animate = prop === 'undefined'? 'grow': enableAnimationCheck(showTagValue, prop);
+    // const animate = prop === 'undefined'? 'grow': enableAnimationCheck(showTagValue, prop);
+    const animate = enableAnimationCheck(showTagValue, prop);
     // console.log('animate',animate);
     const { selectedDate, logDaysBunch } = logDayBunchLogic(prop, displayDate, allDates);
 
@@ -634,51 +650,122 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
       // let bunch = createNoteItemBunch(allDates, prop, selectedDate?.toString() ?? '', showButton);
     // console.log('isLink', isLink);
     // console.log('bunch',bunch);
+
+    const logContent = noteItemsBunch(animate, logDaysBunch, bunch, showLogDaysBunch)
+    return {logContent, count: bunch.length}
+  }
+
+  const tags = useMemo(() => {
+    // console.log(index , 'person',person);
+    const ret = person?.dataLable?.map((noteItem, i) => {
+
+      // const isLog = noteItem.type === 'LOG';
+      let isLink = noteItem.type === 'FOLDER';
+      let isNote = noteItem.type === 'NOTE';
+      const linkBorder = isLink ? 'link-border' : '';
+      const prop = noteItem.name ?? noteItem.content.data 
+      // let bunch = createNoteItemBunch(allDates, prop, selectedDate?.toString() ?? '', showButton);
+      // let bunch = []
+      
+      const key = prop + i;
+      // console.log('key',key, noteItem.type);
+
+      // const showTagValue = showTag ?? selectedNoteName?? 'main'
+      // const showButton = true//showTagValue === prop;
+
+
+      // const prevItemLocal = null;
+      // const nextItemLocal = null;
+      // let count = 0;
+      const dateItem = noteItem.content?.data;
+      // if (isLog) {
+      //   count = (item as LogDay).count;
+      //   dateItem = (item as LogDay).date;
+      // }
+
+    // let newSelectedDate = displayDate;
+    // let allDates = [];
+    // const sort: Record<string, any[]> = {};
+
+    // const showDateSelector = prop === 'Log' //isLog
+    
+    // const sort: Record<string, any[]> | null = showDateSelector? createSort(persons?.[noteItem.id]?.dataLable ?? []): null;
+    // // console.log('sorty',sort);
+    // let allDates = sort? getDataFilteredAndSorted(sort, prop, searchTermState): []
+    // if (isLog) {
+    //   if (displayDate === null) {
+    //     let lastDate = [...allDates].slice(allDates.length - 1);
+    //     if (lastDate[0]) {
+    //       newSelectedDate = new Date(JSON.parse(lastDate[0]).date);
+    //       if(newSelectedDate)setDisplayDate(newSelectedDate);
+    //     }
+    //   }
+    // }
+
+    
+
+    // const animate = prop === 'undefined'? 'grow': enableAnimationCheck(showTagValue, prop);
+    // console.log('animate',animate);
+    // const { selectedDate, logDaysBunch } = logDayBunchLogic(prop, displayDate, allDates);
+
+    // const showTagValue = showTag ?? selectedNoteName?? 'main'
+      // const showButton = showTagValue === prop;
+      // console.log('allDates',allDates);
+      // let bunch = createNoteItemBunch(allDates, prop, selectedDate?.toString() ?? '', showTagValue === prop);
+
+    const { logContent, count } = completeLogContent(noteItem)
+      // let bunch = createNoteItemBunch(allDates, prop, selectedDate?.toString() ?? '', showButton);
+    // console.log('isLink', isLink);
+    // console.log('bunch',bunch);
       return (
         <div className={'detailedBox'} key={key}>
           {isLink && (
             <>
-          <NoteDetailListItem
-            linkBorder={linkBorder}
-            prop={prop}
-            isLink={isLink}
-            contentCount={bunch.length}
-            showDateSelector={showDateSelector}
-            continueData={continueData}
-            onShowHide={() => showHideBox(prop)}
-            onShowLogDays={() => showLogDays(prop)}
-            onShowLogTag={(tag) => saveShowTag(tag)}
-            onChangeDate={changeDate}
-            onDateBackForward={(e, dir) => dateBackForward(e, dir)}
-            onContinueLog={(payload) => continueLog(payload)}
-          />
-          {noteItemsBunch(animate, logDaysBunch, bunch, showLogDaysBunch)}
-          </>
+              <NoteDetailListItem
+                linkBorder={linkBorder}
+                prop={prop}
+                isLink={isLink}
+                contentCount={count ?? 0}
+                // contentCount={bunch.length}
+                // showDateSelector={showDateSelector}
+                continueData={continueData}
+                onShowHide={() => showHideBox(prop)}
+                onShowLogDays={() => showLogDays(prop)}
+                onShowLogTag={(tag) => saveShowTag(tag)}
+                onChangeDate={changeDate}
+                onDateBackForward={(e, dir) => dateBackForward(e, dir)}
+                onContinueLog={(payload) => continueLog(payload)}
+              />
+              {logContent}
+              {/* {noteItemsBunch(animate, logDaysBunch, bunch, showLogDaysBunch)} */}
+            </>
           )}
           {isNote && (
             <div onClick={() => setDate(prop, dateItem)} key={key}>
-            <NoteItem
-              nextItem={nextItemLocal}
-              prevItem={prevItemLocal}
-              item={dateItem}
-              date={displayDate?.toString() ?? ""}
-              show={showButton && lastPage}
-              set={updateNoteItem}
-              cont={continueLog}
-              type={prop}
-              index={i}
-              count={count}
-            />
-          </div>
+              <NoteItem
+                nextItem={undefined}
+                prevItem={undefined}
+                item={dateItem}
+                date={displayDate?.toString() ?? ""}
+                show={lastPage}
+                set={updateNoteItem}
+                cont={continueLog}
+                type={prop}
+                index={i}
+                count={0}
+              />
+            </div>
           )}
         </div>
       )
     })
     return ret
+  // }, [initShowtag.params?.id])
   }, [person?.dataLable, showTag, displayDate, nextDate, prevDate, showLogDaysBunch, searchTermState, lastPage, selectedNoteName, notes])
-  
+  console.log('initShowtag?.id',initShowtag.params?.id);
   return (
     <div className="slide-in">
+      {/* <p>{initShowtag.params?.id}</p> */}
       {personToRender && (
         <PageContent
           person={personToRender}

@@ -18,7 +18,7 @@ import {
 } from './views/Helpers/requests';
 
 import { allNotesToItems, compareSort, processGetAllNotes } from './views/Helpers/utils';
-import { Note } from './views/Helpers/types';
+import { KeyValue, Note } from './views/Helpers/types';
 import { RootState } from '../store';
 import { setTheme } from '../store/themeSlice';
 import { setNotes, setNoteNames, setSelectedNoteName, setPerson } from '../store/personSlice';
@@ -48,6 +48,7 @@ type AppProps = {
   setNotes: (notes: Note[] | null) => void;
   setNoteNames: (notes: string[]) => void;
   setSelectedNoteName: (notes: string) => void;
+  setPerson: (notes: KeyValue<Note>) => void;
 };
 
 const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames, setNoteNames, selectedNoteName, setSelectedNoteName, setPerson}) => {
@@ -125,25 +126,37 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
         const data = localStorage.getItem(currentUser);
         if (data && data[0] && data.length > 0) {
           // console.error('before addMainNote selectedNoteName', selectedNoteName);
-          const pdata = addMainNote(JSON.parse(data) as Note[]);
+          const pdata = JSON.parse(data)//addMainNote(JSON.parse(data) as Note[]);
           if (notes !== pdata) {
-            if(pdata) setNotes(pdata);
+            if(pdata) {
+              let newItems = {}
+              pdata.forEach(p => {
+                newItems[p.id] = p
+              })
+              setPerson(newItems)
+              setNotes(pdata);
+            }
           }
           setFreshData(false);
         }
 
         getMyNotesRec(currentUser, (resp) => {
+          // if(notes || notesInitialLoad) {
+          //   setFreshData(true);
+          //   return
+          // }
           let res = resp;
           // console.log('resprespresp',resp);
           const newData = processGetAllNotes(resp);
-          // console.log('newData',newData);
+          console.log('newData',newData);
           const items = allNotesToItems(newData);
-          // console.error('items',items);
+          console.error('items',items);
           setPerson(items)
+          console.error('items[0]',items[10]);
           const newRes: Note[] = Object.keys(items).map(key => {
             return {...items[key], heading: items[key]?.heading ?? "Placeholder"}
           })
-          console.log('newRes',newRes);
+          console.log('newRes',newRes[10]);
           // console.log('items',items);
           // console.log('items',items);
           // console.log('newData',newData);
