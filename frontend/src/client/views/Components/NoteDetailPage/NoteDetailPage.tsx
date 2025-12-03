@@ -96,10 +96,10 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
       if (!msg.personNext) return;
       // cll
       const tempId = `${msg.personNext.id}-${msg.personNext.heading}`
-      dispatch(setPersonById({ id: tempId, person: {...msg?.personNext} }));
+      // if(msg?.personNext) dispatch(setPersonById({ id: tempId, person: {...msg?.personNext} }));
 
       const nextPage = { params: { id: msg.personNext.id, tempId: tempId } };
-      // console.log('nextPage',nextPage);
+      console.log('nextPage',nextPage);
       const localPages = localStorage.getItem('saved-pages');
 
       let updatePages = pages;

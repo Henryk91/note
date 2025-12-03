@@ -37,6 +37,17 @@ const personSlice = createSlice({
   name: 'person',
   initialState,
   reducers: {
+    bulkUpdatePerson(state, action: PayloadAction<KeyValue<Note>>) {
+      const p = action.payload;
+      if (!p) return;
+      const freshState = {...state.byId}
+      const keys = Object.keys(p);
+      keys.forEach(key => {
+        freshState[key] = p[key];
+      })
+      // console.error('p', p);
+      state.byId = freshState;
+    },
     setPerson(state, action: PayloadAction<KeyValue<Note>>) {
       const p = action.payload;
       if (!p) return;
@@ -162,6 +173,7 @@ export const {
   removeLastPage,
   resetPages,
   setPages,
+  bulkUpdatePerson,
 } = personSlice.actions;
 
 export const selectPersonById = (state: { person: PersonState }, id: string) => state.person.byId[id] || null;

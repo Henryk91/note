@@ -28,6 +28,10 @@ export interface NoteV2Attrs {
   content?: NoteV2Content;
 }
 
+export type NoteItemMap = {
+  [key: string]: { heading: string; id: string; dataLable: NoteV2Attrs[] };
+};
+
 type NoteV2Doc = mongoose.HydratedDocument<NoteV2Attrs>;
 
 export interface NoteUserAttrs {
@@ -440,6 +444,60 @@ export default class Handler {
     try {
       const userId = req?.auth?.sub;
       const docs = await NoteV2Model.find({ userId, parentId: req.query.parentId ?? '' });
+      done(docs);
+    } catch (err) {
+      console.log(err);
+      done('No notes');
+    }
+  };
+
+  getOneLevelDown = async (
+    userId: string,
+    rootParentId: string
+  ) => {
+    // Level 1: direct children of the root parent
+    const currentNote = await NoteV2Model.findOne({ userId, id: rootParentId });
+    const level1 = await NoteV2Model.find({ userId, parentId: rootParentId });
+
+    const level1Ids = level1.map(n => n.id);
+
+    // Level 2: children of each level-1 node
+    const level2 = await NoteV2Model.find({
+      userId,
+      parentId: { $in: level1Ids },
+    });
+
+    const map: NoteItemMap = {};
+
+    // root -> its direct children
+    // console.log('currentNote',currentNote);
+    map[rootParentId] = {
+      heading: currentNote?.name ?? '',
+      id: rootParentId,
+      dataLable: level1,
+    };
+
+    // each level-1 node id -> its children
+    for (const child of level2) {
+      if (!map[child.parentId]) {
+        const heading = level1.find(l => l.id === child.parentId)?.name
+        map[child.parentId] = {
+          id: child.parentId,
+          heading: heading,
+          dataLable: [],
+        };
+      }
+      map[child.parentId].dataLable.push(child);
+    }
+
+    return map;
+  }
+
+  getNoteV2ContentWithChildren = async (req: any, done: Callback) => {
+    try {
+      const userId = req?.auth?.sub;
+      // const docs = await NoteV2Model.find({ userId, parentId: req.query.parentId ?? '' });
+      const docs = await this.getOneLevelDown(userId, req.query.parentId ?? '');
       done(docs);
     } catch (err) {
       console.log(err);

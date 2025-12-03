@@ -23,7 +23,7 @@ export type NoteItemMap = {
   // [key: string]: {id: string, dataLable: NoteLabel[] | NoteItemType[], heading?: string, other?: any};
 };
 // export type NoteItemMap = {
-//   [key: string]: {id: string, dataLable: NoteItemType[], heading?: string};
+//   [key: string]: [Children as a list];
 // };
 
 export enum ItemType {

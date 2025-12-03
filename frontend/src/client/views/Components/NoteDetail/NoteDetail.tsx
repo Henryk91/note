@@ -189,11 +189,13 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     // console.log('handleLinkClick', tagData);
     // console.log('tagData',tagData);
     // console.log('notes',notes);
-    // console.log('tagData',tagData);
-    const noteId = tagData?.data ? tagData.data.substring(5): tagData.id
+    console.log('tagData',tagData);
+    // const noteId = tagData?.data ? tagData.data.substring(5): tagData.id
+    const noteId = tagData.id
     console.log('persons',persons);
     console.log('noteId',noteId);
     const personNext = persons[noteId]//notes?.find((note) => note.id === noteId) ?? null;
+    // const personNext = persons[noteId] ?? {id: noteId}
 
     // console.log('personNextpersonNextpersonNextpersonNextpersonNext',personNext, persons[noteId]);
     const parentId = currentPerson.id;
@@ -308,7 +310,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
       // console.log('prop',prop);
       if (selectedDate === null) {
         let lastDate = [...allDates].slice(allDates.length - 1);
-        console.log('lastDate',lastDate);
+        // console.log('lastDate',lastDate);
         if (lastDate[0]) {
           newSelectedDate = new Date(lastDate[0].content.date);
           if(newSelectedDate)setDisplayDate(newSelectedDate);
@@ -598,22 +600,27 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     //   }
     // }
     const noteDetailPage = document.getElementById('multiple-pages');
-    console.log('lastPage',lastPage);
-    if (noteDetailPage)
-      setTimeout(() => {
+    console.log(index, 'lastPage',lastPage, initShowtag.params.id);
+    console.log('persons[initShowtag.params.id]',persons[initShowtag.params.id]);
+    if (noteDetailPage && lastPage){
+      // setTimeout(() => {
         const localNoteDetailPage = document.getElementById('multiple-pages');
         // console.log('localNoteDetailPage',localNoteDetailPage);
-        if (!localNoteDetailPage || !lastPage) return;
+        // console.log('localNoteDetailPage',localNoteDetailPage);
+        if (!localNoteDetailPage) return;
+        // if (!localNoteDetailPage || !lastPage) return;
         // const pageWidth = localNoteDetailPage.scrollWidth / pageCount;
         // const start = localNoteDetailPage.scrollWidth - pageWidth - pageWidth;
         // const end = start + pageWidth;
         // customScrollBy(localNoteDetailPage, start, end);
         localNoteDetailPage.scrollTo({
-          left: localNoteDetailPage.scrollWidth,//document.body.scrollWidth,
+          left: localNoteDetailPage.scrollWidth *2,//document.body.scrollWidth,
+          // right: 0,//document.body.scrollWidth,
           behavior: "smooth" // optional
         });
-      }, 30);
-      // }, 2000);
+      // }, 30);
+      // }, 500);
+    }
   }
 
   function cancelAddItemEdit() {

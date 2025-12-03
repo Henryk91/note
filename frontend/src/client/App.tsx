@@ -15,13 +15,14 @@ import {
   saveNewNote,
   updateOneNoteRec,
   getNoteNames,
+  getAllNotesV2,
 } from './views/Helpers/requests';
 
 import { allNotesToItems, compareSort, processGetAllNotes, processGetAllNotesA } from './views/Helpers/utils';
-import { KeyValue, Note } from './views/Helpers/types';
+import { KeyValue, Note, PageDescriptor } from './views/Helpers/types';
 import { RootState } from '../store';
 import { setTheme } from '../store/themeSlice';
-import { setNotes, setNoteNames, setSelectedNoteName, setPerson } from '../store/personSlice';
+import { setNotes, setNoteNames, setSelectedNoteName, setPerson, bulkUpdatePerson } from '../store/personSlice';
 
 const Home = lazy(() => import('./views/Components/Home/Home'));
 const NewNote = lazy(() => import('./views/Components/NewNote/NewNote'));
@@ -44,14 +45,19 @@ type AppProps = {
   theme: string;
   noteNames: string[] | undefined;
   selectedNoteName?: string,
+  lastPage: PageDescriptor,
+  pages: PageDescriptor[],
   setTheme: (theme: string) => void;
   setNotes: (notes: Note[] | null) => void;
   setNoteNames: (notes: string[]) => void;
   setSelectedNoteName: (notes: string) => void;
   setPerson: (notes: KeyValue<Note>) => void;
+  bulkUpdatePerson: (notes: KeyValue<Note>) => void;
 };
 
-const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames, setNoteNames, selectedNoteName, setSelectedNoteName, setPerson}) => {
+const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames, setNoteNames, selectedNoteName, setSelectedNoteName, setPerson, lastPage, pages, bulkUpdatePerson}) => {
+  // console.error('lastPage',lastPage);
+  // console.log('pages',pages);
   const [notesInitialLoad, setNotesInitialLoad] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [freshData, setFreshData] = useState(false);
@@ -127,64 +133,92 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
         if (data && data[0] && data.length > 0) {
           // console.error('before addMainNote selectedNoteName', selectedNoteName);
           const pdata = JSON.parse(data)//addMainNote(JSON.parse(data) as Note[]);
+          console.log('pdata',pdata);
           if (notes !== pdata) {
             if(pdata) {
               let newItems = {}
               pdata.forEach(p => {
                 newItems[p.id] = p
               })
-              setPerson(newItems)
+              console.error('!!!!! newItems["WWPxL9Am8OmZlbZi5IMW::Thinking-fast-and-slow"]',newItems);
+              bulkUpdatePerson(newItems)
               setNotes(pdata);
             }
           }
           setFreshData(false);
         }
+        getAllNotesV2(currentUser, (resp) => {
+          console.error('resp',resp);
+          bulkUpdatePerson(resp)
+          // setPerson(resp)
 
-        getMyNotesRec(currentUser, (resp) => {
-          // if(notes || notesInitialLoad) {
-          //   setFreshData(true);
-          //   return
-          // }
-          let res = resp;
-          // console.log('resprespresp',resp);
-          // const newData = processGetAllNotes(resp);
-          const newData = processGetAllNotesA(resp);
-          console.log('newData',newData);
-          const items = allNotesToItems(newData);
-          // console.error('items',items);
-          setPerson(items)
-          // console.error('items[0]',items[10]);
-          const newRes: Note[] = Object.keys(items).map(key => {
-            return {...items[key], heading: items[key]?.heading ?? "Placeholder"}
+          const res: Note[] = Object.keys(resp).map(key => {
+            return {...resp[key], heading: resp[key]?.heading ?? "Placeholder"}
           })
-          console.log('newRes',newRes[10]);
-          // console.log('items',items);
-          // console.log('items',items);
-          // console.log('newData',newData);
-          // console.error('getMyNotesRec before addMainNote selectedNoteName', selectedNoteName);
-          res = addMainNote(resp);
-          // console.error('res',res);
+
           if (res && res.length > 0) {
             res.sort(compareSort);
             setRedirect();
             setFreshData(true);
           }
-          if(newRes) res = newRes;
+
           const stateNotes = notes;
           const reRender =
             res && stateNotes
               ? JSON.stringify(res) !== JSON.stringify(stateNotes)
               : res && res.length > 0;
           if (reRender && res.length > 0) {
-            // console.log('res',res);
-            // console.log('items',items);
-            // res[10] = {...items["Henry"], createdBy: "Main", heading: 'Main'} as any;
-            // res[10].dataLable = items["Henry"].dataLable as any
-            // res[0].dataLable = items["One New One"].dataLable as any
+
             setNotes(res);
             setRedirect();
           }
-        });
+        })
+        // getMyNotesRec(currentUser, (resp) => {
+        //   return
+        //   // if(notes || notesInitialLoad) {
+        //   //   setFreshData(true);
+        //   //   return
+        //   // }
+        //   let res = resp;
+        //   // console.log('resprespresp',resp);
+        //   // const newData = processGetAllNotes(resp);
+        //   const newData = processGetAllNotesA(resp);
+        //   console.log('newData',newData);
+        //   const items = allNotesToItems(newData);
+        //   console.error('items',items);
+        //   // setPerson(items)
+        //   // console.error('items[0]',items[10]);
+        //   const newRes: Note[] = Object.keys(items).map(key => {
+        //     return {...items[key], heading: items[key]?.heading ?? "Placeholder"}
+        //   })
+        //   console.log('newRes',newRes[10]);
+        //   // console.log('items',items);
+        //   // console.log('items',items);
+        //   // console.log('newData',newData);
+        //   // console.error('getMyNotesRec before addMainNote selectedNoteName', selectedNoteName);
+        //   res = addMainNote(resp);
+        //   // console.error('res',res);
+        //   if (res && res.length > 0) {
+        //     // res.sort(compareSort);
+        //     // setRedirect();
+        //     // setFreshData(true);
+        //   }
+        //   if(newRes) res = newRes;
+        //   const stateNotes = notes;
+        //   const reRender =
+        //     res && stateNotes
+        //       ? JSON.stringify(res) !== JSON.stringify(stateNotes)
+        //       : res && res.length > 0;
+        //   if (reRender && res.length > 0) {
+        //     // console.log('res',res);
+        //     // console.log('items',items);
+        //     // res[10] = {...items["Henry"], createdBy: "Main", heading: 'Main'} as any;
+        //     // res[10].dataLable = items["Henry"].dataLable as any
+        //     // res[0].dataLable = items["One New One"].dataLable as any
+        //     // setNotes(res);
+        //     // setRedirect();
+        //   }
+        // });
       }
     },
     [addMainNote, notes, setRedirect, selectedNoteName],
@@ -374,9 +408,35 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
     }
   }, [freshData, theme]);
 
+  const getLastPageData = () => {
+    console.log('selectedNoteName',selectedNoteName);
+    if(lastPage?.params.id !== selectedNoteName){
+      console.error('!!!lastPage',lastPage?.params.id);
+      getAllNotesV2(lastPage?.params.id, (resp) => {
+        if(resp){
+          console.error('!!!!!XXXXXresp',resp);
+          bulkUpdatePerson(resp)
+
+          const newNotes: Note[] = Object.keys(resp).map(key => {
+            return {...resp[key], heading: resp[key]?.heading ?? "Placeholder"}
+          })
+          if(notes && newNotes) setNotes([...notes, ...newNotes])
+          // setRedirect();
+          //   setFreshData(true);
+        }
+      })
+    }
+  }
+
   useEffect(() => {
     checkLoginState();
+    getLastPageData();
   }, []);
+
+  useEffect(() => {
+    
+    getLastPageData();
+  }, [lastPage?.params?.id]);
 
   const themeBack = `${theme.toLowerCase()}-back`;
 
@@ -455,6 +515,8 @@ const mapStateToProps = (state: RootState) => ({
   notes: state.person.notes,
   noteNames: state.person.noteNames,
   selectedNoteName: state.person.selectedNoteName,
+  lastPage: state.person.pages.slice(-1)[0],
+  pages: state.person.pages,
 });
 
 const mapDispatchToProps = {
@@ -463,6 +525,7 @@ const mapDispatchToProps = {
   setNoteNames,
   setSelectedNoteName,
   setPerson,
+  bulkUpdatePerson,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

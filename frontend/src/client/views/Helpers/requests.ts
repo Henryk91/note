@@ -222,3 +222,23 @@ export function saveNewNote(newNote: any) {
     body: JSON.stringify(newNote),
   }).then((response) => console.log(response));
 }
+
+export function getNotesV2(parentId, next) {
+  apiFetch("/api/note-v2" + (parentId && parentId !== "" ? `?parentId=${parentId}` : ""))
+    .then((res) => res?.json())
+    .then((data) => next(data))
+    .catch((error) => {
+      console.log("Error:", error);
+      next({});
+    });
+}
+
+export function getAllNotesV2(parentId, next) {
+  apiFetch("/api/note-v2/with-children" + (parentId && parentId !== "" ? `?parentId=${parentId}` : ""))
+    .then((res) => res?.json())
+    .then((data) => next(data))
+    .catch((error) => {
+      console.log("Error:", error);
+      next({});
+    });
+}
