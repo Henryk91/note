@@ -1,4 +1,4 @@
-import { Note, NoteLabel } from './types';
+import { ItemType, Note, NoteItem, NoteItemMap, NoteLabel } from './types';
 
 export const docId = (): string => {
   let text = '';
@@ -14,11 +14,12 @@ export const docId = (): string => {
 export const getPersonNoteType = (
   notes: Note[] | null,
   propForId: any,
+  selectedNoteName?: string
 ): Note  | null => {
-
+  // console.log('notes',notes);
   const personFound = notes?.filter((val) => val.id === propForId?.params.id)?.[0];
   let person = personFound? {... personFound}: null
-  if (person?.id === 'main' && person.dataLable) {
+  if (person?.id === selectedNoteName && person?.dataLable) {
     person.dataLable = person.dataLable.filter((note) => !note.tag.startsWith('Sub: '));
   }
   return person;
@@ -86,3 +87,152 @@ export const getLogDuration = (nextItem: string | undefined, parsedItem: NoteLab
   const duration = nextDate ? `(${getTimeDifference(parsedItem.date || '', nextDate)})` : '';
   return duration;
 };
+
+function formatDate(input: string): string {
+  const date = new Date(input);
+
+  if (isNaN(date.getTime())) {
+    throw new Error("Invalid date format");
+  }
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  // Extract the weekday from the original input (first 3 chars)
+  const weekday = input.slice(0, 3);
+
+  return `${year}/${month}/${day} ${weekday}`;
+}
+
+function convertDataLableToType(item, label, userId, newNotes, subSubFolderNames) {
+      let forReturn: {newLogDay?: any, subSubFolder?: NoteItem, newNote?: NoteItem} = {}
+        const subSubFolderId = (item.id + "::" + label.tag).replaceAll(" ", "-");
+        if (!subSubFolderNames.includes(label.tag)) {
+          subSubFolderNames.push(label.tag);
+          const subSubFolder: NoteItem = {
+            userId,
+            id: label.data.startsWith("href:") ? label.data.replace("href:", "") : subSubFolderId,
+            name: label.tag === "" || !label.tag ? "Unnamed" : label.tag,
+            parentId: item.id,
+            type: ItemType.FOLDER,
+            tag: label.tag,
+          };
+          // newFolders.push(subSubFolder);
+          forReturn = {subSubFolder}
+        }
+        let content = { data: label.data, date: item.date };
+        let noteType = ItemType.NOTE;
+  
+        let parentId = subSubFolderId;
+        if (label.data.includes('"json":true')) {
+          noteType = ItemType.LOG;
+          const jsonData = label.data ? JSON.parse(label.data) : { data: "", date: "" };
+          content = { data: jsonData.data, date: jsonData.date };
+          const logDay = jsonData.date ? formatDate(jsonData.date.substring(0, 16).trim()) : "unknown";
+  
+          // const logDayId = (subSubFolderId + "::" + logDay).trim().replaceAll(" ", "-");
+          const logDayId = (subSubFolderId ).trim().replaceAll(" ", "-");
+  
+          const newLogDay = {
+            userId,
+            id: logDayId,
+            name: logDay,
+            parentId: subSubFolderId,
+            type: ItemType.FOLDER,
+            tag: label.tag,
+            data: label.data
+          };
+          // logDays[logDayId] = newLogDay
+          forReturn = {...forReturn, newLogDay}
+          parentId = logDayId;
+
+        }
+        const newNote: NoteItem = {
+          userId,
+          id: parentId + "::" + noteType + "::" + newNotes.length.toString(),
+          content: content,
+          parentId: parentId,
+          type: noteType,
+          tag: label.tag,
+          data: label.data
+        };
+        // logDays
+        if (!label.data.startsWith("href:")) {
+          // newNotes.push(newNote);
+          forReturn = {...forReturn, newNote}
+        }
+      return forReturn
+    }
+
+export function processGetAllNotes(data: any): NoteItem[] {
+  let logDays: any = {};
+  let createdByList: string[] = [];
+  let newFolders: NoteItem[] = [];
+  let newNotes: NoteItem[] = [];
+  const userId = localStorage.getItem("loginKey") ?? "";
+  data?.forEach((item: any) => {
+    // console.log('item',item);
+    if (!createdByList.includes(item.createdBy)) {
+      const mainFolder: NoteItem = {
+        userId,
+        id: item.createdBy,
+        name: item.createdBy,
+        parentId: "",
+        type: ItemType.FOLDER,
+      };
+      newFolders.push(mainFolder);
+      createdByList.push(item.createdBy);
+    }
+
+    if (!item.heading?.startsWith("Sub: ")) {
+      const subFolder: NoteItem = {
+        userId,
+        id: item.id,
+        data: "href:" + item.id,
+        name: item.heading === "" ? "Unnamed" : item.heading,
+        tag: item.heading === "" ? "Unnamed" : item.heading,
+        parentId: item.createdBy,
+        type: ItemType.FOLDER,
+      };
+      newFolders.push(subFolder);
+    }
+
+    let subSubFolderNames: string[] = [];
+    item?.dataLable.forEach((label: any) => {
+      const vals = convertDataLableToType(item, label, userId, newNotes, subSubFolderNames)
+      // console.log('vals',vals);
+      if (vals?.newNote) newNotes.push(vals.newNote)
+      if (vals?.subSubFolder) newFolders.push(vals.subSubFolder);
+      if (vals?.newLogDay) logDays[vals?.newLogDay.id] = vals?.newLogDay
+    });
+  });
+
+  // console.log('logDays',logDays);
+  if (newFolders?.length) {
+    const logDayFolders: NoteItem[] = Object.values(logDays);
+
+    const sortedLogDayFolders = logDayFolders.sort((a, b) => (b?.name ?? "").localeCompare(a?.name ?? ""));
+    const itemsToSet = [...newFolders, ...newNotes, ...sortedLogDayFolders];
+    // console.log('itemsToSet',itemsToSet);
+    return itemsToSet;
+  }
+  return [];
+}
+
+export function allNotesToItems(data: NoteItem[]) {
+  let items: NoteItemMap =  {}
+  // let folderid = ''
+  // console.log('data[0]',data[0]);
+  data.forEach(d => {
+    // if(d.name === 'New New') folderid = d.parentId
+    if(items[d.parentId]) {
+      items[d.parentId].dataLable.push(d)
+    }else {
+      const parent = data.find(e => e.id === d.parentId)
+      items[d.parentId] = {id: d.parentId,  dataLable: [d], heading: parent?.name ?? "Main" }
+    }
+  })
+  // console.log(folderid, 'items[folderid]',items[folderid]);
+  return items
+}

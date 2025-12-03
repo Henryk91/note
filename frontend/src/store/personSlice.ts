@@ -23,16 +23,21 @@ type SetPersonPayload = {
   person?: Note | null;
 };
 
+const createInitPage = (selectedNoteName?: string) => {
+  return { params: { id: selectedNoteName ?? 'main', tempId: selectedNoteName ?? 'main' } }
+}
+
+const initSelectedNoteName = localStorage.getItem('user') || undefined
 const initialState: PersonState = {
   byId: {},
   notes: null,
-  selectedNoteName: localStorage.getItem('user') || undefined,
+  selectedNoteName: initSelectedNoteName,
   showTag: localStorage.getItem('showTag') || null,
   showAddItem: !!localStorage.getItem('new-folder-edit'),
   editName: false,
-  pages: localStorage.getItem('saved-pages')? JSON.parse(localStorage.getItem('saved-pages')+"") :DEFAULT_PAGE,
+  pages: localStorage.getItem('saved-pages')? JSON.parse(localStorage.getItem('saved-pages')+"") :[{ params: { id: initSelectedNoteName ?? '1main', tempId: initSelectedNoteName ?? 'main' } }],
 };
-
+// console.log('initialState',initialState);
 const personSlice = createSlice({
   name: 'person',
   initialState,
@@ -50,23 +55,44 @@ const personSlice = createSlice({
       state.notes = action.payload;
       if(state.selectedNoteName) localStorage.setItem(state.selectedNoteName, JSON.stringify(action.payload));
       if(action.payload) {
-        const personFound = getPersonNoteType(state.notes, DEFAULT_PAGE[0]);
-        if(personFound) state.byId['main'] = personFound;
+        // const personFound = getPersonNoteType(state.notes, DEFAULT_PAGE[0]);
+        const initPage = createInitPage(state.selectedNoteName)
+        // console.log('initPage',initPage);
+        const personFound = getPersonNoteType(state.notes, initPage, state.selectedNoteName);
+        // console.log('state.selectedNoteName',state.selectedNoteName);
+        // console.log('personFound',personFound);
+        if(personFound) state.byId[state.selectedNoteName ?? 'main'] = personFound;
       }
     },
     setNoteNames(state, action: PayloadAction<string[]>) {
       state.noteNames = action.payload;
     },
     setSelectedNoteName(state, action: PayloadAction<string>) {
+      // console.error('setSelectedNoteName', action.payload);
       state.selectedNoteName = action.payload;
       localStorage.setItem('user', action.payload);
       const localNoteData = localStorage.getItem(action.payload);
+      state.pages = [createInitPage(state.selectedNoteName)]
+      localStorage.setItem('saved-pages', JSON.stringify(state.pages));
       if(localNoteData) {
         state.notes = JSON.parse(localNoteData);
-        const personFound = getPersonNoteType(state.notes, DEFAULT_PAGE[0]);
-        if(personFound) state.byId['main'] = personFound;
+        // const personFound = getPersonNoteType(state.notes, DEFAULT_PAGE[0]);
+        // console.log('state.pages[0]',state.pages[0]);
+        const personFound = getPersonNoteType(state.notes, state.pages[0], state.selectedNoteName);
+        // console.error('personFound',personFound);
+        if(personFound) state.byId[state.selectedNoteName ?? 'main'] = personFound;
+        
       } else {
-        state.byId = {}
+        // console.error('Here', state.pages[0], state.selectedNoteName);
+        // console.log('state.notes',state.notes);
+        const personFound = getPersonNoteType(state.notes, state.pages[0], state.selectedNoteName);
+        // console.error('personFound',personFound);
+        if(personFound) {
+          state.byId[state.selectedNoteName ?? 'main'] = personFound;
+        } else {
+          state.byId = {}
+        }
+        
       }
     },
     setShowTag(state, action: PayloadAction<string | null>) {
@@ -101,8 +127,9 @@ const personSlice = createSlice({
       localStorage.setItem('saved-pages', JSON.stringify(state.pages));
     },
     resetPages(state) {
-      state.pages = DEFAULT_PAGE;
-      localStorage.setItem('saved-pages', JSON.stringify(DEFAULT_PAGE));
+      // console.error('resetPages');
+      state.pages = [createInitPage(state.selectedNoteName)];
+      localStorage.setItem('saved-pages', JSON.stringify([createInitPage(state.selectedNoteName)]));
     },
   },
 });

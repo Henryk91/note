@@ -183,6 +183,7 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
   const pagesCont = (notes && noteNames)? localPages.map((pageLink, index) => {
     const lastPageShowAddItem = showAddItem && index === lastPageIndex;
     const lastPage = index === lastPageIndex;
+    // console.log(index, 'pageLink',pageLink);
     return (
       <NoteDetailPageItem
         match={match}

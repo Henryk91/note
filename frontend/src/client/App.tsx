@@ -17,7 +17,7 @@ import {
   getNoteNames,
 } from './views/Helpers/requests';
 
-import { compareSort } from './views/Helpers/utils';
+import { allNotesToItems, compareSort, processGetAllNotes } from './views/Helpers/utils';
 import { Note } from './views/Helpers/types';
 import { RootState } from '../store';
 import { setTheme } from '../store/themeSlice';
@@ -60,6 +60,7 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
     if (currentNotes && currentNotes.length) {
       const subs: Note[] = [];
       currentNotes.forEach((note) => {
+        // console.log('note.heading',note.heading);
         if (note.heading.startsWith('Sub: ')) {
           subs.push(note);
           return false;
@@ -83,9 +84,11 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
           currentNotes.push(subItems);
         }
       }
-
-      if (currentNotes[currentNotes.length - 1].id !== 'main') {
-        const mainFound = currentNotes.find((note) => note.id === 'main');
+      // console.log('selectedNoteName',selectedNoteName);
+      if (currentNotes[currentNotes.length - 1].id !== selectedNoteName) {
+        // console.log('currentNotes',currentNotes);
+        const user = localStorage.getItem('user');
+        const mainFound = currentNotes.find((note) => note.id === selectedNoteName);
         if (!mainFound) {
           const mainPage = {
             createdBy: 'Main',
@@ -94,7 +97,7 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
               data: `href:${note.id}`,
             })),
             heading: 'Main',
-            id: 'main',
+            id: user?? selectedNoteName ?? 'main',
           };
           currentNotes.push(mainPage);
         }
@@ -104,7 +107,7 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
     }
 
     return [];
-  }, []);
+  }, [selectedNoteName]);
 
   const setRedirect = useCallback(() => {
     const path = window.location.pathname;
@@ -121,28 +124,47 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
       if (currentUser && currentUser !== '') {
         const data = localStorage.getItem(currentUser);
         if (data && data[0] && data.length > 0) {
+          // console.error('before addMainNote selectedNoteName', selectedNoteName);
           const pdata = addMainNote(JSON.parse(data) as Note[]);
           if (notes !== pdata) {
-            setNotes(pdata);
+            if(pdata) setNotes(pdata);
           }
           setFreshData(false);
         }
 
         getMyNotesRec(currentUser, (resp) => {
           let res = resp;
+          const newData = processGetAllNotes(resp);
+          console.log('newData',newData);
+          const items = allNotesToItems(newData);
+          console.error('items',items);
+          const newRes: Note[] = Object.keys(items).map(key => {
+            return {...items[key], heading: items[key]?.heading ?? "Placeholder"}
+          })
+          console.log('newRes',newRes);
+          // console.log('items',items);
+          // console.log('items',items);
+          // console.log('newData',newData);
+          // console.error('getMyNotesRec before addMainNote selectedNoteName', selectedNoteName);
           res = addMainNote(resp);
+          console.error('res',res);
           if (res && res.length > 0) {
             res.sort(compareSort);
             setRedirect();
             setFreshData(true);
           }
-
+          if(newRes) res = newRes;
           const stateNotes = notes;
           const reRender =
             res && stateNotes
               ? JSON.stringify(res) !== JSON.stringify(stateNotes)
               : res && res.length > 0;
           if (reRender && res.length > 0) {
+            console.log('res',res);
+            console.log('items',items);
+            // res[10] = {...items["Henry"], createdBy: "Main", heading: 'Main'} as any;
+            // res[10].dataLable = items["Henry"].dataLable as any
+            // res[0].dataLable = items["One New One"].dataLable as any
             setNotes(res);
             setRedirect();
           }
@@ -239,7 +261,7 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
 
       if (searchTerm === '' || searchTerm === null) {
         saveNewNote(usedNewNote.note);
-        setNotes(updatedNote);
+        if(updatedNote)setNotes(updatedNote);
       } else {
         alert('Cant update in search');
       }
@@ -252,7 +274,7 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
       if (msg.noteName) {
         const { noteName } = msg;
         setSelectedNoteName(noteName);
-        setNotes(null);
+        // setNotes(null);
         getMyNotes(noteName);
       } else {
         updateNote(msg);
