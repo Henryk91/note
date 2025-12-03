@@ -21,7 +21,7 @@ export type NoteDetailListItemProps = {
   linkBorder: string;
   prop: string;
   isLink: boolean;
-  bunch: any[];
+  contentCount: number;
   showDateSelector: boolean;
   continueData: any;
   onShowHide: () => void;
@@ -116,7 +116,7 @@ export const NoteDetailListItem: React.FC<NoteDetailListItemProps> = ({
   linkBorder,
   prop,
   isLink,
-  bunch,
+  contentCount,
   showDateSelector,
   continueData,
   onShowHide,
@@ -139,7 +139,7 @@ export const NoteDetailListItem: React.FC<NoteDetailListItemProps> = ({
     <>
       <div className={`detailTitleBox dark-hover ${linkBorder}`} onClick={onShowHide}>
         <div id={`${dateCounterId}`} className={`listCountBox white-color ${themeBorder}`} onClick={onShowLogDays}>
-          <span className="list-count-item"> {isLink ? <FontAwesomeIcon icon={faFolder} /> : bunch.length} </span>
+          <span className="list-count-item"> {isLink && !contentCount ? <FontAwesomeIcon icon={faFolder} /> : contentCount} </span>
         </div>
         <h3 className={`${className} white-color`}>{prop} </h3>
         {showDateSelector && (

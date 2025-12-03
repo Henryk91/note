@@ -1,4 +1,4 @@
-import { ItemType, Note, NoteItem, NoteItemMap, NoteLabel } from './types';
+import { ItemType, Note, NoteItemType, NoteItemMap, NoteLabel } from './types';
 
 export const docId = (): string => {
   let text = '';
@@ -106,14 +106,15 @@ function formatDate(input: string): string {
 }
 
 function convertDataLableToType(item, label, userId, newNotes, subSubFolderNames) {
-      let forReturn: {newLogDay?: any, subSubFolder?: NoteItem, newNote?: NoteItem} = {}
+      let forReturn: {newLogDay?: any, subSubFolder?: NoteItemType, newNote?: NoteItemType} = {}
         const subSubFolderId = (item.id + "::" + label.tag).replaceAll(" ", "-");
         if (!subSubFolderNames.includes(label.tag)) {
           subSubFolderNames.push(label.tag);
-          const subSubFolder: NoteItem = {
+          const subSubFolder: NoteItemType = {
             userId,
             id: label.data.startsWith("href:") ? label.data.replace("href:", "") : subSubFolderId,
-            name: label.tag === "" || !label.tag ? "Unnamed" : label.tag,
+            // name: label.tag === "" || !label.tag ? "1Unnamed" : label.tag,
+            name:  label?.tag+"",//+"-test",
             parentId: item.id,
             type: ItemType.FOLDER,
             tag: label.tag,
@@ -148,7 +149,7 @@ function convertDataLableToType(item, label, userId, newNotes, subSubFolderNames
           parentId = logDayId;
 
         }
-        const newNote: NoteItem = {
+        const newNote: NoteItemType = {
           userId,
           id: parentId + "::" + noteType + "::" + newNotes.length.toString(),
           content: content,
@@ -165,16 +166,16 @@ function convertDataLableToType(item, label, userId, newNotes, subSubFolderNames
       return forReturn
     }
 
-export function processGetAllNotes(data: any): NoteItem[] {
+export function processGetAllNotes(data: any): NoteItemType[] {
   let logDays: any = {};
   let createdByList: string[] = [];
-  let newFolders: NoteItem[] = [];
-  let newNotes: NoteItem[] = [];
+  let newFolders: NoteItemType[] = [];
+  let newNotes: NoteItemType[] = [];
   const userId = localStorage.getItem("loginKey") ?? "";
   data?.forEach((item: any) => {
     // console.log('item',item);
     if (!createdByList.includes(item.createdBy)) {
-      const mainFolder: NoteItem = {
+      const mainFolder: NoteItemType = {
         userId,
         id: item.createdBy,
         name: item.createdBy,
@@ -186,11 +187,11 @@ export function processGetAllNotes(data: any): NoteItem[] {
     }
 
     if (!item.heading?.startsWith("Sub: ")) {
-      const subFolder: NoteItem = {
+      const subFolder: NoteItemType = {
         userId,
         id: item.id,
         data: "href:" + item.id,
-        name: item.heading === "" ? "Unnamed" : item.heading,
+        name: item.heading === "" ? "Unnamed" : item.heading +"",
         tag: item.heading === "" ? "Unnamed" : item.heading,
         parentId: item.createdBy,
         type: ItemType.FOLDER,
@@ -210,7 +211,7 @@ export function processGetAllNotes(data: any): NoteItem[] {
 
   // console.log('logDays',logDays);
   if (newFolders?.length) {
-    const logDayFolders: NoteItem[] = Object.values(logDays);
+    const logDayFolders: NoteItemType[] = Object.values(logDays);
 
     const sortedLogDayFolders = logDayFolders.sort((a, b) => (b?.name ?? "").localeCompare(a?.name ?? ""));
     const itemsToSet = [...newFolders, ...newNotes, ...sortedLogDayFolders];
@@ -220,7 +221,7 @@ export function processGetAllNotes(data: any): NoteItem[] {
   return [];
 }
 
-export function allNotesToItems(data: NoteItem[]) {
+export function allNotesToItems(data: NoteItemType[]) {
   let items: NoteItemMap =  {}
   // let folderid = ''
   // console.log('data[0]',data[0]);
@@ -231,6 +232,9 @@ export function allNotesToItems(data: NoteItem[]) {
     }else {
       const parent = data.find(e => e.id === d.parentId)
       items[d.parentId] = {id: d.parentId,  dataLable: [d], heading: parent?.name ?? "Main" }
+      // const heading = typeof parent?.name === 'string' ? parent?.name: "Main"
+      // console.log('parent',parent);
+      // items[d.parentId] = {id: d.parentId,  dataLable: [d], heading: heading }
     }
   })
   // console.log(folderid, 'items[folderid]',items[folderid]);

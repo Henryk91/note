@@ -3,7 +3,7 @@
 export type Note = {
   id: string;
   heading: string;
-  dataLable: NoteLabel[] | NoteItem[];
+  dataLable: NoteLabel[] | NoteItemType[];
   createdBy?: string;
   userId?: string;
 };
@@ -19,10 +19,10 @@ export type PageDescriptor = { params: { id: string, tempId: string } };
 
 
 export type NoteItemMap = {
-  [key: string]: {id: string, dataLable: NoteLabel[] | NoteItem[], heading?: string, other?: any};
+  [key: string]: {id: string, dataLable: NoteLabel[] | NoteItemType[], heading?: string, other?: any};
 };
 // export type NoteItemMap = {
-//   [key: string]: {id: string, dataLable: NoteItem[], heading?: string};
+//   [key: string]: {id: string, dataLable: NoteItemType[], heading?: string};
 // };
 
 export enum ItemType {
@@ -36,7 +36,7 @@ export type NoteContent = {
   data: string;
 };
 
-export type NoteItem = {
+export type NoteItemType = {
   userId?: string;
   id: string;
   type: ItemType;

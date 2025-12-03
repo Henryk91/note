@@ -21,7 +21,7 @@ import { allNotesToItems, compareSort, processGetAllNotes } from './views/Helper
 import { Note } from './views/Helpers/types';
 import { RootState } from '../store';
 import { setTheme } from '../store/themeSlice';
-import { setNotes, setNoteNames, setSelectedNoteName } from '../store/personSlice';
+import { setNotes, setNoteNames, setSelectedNoteName, setPerson } from '../store/personSlice';
 
 const Home = lazy(() => import('./views/Components/Home/Home'));
 const NewNote = lazy(() => import('./views/Components/NewNote/NewNote'));
@@ -50,7 +50,7 @@ type AppProps = {
   setSelectedNoteName: (notes: string) => void;
 };
 
-const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames, setNoteNames, selectedNoteName, setSelectedNoteName}) => {
+const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames, setNoteNames, selectedNoteName, setSelectedNoteName, setPerson}) => {
   const [notesInitialLoad, setNotesInitialLoad] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [freshData, setFreshData] = useState(false);
@@ -134,10 +134,12 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
 
         getMyNotesRec(currentUser, (resp) => {
           let res = resp;
+          // console.log('resprespresp',resp);
           const newData = processGetAllNotes(resp);
-          console.log('newData',newData);
+          // console.log('newData',newData);
           const items = allNotesToItems(newData);
-          console.error('items',items);
+          // console.error('items',items);
+          setPerson(items)
           const newRes: Note[] = Object.keys(items).map(key => {
             return {...items[key], heading: items[key]?.heading ?? "Placeholder"}
           })
@@ -147,7 +149,7 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
           // console.log('newData',newData);
           // console.error('getMyNotesRec before addMainNote selectedNoteName', selectedNoteName);
           res = addMainNote(resp);
-          console.error('res',res);
+          // console.error('res',res);
           if (res && res.length > 0) {
             res.sort(compareSort);
             setRedirect();
@@ -160,8 +162,8 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
               ? JSON.stringify(res) !== JSON.stringify(stateNotes)
               : res && res.length > 0;
           if (reRender && res.length > 0) {
-            console.log('res',res);
-            console.log('items',items);
+            // console.log('res',res);
+            // console.log('items',items);
             // res[10] = {...items["Henry"], createdBy: "Main", heading: 'Main'} as any;
             // res[10].dataLable = items["Henry"].dataLable as any
             // res[0].dataLable = items["One New One"].dataLable as any
@@ -445,7 +447,8 @@ const mapDispatchToProps = {
   setTheme,
   setNotes,
   setNoteNames,
-  setSelectedNoteName
+  setSelectedNoteName,
+  setPerson,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

@@ -42,10 +42,15 @@ const personSlice = createSlice({
   name: 'person',
   initialState,
   reducers: {
+    setPerson(state, action: PayloadAction<KeyValue<Note>>) {
+      const p = action.payload;
+      if (!p) return;
+      state.byId = p;
+    },
     setPersonById(state, action: PayloadAction<SetPersonPayload>) {
       const { id, person } = action.payload;
       if (!person) return;
-      state.byId[id] = person;
+      // state.byId[id] = person;
     },
     removePersonById(state, action: PayloadAction<{ id: string }>) {
       const { id } = action.payload;
@@ -135,6 +140,7 @@ const personSlice = createSlice({
 });
 
 export const {
+  setPerson,
   setPersonById,
   removePersonById,
   setNotes,

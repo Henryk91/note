@@ -342,7 +342,7 @@ const NoteItem: React.FC<NoteItemProps> = ({
       setEditingItem(false);
     }
   }, [show, editingItem]);
-
+  // console.log('item',item);
   const itemIsString = item && typeof item === 'string';
   const isLog = itemIsString ? item.includes('"json":true') : false;
   const editing = editingItem && show;
@@ -351,6 +351,8 @@ const NoteItem: React.FC<NoteItemProps> = ({
 
   if (!item) return <></>;
 
+  
+  // console.log('noEditingNoLog && itemIsString',noEditingNoLog && itemIsString);
   return (  
     <div>
         <div className="noteTagBox">

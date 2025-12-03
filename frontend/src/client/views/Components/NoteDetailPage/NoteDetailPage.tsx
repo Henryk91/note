@@ -67,6 +67,7 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
   );
 
   const scrollPageBack = useCallback(() => {
+    // console.log('scrollPageBack', pages);
     if (pages && pages.length > 1) {
       setTimeout(() => {
         dispatch(removePersonById({id: `${pages.length -1}`}))
@@ -91,12 +92,14 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
 
   const openPage = useCallback(
     (msg: any) => {
+      console.log('msgmsgmsgmsgmsg', msg);
       if (!msg.personNext) return;
+      // cll
       const tempId = `${msg.personNext.id}-${msg.personNext.heading}`
       dispatch(setPersonById({ id: tempId, person: {...msg?.personNext} }));
 
       const nextPage = { params: { id: msg.personNext.id, tempId: tempId } };
-
+      // console.log('nextPage',nextPage);
       const localPages = localStorage.getItem('saved-pages');
 
       let updatePages = pages;
@@ -108,18 +111,23 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
       } else if (parentPageIndex > 0 && pageFoundIndex > -1) {
         updatePages = updatePages.slice(0, pageFoundIndex + 1);
       }
+      // console.log('pageFoundIndex',pageFoundIndex);
       if (pageFoundIndex === -1) {
         // New Page not in pages
         const newPages =
           updatePages.length === 1 && updatePages[0].params.id === '' ? [nextPage] : [...updatePages, nextPage];
+        // console.log('newPages',newPages);
         dispatch(setPages(newPages));
       } else if (pageFoundIndex > -1 && !msg.showNote) {
+        // console.log('pageFoundIndex > -1 && !msg.showNote',pageFoundIndex > -1 && !msg.showNote);
         // New Page in pages but not open note
         const localPageFoundIndex = pageFoundIndex === 0 ? 1 : pageFoundIndex;
         const newPages = updatePages.slice(0, localPageFoundIndex);
         if (pageFoundIndex + 1 === updatePages.length) {
+          // console.log('scrollPageBackscrollPageBackscrollPageBack');
           scrollPageBack();
         } else {
+          // console.log('scrollPagesBackAndSetscrollPagesBackAndSetscrollPagesBackAndSet');
           scrollPagesBackAndSet(updatePages.length, updatePages.length - pageFoundIndex, newPages);
         }
       } else if (pageFoundIndex > -1) {
@@ -135,9 +143,11 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
 
             if (secondTolast && last && last.params.id !== secondTolast.params.id) {
               const updated = [...freshStatePages, last];
+              // console.log('updatedupdatedupdated');
               dispatch(setPages(updated));
             }
             if (secondTolast && last && last.params.id === secondTolast.params.id) {
+              // console.log('freshStatePagesfreshStatePagesfreshStatePages',);
               dispatch(setPages(freshStatePages))
             }
           }
@@ -151,6 +161,7 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
           const secondTolast = locals[locals.length - 2];
 
           if (secondTolast && last && last.params.id === secondTolast.params.id) {
+            // console.log('localslocalslocals');
             dispatch(setPages(locals));
           }
         }
@@ -180,6 +191,7 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
   }
 
   const lastPageIndex = localPages.length - 1;
+  // console.error('localPages', localPages);
   const pagesCont = (notes && noteNames)? localPages.map((pageLink, index) => {
     const lastPageShowAddItem = showAddItem && index === lastPageIndex;
     const lastPage = index === lastPageIndex;
