@@ -223,7 +223,7 @@ export function saveNewNote(newNote: any) {
   }).then((response) => console.log(response));
 }
 
-export function getNotesV2(parentId, next) {
+export function getNotesV2ByParentId(parentId, next) {
   apiFetch("/api/note-v2" + (parentId && parentId !== "" ? `?parentId=${parentId}` : ""))
     .then((res) => res?.json())
     .then((data) => next(data))
@@ -233,7 +233,7 @@ export function getNotesV2(parentId, next) {
     });
 }
 
-export function getAllNotesV2(parentId, next) {
+export function getNotesV2WithChildrenByParentId(parentId, next) {
   apiFetch("/api/note-v2/with-children" + (parentId && parentId !== "" ? `?parentId=${parentId}` : ""))
     .then((res) => res?.json())
     .then((data) => next(data))

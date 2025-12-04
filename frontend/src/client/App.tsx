@@ -15,8 +15,8 @@ import {
   saveNewNote,
   updateOneNoteRec,
   getNoteNames,
-  getAllNotesV2,
-  getNotesV2,
+  getNotesV2WithChildrenByParentId,
+  getNotesV2ByParentId,
 } from './views/Helpers/requests';
 
 import { allNotesToItems, compareSort, processGetAllNotes, processGetAllNotesA } from './views/Helpers/utils';
@@ -155,12 +155,12 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
           // }
           // setFreshData(false);
         // }
-        // getNotesV2(undefined, resp => {
+        // getNotesV2ByParentId(undefined, resp => {
         //   console.log('resp',resp);
         //   const names = resp?.map(item => item.name);
         //   console.log('names',names);
         // })
-        getAllNotesV2(currentUser, (resp) => {
+        getNotesV2WithChildrenByParentId(currentUser, (resp) => {
           // console.error('resp',resp);
           bulkUpdatePerson(resp)
           // setPerson(resp)
@@ -279,7 +279,7 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
       //   }
       // }
       if (loginKey && !notesInitialLoad && !noteNames) {
-        getNotesV2(undefined, resp => {
+        getNotesV2ByParentId(undefined, resp => {
           const names: string[] = resp?.map(item => item.name) 
           if(names.length){
             setNoteNames([...names, 'All', 'None']);
@@ -446,7 +446,7 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
     // console.log('selectedNoteName',selectedNoteName);
     if(lastPage?.params.id && lastPage?.params.id !== selectedNoteName && selectedNoteName){
       // console.error('!!!lastPage',lastPage?.params.id);
-      getAllNotesV2(lastPage?.params.id, (resp) => {
+      getNotesV2WithChildrenByParentId(lastPage?.params.id, (resp) => {
         if(resp){
           console.log('getLastPageData', resp);
           // console.error('!!!!!XXXXXresp',resp);
