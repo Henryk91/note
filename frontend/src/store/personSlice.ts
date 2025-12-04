@@ -18,7 +18,7 @@ type SetPersonPayload = {
   person?: Note | null;
 };
 
-const initSelectedNoteName = localStorage.getItem('user') || undefined
+const initSelectedNoteName = localStorage.getItem('user') || undefined;
 
 const initialState: PersonState = {
   byId: getStorageJsonData(`${initSelectedNoteName}-data`, {}),
@@ -27,10 +27,10 @@ const initialState: PersonState = {
   showTag: localStorage.getItem('showTag') || null,
   showAddItem: !!localStorage.getItem('new-folder-edit'),
   editName: false,
-  pages: getStorageJsonData('saved-pages', [createInitPage(initSelectedNoteName)]), 
+  pages: getStorageJsonData('saved-pages', [createInitPage(initSelectedNoteName)]),
   noteNames: getStorageJsonData('notenames'),
 };
-// console.log('initialState',initialState);
+
 const personSlice = createSlice({
   name: 'person',
   initialState,
@@ -38,25 +38,22 @@ const personSlice = createSlice({
     bulkUpdatePerson(state, action: PayloadAction<KeyValue<Note>>) {
       const p = action.payload;
       if (!p) return;
-      const freshState = {...state.byId}
+      const freshState = { ...state.byId };
       const keys = Object.keys(p);
-      keys.forEach(key => {
+      keys.forEach((key) => {
         freshState[key] = p[key];
-      })
-      // console.error('p', p);
+      });
+
       state.byId = freshState;
 
-      if(state.selectedNoteName && freshState){
-        // console.log('state.selectedNoteName',state.selectedNoteName);
-        // console.log('freshState',freshState);
+      if (state.selectedNoteName && freshState) {
         const storageKey = `${state.selectedNoteName}-data`;
-        localStorage.setItem(storageKey, JSON.stringify(freshState))
+        localStorage.setItem(storageKey, JSON.stringify(freshState));
       }
     },
     setPerson(state, action: PayloadAction<KeyValue<Note>>) {
       const p = action.payload;
       if (!p) return;
-      // console.error('p', p);
       state.byId = p;
     },
     setPersonById(state, action: PayloadAction<SetPersonPayload>) {
@@ -66,63 +63,24 @@ const personSlice = createSlice({
     },
     removePersonById(state, action: PayloadAction<{ id: string }>) {
       const { id } = action.payload;
-      // console.error('delete id', id);
       delete state.byId[id];
     },
     setNotes(state, action: PayloadAction<Note[] | null>) {
-      const wasKeys = Object.keys(state.byId)
-
       state.notes = action.payload;
-      if(state.selectedNoteName) localStorage.setItem(state.selectedNoteName, JSON.stringify(action.payload));
-      if(action.payload) {
-        // const personFound = getPersonNoteType(state.notes, DEFAULT_PAGE[0]);
-        const initPage = createInitPage(state.selectedNoteName)
-        // console.log('initPage',initPage);
-        // const personFound = getPersonNoteType(state.notes, initPage, state.selectedNoteName);
-        // console.log('state.selectedNoteName',state.selectedNoteName);
-        // console.log('personFound',personFound);
-        // if(personFound) {
-        //   // state.byId[state.selectedNoteName ?? 'main'] = personFound;
-        //   const keys = Object.keys(state.byId)
-        //   // console.error(wasKeys.length, 'personFound', keys.length, state.selectedNoteName ?? 'main', personFound);
-        // }
-      }
+      if (state.selectedNoteName) localStorage.setItem(state.selectedNoteName, JSON.stringify(action.payload));
     },
     setNoteNames(state, action: PayloadAction<string[]>) {
       state.noteNames = action.payload;
       localStorage.setItem('notenames', JSON.stringify(action.payload));
     },
     setSelectedNoteName(state, action: PayloadAction<string>) {
-      // console.error('setSelectedNoteName', action.payload);
       state.selectedNoteName = action.payload;
       localStorage.setItem('user', action.payload);
       const localNoteData = localStorage.getItem(action.payload);
-      state.pages = [createInitPage(state.selectedNoteName)]
+      state.pages = [createInitPage(state.selectedNoteName)];
       localStorage.setItem('saved-pages', JSON.stringify(state.pages));
-      if(localNoteData) {
+      if (localNoteData) {
         state.notes = JSON.parse(localNoteData);
-        // const personFound = getPersonNoteType(state.notes, DEFAULT_PAGE[0]);
-        // console.log('state.pages[0]',state.pages[0]);
-        // const personFound = getPersonNoteType(state.notes, state.pages[0], state.selectedNoteName);
-        // console.error('personFound',personFound);
-        // if(personFound) {
-        //   // state.byId[state.selectedNoteName ?? 'main'] = personFound;
-        //   // console.error( 'state.selectedNoteName', personFound);
-        // }
-        
-      } else {
-        // console.error('Here', state.pages[0], state.selectedNoteName);
-        // console.log('state.notes',state.notes);
-        // const personFound = getPersonNoteType(state.notes, state.pages[0], state.selectedNoteName);
-        // console.error('personFound',personFound);
-        // if(personFound) {
-        //   // state.byId[state.selectedNoteName ?? 'main'] = personFound;
-        //   // console.error('state.selectedNoteName', personFound);
-        // } else {
-        //   // console.error('Deleteing state.byId');
-        //   // state.byId = {}
-        // }
-        
       }
     },
     setShowTag(state, action: PayloadAction<string | null>) {
@@ -135,13 +93,13 @@ const personSlice = createSlice({
     },
     setShowAddItem(state, action: PayloadAction<boolean>) {
       state.showAddItem = action.payload;
-      if(!action.payload) localStorage.removeItem('new-folder-edit');
+      if (!action.payload) localStorage.removeItem('new-folder-edit');
     },
     setEditName(state, action: PayloadAction<boolean>) {
       state.editName = action.payload;
     },
     setPages(state, action: PayloadAction<PageDescriptor[]>) {
-      state.pages = action.payload
+      state.pages = action.payload;
       localStorage.setItem('saved-pages', JSON.stringify(state.pages));
     },
     addPage(state, action: PayloadAction<PageDescriptor>) {
@@ -157,8 +115,7 @@ const personSlice = createSlice({
       localStorage.setItem('saved-pages', JSON.stringify(state.pages));
     },
     resetPages(state) {
-      // console.error('resetPages');
-      const initialPages = [createInitPage(state.selectedNoteName)]
+      const initialPages = [createInitPage(state.selectedNoteName)];
       state.pages = initialPages;
       localStorage.setItem('saved-pages', JSON.stringify(initialPages));
     },

@@ -60,7 +60,6 @@ const AutoCompleteTextArea: React.FC<AutoCompleteTextAreaProps> = ({
       const text = await navigator.clipboard.readText();
       const element = document.getElementById(elementId) as HTMLInputElement;
       setTimeout(() => {
-        // const value = element.value.length < 17? element.value + text: text;
         const localValue = element.value + text;
         setValue(localValue);
         setIsBig(localValue.length > 17);

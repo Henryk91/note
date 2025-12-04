@@ -4,7 +4,7 @@ import { faPen, faCheck, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { faTrashAlt } from '@fortawesome/free-regular-svg-icons';
 import { marked } from 'marked';
 import { getLogDuration } from '../../Helpers/utils';
-import { NoteItemType, NoteLabel } from '../../Helpers/types';
+import { NoteItemType, NoteContent } from '../../Helpers/types';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
 
@@ -13,7 +13,7 @@ marked.setOptions({
 });
 
 type NoteItemProps = {
-  item: NoteLabel | string | null;
+  item: NoteContent | string | null;
   date: string;
   show: boolean;
   prevItem?: string;
@@ -49,7 +49,7 @@ type DisplayItemBoxProps = {
 };
 
 type DisplayLogItemBoxProps = {
-  item: NoteLabel;
+  item: NoteContent;
   show: boolean;
   date: string;
   prevItem: NoteItemType;
@@ -97,19 +97,10 @@ const EditItemBox: React.FC<EditItemBoxProps> = ({
             type="datetime-local"
             name="dateSelector"
           />
-          <textarea
-            id="text-date"
-            className={`editDateArea ${themeBack}`}
-            name="itemDate"
-            defaultValue={editDate}
-          />
+          <textarea id="text-date" className={`editDateArea ${themeBack}`} name="itemDate" defaultValue={editDate} />
         </>
       )}
-      <textarea
-        className={`editTextarea ${themeBack}`}
-        name="item"
-        defaultValue={editText}
-      />
+      <textarea className={`editTextarea ${themeBack}`} name="item" defaultValue={editText} />
       <br />
       <button className={`submit-button ${themeBack} ${themeHover}`} type="submit">
         {' '}
@@ -128,13 +119,7 @@ const EditItemBox: React.FC<EditItemBoxProps> = ({
   );
 };
 
-const DisplayItemBox: React.FC<DisplayItemBoxProps> = ({
-  item,
-  showEdit,
-  count,
-  show,
-  onEdit,
-}) => {
+const DisplayItemBox: React.FC<DisplayItemBoxProps> = ({ item, showEdit, count, show, onEdit }) => {
   const theme = useSelector((state: RootState) => state.theme.themeLower);
   const themeBorder = `${theme}-border-thick`;
   const noteItemClass = count > 0 ? 'noteItemHasCount' : 'noteItem';
@@ -150,10 +135,7 @@ const DisplayItemBox: React.FC<DisplayItemBoxProps> = ({
                 <span className="list-count-item">{count}</span>{' '}
               </div>
             )}
-            <div
-              className={`${noteItemClass} white-color`}
-              dangerouslySetInnerHTML={getMarkdownText(item)}
-            />
+            <div className={`${noteItemClass} white-color`} dangerouslySetInnerHTML={getMarkdownText(item)} />
           </div>
           <hr />
         </>
@@ -172,9 +154,8 @@ const DisplayLogItemBox: React.FC<DisplayLogItemBoxProps> = ({
   onEdit,
 }) => {
   const theme = useSelector((state: RootState) => state.theme.themeLower);
-  const parsedItem = item// JSON.parse(item);
   let showItem = show;
-  const newDate = parsedItem?.date?.substring(0, parsedItem?.date.indexOf('GMT')).trim();
+  const newDate = item?.date?.substring(0, item?.date.indexOf('GMT')).trim();
   let selectedDate = date;
 
   if (selectedDate) {
@@ -189,13 +170,11 @@ const DisplayLogItemBox: React.FC<DisplayLogItemBoxProps> = ({
   const themeBack = `${theme}-back`;
   const themeBackHover = `${theme}-hover`;
 
-  const hasBreak = ['Break', 'Pause', 'Lunch'].includes(parsedItem.data)
-    ? 'logNoteItem'
-    : null;
+  const hasBreak = ['Break', 'Pause', 'Lunch'].includes(item.data) ? 'logNoteItem' : null;
 
-  const prevData = (prevItem !== null && prevItem !== undefined)? prevItem?.content?.data: null;
-  // console.log('nextItem',nextItem);
-  const duration = showItem ? getLogDuration(nextItem, parsedItem) : '';
+  const prevData = prevItem !== null && prevItem !== undefined ? prevItem?.content?.data : null;
+
+  const duration = showItem ? getLogDuration(nextItem, item) : '';
 
   return (
     <div className="noteItemBox">
@@ -206,10 +185,7 @@ const DisplayLogItemBox: React.FC<DisplayLogItemBoxProps> = ({
               <span className="noteItem white-color log-noteItem">
                 {newDate} {duration}
               </span>
-              <button
-                className={`editButtons ${themeBack} ${themeBackHover}`}
-                onClick={onEdit}
-              >
+              <button className={`editButtons ${themeBack} ${themeBackHover}`} onClick={onEdit}>
                 <FontAwesomeIcon icon={faPen} />
               </button>
               {hasBreak && prevData && (
@@ -223,7 +199,7 @@ const DisplayLogItemBox: React.FC<DisplayLogItemBoxProps> = ({
             </span>
             <div
               className={`noteItem ${hasBreak} dangerous-text`}
-              dangerouslySetInnerHTML={getMarkdownText(parsedItem.data)}
+              dangerouslySetInnerHTML={getMarkdownText(item.data)}
             />
           </div>
           <hr />
@@ -275,7 +251,7 @@ const NoteItem: React.FC<NoteItemProps> = ({
   };
 
   const setEditState = () => {
-      setEditingItem(true);
+    setEditingItem(true);
     setScrollPos(window.scrollY);
     hideLogLines();
     window.scrollTo({ top: 0 });
@@ -343,53 +319,43 @@ const NoteItem: React.FC<NoteItemProps> = ({
       setEditingItem(false);
     }
   }, [show, editingItem]);
-  // console.log('item',item);
+
   const itemIsString = item && typeof item === 'string';
-  // console.log('item.date',item.date);
-  const isLog = !!(item as NoteLabel)?.date;
-  // const isLog = itemIsString ? item.includes('"json":true') : false;
+  const isLog = !!(item as NoteContent)?.date;
   const editing = editingItem && show;
   const noEditingIsLog = !editing && isLog;
   const noEditingNoLog = !editing && !isLog;
 
   if (!item) return <></>;
 
-  
-  // console.log('noEditingNoLog && itemIsString',noEditingNoLog && itemIsString);
-  return (  
+  return (
     <div>
-        <div className="noteTagBox">
-          {editing && itemIsString && (
-            <EditItemBox
-              item={item}
-              onSubmit={submitChange}
-              onClose={closeEdit}
-              onDelete={deleteItem}
-              changeDate={changeDate}
-              dateToInputDisplayDate={dateToInputDisplayDate}
-            />
-          )}
-          {noEditingIsLog && (
-            <DisplayLogItemBox
-              item={item}
-              show={show}
-              date={date}
-              prevItem={prevItem}
-              nextItem={nextItem}
-              cont={cont}
-              onEdit={() => setEditingItem(true)}
-            />
-          )}
-          {noEditingNoLog && itemIsString && (
-            <DisplayItemBox
-              item={item}
-              showEdit={showEdit}
-              count={count}
-              show={show}
-              onEdit={setEditState}
-            />
-          )}
-        </div>
+      <div className="noteTagBox">
+        {editing && itemIsString && (
+          <EditItemBox
+            item={item}
+            onSubmit={submitChange}
+            onClose={closeEdit}
+            onDelete={deleteItem}
+            changeDate={changeDate}
+            dateToInputDisplayDate={dateToInputDisplayDate}
+          />
+        )}
+        {noEditingIsLog && (
+          <DisplayLogItemBox
+            item={item}
+            show={show}
+            date={date}
+            prevItem={prevItem}
+            nextItem={nextItem}
+            cont={cont}
+            onEdit={() => setEditingItem(true)}
+          />
+        )}
+        {noEditingNoLog && itemIsString && (
+          <DisplayItemBox item={item} showEdit={showEdit} count={count} show={show} onEdit={setEditState} />
+        )}
+      </div>
     </div>
   );
 };

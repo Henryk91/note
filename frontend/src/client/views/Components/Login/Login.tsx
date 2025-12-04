@@ -3,7 +3,7 @@ import { loginRequest, createAccount } from '../../Helpers/requests';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
 
-const Login: React.FC= () => {
+const Login: React.FC = () => {
   const theme = useSelector((state: RootState) => state.theme.themeLower);
   const [signUp, setSignUp] = useState(false);
   const themeBack = `${theme}-back`;
@@ -25,7 +25,6 @@ const Login: React.FC= () => {
         window.location.href = '/notes/main';
       } else {
         alert('Login Error');
-        // console.log(res);
       }
     });
   };
@@ -57,8 +56,6 @@ const Login: React.FC= () => {
       if (res.id) {
         localStorage.setItem('loginKey', res.id);
         window.location.reload();
-      } else {
-        // console.log(res);
       }
     });
   };

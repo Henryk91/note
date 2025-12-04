@@ -1,5 +1,3 @@
-
-
 export type Note = {
   id: string;
   heading: string;
@@ -15,21 +13,16 @@ export type Match = {
   url: string;
 };
 
-export type PageDescriptor = { params: { id: string, tempId: string } };
-
+export type PageDescriptor = { params: { id: string; tempId: string } };
 
 export type NoteItemMap = {
   [key: string]: Note;
-  // [key: string]: {id: string, dataLable: NoteLabel[] | NoteItemType[], heading?: string, other?: any};
 };
-// export type NoteItemMap = {
-//   [key: string]: [Children as a list];
-// };
 
 export enum ItemType {
-  FOLDER = "FOLDER",
-  NOTE = "NOTE",
-  LOG = "LOG",
+  FOLDER = 'FOLDER',
+  NOTE = 'NOTE',
+  LOG = 'LOG',
 }
 
 export type NoteContent = {
@@ -44,10 +37,7 @@ export type NoteItemTypeA = {
   name?: string;
   content?: NoteContent;
   parentId: string;
-  // data?: string;
-  // tag?: string;
   edit?: string;
-  // date?: string;
 };
 
 export type NoteItemType = {

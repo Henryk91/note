@@ -1,14 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faArrowDown,
-  faArrowLeft,
-  faArrowUp,
-  faPen,
-  faPlus,
-  faPowerOff,
-} from '@fortawesome/free-solid-svg-icons';
+import { faArrowDown, faArrowLeft, faArrowUp, faPen, faPlus, faPowerOff } from '@fortawesome/free-solid-svg-icons';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import NoteDetail from '../NoteDetail/NoteDetail';
 import { Match, PageDescriptor } from '../../Helpers/types';
@@ -29,8 +22,8 @@ export type NoteDetailPageItemProps = {
   set: (payload: any) => void;
   openPage: (payload: any) => void;
   initShowtag: PageDescriptor;
-  match: Match
-}
+  match: Match;
+};
 
 export type SidebarProps = {
   prepForNote: (name: string) => void;
@@ -68,7 +61,6 @@ export const NoteDetailPageItem: React.FC<NoteDetailPageItemProps> = ({
   initShowtag,
   match,
 }) => {
-
   const key = pageLink?.params?.id ?? 'first';
   return (
     <div id="multiple-pages1" key={key + index}>
@@ -91,16 +83,17 @@ export const NoteDetailPageItem: React.FC<NoteDetailPageItemProps> = ({
 const NoteNamesList: React.FC<NoteNamesListProps> = ({ onSelect }) => {
   const noteNames = useSelector((state: RootState) => state.person.noteNames);
   return (
-  <>
-    {noteNames?.map((name) => (
-      <Link key={name} style={{ textDecoration: 'none' }} to="/notes/main" title="Note List">
-        <div className="listNameButton" onClick={() => onSelect(name)}>
-          <h3> {name} </h3>
-        </div>
-      </Link>
-    ))}
-  </>
-)};
+    <>
+      {noteNames?.map((name) => (
+        <Link key={name} style={{ textDecoration: 'none' }} to="/notes/main" title="Note List">
+          <div className="listNameButton" onClick={() => onSelect(name)}>
+            <h3> {name} </h3>
+          </div>
+        </Link>
+      ))}
+    </>
+  );
+};
 
 const NoteThemesList: React.FC<NoteThemesListProps> = ({ names, onSelect }) => (
   <>
@@ -117,53 +110,51 @@ const NoteThemesList: React.FC<NoteThemesListProps> = ({ names, onSelect }) => (
 export const Sidebar: React.FC<SidebarProps> = ({ prepForNote }) => {
   const dispatch = useDispatch();
   const setSelectedTheme = (name: string) => dispatch(setTheme(name));
-  
-  return (
-  <div>
-    <br />
-    <h3 className="page-content-top1">Note Book Names</h3>
-    <NoteNamesList onSelect={prepForNote} />
-    <br />
-    <h3>Apps</h3>
-    <Link key="memento" style={{ textDecoration: 'none' }} to="/memento" title="Note List">
-      <div className="listNameButton">
-        <h3> Memento </h3>
-      </div>
-    </Link>
-    <Link key="pomodoro" style={{ textDecoration: 'none' }} to="/pomodoro" title="Note List">
-      <div className="listNameButton">
-        <h3> Pomodoro </h3>
-      </div>
-    </Link>
-    <br />
-    <h3>Themes</h3>
-    <NoteThemesList names={THEMES} onSelect={setSelectedTheme} />
-  </div>
-)}
 
-export const ScrollButtons: React.FC<ScrollButtonsProps> = ({
-  showBackButton,
-}) => {
+  return (
+    <div>
+      <br />
+      <h3 className="page-content-top1">Note Book Names</h3>
+      <NoteNamesList onSelect={prepForNote} />
+      <br />
+      <h3>Apps</h3>
+      <Link key="memento" style={{ textDecoration: 'none' }} to="/memento" title="Note List">
+        <div className="listNameButton">
+          <h3> Memento </h3>
+        </div>
+      </Link>
+      <Link key="pomodoro" style={{ textDecoration: 'none' }} to="/pomodoro" title="Note List">
+        <div className="listNameButton">
+          <h3> Pomodoro </h3>
+        </div>
+      </Link>
+      <br />
+      <h3>Themes</h3>
+      <NoteThemesList names={THEMES} onSelect={setSelectedTheme} />
+    </div>
+  );
+};
+
+export const ScrollButtons: React.FC<ScrollButtonsProps> = ({ showBackButton }) => {
   const dispatch = useDispatch();
   const theme = useSelector((state: RootState) => state.theme.themeLower);
-  const { showAddItem, editName} = useSelector((state: RootState) => state.person);
+  const { showAddItem, editName } = useSelector((state: RootState) => state.person);
   const themeBack = `${theme}-back`;
   const themeHover = `${theme}-hover`;
 
   const addButtonClicked = () => {
-    // console.log('addButtonClickedaddButtonClicked');
     dispatch(setShowAddItem(!showAddItem));
     if (!showAddItem) window.scrollTo(0, 0);
-  }
+  };
 
   const editNameClick = () => {
-      window.scrollTo(0, 0);
-      dispatch(setEditName(!editName));
-    }
+    window.scrollTo(0, 0);
+    dispatch(setEditName(!editName));
+  };
 
   return (
     <div className="detail-scroll">
-      <button  className={`editButtons1 detailUpButton ${themeHover} ${themeBack}`} onClick={editNameClick}>
+      <button className={`editButtons1 detailUpButton ${themeHover} ${themeBack}`} onClick={editNameClick}>
         <FontAwesomeIcon icon={faPen} />
       </button>
       <div
@@ -185,14 +176,11 @@ export const ScrollButtons: React.FC<ScrollButtonsProps> = ({
       {!showBackButton ? (
         <div className={`detailAddButton ${themeHover} ${themeBack}`}>
           <Link style={{ textDecoration: 'none', color: 'white' }} to="/new-note/">
-            <FontAwesomeIcon icon={faPlus}/>
+            <FontAwesomeIcon icon={faPlus} />
           </Link>
         </div>
       ) : (
-        <div
-          className={`detailAddButton ${themeHover} ${themeBack}`}
-          onClick={() => addButtonClicked()}
-        >
+        <div className={`detailAddButton ${themeHover} ${themeBack}`} onClick={() => addButtonClicked()}>
           <FontAwesomeIcon icon={faPlus} />
         </div>
       )}
@@ -200,7 +188,7 @@ export const ScrollButtons: React.FC<ScrollButtonsProps> = ({
   );
 };
 
-export const BackButton: React.FC<BackButtonProps> = ({  hasPages, onBack, onLogout }) => {
+export const BackButton: React.FC<BackButtonProps> = ({ hasPages, onBack, onLogout }) => {
   const theme = useSelector((state: RootState) => state.theme.themeLower);
   const themeBack = `${theme}-back`;
   const icon: IconProp = hasPages ? faArrowLeft : faPowerOff;

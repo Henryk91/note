@@ -16,11 +16,7 @@ const createList = (notes: Note[] | null, theme: string) => {
       const dataLable = [...person.dataLable].map((dataL) => dataL.tag);
       const noteCount = dataLable.filter(onlyUnique).length;
       return (
-        <Link
-          key={person.id}
-          style={{ textDecoration: 'none' }}
-          to={`/notes/${person.id}`}
-        >
+        <Link key={person.id} style={{ textDecoration: 'none' }} to={`/notes/${person.id}`}>
           <div className="listNameButton dark-hover">
             <div className={`listCountBox ${themeBorder}`}> {noteCount} </div>
             <h3>{person.heading}</h3>
@@ -43,7 +39,6 @@ const Home: React.FC<HomeProps> = ({ User }) => {
   const themeHover = `${theme}-hover`;
 
   const logOut = () => {
-    // console.log('logOut localStorage.clear()');
     localStorage.clear();
     window.location.reload();
   };

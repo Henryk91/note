@@ -2,24 +2,16 @@ import React, { useCallback, useEffect, useState, lazy, Suspense } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars } from '@fortawesome/free-solid-svg-icons';
 import { connect } from 'react-redux';
-import {
-  BrowserRouter as Router,
-  Route,
-  Link,
-  Redirect,
-  Switch,
-} from 'react-router-dom';
+import { BrowserRouter as Router, Route, Link, Redirect, Switch } from 'react-router-dom';
 import { SearchBar, NoteDetailPage } from './views/Components/index';
 import {
-  getMyNotesRec,
   saveNewNote,
   updateOneNoteRec,
-  getNoteNames,
   getNotesV2WithChildrenByParentId,
   getNotesV2ByParentId,
 } from './views/Helpers/requests';
 
-import { allNotesToItems, compareSort, processGetAllNotes, processGetAllNotesA } from './views/Helpers/utils';
+import { compareSort } from './views/Helpers/utils';
 import { KeyValue, Note, PageDescriptor } from './views/Helpers/types';
 import { RootState } from '../store';
 import { setTheme } from '../store/themeSlice';
@@ -42,12 +34,12 @@ function ProtectedRoutes({ children }: ProtectedRoutesProps) {
 }
 
 type AppProps = {
-  notes: Note[] | null,
+  notes: Note[] | null;
   theme: string;
   noteNames: string[] | undefined;
-  selectedNoteName?: string,
-  lastPage: PageDescriptor,
-  pages: PageDescriptor[],
+  selectedNoteName?: string;
+  lastPage: PageDescriptor;
+  pages: PageDescriptor[];
   setTheme: (theme: string) => void;
   setNotes: (notes: Note[] | null) => void;
   setNoteNames: (notes: string[]) => void;
@@ -56,67 +48,25 @@ type AppProps = {
   bulkUpdatePerson: (notes: KeyValue<Note>) => void;
 };
 
-const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames, setNoteNames, selectedNoteName, setSelectedNoteName, setPerson, lastPage, pages, bulkUpdatePerson}) => {
-  // console.error('lastPage',lastPage);
-  // console.log('pages',pages);
+const App: React.FC<AppProps> = ({
+  theme,
+  setTheme,
+  notes,
+  setNotes,
+  noteNames,
+  setNoteNames,
+  selectedNoteName,
+  setSelectedNoteName,
+  setPerson,
+  lastPage,
+  pages,
+  bulkUpdatePerson,
+}) => {
   const [notesInitialLoad, setNotesInitialLoad] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [freshData, setFreshData] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<number | null>(null);
   const [loadingData, setLoadingData] = useState(false);
-
-  const addMainNote = useCallback((currentNotes: Note[]) => {
-    if (currentNotes && currentNotes.length) {
-      const subs: Note[] = [];
-      currentNotes.forEach((note) => {
-        // console.log('note.heading',note.heading);
-        if (note.heading.startsWith('Sub: ')) {
-          subs.push(note);
-          return false;
-        }
-        return true;
-      });
-
-      if (subs.length > 0) {
-        const subFound = currentNotes.find((note) => note.id === 'subs');
-        if (!subFound) {
-          const headings = subs.map((sub) => ({
-            tag: sub.heading,
-            data: `href:${sub.id}`,
-          }));
-          const subItems = {
-            createdBy: subs[0].createdBy,
-            dataLable: headings,
-            heading: 'Z Sub Directories',
-            id: 'subs',
-          };
-          currentNotes.push(subItems);
-        }
-      }
-      // console.log('selectedNoteName',selectedNoteName);
-      if (currentNotes[currentNotes.length - 1].id !== selectedNoteName) {
-        // console.log('currentNotes',currentNotes);
-        const user = localStorage.getItem('user');
-        const mainFound = currentNotes.find((note) => note.id === selectedNoteName);
-        if (!mainFound) {
-          const mainPage = {
-            createdBy: 'Main',
-            dataLable: [...currentNotes].map((note) => ({
-              tag: note.heading,
-              data: `href:${note.id}`,
-            })),
-            heading: 'Main',
-            id: user?? selectedNoteName ?? 'main',
-          };
-          currentNotes.push(mainPage);
-        }
-      }
-
-      return currentNotes;
-    }
-
-    return [];
-  }, [selectedNoteName]);
 
   const setRedirect = useCallback(() => {
     const path = window.location.pathname;
@@ -127,47 +77,19 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
 
   const getMyNotes = useCallback(
     (noteName?: string | null) => {
-      console.log('loadingData',loadingData);
-      const ld = sessionStorage.getItem("loading")
-      if (ld) return;
+      if (sessionStorage.getItem('loading')) return;
       setLoadingData(true);
-      sessionStorage.setItem("loading", "true")
+      sessionStorage.setItem('loading', 'true');
       let currentUser = selectedNoteName;
       if (noteName) currentUser = noteName;
 
       if (currentUser && currentUser !== '') {
-        // const data = localStorage.getItem(currentUser);
-        // if (data && data[0] && data.length > 0) {
-          // console.error('before addMainNote selectedNoteName', selectedNoteName);
-          // const pdata = JSON.parse(data)//addMainNote(JSON.parse(data) as Note[]);
-          // console.log('pdata',pdata);
-          // if (notes !== pdata) {
-            // if(pdata) {
-              // let newItems = {}
-              // pdata.forEach(p => {
-              //   newItems[p.id] = p
-              // })
-              // console.log('chash data', newItems);
-              // console.error('!!!!! newItems["WWPxL9Am8OmZlbZi5IMW::Thinking-fast-and-slow"]',newItems);
-              // bulkUpdatePerson(newItems)
-              // setNotes(pdata);
-            // }
-          // }
-          // setFreshData(false);
-        // }
-        // getNotesV2ByParentId(undefined, resp => {
-        //   console.log('resp',resp);
-        //   const names = resp?.map(item => item.name);
-        //   console.log('names',names);
-        // })
         getNotesV2WithChildrenByParentId(currentUser, (resp) => {
-          // console.error('resp',resp);
-          bulkUpdatePerson(resp)
-          // setPerson(resp)
+          bulkUpdatePerson(resp);
 
-          const res: Note[] = Object.keys(resp).map(key => {
-            return {...resp[key], heading: resp[key]?.heading ?? "Placeholder"}
-          })
+          const res: Note[] = Object.keys(resp).map((key) => {
+            return { ...resp[key], heading: resp[key]?.heading ?? 'Placeholder' };
+          });
 
           if (res && res.length > 0) {
             res.sort(compareSort);
@@ -177,138 +99,59 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
 
           const stateNotes = notes;
           const reRender =
-            res && stateNotes
-              ? JSON.stringify(res) !== JSON.stringify(stateNotes)
-              : res && res.length > 0;
+            res && stateNotes ? JSON.stringify(res) !== JSON.stringify(stateNotes) : res && res.length > 0;
           if (reRender && res.length > 0) {
-
             setNotes(res);
             setRedirect();
           }
 
           setLoadingData(false);
-          sessionStorage.removeItem("loading")
-        })
-        // getMyNotesRec(currentUser, (resp) => {
-        //   return
-        //   // if(notes || notesInitialLoad) {
-        //   //   setFreshData(true);
-        //   //   return
-        //   // }
-        //   let res = resp;
-        //   // console.log('resprespresp',resp);
-        //   // const newData = processGetAllNotes(resp);
-        //   const newData = processGetAllNotesA(resp);
-        //   // console.log('newData',newData);
-        //   const items = allNotesToItems(newData);
-        //   // console.error('items',items);
-        //   // setPerson(items)
-        //   // console.error('items[0]',items[10]);
-        //   const newRes: Note[] = Object.keys(items).map(key => {
-        //     return {...items[key], heading: items[key]?.heading ?? "Placeholder"}
-        //   })
-        //   // console.log('newRes',newRes[10]);
-        //   // console.log('items',items);
-        //   // console.log('items',items);
-        //   // console.log('newData',newData);
-        //   // console.error('getMyNotesRec before addMainNote selectedNoteName', selectedNoteName);
-        //   res = addMainNote(resp);
-        //   // console.error('res',res);
-        //   if (res && res.length > 0) {
-        //     // res.sort(compareSort);
-        //     // setRedirect();
-        //     // setFreshData(true);
-        //   }
-        //   if(newRes) res = newRes;
-        //   const stateNotes = notes;
-        //   const reRender =
-        //     res && stateNotes
-        //       ? JSON.stringify(res) !== JSON.stringify(stateNotes)
-        //       : res && res.length > 0;
-        //   if (reRender && res.length > 0) {
-        //     // console.log('res',res);
-        //     // console.log('items',items);
-        //     // res[10] = {...items["Henry"], createdBy: "Main", heading: 'Main'} as any;
-        //     // res[10].dataLable = items["Henry"].dataLable as any
-        //     // res[0].dataLable = items["One New One"].dataLable as any
-        //     // setNotes(res);
-        //     // setRedirect();
-        //   }
-        // });
+          sessionStorage.removeItem('loading');
+        });
       }
     },
-    [addMainNote, notes, setRedirect, selectedNoteName, loadingData, setLoadingData],
+    [notes, setRedirect, selectedNoteName, loadingData, setLoadingData]
   );
 
   const getNotesOnLoad = useCallback(
     (loggedIn, loggedUser) => {
       if (!notesInitialLoad) {
         if (loggedIn && !notesInitialLoad && loggedUser !== '') {
-          console.log('getMyNotes',loadingData);
           getMyNotes(loggedUser);
           setNotesInitialLoad(true);
         }
       }
     },
-    [getMyNotes, notesInitialLoad, loadingData],
+    [getMyNotes, notesInitialLoad, loadingData]
   );
 
   const setFilterNote = useCallback(
     (val) => {
       if (selectedNoteName !== val.user) {
-        console.log('getMyNotes',loadingData);
         getMyNotes(val.user);
       }
       setSelectedNoteName(val.user);
       setSearchTerm(val.searchTerm);
     },
-    [getMyNotes, selectedNoteName],
+    [getMyNotes, selectedNoteName]
   );
 
   const getNoteNamesHandler = useCallback(
     (loginKey) => {
-      // let savedNames = localStorage.getItem('notenames');
-
-      // if (savedNames) {
-      //   const savedNoteNames = JSON.parse(savedNames);
-      //   const selectedUser = selectedNoteName || null;
-      //   setNoteNames(savedNoteNames);
-      //   if (selectedUser) {
-      //     console.log('getMyNotes',loadingData);
-      //     getMyNotes(selectedUser);
-      //   }
-      // }
       if (loginKey && !notesInitialLoad && !noteNames) {
-        getNotesV2ByParentId(undefined, resp => {
-          const names: string[] = resp?.map(item => item.name) 
-          if(names.length){
+        getNotesV2ByParentId(undefined, (resp) => {
+          const names: string[] = resp?.map((item) => item.name);
+          if (names.length) {
             setNoteNames([...names, 'All', 'None']);
             if (!selectedNoteName) {
               setSelectedNoteName(names[0]);
               getMyNotes(names[0]);
             }
           }
-        })
-        // getNoteNames((res) => {
-        //   if (res.length > 0) {
-        //     res.push('All');
-        //     res.push('None');
-        //     if (res && res.length > 0) {
-        //       console.error('res',res);
-        //       // localStorage.setItem('notenames', JSON.stringify(res));
-        //       let update: any = { noteNames: res };
-        //       if (!selectedNoteName) {
-        //         update = { ...update, user: res[0] };
-        //         getMyNotes(res[0]);
-        //       }
-        //       setNoteNames(update.noteNames);
-        //       if (update.user) setSelectedNoteName(update.user);
-        //     }
-        //   }
-        // });
+        });
       }
     },
-    [getMyNotes, noteNames, notesInitialLoad, selectedNoteName, loadingData],
+    [getMyNotes, noteNames, notesInitialLoad, selectedNoteName, loadingData]
   );
 
   const updateNote = useCallback(
@@ -322,12 +165,10 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
         person = update;
       }
       updateOneNoteRec({ person, delete: update.delete }, () => {
-        console.log('getMyNotes',loadingData);
         getMyNotes(selectedNoteName);
-
       });
     },
-    [getMyNotes, selectedNoteName],
+    [getMyNotes, selectedNoteName]
   );
 
   const addNewNote = useCallback(
@@ -344,12 +185,12 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
 
       if (searchTerm === '' || searchTerm === null) {
         saveNewNote(usedNewNote.note);
-        if(updatedNote)setNotes(updatedNote);
+        if (updatedNote) setNotes(updatedNote);
       } else {
         alert('Cant update in search');
       }
     },
-    [notes, searchTerm, selectedNoteName],
+    [notes, searchTerm, selectedNoteName]
   );
 
   const noteDetailSet = useCallback(
@@ -357,14 +198,12 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
       if (msg.noteName) {
         const { noteName } = msg;
         setSelectedNoteName(noteName);
-        // setNotes(null);
-        console.log('getMyNotes',loadingData);
         getMyNotes(noteName);
       } else {
         updateNote(msg);
       }
     },
-    [getMyNotes, setTheme, updateNote],
+    [getMyNotes, setTheme, updateNote]
   );
 
   const checkLoginState = useCallback(() => {
@@ -384,7 +223,7 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
         checkLoginState();
       }
     },
-    [checkLoginState],
+    [checkLoginState]
   );
 
   useEffect(() => {
@@ -443,41 +282,20 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
   }, [freshData, theme]);
 
   const getLastPageData = () => {
-    // console.log('selectedNoteName',selectedNoteName);
-    if(lastPage?.params.id && lastPage?.params.id !== selectedNoteName && selectedNoteName){
-      // console.error('!!!lastPage',lastPage?.params.id);
+    if (lastPage?.params.id && lastPage?.params.id !== selectedNoteName && selectedNoteName) {
       getNotesV2WithChildrenByParentId(lastPage?.params.id, (resp) => {
-        if(resp){
-          console.log('getLastPageData', resp);
-          // console.error('!!!!!XXXXXresp',resp);
-          bulkUpdatePerson(resp)
-
-          // const newNotes: Note[] = Object.keys(resp).map(key => {
-          //   return {...resp[key], heading: resp[key]?.heading ?? "Placeholder"}
-          // })
-          // if(notes && newNotes) setNotes([...notes, ...newNotes])
-          // setRedirect();
-          //   setFreshData(true);
-        }
-      })
+        if (resp) bulkUpdatePerson(resp);
+      });
     }
-  }
+  };
 
   useEffect(() => {
-    sessionStorage.removeItem("loading")
+    sessionStorage.removeItem('loading');
     checkLoginState();
-    // setTimeout(() => {
-    //   getLastPageData();
-    // },50)
-    
   }, []);
 
   useEffect(() => {
-    
-    // setTimeout(() => {
-      getLastPageData();
-    // },1000)
-    // },1000)
+    getLastPageData();
   }, [lastPage?.params?.id]);
 
   const themeBack = `${theme.toLowerCase()}-back`;
@@ -503,43 +321,21 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
                   </Link>
                 </nav>
               </header>
-              <Route
-                exact
-                path="/all"
-                render={(props) => <Home {...props} searchTerm={searchTerm} notes={notes} />}
-              />
+              <Route exact path="/all" render={(props) => <Home {...props} searchTerm={searchTerm} notes={notes} />} />
               <Route
                 exact
                 path="/index.html"
-                render={(props) => (
-                  <NoteDetailPage
-                    searchTerm={searchTerm}
-                    {...props}
-                    set={noteDetailSet}
-                  />
-                )}
+                render={(props) => <NoteDetailPage searchTerm={searchTerm} {...props} set={noteDetailSet} />}
               />
               <Route
                 exact
                 path="/"
-                render={(props) => (
-                  <NoteDetailPage
-                    searchTerm={searchTerm}
-                    {...props}
-                    set={noteDetailSet}
-                  />
-                )}
+                render={(props) => <NoteDetailPage searchTerm={searchTerm} {...props} set={noteDetailSet} />}
               />
               <Route
                 exact
                 path="/notes/:id"
-                render={(props) => (
-                  <NoteDetailPage
-                    searchTerm={searchTerm}
-                    {...props}
-                    set={noteDetailSet}
-                  />
-                )}
+                render={(props) => <NoteDetailPage searchTerm={searchTerm} {...props} set={noteDetailSet} />}
               />
               <Route exact path="/new-note" render={() => <NewNote set={addNewNote} />} />
               <Route exact path="/pomodoro" render={() => <Pomodoro />} />
