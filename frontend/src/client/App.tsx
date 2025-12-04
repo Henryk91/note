@@ -429,7 +429,7 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
 
   const getLastPageData = () => {
     // console.log('selectedNoteName',selectedNoteName);
-    if(lastPage?.params.id !== selectedNoteName){
+    if(lastPage?.params.id && lastPage?.params.id !== selectedNoteName && selectedNoteName){
       // console.error('!!!lastPage',lastPage?.params.id);
       getAllNotesV2(lastPage?.params.id, (resp) => {
         if(resp){
@@ -449,6 +449,7 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
   }
 
   useEffect(() => {
+    sessionStorage.removeItem("loading")
     checkLoginState();
     // setTimeout(() => {
     //   getLastPageData();
