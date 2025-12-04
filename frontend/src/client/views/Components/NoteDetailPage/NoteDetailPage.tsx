@@ -92,14 +92,14 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({
 
   const openPage = useCallback(
     (msg: any) => {
-      console.log('msgmsgmsgmsgmsg', msg);
+      // console.log('msgmsgmsgmsgmsg', msg);
       if (!msg.personNext) return;
       // cll
       const tempId = `${msg.personNext.id}-${msg.personNext.heading}`
       // if(msg?.personNext) dispatch(setPersonById({ id: tempId, person: {...msg?.personNext} }));
 
       const nextPage = { params: { id: msg.personNext.id, tempId: tempId } };
-      console.log('nextPage',nextPage);
+      // console.log('nextPage',nextPage);
       const localPages = localStorage.getItem('saved-pages');
 
       let updatePages = pages;

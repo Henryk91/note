@@ -100,7 +100,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   }
 
   function getDataFilteredAndSorted(sort: Record<string, string[]>, prop: string, term?: string) {
-    console.log('prop, sort', prop,sort);
+    // console.log('prop, sort', prop,sort);
     let allDates = sort[prop]? [...sort[prop]]: []
 
     if (term) {
@@ -173,7 +173,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   }
 
   function openDetailOnNewPage(personParam: Note | null) {
-    console.log('openDetailOnNewPage');
+    // console.log('openDetailOnNewPage');
     if (!personParam) return;
     const parentId = personParam.id;
 
@@ -189,11 +189,11 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     // console.log('handleLinkClick', tagData);
     // console.log('tagData',tagData);
     // console.log('notes',notes);
-    console.log('tagData',tagData);
+    // console.log('tagData',tagData);
     // const noteId = tagData?.data ? tagData.data.substring(5): tagData.id
     const noteId = tagData.id
-    console.log('persons',persons);
-    console.log('noteId',noteId);
+    // console.log('persons',persons);
+    // console.log('noteId',noteId);
     const personNext = persons[noteId]//notes?.find((note) => note.id === noteId) ?? null;
     // const personNext = persons[noteId] ?? {id: noteId}
 
@@ -361,14 +361,14 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
 
     const { linkProps, propertyArray } = setLogAndLinksAtTop(sort);
     const all = [...linkProps, ...propertyArray].map((prop, i) => {
-      // if(index === 2) console.log('prop',prop);
+      // if(index === 2) // console.log('prop',prop);
       // console.log('prop',prop);
       const showDateSelector = prop === 'Log';
 
       const showButton = showTagValue === prop;
       // console.log('sort',sort);
       let allDates = getDataFilteredAndSorted(sort, prop, searchTermState);
-      // if(index === 2) console.log('allDates',allDates);
+      // if(index === 2) // console.log('allDates',allDates);
       const { selectedDate, logDaysBunch } = logDayBunchLogic(prop, displayDate, allDates);
 
       let isLink = isLinkCheck(sort, prop);
@@ -458,7 +458,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
         dispatch(setShowTag(tagName));
         openDetailOnNewPage(localPerson);
       } else if (sessionShowTag && tagName && sessionShowTag !== tagName) {
-        console.log('here here');
+        // console.log('here here');
         dispatch(setShowTag(tagName));
 
         openPage({
@@ -600,8 +600,8 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     //   }
     // }
     const noteDetailPage = document.getElementById('multiple-pages');
-    console.log(index, 'lastPage',lastPage, initShowtag.params.id);
-    console.log('persons[initShowtag.params.id]',persons[initShowtag.params.id]);
+    // console.log(index, 'lastPage',lastPage, initShowtag.params.id);
+    // console.log('persons[initShowtag.params.id]',persons[initShowtag.params.id]);
     if (noteDetailPage && lastPage){
       // setTimeout(() => {
         const localNoteDetailPage = document.getElementById('multiple-pages');
@@ -655,7 +655,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   const createSort = (items) => {
     // const sort: Record<string, any[]> = {};
     // items.forEach((tag) => {
-    //   console.error('tag',tag);
+    //   // console.error('tag',tag);
     //   // console.log('tag',tag);
     //   if (sort[tag.tag]) {
     //     sort[tag.tag].push(tag.data);
@@ -776,7 +776,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     // const showDateSelector = prop === 'Log' //isLog
     
     // const sort: Record<string, any[]> | null = showDateSelector? createSort(persons?.[noteItem.id]?.dataLable ?? []): null;
-    // // console.log('sorty',sort);
+    // console.log('sorty',sort);
     // let allDates = sort? getDataFilteredAndSorted(sort, prop, searchTermState): []
     // if (isLog) {
     //   if (displayDate === null) {

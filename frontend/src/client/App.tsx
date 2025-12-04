@@ -62,6 +62,7 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
   const [searchTerm, setSearchTerm] = useState('');
   const [freshData, setFreshData] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<number | null>(null);
+  const [loadingData, setLoadingData] = useState(false);
 
   const addMainNote = useCallback((currentNotes: Note[]) => {
     if (currentNotes && currentNotes.length) {
@@ -125,6 +126,11 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
 
   const getMyNotes = useCallback(
     (noteName?: string | null) => {
+      console.log('loadingData',loadingData);
+      const ld = sessionStorage.getItem("loading")
+      if (ld) return;
+      setLoadingData(true);
+      sessionStorage.setItem("loading", "true")
       let currentUser = selectedNoteName;
       if (noteName) currentUser = noteName;
 
@@ -133,22 +139,24 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
         if (data && data[0] && data.length > 0) {
           // console.error('before addMainNote selectedNoteName', selectedNoteName);
           const pdata = JSON.parse(data)//addMainNote(JSON.parse(data) as Note[]);
-          console.log('pdata',pdata);
+          // console.log('pdata',pdata);
           if (notes !== pdata) {
             if(pdata) {
               let newItems = {}
               pdata.forEach(p => {
                 newItems[p.id] = p
               })
-              console.error('!!!!! newItems["WWPxL9Am8OmZlbZi5IMW::Thinking-fast-and-slow"]',newItems);
-              bulkUpdatePerson(newItems)
-              setNotes(pdata);
+              console.log('chash data', newItems);
+              // console.error('!!!!! newItems["WWPxL9Am8OmZlbZi5IMW::Thinking-fast-and-slow"]',newItems);
+              // bulkUpdatePerson(newItems)
+              // setNotes(pdata);
             }
           }
           setFreshData(false);
         }
         getAllNotesV2(currentUser, (resp) => {
-          console.error('resp',resp);
+          // console.error('resp',resp);
+          console.log('getMyNotes',resp);
           bulkUpdatePerson(resp)
           // setPerson(resp)
 
@@ -172,6 +180,9 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
             setNotes(res);
             setRedirect();
           }
+
+          setLoadingData(false);
+          sessionStorage.removeItem("loading")
         })
         // getMyNotesRec(currentUser, (resp) => {
         //   return
@@ -183,15 +194,15 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
         //   // console.log('resprespresp',resp);
         //   // const newData = processGetAllNotes(resp);
         //   const newData = processGetAllNotesA(resp);
-        //   console.log('newData',newData);
+        //   // console.log('newData',newData);
         //   const items = allNotesToItems(newData);
-        //   console.error('items',items);
+        //   // console.error('items',items);
         //   // setPerson(items)
         //   // console.error('items[0]',items[10]);
         //   const newRes: Note[] = Object.keys(items).map(key => {
         //     return {...items[key], heading: items[key]?.heading ?? "Placeholder"}
         //   })
-        //   console.log('newRes',newRes[10]);
+        //   // console.log('newRes',newRes[10]);
         //   // console.log('items',items);
         //   // console.log('items',items);
         //   // console.log('newData',newData);
@@ -221,24 +232,26 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
         // });
       }
     },
-    [addMainNote, notes, setRedirect, selectedNoteName],
+    [addMainNote, notes, setRedirect, selectedNoteName, loadingData, setLoadingData],
   );
 
   const getNotesOnLoad = useCallback(
     (loggedIn, loggedUser) => {
       if (!notesInitialLoad) {
         if (loggedIn && !notesInitialLoad && loggedUser !== '') {
+          console.log('getMyNotes',loadingData);
           getMyNotes(loggedUser);
           setNotesInitialLoad(true);
         }
       }
     },
-    [getMyNotes, notesInitialLoad],
+    [getMyNotes, notesInitialLoad, loadingData],
   );
 
   const setFilterNote = useCallback(
     (val) => {
       if (selectedNoteName !== val.user) {
+        console.log('getMyNotes',loadingData);
         getMyNotes(val.user);
       }
       setSelectedNoteName(val.user);
@@ -255,7 +268,10 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
         const savedNoteNames = JSON.parse(savedNames);
         const selectedUser = selectedNoteName || null;
         setNoteNames(savedNoteNames);
-        if (selectedUser) getMyNotes(selectedUser);
+        if (selectedUser) {
+          console.log('getMyNotes',loadingData);
+          getMyNotes(selectedUser);
+        }
       }
       if (loginKey && !notesInitialLoad && !noteNames) {
         getNoteNames((res) => {
@@ -267,6 +283,7 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
               let update: any = { noteNames: res };
               if (!selectedNoteName) {
                 update = { ...update, user: res[0] };
+                console.log('getMyNotes',loadingData);
                 getMyNotes(res[0]);
               }
               setNoteNames(update.noteNames);
@@ -276,7 +293,7 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
         });
       }
     },
-    [getMyNotes, noteNames, notesInitialLoad, selectedNoteName],
+    [getMyNotes, noteNames, notesInitialLoad, selectedNoteName, loadingData],
   );
 
   const updateNote = useCallback(
@@ -290,6 +307,7 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
         person = update;
       }
       updateOneNoteRec({ person, delete: update.delete }, () => {
+        console.log('getMyNotes',loadingData);
         getMyNotes(selectedNoteName);
 
       });
@@ -325,6 +343,7 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
         const { noteName } = msg;
         setSelectedNoteName(noteName);
         // setNotes(null);
+        console.log('getMyNotes',loadingData);
         getMyNotes(noteName);
       } else {
         updateNote(msg);
@@ -409,18 +428,19 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
   }, [freshData, theme]);
 
   const getLastPageData = () => {
-    console.log('selectedNoteName',selectedNoteName);
+    // console.log('selectedNoteName',selectedNoteName);
     if(lastPage?.params.id !== selectedNoteName){
-      console.error('!!!lastPage',lastPage?.params.id);
+      // console.error('!!!lastPage',lastPage?.params.id);
       getAllNotesV2(lastPage?.params.id, (resp) => {
         if(resp){
-          console.error('!!!!!XXXXXresp',resp);
+          console.log('getLastPageData', resp);
+          // console.error('!!!!!XXXXXresp',resp);
           bulkUpdatePerson(resp)
 
-          const newNotes: Note[] = Object.keys(resp).map(key => {
-            return {...resp[key], heading: resp[key]?.heading ?? "Placeholder"}
-          })
-          if(notes && newNotes) setNotes([...notes, ...newNotes])
+          // const newNotes: Note[] = Object.keys(resp).map(key => {
+          //   return {...resp[key], heading: resp[key]?.heading ?? "Placeholder"}
+          // })
+          // if(notes && newNotes) setNotes([...notes, ...newNotes])
           // setRedirect();
           //   setFreshData(true);
         }
@@ -430,12 +450,18 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
 
   useEffect(() => {
     checkLoginState();
-    getLastPageData();
+    // setTimeout(() => {
+    //   getLastPageData();
+    // },50)
+    
   }, []);
 
   useEffect(() => {
     
-    getLastPageData();
+    // setTimeout(() => {
+      getLastPageData();
+    // },1000)
+    // },1000)
   }, [lastPage?.params?.id]);
 
   const themeBack = `${theme.toLowerCase()}-back`;

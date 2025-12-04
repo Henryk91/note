@@ -43,7 +43,7 @@ const Home: React.FC<HomeProps> = ({ User }) => {
   const themeHover = `${theme}-hover`;
 
   const logOut = () => {
-    console.log('logOut localStorage.clear()');
+    // console.log('logOut localStorage.clear()');
     localStorage.clear();
     window.location.reload();
   };

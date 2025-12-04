@@ -25,7 +25,7 @@ const Login: React.FC= () => {
         window.location.href = '/notes/main';
       } else {
         alert('Login Error');
-        console.log(res);
+        // console.log(res);
       }
     });
   };
@@ -58,7 +58,7 @@ const Login: React.FC= () => {
         localStorage.setItem('loginKey', res.id);
         window.location.reload();
       } else {
-        console.log(res);
+        // console.log(res);
       }
     });
   };

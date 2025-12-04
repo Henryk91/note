@@ -23,8 +23,10 @@ const createInitPage = (selectedNoteName?: string) => {
 }
 
 const initSelectedNoteName = localStorage.getItem('user') || undefined
+const initByIdData = localStorage.getItem(`${initSelectedNoteName}-data`);
+
 const initialState: PersonState = {
-  byId: {},
+  byId: initByIdData? JSON.parse(initByIdData) : {},
   notes: null,
   selectedNoteName: initSelectedNoteName,
   showTag: localStorage.getItem('showTag') || null,
@@ -47,6 +49,13 @@ const personSlice = createSlice({
       })
       // console.error('p', p);
       state.byId = freshState;
+
+      if(state.selectedNoteName && freshState){
+        // console.log('state.selectedNoteName',state.selectedNoteName);
+        // console.log('freshState',freshState);
+        const storageKey = `${state.selectedNoteName}-data`;
+        localStorage.setItem(storageKey, JSON.stringify(freshState))
+      }
     },
     setPerson(state, action: PayloadAction<KeyValue<Note>>) {
       const p = action.payload;
@@ -98,7 +107,7 @@ const personSlice = createSlice({
         // const personFound = getPersonNoteType(state.notes, DEFAULT_PAGE[0]);
         // console.log('state.pages[0]',state.pages[0]);
         // const personFound = getPersonNoteType(state.notes, state.pages[0], state.selectedNoteName);
-        // // console.error('personFound',personFound);
+        // console.error('personFound',personFound);
         // if(personFound) {
         //   // state.byId[state.selectedNoteName ?? 'main'] = personFound;
         //   // console.error( 'state.selectedNoteName', personFound);
@@ -108,7 +117,7 @@ const personSlice = createSlice({
         // console.error('Here', state.pages[0], state.selectedNoteName);
         // console.log('state.notes',state.notes);
         // const personFound = getPersonNoteType(state.notes, state.pages[0], state.selectedNoteName);
-        // // console.error('personFound',personFound);
+        // console.error('personFound',personFound);
         // if(personFound) {
         //   // state.byId[state.selectedNoteName ?? 'main'] = personFound;
         //   // console.error('state.selectedNoteName', personFound);
@@ -152,8 +161,9 @@ const personSlice = createSlice({
     },
     resetPages(state) {
       // console.error('resetPages');
-      state.pages = [createInitPage(state.selectedNoteName)];
-      localStorage.setItem('saved-pages', JSON.stringify([createInitPage(state.selectedNoteName)]));
+      const initialPages = [createInitPage(state.selectedNoteName)]
+      state.pages = initialPages;
+      localStorage.setItem('saved-pages', JSON.stringify(initialPages));
     },
   },
 });
