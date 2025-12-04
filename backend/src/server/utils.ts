@@ -72,8 +72,8 @@ export function mapNoteV1ToNoteV2Query(req: any): { queryParams: any; newContent
   const jsonDataLableData = !isNote ? JSON.parse(person.dataLable.data) : undefined;
   const contentData = jsonDataLableData?.data ?? person.dataLable.data;
 
-  const logDay = jsonDataLableData?.date ? formatDate(jsonDataLableData.date.substring(0, 16).trim()) : null;
-  if (logDay) parentId += `::${logDay.trim().replaceAll(' ', '-')}`;
+  // const logDay = jsonDataLableData?.date ? formatDate(jsonDataLableData.date.substring(0, 16).trim()) : null;
+  // if (logDay) parentId += `::${logDay.trim().replaceAll(' ', '-')}`;
   const queryParams: any = { parentId, userId, 'content.data': contentData };
   if (jsonDataLableData) queryParams['content.date'] = jsonDataLableData?.date;
 
