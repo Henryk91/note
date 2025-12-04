@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import NoteItem from '../NoteItem/NoteItem';
-import { Note, NoteItemType, PageDescriptor } from '../../Helpers/types';
+import { Note, NoteContent, NoteItemType, PageDescriptor } from '../../Helpers/types';
 import PageContent from './PageContent';
 import { NoteDetailListItem } from './forms';
 
@@ -8,12 +8,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
 import {
   getAllPersonById,
+  removePersonById,
   selectPersonById,
   setEditName,
   setPersonById,
   setShowAddItem,
   setShowTag,
+  triggerLastPageReload,
 } from '../../../../store/personSlice';
+import { addFolder, addItem, deleteItem, updateItem } from '../../Helpers/crud';
 
 type Match = {
   isExact: boolean;
@@ -49,7 +52,6 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   const dispatch = useDispatch();
   const person = useSelector((state: RootState) => selectPersonById(state, initShowtag?.params.id));
   const persons = useSelector((state: RootState) => getAllPersonById(state));
-
   const { showTag, editName, selectedNoteName } = useSelector((state: RootState) => state.person);
 
   const [addLable, setAddLable] = useState<any>(null);
@@ -165,7 +167,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
           <NoteItem
             nextItem={undefined}
             prevItem={undefined}
-            item={item.date}
+            item={item}
             date={selectedDate}
             show={showButton && lastPage}
             set={updateNoteItem}
@@ -260,9 +262,10 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   function showTagChange(tagName: string) {
     const localPerson = person;
     const tagData = localPerson?.dataLable.find((note) => note.name === tagName);
+    dispatch(setShowTag(tagName));
     if (tagData?.type === 'FOLDER' && editName === false) {
       handleLinkClick(tagData, localPerson);
-      clearShowTag();
+      // clearShowTag();
     } else {
       const sessionShowTag = localStorage.getItem('showTag');
       if (lastPage) {
@@ -301,15 +304,26 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   }
 
   function updateNoteItem(val) {
-    const updateData = JSON.parse(JSON.stringify(person));
-    if (updateData) {
-      updateData.dataLable = [{ tag: val.type, data: val.oldItem, edit: val.item }];
-      if (!val.delete) {
-        set({ updateData, edit: val.item });
-      } else {
-        set({ updateData, delete: true });
-      }
+    const dataLable = val.type === 'Log'? persons?.[person.dataLable.find(item => item.name === 'Log')?.id ?? 0]?.dataLable: person.dataLable;
+    if (!dataLable) return;
+    const noteItem = dataLable.find((item) => item.content?.data === val.oldItem.data);
+    if (!noteItem) return;
+    if (val.delete) {
+      deleteItem(noteItem, () => {
+        if(val.type === 'Log') dispatch(removePersonById({id: noteItem.parentId}));
+        dispatch(triggerLastPageReload());
+      });
+      return;
     }
+
+    const updatedItem = {
+      ...noteItem,
+      content: noteItem?.content ? { ...val.item } : val.item,
+    };
+
+    updateItem(updatedItem, () => {
+      dispatch(triggerLastPageReload());
+    });
   }
 
   function continueLog(val) {
@@ -336,14 +350,10 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     if (!currentPerson) return;
 
     let number = event.target.number.value;
-    let tag = event.target.tagType.value;
-    const textTag = event.target.tagTypeText ? event.target.tagTypeText.value : '';
+    const tag = event.target.tagType.value;
+    const textTag = event?.target?.tagTypeText?.value;
 
-    if (tag === 'Note' || tag === 'Upload') tag = textTag;
-
-    if (tag === 'Log') {
-      number = JSON.stringify({ json: true, date: textTag, data: number });
-    }
+    let content: NoteContent = { data: number };
 
     if (number.includes(';base64,')) {
       const b64 = number.substring(number.indexOf('base64') + 7);
@@ -351,21 +361,34 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     }
 
     if (tag === 'Link') {
-      const link = event.target.links.value;
-      number = `href:${link}`;
-      const linkHeading = (document.getElementById('link-text') as HTMLInputElement)?.value;
-      tag = linkHeading.startsWith('Sub: ') ? linkHeading.slice(4).trim() : linkHeading;
+      addFolder(textTag, currentPerson.id, (data) => {
+        setAddLable(null);
+        dispatch(setShowAddItem(false));
+        if (data?.parentId === currentPerson.id) {
+          const updated = { ...currentPerson, dataLable: [...currentPerson.dataLable, data] };
+          dispatch(setPersonById({ id: `${currentPerson.id}`, person: updated }));
+        } else {
+          dispatch(triggerLastPageReload());
+        }
+      });
+      return;
     }
 
-    const dataLable = [...currentPerson.dataLable];
-    dataLable.push({ tag, data: number });
-    currentPerson.dataLable = dataLable;
-    const updateData = JSON.parse(JSON.stringify(currentPerson));
-    updateData.dataLable = [{ tag, data: number }];
-    set({ updateData });
-    dispatch(setPersonById({ id: `${initShowtag?.params.tempId}`, person: { ...currentPerson } }));
-    setAddLable(null);
-    dispatch(setShowAddItem(false));
+    if (!number || !currentPerson?.id) return;
+
+    if (tag === 'Log') content.date = textTag;
+
+    addItem(content, currentPerson.id, (data) => {
+      setAddLable(null);
+      dispatch(setShowAddItem(false));
+
+      if (data?.parentId === currentPerson.id) {
+        const updated = { ...currentPerson, dataLable: [...currentPerson.dataLable, data] };
+        dispatch(setPersonById({ id: `${currentPerson.id}`, person: updated }));
+      } else {
+        dispatch(triggerLastPageReload());
+      }
+    });
   }
 
   function dateBackForward(event, direction) {
@@ -494,7 +517,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
               <NoteItem
                 nextItem={undefined}
                 prevItem={undefined}
-                item={dateItem}
+                item={noteItem.content}
                 date={displayDate?.toString() ?? ''}
                 show={lastPage}
                 set={updateNoteItem}

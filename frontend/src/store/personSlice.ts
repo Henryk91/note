@@ -11,6 +11,7 @@ type PersonState = {
   showAddItem: boolean;
   editName: boolean;
   pages: PageDescriptor[];
+  reloadLastPage: boolean;
 };
 
 type SetPersonPayload = {
@@ -29,6 +30,7 @@ const initialState: PersonState = {
   editName: false,
   pages: getStorageJsonData('saved-pages', [createInitPage(initSelectedNoteName)]),
   noteNames: getStorageJsonData('notenames'),
+  reloadLastPage: false,
 };
 
 const personSlice = createSlice({
@@ -59,7 +61,7 @@ const personSlice = createSlice({
     setPersonById(state, action: PayloadAction<SetPersonPayload>) {
       const { id, person } = action.payload;
       if (!person) return;
-      // state.byId[id] = person;
+      state.byId[id] = person;
     },
     removePersonById(state, action: PayloadAction<{ id: string }>) {
       const { id } = action.payload;
@@ -119,6 +121,9 @@ const personSlice = createSlice({
       state.pages = initialPages;
       localStorage.setItem('saved-pages', JSON.stringify(initialPages));
     },
+    triggerLastPageReload(state) {
+      state.reloadLastPage = !state.reloadLastPage;
+    }
   },
 });
 
@@ -138,6 +143,7 @@ export const {
   resetPages,
   setPages,
   bulkUpdatePerson,
+  triggerLastPageReload
 } = personSlice.actions;
 
 export const selectPersonById = (state: { person: PersonState }, id: string) => state.person.byId[id] || null;

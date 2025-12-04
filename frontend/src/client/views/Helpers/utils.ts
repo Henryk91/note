@@ -1,11 +1,11 @@
 import { ItemType, Note, NoteItemType, NoteItemMap, NoteLabel, NoteContent } from './types';
 
-export const generateDocId = (): string => {
+export const generateDocId = (count: number = 20): string => {
   let text = '';
 
   const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
-  for (let i = 0; i < 20; i += 1) {
+  for (let i = 0; i < count; i += 1) {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   }
   return text;

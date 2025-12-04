@@ -517,16 +517,48 @@ export default class Handler {
         return;
       }
 
-      const note: any = {
+      const note: NoteV2Attrs = {
         id,
         parentId,
         type,
         content,
         userId,
       };
+
+      if (type === 'LOG') {
+        const parentData = await NoteV2Model.findOne({
+          userId,
+          id: parentId,
+        });
+        if (parentData?.name !== 'Log') {
+          // Parent isn't a log folder. Check if the parent has a Log folder
+          const logParent = await NoteV2Model.findOne({
+            userId,
+            parentId,
+            name: 'Log',
+          });
+
+          if (logParent) {
+            // Correct parent found
+            note.parentId = logParent.id;
+          } else {
+            // Log parent folder needs to be created;
+            const newLogParent = {
+              id: `${parentId}::Log`,
+              parentId,
+              type: 'FOLDER',
+              name: 'Log',
+              userId,
+            };
+            const createFolder = new NoteV2Model(newLogParent);
+            const folderData = await createFolder.save();
+            if (folderData) note.parentId = newLogParent.id;
+          }
+        }
+      }
+
       if (name) note.name = name;
       const createNote = new NoteV2Model(note);
-
       const data = await createNote.save();
       done(data);
     } catch (err: any) {

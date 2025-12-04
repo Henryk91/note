@@ -13,7 +13,7 @@ marked.setOptions({
 });
 
 type NoteItemProps = {
-  item: NoteContent | string | null;
+  item: NoteContent;
   date: string;
   show: boolean;
   prevItem?: string;
@@ -32,7 +32,7 @@ type NoteItemProps = {
 };
 
 type EditItemBoxProps = {
-  item: string;
+  item: NoteContent;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   onClose: () => void;
   onDelete: (e: React.MouseEvent<HTMLButtonElement>) => void;
@@ -74,15 +74,13 @@ const EditItemBox: React.FC<EditItemBoxProps> = ({
   const theme = useSelector((state: RootState) => state.theme.themeLower);
   const themeBack = `${theme}-back`;
   const themeHover = `${theme}-hover`;
-  let editText = item;
-  const isLog = item.includes('"json":true');
+  const editText = item.data;
+  const isLog = item?.date;
   let editDate;
   let editInputDate;
 
   if (isLog) {
-    const logObj = JSON.parse(item);
-    editDate = logObj.date;
-    editText = logObj.data;
+    editDate = item.date;
     editInputDate = dateToInputDisplayDate(new Date(editDate));
   }
 
@@ -264,23 +262,14 @@ const NoteItem: React.FC<NoteItemProps> = ({
 
   const submitChange = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const target = e.target as typeof e.target & {
-      item: { value: string };
-      itemDate?: { value: string };
-    };
-    let update: string | { json: boolean; date: string; data: string } = target.item.value;
-
+    const target = e.target as any
+    let update: NoteContent = {data: target.item.value};
     if (target.itemDate) {
-      update = {
-        json: true,
-        date: target.itemDate.value,
-        data: target.item.value,
-      };
-      update = JSON.stringify(update);
+      update = { data: target.item.value, date: target?.itemDate?.value }
     }
 
     set({
-      item: update,
+      item: { data: target.item.value, date: target?.itemDate?.value },
       oldItem: item,
       index,
       type,
@@ -320,7 +309,7 @@ const NoteItem: React.FC<NoteItemProps> = ({
     }
   }, [show, editingItem]);
 
-  const itemIsString = item && typeof item === 'string';
+  const itemIsString = item && typeof item.data === 'string';
   const isLog = !!(item as NoteContent)?.date;
   const editing = editingItem && show;
   const noEditingIsLog = !editing && isLog;
@@ -353,7 +342,7 @@ const NoteItem: React.FC<NoteItemProps> = ({
           />
         )}
         {noEditingNoLog && itemIsString && (
-          <DisplayItemBox item={item} showEdit={showEdit} count={count} show={show} onEdit={setEditState} />
+          <DisplayItemBox item={item.data} showEdit={showEdit} count={count} show={show} onEdit={setEditState} />
         )}
       </div>
     </div>

@@ -40,6 +40,7 @@ type AppProps = {
   selectedNoteName?: string;
   lastPage: PageDescriptor;
   pages: PageDescriptor[];
+  reloadLastPage: boolean;
   setTheme: (theme: string) => void;
   setNotes: (notes: Note[] | null) => void;
   setNoteNames: (notes: string[]) => void;
@@ -61,6 +62,7 @@ const App: React.FC<AppProps> = ({
   lastPage,
   pages,
   bulkUpdatePerson,
+  reloadLastPage
 }) => {
   const [notesInitialLoad, setNotesInitialLoad] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -281,6 +283,12 @@ const App: React.FC<AppProps> = ({
     getLastPageData();
   }, [lastPage?.params?.id]);
 
+  useEffect(() => {
+    if (lastPage?.params.id && notesInitialLoad) {
+      getLastPageData();
+    }
+  }, [reloadLastPage]);
+
   const themeBack = `${theme.toLowerCase()}-back`;
 
   return (
@@ -338,6 +346,7 @@ const mapStateToProps = (state: RootState) => ({
   selectedNoteName: state.person.selectedNoteName,
   lastPage: state.person.pages.slice(-1)[0],
   pages: state.person.pages,
+  reloadLastPage: state.person.reloadLastPage,
 });
 
 const mapDispatchToProps = {
