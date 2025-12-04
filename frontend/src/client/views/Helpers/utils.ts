@@ -1,6 +1,6 @@
 import { ItemType, Note, NoteItemType, NoteItemMap, NoteLabel, NoteContent } from './types';
 
-export const docId = (): string => {
+export const generateDocId = (): string => {
   let text = '';
 
   const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';

@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faCheck } from '@fortawesome/free-solid-svg-icons';
 import EditNoteCheck from '../EditNoteCheck/EditNoteCheck';
-import { docId } from '../../Helpers/utils';
+import { generateDocId } from '../../Helpers/utils';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
 
@@ -33,7 +33,7 @@ const NewNote: React.FC<NewNoteProps> = ({ set }) => {
 
     if (tag === 'Note') tag = (form.tagTypeText as HTMLInputElement).value;
     const loginKey = localStorage.getItem('loginKey');
-    const uniqueId = docId();
+    const uniqueId = generateDocId();
     const textTag = (form.tagTypeText as HTMLInputElement).value;
     if (tag === 'Log') {
       number = JSON.stringify({ json: true, date: textTag, data: number });
