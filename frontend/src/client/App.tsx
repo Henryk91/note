@@ -16,6 +16,7 @@ import {
   updateOneNoteRec,
   getNoteNames,
   getAllNotesV2,
+  getNotesV2,
 } from './views/Helpers/requests';
 
 import { allNotesToItems, compareSort, processGetAllNotes, processGetAllNotesA } from './views/Helpers/utils';
@@ -135,28 +136,32 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
       if (noteName) currentUser = noteName;
 
       if (currentUser && currentUser !== '') {
-        const data = localStorage.getItem(currentUser);
-        if (data && data[0] && data.length > 0) {
+        // const data = localStorage.getItem(currentUser);
+        // if (data && data[0] && data.length > 0) {
           // console.error('before addMainNote selectedNoteName', selectedNoteName);
-          const pdata = JSON.parse(data)//addMainNote(JSON.parse(data) as Note[]);
+          // const pdata = JSON.parse(data)//addMainNote(JSON.parse(data) as Note[]);
           // console.log('pdata',pdata);
-          if (notes !== pdata) {
-            if(pdata) {
-              let newItems = {}
-              pdata.forEach(p => {
-                newItems[p.id] = p
-              })
-              console.log('chash data', newItems);
+          // if (notes !== pdata) {
+            // if(pdata) {
+              // let newItems = {}
+              // pdata.forEach(p => {
+              //   newItems[p.id] = p
+              // })
+              // console.log('chash data', newItems);
               // console.error('!!!!! newItems["WWPxL9Am8OmZlbZi5IMW::Thinking-fast-and-slow"]',newItems);
               // bulkUpdatePerson(newItems)
               // setNotes(pdata);
-            }
-          }
-          setFreshData(false);
-        }
+            // }
+          // }
+          // setFreshData(false);
+        // }
+        // getNotesV2(undefined, resp => {
+        //   console.log('resp',resp);
+        //   const names = resp?.map(item => item.name);
+        //   console.log('names',names);
+        // })
         getAllNotesV2(currentUser, (resp) => {
           // console.error('resp',resp);
-          console.log('getMyNotes',resp);
           bulkUpdatePerson(resp)
           // setPerson(resp)
 
@@ -262,35 +267,45 @@ const App: React.FC<AppProps> = ({ theme, setTheme , notes, setNotes, noteNames,
 
   const getNoteNamesHandler = useCallback(
     (loginKey) => {
-      let savedNames = localStorage.getItem('notenames');
+      // let savedNames = localStorage.getItem('notenames');
 
-      if (savedNames) {
-        const savedNoteNames = JSON.parse(savedNames);
-        const selectedUser = selectedNoteName || null;
-        setNoteNames(savedNoteNames);
-        if (selectedUser) {
-          console.log('getMyNotes',loadingData);
-          getMyNotes(selectedUser);
-        }
-      }
+      // if (savedNames) {
+      //   const savedNoteNames = JSON.parse(savedNames);
+      //   const selectedUser = selectedNoteName || null;
+      //   setNoteNames(savedNoteNames);
+      //   if (selectedUser) {
+      //     console.log('getMyNotes',loadingData);
+      //     getMyNotes(selectedUser);
+      //   }
+      // }
       if (loginKey && !notesInitialLoad && !noteNames) {
-        getNoteNames((res) => {
-          if (res.length > 0) {
-            res.push('All');
-            res.push('None');
-            if (res && res.length > 0) {
-              localStorage.setItem('notenames', JSON.stringify(res));
-              let update: any = { noteNames: res };
-              if (!selectedNoteName) {
-                update = { ...update, user: res[0] };
-                console.log('getMyNotes',loadingData);
-                getMyNotes(res[0]);
-              }
-              setNoteNames(update.noteNames);
-              if (update.user) setSelectedNoteName(update.user);
+        getNotesV2(undefined, resp => {
+          const names: string[] = resp?.map(item => item.name) 
+          if(names.length){
+            setNoteNames([...names, 'All', 'None']);
+            if (!selectedNoteName) {
+              setSelectedNoteName(names[0]);
+              getMyNotes(names[0]);
             }
           }
-        });
+        })
+        // getNoteNames((res) => {
+        //   if (res.length > 0) {
+        //     res.push('All');
+        //     res.push('None');
+        //     if (res && res.length > 0) {
+        //       console.error('res',res);
+        //       // localStorage.setItem('notenames', JSON.stringify(res));
+        //       let update: any = { noteNames: res };
+        //       if (!selectedNoteName) {
+        //         update = { ...update, user: res[0] };
+        //         getMyNotes(res[0]);
+        //       }
+        //       setNoteNames(update.noteNames);
+        //       if (update.user) setSelectedNoteName(update.user);
+        //     }
+        //   }
+        // });
       }
     },
     [getMyNotes, noteNames, notesInitialLoad, selectedNoteName, loadingData],

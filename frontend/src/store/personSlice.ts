@@ -90,6 +90,7 @@ const personSlice = createSlice({
     },
     setNoteNames(state, action: PayloadAction<string[]>) {
       state.noteNames = action.payload;
+      localStorage.setItem('notenames', JSON.stringify(action.payload));
     },
     setSelectedNoteName(state, action: PayloadAction<string>) {
       // console.error('setSelectedNoteName', action.payload);
