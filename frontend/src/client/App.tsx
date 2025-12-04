@@ -78,35 +78,18 @@ const App: React.FC<AppProps> = ({
   const getMyNotes = useCallback(
     (noteName?: string | null) => {
       if (sessionStorage.getItem('loading')) return;
-      setLoadingData(true);
-      sessionStorage.setItem('loading', 'true');
       let currentUser = selectedNoteName;
       if (noteName) currentUser = noteName;
 
       if (currentUser && currentUser !== '') {
+        setLoadingData(true);
+        sessionStorage.setItem('loading', 'true');
         getNotesV2WithChildrenByParentId(currentUser, (resp) => {
           bulkUpdatePerson(resp);
-
-          const res: Note[] = Object.keys(resp).map((key) => {
-            return { ...resp[key], heading: resp[key]?.heading ?? 'Placeholder' };
-          });
-
-          if (res && res.length > 0) {
-            res.sort(compareSort);
-            setRedirect();
-            setFreshData(true);
-          }
-
-          const stateNotes = notes;
-          const reRender =
-            res && stateNotes ? JSON.stringify(res) !== JSON.stringify(stateNotes) : res && res.length > 0;
-          if (reRender && res.length > 0) {
-            setNotes(res);
-            setRedirect();
-          }
-
+          setFreshData(true);
           setLoadingData(false);
           sessionStorage.removeItem('loading');
+          if (resp) setRedirect();
         });
       }
     },
