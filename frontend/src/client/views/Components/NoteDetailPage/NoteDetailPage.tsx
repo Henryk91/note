@@ -57,9 +57,6 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ match, searchTerm, set 
 
   const scrollPageBack = useCallback(() => {
     if (pages && pages.length > 1) {
-      setTimeout(() => {
-        dispatch(removePersonById({ id: `${pages.length - 1}` }));
-      }, 350);
       const pageCount = pages.length;
       const noteDetailPage = document.getElementById('multiple-pages');
       if (noteDetailPage) {
