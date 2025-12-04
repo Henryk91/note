@@ -566,7 +566,8 @@ export default class Handler {
           newReq.body = {
             id: `${parentId}::LOG::${id}`,
             userId,
-            parentId: logDayCreate.id,
+            parentId,
+            // parentId: logDayCreate.id,
             type: 'LOG',
             content,
           };
