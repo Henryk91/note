@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { KeyValue, Note, PageDescriptor } from '../client/views/Helpers/types';
-import { getPersonNoteType } from '../client/views/Helpers/utils';
+import { createInitPage, getStorageJsonData } from '../client/views/Helpers/utils';
 
 type PersonState = {
   byId: KeyValue<Note>;
@@ -18,21 +18,17 @@ type SetPersonPayload = {
   person?: Note | null;
 };
 
-const createInitPage = (selectedNoteName?: string) => {
-  return { params: { id: selectedNoteName ?? 'main', tempId: selectedNoteName ?? 'main' } }
-}
-
 const initSelectedNoteName = localStorage.getItem('user') || undefined
-const initByIdData = localStorage.getItem(`${initSelectedNoteName}-data`);
 
 const initialState: PersonState = {
-  byId: initByIdData? JSON.parse(initByIdData) : {},
+  byId: getStorageJsonData(`${initSelectedNoteName}-data`, {}),
   notes: null,
   selectedNoteName: initSelectedNoteName,
   showTag: localStorage.getItem('showTag') || null,
   showAddItem: !!localStorage.getItem('new-folder-edit'),
   editName: false,
-  pages: localStorage.getItem('saved-pages')? JSON.parse(localStorage.getItem('saved-pages')+"") :[{ params: { id: initSelectedNoteName ?? '1main', tempId: initSelectedNoteName ?? 'main' } }],
+  pages: getStorageJsonData('saved-pages', [createInitPage(initSelectedNoteName)]), 
+  noteNames: getStorageJsonData('notenames'),
 };
 // console.log('initialState',initialState);
 const personSlice = createSlice({

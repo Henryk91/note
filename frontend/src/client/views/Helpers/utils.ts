@@ -331,3 +331,13 @@ export function allNotesToItems(data: NoteItemType[]) {
   // console.log(folderid, 'items[folderid]',items[folderid]);
   return items
 }
+
+export const createInitPage = (selectedNoteName?: string) => {
+  return { params: { id: selectedNoteName ?? 'main', tempId: selectedNoteName ?? 'main' } }
+}
+
+export const getStorageJsonData = (key: string, defaultValue?: any) => {
+  const stringData = localStorage.getItem(key);
+  if(stringData) return JSON.parse(stringData);
+  return defaultValue
+}
