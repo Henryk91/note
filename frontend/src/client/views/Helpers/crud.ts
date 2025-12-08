@@ -22,7 +22,7 @@ export const addFolder = (_name: string, _parentId: string, done: (data) => void
 
   let newItem: NoteItemType = {
     id: _parentId + "::" + ItemType.FOLDER + "::" + generateDocId(10),
-    name: _name,
+    name: _name.trim(),
     parentId: _parentId,
     type: ItemType.FOLDER,
   };

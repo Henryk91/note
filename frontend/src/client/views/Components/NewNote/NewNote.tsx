@@ -2,16 +2,20 @@ import React, { useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faCheck } from '@fortawesome/free-solid-svg-icons';
 import EditNoteCheck from '../EditNoteCheck/EditNoteCheck';
-import { generateDocId } from '../../Helpers/utils';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
+import { addFolder, addItem } from '../../Helpers/crud';
+import { NoteContent } from '../../Helpers/types';
+import { triggerLastPageReload } from '../../../../store/personSlice';
 
 type NewNoteProps = {
   set: (payload: any) => void;
 };
 
 const NewNote: React.FC<NewNoteProps> = ({ set }) => {
+  const dispatch = useDispatch();
   const theme = useSelector((state: RootState) => state.theme.themeLower);
+  const { selectedNoteName } = useSelector((state: RootState) => state.person);
   const themeBack = `${theme}-back`;
   const themeHover = `${theme}-hover`;
 
@@ -32,23 +36,23 @@ const NewNote: React.FC<NewNoteProps> = ({ set }) => {
     let tag = (form.tagType as HTMLInputElement).value;
 
     if (tag === 'Note') tag = (form.tagTypeText as HTMLInputElement).value;
-    const loginKey = localStorage.getItem('loginKey');
-    const uniqueId = generateDocId();
+
     const textTag = (form.tagTypeText as HTMLInputElement).value;
-    if (tag === 'Log') {
-      number = JSON.stringify({ json: true, date: textTag, data: number });
-    }
+    
+    let content: NoteContent = { data: number };
 
-    const note = {
-      id: uniqueId,
-      userId: loginKey,
-      createdBy: 'Unknown',
-      heading,
-      dataLable: [{ tag, data: number }],
-    };
+    if (tag === 'Log') content.date = textTag;
 
-    set({ note });
-    window.history.back();
+    if(selectedNoteName === undefined) return;
+
+    addFolder(heading, selectedNoteName, (mainFolder) => {
+      addFolder(tag, mainFolder?.id, (subFolder) => {
+        addItem(content, subFolder?.id, (data) => {
+          dispatch(triggerLastPageReload());
+          window.history.back();
+        })
+      })
+    })
   };
 
   return (

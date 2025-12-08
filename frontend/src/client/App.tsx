@@ -266,8 +266,8 @@ const App: React.FC<AppProps> = ({
     }
   }, [freshData, theme]);
 
-  const getLastPageData = () => {
-    if (lastPage?.params.id && lastPage?.params.id !== selectedNoteName && selectedNoteName) {
+  const getLastPageData = (override: boolean = false) => {
+    if ((lastPage?.params.id && lastPage?.params.id !== selectedNoteName && selectedNoteName) || override) {
       getNotesV2WithChildrenByParentId(lastPage?.params.id, (resp) => {
         if (resp) bulkUpdatePerson(resp);
       });
@@ -285,7 +285,7 @@ const App: React.FC<AppProps> = ({
 
   useEffect(() => {
     if (lastPage?.params.id && notesInitialLoad) {
-      getLastPageData();
+      getLastPageData(true);
     }
   }, [reloadLastPage]);
 
