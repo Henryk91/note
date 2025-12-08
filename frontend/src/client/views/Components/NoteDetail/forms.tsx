@@ -131,6 +131,8 @@ export const NoteDetailListItem: React.FC<NoteDetailListItemProps> = ({
   const themeHover = `${theme}-hover`;
 
   const propIsLog = prop === 'Log';
+  if(propIsLog && contentCount === 0) return <></>
+
   const className = propIsLog ? 'detailLogBoxTitle' : 'detailBoxTitle';
   const dateCounterId = propIsLog ? 'date-selector-counter' : '';
 
@@ -139,12 +141,11 @@ export const NoteDetailListItem: React.FC<NoteDetailListItemProps> = ({
       <div className={`detailTitleBox dark-hover ${linkBorder}`} onClick={onShowHide}>
         <div id={`${dateCounterId}`} className={`listCountBox white-color ${themeBorder}`} onClick={onShowLogDays}>
           <span className="list-count-item">
-            {' '}
-            {isLink && !contentCount ? <FontAwesomeIcon icon={faFolder} /> : contentCount}{' '}
+            {isLink && !contentCount ? <FontAwesomeIcon icon={faFolder} /> : contentCount}
           </span>
         </div>
         <h3 className={`${className} white-color`}>{prop || '<NAME NOT SET>'} </h3>
-        {propIsLog && (
+        {propIsLog && contentCount > 0 && (
           <>
             <form className={`${className} dateSelector`} onSubmit={onChangeDate as any}>
               <input
@@ -167,7 +168,7 @@ export const NoteDetailListItem: React.FC<NoteDetailListItemProps> = ({
         )}
       </div>
       <div className={`logToggleHeader detailTitleBox dark-hover ${linkBorder}`}>
-        {showTag === 'Log' && prop === 'Log' && (
+        {showTag === 'Log' && prop === 'Log' && contentCount && (
           <LogHeader continueData={continueData} onDateBackForward={onDateBackForward} onContinueLog={onContinueLog} />
         )}
       </div>
