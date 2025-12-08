@@ -130,42 +130,45 @@ export const NoteDetailListItem: React.FC<NoteDetailListItemProps> = ({
   const themeBorder = `${theme}-border-thick`;
   const themeHover = `${theme}-hover`;
 
-  const showDateSelector = prop === 'Log';
-  const className = showDateSelector ? 'detailLogBoxTitle' : 'detailBoxTitle';
-  const dateCounterId = showDateSelector ? 'date-selector-counter' : '';
+  const propIsLog = prop === 'Log';
+  const className = propIsLog ? 'detailLogBoxTitle' : 'detailBoxTitle';
+  const dateCounterId = propIsLog ? 'date-selector-counter' : '';
 
   return (
     <>
       <div className={`detailTitleBox dark-hover ${linkBorder}`} onClick={onShowHide}>
         <div id={`${dateCounterId}`} className={`listCountBox white-color ${themeBorder}`} onClick={onShowLogDays}>
-          <span className="list-count-item"> {isLink && !contentCount ? <FontAwesomeIcon icon={faFolder} /> : contentCount} </span>
+          <span className="list-count-item">
+            {' '}
+            {isLink && !contentCount ? <FontAwesomeIcon icon={faFolder} /> : contentCount}{' '}
+          </span>
         </div>
-        <h3 className={`${className} white-color`}>{prop || "<NAME NOT SET>"} </h3>
-        {showDateSelector && (
-          <form className={`${className} dateSelector`} onSubmit={onChangeDate as any}>
-            <input id="note-detail-date" onChange={onChangeDate as any} className={themeBack} type="date" name="dateSelector" />
-          </form>
-        )}
-        {showTag === 'Log' && prop === 'Log' && (
-          <button className={`detailBoxTitleButton ${themeBack} ${themeHover}`} onClick={() => onShowLogTag('')}>
-            Hide
-          </button>
-        )}
-        {showTag !== 'Log' && prop === 'Log' &&(
-          <div>
-            <button className={`detailBoxTitleButton ${themeBack} ${themeHover}`} onClick={() => onShowLogTag(prop)}>
-              Show
-            </button>
-          </div>
+        <h3 className={`${className} white-color`}>{prop || '<NAME NOT SET>'} </h3>
+        {propIsLog && (
+          <>
+            <form className={`${className} dateSelector`} onSubmit={onChangeDate as any}>
+              <input
+                id="note-detail-date"
+                onChange={onChangeDate as any}
+                className={themeBack}
+                type="date"
+                name="dateSelector"
+              />
+            </form>
+            <div>
+              <button
+                className={`detailBoxTitleButton ${themeBack} ${themeHover}`}
+                onClick={() => onShowLogTag(showTag === 'Log' ? '': prop)}
+              >
+                {showTag === 'Log' ? "Hide" :"Show"}
+              </button>
+            </div>
+          </>
         )}
       </div>
       <div className={`logToggleHeader detailTitleBox dark-hover ${linkBorder}`}>
         {showTag === 'Log' && prop === 'Log' && (
-          <LogHeader
-            continueData={continueData}
-            onDateBackForward={onDateBackForward}
-            onContinueLog={onContinueLog}
-          />
+          <LogHeader continueData={continueData} onDateBackForward={onDateBackForward} onContinueLog={onContinueLog} />
         )}
       </div>
     </>
