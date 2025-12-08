@@ -309,18 +309,20 @@ const NoteItem: React.FC<NoteItemProps> = ({
     }
   }, [show, editingItem]);
 
-  const itemIsString = item && typeof item.data === 'string';
-  const isLog = !!(item as NoteContent)?.date;
+  const isLog = !!item?.date && !!item?.data;
   const editing = editingItem && show;
+
   const noEditingIsLog = !editing && isLog;
   const noEditingNoLog = !editing && !isLog;
+
+  const noEditingIsLogDay = !editing && item.data === undefined;
 
   if (!item) return <></>;
 
   return (
     <div>
       <div className="noteTagBox">
-        {editing && itemIsString && (
+        {editing && (
           <EditItemBox
             item={item}
             onSubmit={submitChange}
@@ -341,9 +343,9 @@ const NoteItem: React.FC<NoteItemProps> = ({
             onEdit={() => setEditingItem(true)}
           />
         )}
-        {noEditingNoLog && itemIsString && (
-          <DisplayItemBox item={item.data} showEdit={showEdit} count={count} show={show} onEdit={setEditState} />
-        )}
+        {noEditingNoLog && (
+          <DisplayItemBox item={noEditingIsLogDay? item.date+"": item.data} showEdit={showEdit} count={count} show={show} onEdit={setEditState} />
+         )}
       </div>
     </div>
   );

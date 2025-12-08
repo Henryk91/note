@@ -167,7 +167,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
           <NoteItem
             nextItem={undefined}
             prevItem={undefined}
-            item={item}
+            item={{date: item.date }}
             date={selectedDate}
             show={showButton && lastPage}
             set={updateNoteItem}
