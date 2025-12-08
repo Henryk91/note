@@ -193,10 +193,10 @@ const App: React.FC<AppProps> = ({
 
   const checkLoginState = useCallback(() => {
     const loginKey = localStorage.getItem('loginKey');
-
     if (loginKey !== null) {
       getNoteNamesHandler(loginKey);
       getNotesOnLoad(loginKey, selectedNoteName);
+      getLastPageData(true)
     }
   }, [getNoteNamesHandler, getNotesOnLoad, setTheme, selectedNoteName]);
 
@@ -237,7 +237,7 @@ const App: React.FC<AppProps> = ({
   useEffect(() => {
     const menuBtn = document.getElementById('menuButton');
     if (menuBtn) {
-      if (freshData) {
+      if (!loadingData) {
         menuBtn.style.color = '#ffffff';
       } else {
         menuBtn.style.color = '#ffa500';
@@ -264,12 +264,15 @@ const App: React.FC<AppProps> = ({
       document.body.style.backgroundColor = '#061f2f';
       document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#27343b');
     }
-  }, [freshData, theme]);
+  }, [loadingData, theme]);
 
   const getLastPageData = (override: boolean = false) => {
+    if(loadingData) return;
     if ((lastPage?.params.id && lastPage?.params.id !== selectedNoteName && selectedNoteName) || override) {
+      setLoadingData(true);
       getNotesV2WithChildrenByParentId(lastPage?.params.id, (resp) => {
         if (resp) bulkUpdatePerson(resp);
+        setLoadingData(false);
       });
     }
   };
