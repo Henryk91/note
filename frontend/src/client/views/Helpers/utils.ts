@@ -11,31 +11,6 @@ export const generateDocId = (count: number = 20): string => {
   return text;
 };
 
-export const getPersonNoteType = (notes: Note[] | null, propForId: any, selectedNoteName?: string): Note | null => {
-  const personFound = notes?.filter((val) => val.id === propForId?.params.id)?.[0];
-  let person = personFound ? { ...personFound } : null;
-  if (person?.id === selectedNoteName && person?.dataLable) {
-    person.dataLable = person.dataLable.filter((note) => !note.tag.startsWith('Sub: '));
-  }
-  return person;
-};
-
-export const getPerson = (
-  notes: Note[] | null,
-  propForId: any,
-  propNoteNames: string[] | null
-): Note | string[] | undefined | null => {
-  if (propForId === 'note-name') {
-    return propNoteNames;
-  }
-  const personFound = notes?.filter((val) => val.id === propForId?.params.id)?.[0];
-  let person = personFound ? { ...personFound } : undefined;
-  if (person?.id === 'main' && person.dataLable) {
-    person.dataLable = person.dataLable.filter((note) => !note.tag.startsWith('Sub: '));
-  }
-  return person;
-};
-
 export const compareSort = (a: Note, b: Note): number => {
   const nameA = a.heading.toUpperCase();
   const nameB = b.heading.toUpperCase();
@@ -297,3 +272,13 @@ export const getStorageJsonData = (key: string, defaultValue?: any) => {
   if (stringData) return JSON.parse(stringData);
   return defaultValue;
 };
+
+
+export const setLogDirAtTop = (person: Note) => {
+  const logFolder = person?.dataLable?.find(d => d.name === 'Log');
+  if(!logFolder) return person;
+  return {
+    ...person,
+    dataLable: [logFolder, ...person?.dataLable?.filter(d => d.name !== 'Log')]
+  }
+}

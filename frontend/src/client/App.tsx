@@ -15,7 +15,7 @@ import { compareSort } from './views/Helpers/utils';
 import { KeyValue, Note, PageDescriptor } from './views/Helpers/types';
 import { RootState } from '../store';
 import { setTheme } from '../store/themeSlice';
-import { setNotes, setNoteNames, setSelectedNoteName, setPerson, bulkUpdatePerson } from '../store/personSlice';
+import { setNotes, setNoteNames, setSelectedNoteName, bulkUpdatePerson } from '../store/personSlice';
 
 const Home = lazy(() => import('./views/Components/Home/Home'));
 const NewNote = lazy(() => import('./views/Components/NewNote/NewNote'));
@@ -45,7 +45,6 @@ type AppProps = {
   setNotes: (notes: Note[] | null) => void;
   setNoteNames: (notes: string[]) => void;
   setSelectedNoteName: (notes: string) => void;
-  setPerson: (notes: KeyValue<Note>) => void;
   bulkUpdatePerson: (notes: KeyValue<Note>) => void;
 };
 
@@ -58,7 +57,6 @@ const App: React.FC<AppProps> = ({
   setNoteNames,
   selectedNoteName,
   setSelectedNoteName,
-  setPerson,
   lastPage,
   pages,
   bulkUpdatePerson,
@@ -357,7 +355,6 @@ const mapDispatchToProps = {
   setNotes,
   setNoteNames,
   setSelectedNoteName,
-  setPerson,
   bulkUpdatePerson,
 };
 

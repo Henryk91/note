@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { KeyValue, Note, PageDescriptor } from '../client/views/Helpers/types';
-import { createInitPage, getStorageJsonData } from '../client/views/Helpers/utils';
+import { createInitPage, getStorageJsonData, setLogDirAtTop } from '../client/views/Helpers/utils';
 
 type PersonState = {
   byId: KeyValue<Note>;
@@ -46,7 +46,7 @@ const personSlice = createSlice({
         if (p[key].id === p[key].heading){
           p[key].dataLable.sort((a, b) => (a?.name ?? '').localeCompare(b?.name ?? ''));
         }
-        freshState[key] = p[key];
+        freshState[key] = setLogDirAtTop(p[key]);
       });
 
       state.byId = freshState;
@@ -56,15 +56,10 @@ const personSlice = createSlice({
         localStorage.setItem(storageKey, JSON.stringify(freshState));
       }
     },
-    setPerson(state, action: PayloadAction<KeyValue<Note>>) {
-      const p = action.payload;
-      if (!p) return;
-      state.byId = p;
-    },
     setPersonById(state, action: PayloadAction<SetPersonPayload>) {
       const { id, person } = action.payload;
       if (!person) return;
-      state.byId[id] = person;
+      state.byId[id] = setLogDirAtTop(person);
     },
     removePersonById(state, action: PayloadAction<{ id: string }>) {
       const { id } = action.payload;
@@ -131,7 +126,6 @@ const personSlice = createSlice({
 });
 
 export const {
-  setPerson,
   setPersonById,
   removePersonById,
   setNotes,
