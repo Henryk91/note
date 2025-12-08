@@ -7,7 +7,7 @@ import { RootState } from '../../../../store';
 type PageContentProps = {
   person: Note;
   showAddItem: boolean;
-  tags: React.ReactNode;
+  tags: React.JSX.Element[];
   addLable: any;
   index?: number;
   lastPage?: boolean;
@@ -59,7 +59,7 @@ const PageContent: React.FC<PageContentProps> = ({
           />
         </div>
       )}
-      {tags && <div> {tags} </div>}
+      <div className={tags?.length ? "": "detailedBox"}> {tags} </div>
       <br />
     </div>
   );
