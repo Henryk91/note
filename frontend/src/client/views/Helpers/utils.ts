@@ -20,15 +20,21 @@ export const compareSort = (a: Note, b: Note): number => {
   return 0;
 };
 
+export const checkIsSameDate = (dateOne: Date, dateTwo: Date): boolean => {
+  return (
+    dateTwo.getDate() === dateOne.getDate() &&
+    dateTwo.getMonth() === dateOne.getMonth() &&
+    dateTwo.getFullYear() === dateOne.getFullYear()
+  );
+};
+
 const checkIsSameDay = (dateOne: string, dateTwo: string): boolean => {
   const today = new Date(dateOne);
   const someDate = new Date(dateTwo);
-  return (
-    someDate.getDate() === today.getDate() &&
-    someDate.getMonth() === today.getMonth() &&
-    someDate.getFullYear() === today.getFullYear()
-  );
+  return checkIsSameDate(today, someDate)
 };
+
+
 
 const checkIsToday = (dateString: string): boolean => {
   const today = new Date();

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import NoteItem from '../NoteItem/NoteItem';
-import { Note, NoteContent, NoteItemType, PageDescriptor } from '../../Helpers/types';
+import { KeyValue, Note, NoteContent, NoteItemType, PageDescriptor } from '../../Helpers/types';
 import PageContent from './PageContent';
 import { NoteDetailListItem } from './forms';
 
@@ -17,6 +17,7 @@ import {
   triggerLastPageReload,
 } from '../../../../store/personSlice';
 import { addFolder, addItem, deleteItem, updateItem } from '../../Helpers/crud';
+import { checkIsSameDate } from '../../Helpers/utils';
 
 type Match = {
   isExact: boolean;
@@ -61,6 +62,8 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   const [searchTermState, setSearchTermState] = useState<string | undefined>(searchTerm);
   const [prevDate, setPrevDate] = useState<string | null>(null);
   const [nextDate, setNextDate] = useState<string | null>(null);
+  const [totalLogCount, setTotalLogCount] = useState<number>(0);
+  const [logDayMap, setLogDayMap] = useState<KeyValue<NoteItemType[]> | null>(null);
 
   function enableAnimationCheck(tag: string | null, prop: string) {
     if (tag === prop && tag !== '' && prop !== 'Log') return 'grow';
@@ -178,27 +181,29 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     });
   }
 
-  function createNoteLogLineItems(items: NoteItemType[], prop: string, selectedDate: string, showButton: boolean) {
-    const max = items.length;
+  const createNoteLogLineItems = (showButton: boolean) => {
+    const checkDate = displayDate?.toString().substring(0, 15).trim();
+    if(!logDayMap || !checkDate) return;
+    const filteredItems = logDayMap?.[checkDate]? [...logDayMap[checkDate]]: []
+    const max = filteredItems.length;
 
-    if (items[0] === undefined) return '';
+    return [...filteredItems]?.map((item, ind) => {
+      const prevItemLocal = ind > -1 ? filteredItems[ind - 1] : null;
+      const nextItemLocal = ind < max ? filteredItems[ind + 1] : null;
 
-    return items?.map((item, ind) => {
-      const prevItemLocal = ind > -1 ? items[ind - 1] : null;
-      const nextItemLocal = ind < max ? items[ind + 1] : null;
+      const key = item.id + "Log" + ind;
 
-      const key = item + prop + ind;
       return (
-        <div onClick={() => setDate(prop, item?.content?.date + '')} key={key}>
+        <div onClick={() => setDate("Log", item?.content?.date + '')} key={key}>
           <NoteItem
             nextItem={nextItemLocal}
             prevItem={prevItemLocal}
             item={item?.content}
-            date={selectedDate}
+            date={checkDate}
             show={showButton && lastPage}
             set={updateNoteItem}
             cont={continueLog}
-            type={prop}
+            type={"Log"}
             index={ind}
             count={0}
           />
@@ -207,48 +212,33 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     });
   }
 
-  function logDayBunchLogic(prop: string, selectedDate: Date | string | null, allDates: any[]) {
-    let newSelectedDate = selectedDate;
-    let newLogDaysBunch;
+  const logDayBunchLogic = () => {
+      if (!logDayMap) return []
+      const logDays = Object.keys(logDayMap).map(key => {
+        return {date: key, count: logDayMap[key]?.length}
+      })
 
-    if (prop === 'Log') {
-      if (selectedDate === null) {
-        let lastDate = [...allDates].slice(allDates.length - 1);
-        if (lastDate[0]) {
-          newSelectedDate = new Date(lastDate[0].content.date);
-          if (newSelectedDate) setDisplayDate(newSelectedDate);
-        }
-      }
-      const allLogDays = [...allDates].map((item) => item.content.date.substring(0, 15).trim());
-
-      const logDaysTemp = [...allLogDays].filter((v, ind, s) => s.indexOf(v) === ind);
-
-      const logDays = [...logDaysTemp].map((day) => {
-        const total = allLogDays.filter((allDay) => allDay === day).length;
-        return { date: day, count: total };
-      });
-
-      let selDate = `${new Date(newSelectedDate as any)}`;
+      let selDate = `${new Date(displayDate as any)}`;
       selDate = selDate.substring(0, 15).trim();
       const logDaysBunch = createLogDateSelectorLines(
         logDays.reverse(),
-        newSelectedDate?.toString() ?? '',
+        displayDate?.toString() ?? '',
         showLogDaysBunch
       );
 
-      let selDates = [...allDates].filter((val) => val.content.date.includes(selDate));
-      if (selDates.length > 0) {
+
+      let selDates = logDayMap[selDate];
+      if (selDates && selDates.length > 0) {
         selDates = selDates.slice(selDates.length - 2);
-        const contData = selDates[0].content.data;
+        const contData = selDates[0]?.content?.data;
         setContinueData(contData);
       }
-      newLogDaysBunch = logDaysBunch;
-    }
-    return { selectedDate: newSelectedDate, logDaysBunch: newLogDaysBunch };
+      return logDaysBunch;
   }
 
   function saveShowTag(tagName: string) {
     if (!person) return;
+    if(tagName === 'Log') setShowLogDaysBunch(false);
     dispatch(setShowTag(tagName));
   }
 
@@ -450,6 +440,37 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     localStorage.removeItem('new-folder-edit');
   }
 
+  const initLogDayMap = () => {
+    const logItem = person?.dataLable.find(item => item.name === 'Log');
+    if (!logItem) return 0;
+    
+    let allDates = getDataLableFilteredAndSorted(persons?.[logItem.id]?.dataLable, 'Log', searchTermState);
+    if (displayDate === null) {
+      let lastDate = [...allDates].slice(allDates.length - 1);
+      if (lastDate[0]) {
+        const newSelectedDate = new Date(lastDate[0]?.content?.date +"");
+        if (newSelectedDate) setDisplayDate(newSelectedDate);
+      }
+    }
+
+    let map = {};
+    allDates.forEach(item => {
+      const dateString = item?.content?.date?.substring(0, 15).trim();
+      if(dateString){
+        if(!map[dateString]) map[dateString] = []
+        map[dateString].push(item)
+      }
+    })
+
+    setLogDayMap(map);
+    setTotalLogCount(allDates.length)
+    return allDates.length ?? 1
+  }
+
+  useEffect(() => {
+    initLogDayMap();
+  },[person?.dataLable])
+
   useEffect(() => {
     initPage();
   }, []);
@@ -467,27 +488,23 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     if (prop !== 'Log') return {};
 
     const showTagValue = showTag ?? selectedNoteName ?? 'main';
-
-    let allDates = getDataLableFilteredAndSorted(persons?.[noteItem.id]?.dataLable, prop, searchTermState);
-
     const animate = enableAnimationCheck(showTagValue, prop);
-
-    const { selectedDate, logDaysBunch } = logDayBunchLogic(prop, displayDate, allDates);
-
-    let bunch = createNoteLogLineItems(allDates, prop, selectedDate?.toString() ?? '', showTagValue === prop);
+    const logDaysBunch = logDayBunchLogic();
+    let bunch = createNoteLogLineItems(showTagValue === prop);
 
     const logContent = noteItemsBunch(animate, logDaysBunch, bunch, showLogDaysBunch);
-    return { logContent, count: bunch.length };
+
+    return { logContent, count: bunch?.length }
   };
 
   const tags = useMemo(() => {
-    const ret = person?.dataLable?.map((noteItem, i) => {
+    return person?.dataLable?.map((noteItem, i) => {
       let isLink = noteItem.type === 'FOLDER';
       let isNote = noteItem.type === 'NOTE';
       const linkBorder = isLink ? 'link-border' : '';
       const prop = noteItem.name ?? noteItem?.content?.data ?? 'Unknown';
 
-      const key = prop + i;
+      const key = prop + noteItem.id + i;
 
       const dateItem = noteItem.content?.data;
 
@@ -525,14 +542,13 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
                 cont={continueLog}
                 type={prop}
                 index={i}
-                count={0}
+                count={count ?? 0}
               />
             </div>
           )}
         </div>
       );
     });
-    return ret;
   }, [
     person?.dataLable,
     showTag,
@@ -543,8 +559,10 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     searchTermState,
     lastPage,
     selectedNoteName,
+    logDayMap,
+    totalLogCount
   ]);
-
+  
   return (
     <div className="slide-in">
       {personToRender && (
