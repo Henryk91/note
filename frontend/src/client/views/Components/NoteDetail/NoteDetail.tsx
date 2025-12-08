@@ -52,7 +52,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   const dispatch = useDispatch();
   const person = useSelector((state: RootState) => selectPersonById(state, initShowtag?.params.id));
   const persons = useSelector((state: RootState) => getAllPersonById(state));
-  const { showTag, editName, selectedNoteName } = useSelector((state: RootState) => state.person);
+  const { pages, showTag, editName, selectedNoteName } = useSelector((state: RootState) => state.person);
 
   const [addLable, setAddLable] = useState<any>(null);
   const [displayDate, setDisplayDate] = useState<Date | string | null>(null);
@@ -335,12 +335,16 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   function submitNameChange(e) {
     e.preventDefault();
     const heading = e.target.heading.value;
-    const updatedPerson = person ? { ...person } : null;
-    if (updatedPerson && updatedPerson.heading !== heading) {
-      updatedPerson.heading = heading;
-      set({ person: updatedPerson });
-    } else {
-      dispatch(setEditName(false));
+
+    const parentId = pages[pages.length - 2]?.params?.id;
+    let currentNote = {...persons[parentId].dataLable.find(d => d.id === person?.id)};
+
+    dispatch(setEditName(false));
+    if (currentNote && currentNote.name !== heading) {
+      currentNote.name = heading;
+      updateItem(currentNote as NoteItemType, () => {
+        dispatch(triggerLastPageReload());
+      });
     }
   }
 
