@@ -45,7 +45,7 @@ const PageContent: React.FC<PageContentProps> = ({
       ) : (
         <div id="personContainer" className="page-content-top1">
           <h1 id="personHead" className="nameBox">
-            {heading}
+            {heading || "<NAME NOT SET>"}
           </h1>
         </div>
       )}

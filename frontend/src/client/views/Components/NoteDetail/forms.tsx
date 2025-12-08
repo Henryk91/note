@@ -140,7 +140,7 @@ export const NoteDetailListItem: React.FC<NoteDetailListItemProps> = ({
         <div id={`${dateCounterId}`} className={`listCountBox white-color ${themeBorder}`} onClick={onShowLogDays}>
           <span className="list-count-item"> {isLink && !contentCount ? <FontAwesomeIcon icon={faFolder} /> : contentCount} </span>
         </div>
-        <h3 className={`${className} white-color`}>{prop} </h3>
+        <h3 className={`${className} white-color`}>{prop || "<NAME NOT SET>"} </h3>
         {showDateSelector && (
           <form className={`${className} dateSelector`} onSubmit={onChangeDate as any}>
             <input id="note-detail-date" onChange={onChangeDate as any} className={themeBack} type="date" name="dateSelector" />
