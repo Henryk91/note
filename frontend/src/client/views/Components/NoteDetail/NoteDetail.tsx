@@ -403,8 +403,6 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
       if (direction === 'back') {
         if (nextDate) {
           dateObj = new Date(nextDate);
-        } else {
-          dateObj.setDate(dateObj.getDate() - 1);
         }
       } else if (prevDate) {
         dateObj = new Date(prevDate);
