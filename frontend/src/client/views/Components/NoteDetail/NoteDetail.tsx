@@ -141,10 +141,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   }
 
   function handleLinkClick(tagData, currentPerson) {
-    const noteId = tagData.id;
-    const personNext = persons[noteId];
-    const parentId = currentPerson.id;
-    openPage({ personNext, parentId, hideNote: true });
+    openPage({ personNext: { id: tagData.id }, parentId: currentPerson.id, hideNote: true });
   }
 
   function createLogDateSelectorLines(items: LogDay[], selectedDate: string, showButton: boolean) {
