@@ -43,6 +43,9 @@ const personSlice = createSlice({
       const freshState = { ...state.byId };
       const keys = Object.keys(p);
       keys.forEach((key) => {
+        if (p[key].id === p[key].heading){
+          p[key].dataLable.sort((a, b) => (a?.name ?? '').localeCompare(b?.name ?? ''));
+        }
         freshState[key] = p[key];
       });
 
