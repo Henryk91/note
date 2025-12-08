@@ -256,6 +256,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   }
 
   function showHideBox(prop: string) {
+
     if (prop !== 'Log') showTagChange(prop);
   }
 
@@ -439,6 +440,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
       // const start = localNoteDetailPage.scrollWidth - pageWidth - pageWidth;
       // const end = start + pageWidth;
       // customScrollBy(localNoteDetailPage, start, end);
+      window.scrollTo({ top: 0 });
       localNoteDetailPage.scrollTo({
         left: localNoteDetailPage.scrollWidth * 2,
         behavior: 'smooth',
