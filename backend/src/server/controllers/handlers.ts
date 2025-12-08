@@ -62,7 +62,7 @@ const noteV2Schema = new Schema<NoteV2Attrs>({
   id: { type: String, required: true },
   userId: { type: String, required: true },
   name: { type: String },
-  parentId: { type: String, required: true },
+  parentId: { type: String },
   type: { type: String, required: true },
   content: { type: noteContent },
 });
@@ -515,6 +515,22 @@ export default class Handler {
         console.log('Note with this id already Created!');
         done(existing);
         return;
+      }
+
+      const existingParent = await NoteV2Model.findOne({
+        userId,
+        id: parentId,
+      });
+      if (!existingParent) {
+        const folder: NoteV2Attrs = {
+          name: parentId,
+          id: parentId,
+          parentId: '',
+          type: 'FOLDER',
+          userId,
+        };
+        const createHighLevelFolder = new NoteV2Model(folder);
+        await createHighLevelFolder.save();
       }
 
       const note: NoteV2Attrs = {
