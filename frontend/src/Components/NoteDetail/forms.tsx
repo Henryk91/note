@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faArrowRight, faCheck, faFolder, faTimes } from '@fortawesome/free-solid-svg-icons';
 import EditNoteCheck from '../EditNoteCheck/EditNoteCheck';
 import { Note } from '../../Helpers/types';
-import { RootState } from '../../../../store';
+import { RootState } from '../../store';
 import { useSelector } from 'react-redux';
 
 export type EditNameFormProps = {

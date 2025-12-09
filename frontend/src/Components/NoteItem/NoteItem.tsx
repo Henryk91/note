@@ -6,7 +6,7 @@ import { marked } from 'marked';
 import { getLogDuration } from '../../Helpers/utils';
 import { NoteItemType, NoteContent } from '../../Helpers/types';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../../../store';
+import { RootState } from '../../store';
 
 marked.setOptions({
   breaks: true,

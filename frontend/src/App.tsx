@@ -3,25 +3,25 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars } from '@fortawesome/free-solid-svg-icons';
 import { connect } from 'react-redux';
 import { BrowserRouter as Router, Route, Link, Redirect, Switch } from 'react-router-dom';
-import { SearchBar, NoteDetailPage } from './views/Components/index';
+import { SearchBar, NoteDetailPage } from './Components/index';
 import {
   saveNewNote,
   updateOneNoteRec,
   getNotesV2WithChildrenByParentId,
   getNotesV2ByParentId,
-} from './views/Helpers/requests';
+} from './Helpers/requests';
 
-import { compareSort } from './views/Helpers/utils';
-import { KeyValue, Note, PageDescriptor } from './views/Helpers/types';
-import { RootState } from '../store';
-import { setTheme } from '../store/themeSlice';
-import { setNotes, setNoteNames, setSelectedNoteName, bulkUpdatePerson } from '../store/personSlice';
+import { compareSort } from './Helpers/utils';
+import { KeyValue, Note, PageDescriptor } from './Helpers/types';
+import { RootState } from './store';
+import { setTheme } from './store/themeSlice';
+import { setNotes, setNoteNames, setSelectedNoteName, bulkUpdatePerson } from './store/personSlice';
 
-const Home = lazy(() => import('./views/Components/Home/Home'));
-const NewNote = lazy(() => import('./views/Components/NewNote/NewNote'));
-const Login = lazy(() => import('./views/Components/Login/Login'));
-const Pomodoro = lazy(() => import('./views/Components/Pomodoro/Pomodoro'));
-const Memento = lazy(() => import('./views/Components/Memento/Memento'));
+const Home = lazy(() => import('./Components/Home/Home'));
+const NewNote = lazy(() => import('./Components/NewNote/NewNote'));
+const Login = lazy(() => import('./Components/Login/Login'));
+const Pomodoro = lazy(() => import('./Components/Pomodoro/Pomodoro'));
+const Memento = lazy(() => import('./Components/Memento/Memento'));
 
 type ProtectedRoutesProps = {
   children: React.ReactElement;

@@ -1,11 +1,11 @@
 @import url('https://fonts.googleapis.com/css?family=Open+Sans');
 
-@import url('./views/Components/SearchBar/style.css');
-@import url('./views/Components/Home/style.css');
-@import url('./views/Components/NoteDetail/style.css');
-@import url('./views/Components/NewNote/style.css');
-@import url('./views/Components/NoteItem/style.css');
-@import url('./views/Components/EditNoteCheck/style.css');
+@import url('./Components/SearchBar/style.css');
+@import url('./Components/Home/style.css');
+@import url('./Components/NoteDetail/style.css');
+@import url('./Components/NewNote/style.css');
+@import url('./Components/NoteItem/style.css');
+@import url('./Components/EditNoteCheck/style.css');
 
 
 header {

@@ -5,7 +5,7 @@ import PageContent from './PageContent';
 import { NoteDetailListItem } from './forms';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../../../store';
+import { RootState } from '../../store';
 import {
   getAllPersonById,
   removePersonById,
@@ -15,7 +15,7 @@ import {
   setShowAddItem,
   setShowTag,
   triggerLastPageReload,
-} from '../../../../store/personSlice';
+} from '../../store/personSlice';
 import { addFolder, addItem, deleteItem, updateItem } from '../../Helpers/crud';
 import { checkIsSameDate } from '../../Helpers/utils';
 

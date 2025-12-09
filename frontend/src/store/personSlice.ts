@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { KeyValue, Note, PageDescriptor } from '../client/views/Helpers/types';
-import { createInitPage, getStorageJsonData, setLogDirAtTop } from '../client/views/Helpers/utils';
+import { KeyValue, Note, PageDescriptor } from '../Helpers/types';
+import { createInitPage, getStorageJsonData, setLogDirAtTop } from '../Helpers/utils';
 
 type PersonState = {
   byId: KeyValue<Note>;

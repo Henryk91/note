@@ -3,10 +3,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faCheck } from '@fortawesome/free-solid-svg-icons';
 import EditNoteCheck from '../EditNoteCheck/EditNoteCheck';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../../../store';
+import { RootState } from '../../store';
 import { addFolder, addItem } from '../../Helpers/crud';
 import { NoteContent } from '../../Helpers/types';
-import { triggerLastPageReload } from '../../../../store/personSlice';
+import { triggerLastPageReload } from '../../store/personSlice';
 
 type NewNoteProps = {
   set: (payload: any) => void;

@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { Note } from '../../Helpers/types';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../../../store';
+import { RootState } from '../../store';
 
 type SearchBarProps = {
   set: (payload: any) => void;

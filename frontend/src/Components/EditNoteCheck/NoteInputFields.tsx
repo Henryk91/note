@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Note } from '../../Helpers/types';
 import AutoCompleteTextArea from './AutoCompleteTextArea';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../../../store';
+import { RootState } from '../../store';
 
 type BaseProps = {
   themeBack: string;

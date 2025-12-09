@@ -2,7 +2,7 @@ import React from 'react';
 import { Note } from '../../Helpers/types';
 import { AddItemForm, EditNameForm } from './forms';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../../../store';
+import { RootState } from '../../store';
 
 type PageContentProps = {
   person: Note;

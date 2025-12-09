@@ -4,8 +4,8 @@ import { Match, PageDescriptor } from '../../Helpers/types';
 import { NoteDetailPageItem, Sidebar, ScrollButtons, BackButton } from './NoteDetailPageParts';
 
 import { useDispatch, useSelector } from 'react-redux';
-import { removePersonById, setShowTag, removeLastPage, resetPages, setPages } from '../../../../store/personSlice';
-import { RootState } from '../../../../store';
+import { removePersonById, setShowTag, removeLastPage, resetPages, setPages } from '../../store/personSlice';
+import { RootState } from '../../store';
 
 type NoteDetailPageProps = {
   set: (payload: any) => void;

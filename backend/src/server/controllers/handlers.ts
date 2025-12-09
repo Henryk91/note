@@ -29,7 +29,7 @@ export interface NoteV2Attrs {
 }
 
 export type NoteItemMap = {
-  [key: string]: { heading: string; id: string; dataLable: NoteV2Attrs[] };
+  [key: string]: { heading?: string; id: string; dataLable: NoteV2Attrs[] };
 };
 
 type NoteV2Doc = mongoose.HydratedDocument<NoteV2Attrs>;

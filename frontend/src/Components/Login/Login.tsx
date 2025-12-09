@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { loginRequest, createAccount } from '../../Helpers/requests';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../../../store';
+import { RootState } from '../../store';
 
 const Login: React.FC = () => {
   const theme = useSelector((state: RootState) => state.theme.themeLower);

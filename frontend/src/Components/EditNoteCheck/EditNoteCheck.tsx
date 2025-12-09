@@ -9,7 +9,7 @@ import {
   NewUploadField,
 } from './NoteInputFields';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../../../store';
+import { RootState } from '../../store';
 
 type EditNoteCheckProps = {
   note?: Note | null;

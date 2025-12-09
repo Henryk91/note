@@ -6,10 +6,10 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import NoteDetail from '../NoteDetail/NoteDetail';
 import { Match, PageDescriptor } from '../../Helpers/types';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../../../store';
-import { setTheme } from '../../../../store/themeSlice';
+import { RootState } from '../../store';
+import { setTheme } from '../../store/themeSlice';
 import { THEMES } from '../../Helpers/const';
-import { setEditName, setShowAddItem } from '../../../../store/personSlice';
+import { setEditName, setShowAddItem } from '../../store/personSlice';
 
 export type NoteDetailPageItemProps = {
   searchTerm: string;

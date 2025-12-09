@@ -1,7 +1,7 @@
 import React from 'react';
 import './style.css';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../../../store';
+import { RootState } from '../../store';
 
 type YearProps = {
   day: number;

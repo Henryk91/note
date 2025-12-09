@@ -4,7 +4,7 @@ import { faPlus, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
 import { Note } from '../../Helpers/types';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../../../store';
+import { RootState } from '../../store';
 
 const onlyUnique = (value: string, index: number, self: string[]) => self.indexOf(value) === index;
 
