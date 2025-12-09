@@ -210,6 +210,7 @@ const App: React.FC<AppProps> = ({
         event.preventDefault();
         window.history.back();
         checkLoginState();
+        getLastPageData(true);
       }
     },
     [checkLoginState]
