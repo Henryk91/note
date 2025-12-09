@@ -48,32 +48,20 @@
       /* margin-left: 25vw; */
     }
     .first-note-detail-item{
-      margin-left: 25vw;
+      /* margin-left: 25vw; */
+    }
+
+    #multiple-pages{
+      width: 605px;
+      overflow: hidden;
     }
   }
 
 
 .detailBoxTitle{
-  display: inline-block !important;
-  vertical-align: middle !important;
-  width:79%
-}
-.detailLogBoxTitle{
-  display: inline-block !important;
-  vertical-align: middle !important;
+  width:81%
 }
 
-.detailBoxTitleButton{
-  /* position: relative;
-  float:right;
-  margin-right: 0px;
-  margin-top: -43px; */
-}
-
-.dateSelector{
-  /* margin-left: 10px; */
-  
-}
 #date-selector-counter{
   margin-right: unset;
 }
@@ -96,12 +84,10 @@
   padding-left: 10px !important;
   display: flex;
   flex-direction: row;
-  justify-content: space-evenly;
+  justify-content: space-between;
   align-items: center;
 }
-#nameBoxButton:hover{
-  /* background: rgba(187, 59, 0, 0.7); */
-}
+
 @media(min-width: 1000px){
   #nameBoxButton{
     right: 26vw;
@@ -138,27 +124,16 @@ input[type="date"]::-webkit-inner-spin-button{
 .link-border{
   border-bottom: 1px solid;
 }
-#multiple-pages1{
-  /* margin-left: 25vw; */
-}
+
 #multiple-pages{
   display: flex;
   flex-direction: row;
   overflow-x: hidden;
-  /* overscroll-behavior: none; */
-  /* margin-left: 25vw; */
-  /* padding-left: 25vw; */
-      /* align-items: center; */
-  /* justify-content: center; */
 }
 .note-detail-item{
   justify-content: center;
-  /* margin-left: 25vw; */
 }
 
-#personContainer{
-  /* margin-left: 25vw; */
-}
 .logToggleHeader{
   border: 1px solid;
   justify-content: center;
@@ -171,4 +146,29 @@ input[type="date"]::-webkit-inner-spin-button{
 }
 #isFirstPage{
   max-width: 98vw;
+}
+.list-count-folder{
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.list-count-folder-icon{
+  font-size: 25px;
+}
+.list-count-folder-number{
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  font-weight: 700;
+  color: inherit;
+  line-height: 1;
+  color: rgb(6, 31, 47);
+}
+@media(min-width: 650px){
+  .list-count-folder-number{
+    top: 50%;
+  }
 }

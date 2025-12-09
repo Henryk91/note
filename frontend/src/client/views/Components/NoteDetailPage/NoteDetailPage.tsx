@@ -195,17 +195,6 @@ const NoteDetailPage: React.FC<NoteDetailPageProps> = ({ match, searchTerm, set 
       {isNoteNames && <Sidebar prepForNote={prepForNote} />}
       <div id="multiple-pages">{pagesCont}</div>
       <ScrollButtons showBackButton={showBackButton} />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
-      <br />
     </div>
   );
 };

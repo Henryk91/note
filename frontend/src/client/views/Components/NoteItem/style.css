@@ -26,12 +26,10 @@
 .noteItemHasCount{
   overflow: hidden;
   margin-right: 0px;
-  width: 85%;
-  display: inline-block !important;
+  width: 81%;
 }
 .noteItemCount{
   color: white;
-  margin-left: 10px !important;
 }
 .logNoteItem{
   width: 60%;
@@ -44,7 +42,6 @@
   height: 20%;
   width: 100%;
   text-align: left;
-  /* background: rgb(187, 59, 0); */
   color: white;
   border: none;
   border-radius: 2px;
@@ -56,7 +53,6 @@
   height: 100%;
   width: 100% !important;
   text-align: left;
-  /* background: rgb(187, 59, 0); */
   color: white;
   border: none;
   border-radius: 2px;
@@ -65,7 +61,6 @@
   font-size: 18px;
 }
 .editButtons{
-  /* background: rgb(187, 59, 0); */
   color: white;
   border-radius: 50px;
   padding: 4px 7px 4px 7px;
@@ -121,8 +116,10 @@ code {
     monospace;
 }
 .logLine{
+  padding-left: 10px !important;
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
   align-items: center;
 }
 

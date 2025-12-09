@@ -208,7 +208,7 @@ h2 {
     right: 26vw;
   }
   .detail-scroll {
-    right: 26vw;
+    /* right: 26vw; */
   }
 
   .backButton {
@@ -350,12 +350,10 @@ h2 {
   flex-direction: column;
 }
 .slide-in{
-  /* animation-name: slide;
-  animation-duration: 1s;
-  overflow: hidden; */
-  /* width: fit-content; */
   overflow: hidden;
   overscroll-behavior: none;
+  justify-content: center;
+  display: flex;
 }
 @keyframes slide {
   from {max-width: 0px;}

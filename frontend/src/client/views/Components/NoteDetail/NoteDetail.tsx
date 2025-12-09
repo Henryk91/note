@@ -485,22 +485,21 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   const completeLogContent = (noteItem) => {
     const prop = noteItem.name ?? noteItem.content.data;
 
-    if (prop !== 'Log') return {};
+    if (prop !== 'Log') return <></>;
 
     const showTagValue = showTag ?? selectedNoteName ?? 'main';
     const animate = enableAnimationCheck(showTagValue, prop);
     const logDaysBunch = logDayBunchLogic();
     let bunch = createNoteLogLineItems(showTagValue === prop);
 
-    const logContent = noteItemsBunch(animate, logDaysBunch, bunch, showLogDaysBunch);
-
-    return { logContent, count: bunch?.length }
+    return noteItemsBunch(animate, logDaysBunch, bunch, showLogDaysBunch);
   };
 
   const tags = useMemo(() => {
     return person?.dataLable?.map((noteItem, i) => {
       let isLink = noteItem.type === 'FOLDER';
       let isNote = noteItem.type === 'NOTE';
+      let isLogDirectory = noteItem.name === 'Log';
       const linkBorder = isLink ? 'link-border' : '';
       const prop = noteItem.name ?? noteItem?.content?.data ?? 'Unknown';
 
@@ -508,7 +507,8 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
 
       const dateItem = noteItem.content?.data;
 
-      const { logContent, count } = completeLogContent(noteItem);
+      const logContent = completeLogContent(noteItem);
+      const contentCount = isLogDirectory? totalLogCount: persons?.[noteItem.id]?.dataLable?.length
 
       return (
         <div className={'detailedBox'} key={key}>
@@ -518,7 +518,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
                 linkBorder={linkBorder}
                 prop={prop}
                 isLink={isLink}
-                contentCount={count ?? 0}
+                contentCount={contentCount}
                 continueData={continueData}
                 onShowHide={() => showHideBox(prop)}
                 onShowLogDays={() => showLogDays(prop)}
@@ -542,7 +542,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
                 cont={continueLog}
                 type={prop}
                 index={i}
-                count={count ?? 0}
+                count={contentCount}
               />
             </div>
           )}

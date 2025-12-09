@@ -140,8 +140,9 @@ export const NoteDetailListItem: React.FC<NoteDetailListItemProps> = ({
     <>
       <div className={`detailTitleBox dark-hover ${linkBorder}`} onClick={onShowHide}>
         <div id={`${dateCounterId}`} className={`listCountBox white-color ${themeBorder}`} onClick={onShowLogDays}>
-          <span className="list-count-item">
-            {isLink && !contentCount ? <FontAwesomeIcon icon={faFolder} /> : contentCount}
+          <span className="list-count-folder">
+            <FontAwesomeIcon icon={faFolder} className="list-count-folder-icon" />
+            <span className="list-count-folder-number">{contentCount}</span>
           </span>
         </div>
         <h3 className={`${className} white-color`}>{prop || '<NAME NOT SET>'} </h3>

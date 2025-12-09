@@ -18,15 +18,13 @@
 }
 
 .listCountBox{
-  line-height: 30px;
-  display: inline-block;
-  margin-right: 30px;
   border-radius: 50px;
-  min-width: 30px;
-  height: 30px;
+  min-width: 35px;
+  height: 35px;
   text-align: center;
+  justify-content: center;
+  display: flex;
 }
 .list-count-item{
-  margin-left: 5px;
-  margin-right: 5px;
+  align-self: center;
 }
