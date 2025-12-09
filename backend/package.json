@@ -8,7 +8,8 @@
     "build": "NODE_PATH=./node_modules tsc -p ./tsconfig.json",
     "start": "NODE_PATH=./node_modules node --trace-warnings ../build/server/index.js",
     "test": "NODE_PATH=./node_modules NODE_ENV=test TS_NODE_PROJECT=./tsconfig.test.json mocha --timeout 20000 -r ts-node/register/transpile-only --file ../__tests__/integration/setup.ts \"../__tests__/integration/**/*.test.ts\"",
-    "lint": "NODE_PATH=./node_modules eslint \"./src/**/*.{ts,js}\""
+    "lint": "NODE_PATH=./node_modules eslint \"./src/**/*.{ts,js}\"",
+    "lint:fix": "NODE_PATH=./node_modules eslint \"./src/**/*.{ts,js}\" --fix"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

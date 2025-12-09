@@ -7,7 +7,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "NODE_PATH=./node_modules jest --config ./jest.config.js",
-    "lint": "NODE_PATH=./node_modules eslint \"./src/**/*.{js,jsx,ts,tsx}\""
+    "lint": "NODE_PATH=./node_modules eslint \"./src/**/*.{js,jsx,ts,tsx}\"",
+    "lint:fix": "NODE_PATH=./node_modules eslint \"./src/**/*.{js,jsx,ts,tsx}\" --fix"
   },
   "dependencies": {
     "@babel/core": "^7.26.0",
