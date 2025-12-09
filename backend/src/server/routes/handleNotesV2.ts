@@ -10,11 +10,22 @@ router.get('/', (req: Request, res: Response) => {
   });
 });
 
+router.get('/with-children', (req: Request, res: Response) => {
+  dbHandler.getNoteV2ContentWithChildren(req, (docs) => {
+    res.json(docs);
+  });
+});
+
 router.post('/', (req: Request, res: Response) => {
   dbHandler.newV2Note(req, (docs) => {
     res.json(docs);
   });
-
+  if (req.body.type === 'FOLDER') {
+    req.body.content = {
+      data: `href:${req.body.id}`,
+      tag: `Sub: ${req.body.name}`,
+    };
+  }
   dbHandler.syncCreateV1Note(req, () => {
     console.log('Created Note V1');
   });

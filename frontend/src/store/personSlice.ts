@@ -1,11 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Note, PageDescriptor } from '../client/views/Helpers/types';
-import { DEFAULT_PAGE } from '../client/views/Helpers/const';
-import { getPersonNoteType } from '../client/views/Helpers/utils';
-
-type KeyValue<T = any> = {
-  [key: string]: T;
-};
+import { KeyValue, Note, PageDescriptor } from '../Helpers/types';
+import { createInitPage, getStorageJsonData, setLogDirAtTop } from '../Helpers/utils';
 
 type PersonState = {
   byId: KeyValue<Note>;
@@ -16,6 +11,7 @@ type PersonState = {
   showAddItem: boolean;
   editName: boolean;
   pages: PageDescriptor[];
+  reloadLastPage: boolean;
 };
 
 type SetPersonPayload = {
@@ -23,24 +19,47 @@ type SetPersonPayload = {
   person?: Note | null;
 };
 
+const initSelectedNoteName = localStorage.getItem('user') || undefined;
+
 const initialState: PersonState = {
-  byId: {},
+  byId: getStorageJsonData(`${initSelectedNoteName}-data`, {}),
   notes: null,
-  selectedNoteName: localStorage.getItem('user') || undefined,
+  selectedNoteName: initSelectedNoteName,
   showTag: localStorage.getItem('showTag') || null,
   showAddItem: !!localStorage.getItem('new-folder-edit'),
   editName: false,
-  pages: localStorage.getItem('saved-pages')? JSON.parse(localStorage.getItem('saved-pages')+"") :DEFAULT_PAGE,
+  pages: getStorageJsonData('saved-pages', [createInitPage(initSelectedNoteName)]),
+  noteNames: getStorageJsonData('notenames'),
+  reloadLastPage: false,
 };
 
 const personSlice = createSlice({
   name: 'person',
   initialState,
   reducers: {
+    bulkUpdatePerson(state, action: PayloadAction<KeyValue<Note>>) {
+      const p = action.payload;
+      if (!p) return;
+      const freshState = { ...state.byId };
+      const keys = Object.keys(p);
+      keys.forEach((key) => {
+        if (p[key].id === p[key].heading){
+          p[key].dataLable.sort((a, b) => (a?.name ?? '').localeCompare(b?.name ?? ''));
+        }
+        freshState[key] = setLogDirAtTop(p[key]);
+      });
+
+      state.byId = freshState;
+
+      if (state.selectedNoteName && freshState) {
+        const storageKey = `${state.selectedNoteName}-data`;
+        localStorage.setItem(storageKey, JSON.stringify(freshState));
+      }
+    },
     setPersonById(state, action: PayloadAction<SetPersonPayload>) {
       const { id, person } = action.payload;
       if (!person) return;
-      state.byId[id] = person;
+      state.byId[id] = setLogDirAtTop(person);
     },
     removePersonById(state, action: PayloadAction<{ id: string }>) {
       const { id } = action.payload;
@@ -48,25 +67,20 @@ const personSlice = createSlice({
     },
     setNotes(state, action: PayloadAction<Note[] | null>) {
       state.notes = action.payload;
-      if(state.selectedNoteName) localStorage.setItem(state.selectedNoteName, JSON.stringify(action.payload));
-      if(action.payload) {
-        const personFound = getPersonNoteType(state.notes, DEFAULT_PAGE[0]);
-        if(personFound) state.byId['main'] = personFound;
-      }
+      if (state.selectedNoteName) localStorage.setItem(state.selectedNoteName, JSON.stringify(action.payload));
     },
     setNoteNames(state, action: PayloadAction<string[]>) {
       state.noteNames = action.payload;
+      localStorage.setItem('notenames', JSON.stringify(action.payload));
     },
     setSelectedNoteName(state, action: PayloadAction<string>) {
       state.selectedNoteName = action.payload;
       localStorage.setItem('user', action.payload);
       const localNoteData = localStorage.getItem(action.payload);
-      if(localNoteData) {
+      state.pages = [createInitPage(state.selectedNoteName)];
+      localStorage.setItem('saved-pages', JSON.stringify(state.pages));
+      if (localNoteData) {
         state.notes = JSON.parse(localNoteData);
-        const personFound = getPersonNoteType(state.notes, DEFAULT_PAGE[0]);
-        if(personFound) state.byId['main'] = personFound;
-      } else {
-        state.byId = {}
       }
     },
     setShowTag(state, action: PayloadAction<string | null>) {
@@ -79,13 +93,13 @@ const personSlice = createSlice({
     },
     setShowAddItem(state, action: PayloadAction<boolean>) {
       state.showAddItem = action.payload;
-      if(!action.payload) localStorage.removeItem('new-folder-edit');
+      if (!action.payload) localStorage.removeItem('new-folder-edit');
     },
     setEditName(state, action: PayloadAction<boolean>) {
       state.editName = action.payload;
     },
     setPages(state, action: PayloadAction<PageDescriptor[]>) {
-      state.pages = action.payload
+      state.pages = action.payload;
       localStorage.setItem('saved-pages', JSON.stringify(state.pages));
     },
     addPage(state, action: PayloadAction<PageDescriptor>) {
@@ -101,9 +115,13 @@ const personSlice = createSlice({
       localStorage.setItem('saved-pages', JSON.stringify(state.pages));
     },
     resetPages(state) {
-      state.pages = DEFAULT_PAGE;
-      localStorage.setItem('saved-pages', JSON.stringify(DEFAULT_PAGE));
+      const initialPages = [createInitPage(state.selectedNoteName)];
+      state.pages = initialPages;
+      localStorage.setItem('saved-pages', JSON.stringify(initialPages));
     },
+    triggerLastPageReload(state) {
+      state.reloadLastPage = !state.reloadLastPage;
+    }
   },
 });
 
@@ -121,6 +139,8 @@ export const {
   removeLastPage,
   resetPages,
   setPages,
+  bulkUpdatePerson,
+  triggerLastPageReload
 } = personSlice.actions;
 
 export const selectPersonById = (state: { person: PersonState }, id: string) => state.person.byId[id] || null;

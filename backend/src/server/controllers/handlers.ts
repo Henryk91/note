@@ -28,6 +28,10 @@ export interface NoteV2Attrs {
   content?: NoteV2Content;
 }
 
+export type NoteItemMap = {
+  [key: string]: { heading?: string; id: string; dataLable: NoteV2Attrs[] };
+};
+
 type NoteV2Doc = mongoose.HydratedDocument<NoteV2Attrs>;
 
 export interface NoteUserAttrs {
@@ -58,7 +62,7 @@ const noteV2Schema = new Schema<NoteV2Attrs>({
   id: { type: String, required: true },
   userId: { type: String, required: true },
   name: { type: String },
-  parentId: { type: String, required: true },
+  parentId: { type: String },
   type: { type: String, required: true },
   content: { type: noteContent },
 });
@@ -447,6 +451,60 @@ export default class Handler {
     }
   };
 
+  getOneLevelDown = async (
+    userId: string,
+    rootParentId: string
+  ) => {
+    // Level 1: direct children of the root parent
+    const currentNote = await NoteV2Model.findOne({ userId, id: rootParentId });
+    const level1 = await NoteV2Model.find({ userId, parentId: rootParentId });
+
+    const level1Ids = level1.map(n => n.id);
+
+    // Level 2: children of each level-1 node
+    const level2 = await NoteV2Model.find({
+      userId,
+      parentId: { $in: level1Ids },
+    });
+
+    const map: NoteItemMap = {};
+
+    // root -> its direct children
+    // console.log('currentNote',currentNote);
+    map[rootParentId] = {
+      heading: currentNote?.name ?? '',
+      id: rootParentId,
+      dataLable: level1,
+    };
+
+    // each level-1 node id -> its children
+    for (const child of level2) {
+      if (!map[child.parentId]) {
+        const heading = level1.find(l => l.id === child.parentId)?.name
+        map[child.parentId] = {
+          id: child.parentId,
+          heading: heading,
+          dataLable: [],
+        };
+      }
+      map[child.parentId].dataLable.push(child);
+    }
+
+    return map;
+  }
+
+  getNoteV2ContentWithChildren = async (req: any, done: Callback) => {
+    try {
+      const userId = req?.auth?.sub;
+      // const docs = await NoteV2Model.find({ userId, parentId: req.query.parentId ?? '' });
+      const docs = await this.getOneLevelDown(userId, req.query.parentId ?? '');
+      done(docs);
+    } catch (err) {
+      console.log(err);
+      done('No notes');
+    }
+  };
+
   newV2Note = async (req: any, done: Callback) => {
     try {
       const userId = req.auth.sub;
@@ -459,16 +517,64 @@ export default class Handler {
         return;
       }
 
-      const note: any = {
+      const existingParent = await NoteV2Model.findOne({
+        userId,
+        id: parentId,
+      });
+      if (!existingParent) {
+        const folder: NoteV2Attrs = {
+          name: parentId,
+          id: parentId,
+          parentId: '',
+          type: 'FOLDER',
+          userId,
+        };
+        const createHighLevelFolder = new NoteV2Model(folder);
+        await createHighLevelFolder.save();
+      }
+
+      const note: NoteV2Attrs = {
         id,
         parentId,
         type,
         content,
         userId,
       };
+
+      if (type === 'LOG') {
+        const parentData = await NoteV2Model.findOne({
+          userId,
+          id: parentId,
+        });
+        if (parentData?.name !== 'Log') {
+          // Parent isn't a log folder. Check if the parent has a Log folder
+          const logParent = await NoteV2Model.findOne({
+            userId,
+            parentId,
+            name: 'Log',
+          });
+
+          if (logParent) {
+            // Correct parent found
+            note.parentId = logParent.id;
+          } else {
+            // Log parent folder needs to be created;
+            const newLogParent = {
+              id: `${parentId}::Log`,
+              parentId,
+              type: 'FOLDER',
+              name: 'Log',
+              userId,
+            };
+            const createFolder = new NoteV2Model(newLogParent);
+            const folderData = await createFolder.save();
+            if (folderData) note.parentId = newLogParent.id;
+          }
+        }
+      }
+
       if (name) note.name = name;
       const createNote = new NoteV2Model(note);
-
       const data = await createNote.save();
       done(data);
     } catch (err: any) {

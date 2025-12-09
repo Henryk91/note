@@ -1,0 +1,30 @@
+
+.listNameButton{
+  text-align: left;
+  color: white;
+  padding-left: 10px;
+  width: calc(90vw - 10px);
+  margin-left: 5vw;
+  
+}
+.listNameButton > h3{
+  display: inline-block
+}
+@media(min-width: 1000px){
+  .listNameButton{
+    width: 40vw;
+    margin-left: 30vw;
+  }
+}
+
+.listCountBox{
+  border-radius: 50px;
+  min-width: 35px;
+  height: 35px;
+  text-align: center;
+  justify-content: center;
+  display: flex;
+}
+.list-count-item{
+  align-self: center;
+}
