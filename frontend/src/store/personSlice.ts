@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { KeyValue, Note, PageDescriptor } from '../Helpers/types';
-import { createInitPage, getStorageJsonData, setLogDirAtTop } from '../Helpers/utils';
+import { createInitPage, getStorageJsonData, setLogDirAtTop, setPersonDataToLocalStorage } from '../Helpers/utils';
 
 type PersonState = {
   byId: KeyValue<Note>;
@@ -50,11 +50,7 @@ const personSlice = createSlice({
       });
 
       state.byId = freshState;
-
-      if (state.selectedNoteName && freshState) {
-        const storageKey = `${state.selectedNoteName}-data`;
-        localStorage.setItem(storageKey, JSON.stringify(freshState));
-      }
+      setPersonDataToLocalStorage(freshState, state.selectedNoteName, state.noteNames);
     },
     setPersonById(state, action: PayloadAction<SetPersonPayload>) {
       const { id, person } = action.payload;
