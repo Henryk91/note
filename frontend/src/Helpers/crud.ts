@@ -13,7 +13,7 @@ export const addItem = (_content: NoteContent, _parentId: string, done: (data) =
   };
 
   createNoteV2(newItem, (data) => {
-    done(data);
+    done(data ?? newItem);
   });
 };
 

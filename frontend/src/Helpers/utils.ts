@@ -285,6 +285,6 @@ export const setLogDirAtTop = (person: Note) => {
   if(!logFolder) return person;
   return {
     ...person,
-    dataLable: [logFolder, ...person?.dataLable?.filter(d => d.name !== 'Log')]
+    dataLable: [logFolder, ...person?.dataLable?.filter(d => d?.name !== 'Log')]
   }
 }

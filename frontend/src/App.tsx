@@ -17,6 +17,10 @@ import { RootState } from './store';
 import { setTheme } from './store/themeSlice';
 import { setNotes, setNoteNames, setSelectedNoteName, bulkUpdatePerson } from './store/personSlice';
 
+import { useOfflineSync } from "./hooks/useOfflineSync";
+import { sendOrQueueJSON } from "./offlineQueue/queue";
+import { useOnlineStatus } from './hooks/useOnlineStatus';
+
 const Home = lazy(() => import('./Components/Home/Home'));
 const NewNote = lazy(() => import('./Components/NewNote/NewNote'));
 const Login = lazy(() => import('./Components/Login/Login'));
@@ -62,9 +66,11 @@ const App: React.FC<AppProps> = ({
   bulkUpdatePerson,
   reloadLastPage
 }) => {
+  useOfflineSync();
+  const isOnline = useOnlineStatus();
+  
   const [notesInitialLoad, setNotesInitialLoad] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [freshData, setFreshData] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<number | null>(null);
   const [loadingData, setLoadingData] = useState(false);
 
@@ -85,11 +91,12 @@ const App: React.FC<AppProps> = ({
         setLoadingData(true);
         sessionStorage.setItem('loading', 'true');
         getNotesV2WithChildrenByParentId(currentUser, (resp) => {
-          bulkUpdatePerson(resp);
-          setFreshData(true);
           setLoadingData(false);
-          sessionStorage.removeItem('loading');
-          if (resp) setRedirect();
+          if (resp) {
+            bulkUpdatePerson(resp);
+            sessionStorage.removeItem('loading');
+            setRedirect();
+          }
         });
       }
     },
@@ -100,8 +107,8 @@ const App: React.FC<AppProps> = ({
     (loggedIn, loggedUser) => {
       if (!notesInitialLoad) {
         if (loggedIn && !notesInitialLoad && loggedUser !== '') {
-          getMyNotes(loggedUser);
           setNotesInitialLoad(true);
+          getMyNotes(loggedUser);
         }
       }
     },
@@ -194,7 +201,6 @@ const App: React.FC<AppProps> = ({
     if (loginKey !== null) {
       getNoteNamesHandler(loginKey);
       getNotesOnLoad(loginKey, selectedNoteName);
-      getLastPageData(true)
     }
   }, [getNoteNamesHandler, getNotesOnLoad, setTheme, selectedNoteName]);
 
@@ -281,14 +287,19 @@ const App: React.FC<AppProps> = ({
   }, []);
 
   useEffect(() => {
-    getLastPageData();
-  }, [lastPage?.params?.id]);
+    if(isOnline && notesInitialLoad){
+      setTimeout(() => {
+        sessionStorage.removeItem('loading');
+        getLastPageData(true);
+      }, 3000);
+    }
+  }, [isOnline]);
 
   useEffect(() => {
     if (lastPage?.params.id && notesInitialLoad) {
       getLastPageData(true);
     }
-  }, [reloadLastPage]);
+  }, [lastPage?.params.id, reloadLastPage]);
 
   const themeBack = `${theme.toLowerCase()}-back`;
 

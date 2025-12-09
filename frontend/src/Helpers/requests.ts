@@ -1,3 +1,5 @@
+import { sendOrQueueJSON } from '../offlineQueue/queue';
+import { apiFetch } from './apiFetch';
 import { Note } from './types';
 
 type Callback<T = any> = (data: T) => void;
@@ -20,37 +22,6 @@ export function logoutUser(next: Callback) {
       console.log('Error:', error);
       next(error);
     });
-}
-
-async function refreshToken(): Promise<Response> {
-  const res = await fetch('/api/refresh', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: '',
-  });
-
-  if (res.status === 401) {
-    console.log('refreshToken localStorage.clear()');
-    localStorage.clear();
-    window.location.reload();
-  }
-  return res;
-}
-
-export async function apiFetch(url: string, options?: RequestInit): Promise<Response> {
-  const res = await fetch(url, {
-    credentials: 'include',
-    ...options,
-  });
-
-  if (res.status === 401) {
-    const refRes = await refreshToken();
-    if (refRes?.ok) return apiFetch(url, options);
-  }
-
-  return res;
 }
 
 export function getNoteNames(next: Callback<string[]>) {
@@ -234,6 +205,10 @@ export function getNotesV2ByParentId(parentId, next) {
 }
 
 export function getNotesV2WithChildrenByParentId(parentId, next) {
+  if (!navigator.onLine) {
+    next({})
+    return;
+  }
   apiFetch("/api/note-v2/with-children" + (parentId && parentId !== "" ? `?parentId=${parentId}` : ""))
     .then((res) => res?.json())
     .then((data) => next(data))
@@ -244,16 +219,14 @@ export function getNotesV2WithChildrenByParentId(parentId, next) {
 }
 
 export function createNoteV2(newNote, next) {
-  apiFetch("/api/note-v2", {
+  sendOrQueueJSON("/api/note-v2", newNote, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-    },
-    body: JSON.stringify(newNote),
+    }
   })
-    .then((res) => res?.json())
     .then((data) => {
-      next(data);
+      next(data?.response);
     })
     .catch((error) => {
       console.log("Error:", error);
@@ -262,16 +235,14 @@ export function createNoteV2(newNote, next) {
 }
 
 export function updateNoteV2(newNote, next) {
-  apiFetch("/api/note-v2", {
+  sendOrQueueJSON("/api/note-v2", newNote, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-    },
-    body: JSON.stringify(newNote),
+    }
   })
-    .then((res) => res?.json())
     .then((data) => {
-      next(data);
+      next(data.response);
     })
     .catch((error) => {
       console.log("Error:", error);
@@ -280,16 +251,14 @@ export function updateNoteV2(newNote, next) {
 }
 
 export function deleteNoteV2(note, next) {
-  apiFetch("/api/note-v2", {
+  sendOrQueueJSON("/api/note-v2", note, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
-    },
-    body: JSON.stringify(note),
+    }
   })
-    .then((res) => res?.json())
     .then((data) => {
-      next(data);
+      next(data.response);
     })
     .catch((error) => {
       console.log("Error:", error);

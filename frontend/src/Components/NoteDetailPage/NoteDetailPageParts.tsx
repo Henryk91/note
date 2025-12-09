@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowDown, faArrowLeft, faArrowUp, faPen, faPlus, faPowerOff } from '@fortawesome/free-solid-svg-icons';
+import { faArrowDown, faArrowLeft, faArrowUp, faPen, faPlus, faPowerOff, faSlash, faWifi } from '@fortawesome/free-solid-svg-icons';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import NoteDetail from '../NoteDetail/NoteDetail';
 import { Match, PageDescriptor } from '../../Helpers/types';
@@ -10,6 +10,7 @@ import { RootState } from '../../store';
 import { setTheme } from '../../store/themeSlice';
 import { THEMES } from '../../Helpers/const';
 import { setEditName, setShowAddItem } from '../../store/personSlice';
+import { useOnlineStatus } from '../../hooks/useOnlineStatus';
 
 export type NoteDetailPageItemProps = {
   searchTerm: string;
@@ -136,6 +137,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ prepForNote }) => {
 };
 
 export const ScrollButtons: React.FC<ScrollButtonsProps> = ({ showBackButton }) => {
+  const isOnline = useOnlineStatus();
   const dispatch = useDispatch();
   const theme = useSelector((state: RootState) => state.theme.themeLower);
   const { showAddItem, editName } = useSelector((state: RootState) => state.person);
@@ -154,6 +156,14 @@ export const ScrollButtons: React.FC<ScrollButtonsProps> = ({ showBackButton }) 
 
   return (
     <div className="detail-scroll">
+      {!isOnline && (
+        <div
+          className={`detailUpButton ${themeHover} ${themeBack}`}
+          style={{ color: "red" }}
+        >
+          <FontAwesomeIcon icon={faWifi} size="lg" />
+        </div>
+      )}
       <button className={`editButtons1 detailUpButton ${themeHover} ${themeBack}`} onClick={editNameClick}>
         <FontAwesomeIcon icon={faPen} />
       </button>

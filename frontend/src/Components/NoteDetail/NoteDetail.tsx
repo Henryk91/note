@@ -378,7 +378,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
         const updated = { ...currentPerson, dataLable: [...currentPerson.dataLable, data] };
         dispatch(setPersonById({ id: `${currentPerson.id}`, person: updated }));
       } else {
-        dispatch(triggerLastPageReload());
+        if(data) dispatch(triggerLastPageReload());
       }
     });
   }

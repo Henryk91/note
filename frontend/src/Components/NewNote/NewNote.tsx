@@ -48,7 +48,7 @@ const NewNote: React.FC<NewNoteProps> = ({ set }) => {
     addFolder(heading, selectedNoteName, (mainFolder) => {
       addFolder(tag, mainFolder?.id, (subFolder) => {
         addItem(content, subFolder?.id, (data) => {
-          dispatch(triggerLastPageReload());
+          if(data) dispatch(triggerLastPageReload());
           window.history.back();
         })
       })
