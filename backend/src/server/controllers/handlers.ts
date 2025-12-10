@@ -719,7 +719,7 @@ export default class Handler {
     const syncReq = { ...req, body: mapped };
 
     this.updateOneNote(syncReq, () => {
-      console.log('Created Note V1');
+      console.log('Updated Note V1', mapped?.person?.id);
       done('ok');
     });
   };
@@ -740,7 +740,7 @@ export default class Handler {
       const syncReq = { ...req, body: mapped };
 
       this.updateOneNote(syncReq, (resp) => {
-        console.log('Created Note V1');
+        console.log('Updated Note V1', mapped?.person?.id);
         done(resp);
       });
     } catch (err) {
