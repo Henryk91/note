@@ -5,11 +5,11 @@ function registerSW() {
       console.info('ServiceWorker registration successful: ', registration);
     },
     (err) => {
-      // console.error('ServiceWorker registration failed:', err);
+      console.error('ServiceWorker registration failed:', err);
     },
   );
 }
 
 if ('serviceWorker' in navigator) {
-  // window.addEventListener('load', () => registerSW());
+  window.addEventListener('load', () => registerSW());
 }
