@@ -25,6 +25,7 @@ export function formatDate(input: string): string {
 export type NoteV2Content = {
   data: string;
   date?: string;
+  tag?: string;
 };
 
 export type NoteV2Shape = {
