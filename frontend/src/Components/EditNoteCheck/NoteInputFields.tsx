@@ -123,55 +123,19 @@ export const NewNoteField: React.FC = () => {
   );
 };
 
-type NewLinkFieldProps = {
-  onChangeLink: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  onNewFolder: () => void;
-};
-
-export const NewLinkField: React.FC<NewLinkFieldProps> = ({
-  onChangeLink,
-  onNewFolder,
-}) => {
-  const notes = useSelector((state: RootState) => state.person.notes);
+export const NewLinkField: React.FC = () => {
   const theme = useSelector((state: RootState) => state.theme.themeLower);
   const themeBack = `${theme}-back`;
-  const themeHover = `${theme}-hover`;
 
-  const headings =
-    notes?.map((note) => ({ heading: note.heading, id: note.id })) ?? [];
-
-  let defaultId = headings[headings.length - 1]?.id ?? '';
-  const options = headings.map((item) => (
-    <option key={item.id} value={item.id}>
-      {item.heading}
-    </option>
-  ));
-  const defaultVal =
-    headings && headings.length
-      ? headings[headings.length - 1].heading.replace('Sub: ', '')
-      : '';
   return (
     <div>
-      <br />
-      <Link
-        style={{ textDecoration: 'none', color: 'white' }}
-        className={`${themeHover} ${themeBack}`}
-        to="/new-note/"
-        onClick={onNewFolder}
-      >
-        New Folder
-      </Link>
-      <br />
-      <select onChange={onChangeLink} className={themeBack} name="number" id="links" defaultValue={defaultId}>
-        {options}
-      </select>
-      <br />
       <input
+        autoFocus
         id="link-text"
         className={themeBack}
         name="tagTypeText"
         type="text"
-        defaultValue={defaultVal}
+        placeholder="Folder Name Here..."
       />
       <br />
     </div>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faArrowRight, faCheck, faFolder, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faArrowRight, faCheck, faFolder, faTimes, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import EditNoteCheck from '../EditNoteCheck/EditNoteCheck';
 import { Note } from '../../Helpers/types';
 import { RootState } from '../../store';
@@ -39,6 +39,7 @@ export const EditNameForm: React.FC<EditNameFormProps> = ({ heading, onSubmit })
     <form onSubmit={onSubmit}>
       <br />
       <input
+        autoFocus
         className={`changeNameHeading ${themeHover} ${themeBack}`}
         name="heading"
         type="text"
@@ -53,6 +54,9 @@ export const EditNameForm: React.FC<EditNameFormProps> = ({ heading, onSubmit })
       <button className={`submit-button ${themeHover} ${themeBack}`} type="submit">
         {' '}
         <FontAwesomeIcon icon={faTimes} />
+      </button>
+      <button value="delete" className={`submit-button ${themeBack} ${themeHover}`} type="submit">
+        <FontAwesomeIcon icon={faTrashAlt} />
       </button>
       <br />
       <br />

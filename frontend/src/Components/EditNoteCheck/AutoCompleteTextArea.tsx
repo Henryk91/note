@@ -88,6 +88,7 @@ const AutoCompleteTextArea: React.FC<AutoCompleteTextAreaProps> = ({
     />
   ) : (
     <input
+      autoFocus
       id={elementId}
       className={`${className} ${smallClassName}`}
       onChange={localChange}

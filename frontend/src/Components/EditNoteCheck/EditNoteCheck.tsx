@@ -175,10 +175,7 @@ const EditNoteCheck: React.FC<EditNoteCheckProps> = ({ lable }) => {
         />
       )}
       {effectiveRadioType === 'Link' && (
-        <NewLinkField
-          onChangeLink={changeLink}
-          onNewFolder={toNewNote}
-        />
+        <NewLinkField />
       )}
       {effectiveRadioType === 'Upload' && (
         <NewUploadField

@@ -42,10 +42,10 @@ export function mapNoteV2ToNoteV1(input: NoteV2Shape): any {
   const data = input.content?.date
     ? JSON.stringify({
         json: true,
-        date: input.content?.date,
-        data: input.content.data,
+        date: input?.content?.date,
+        data: input?.content?.data,
       })
-    : input.content.data;
+    : input.content?.data;
 
   const person: any = {
     person: {

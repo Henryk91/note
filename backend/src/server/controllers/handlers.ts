@@ -251,7 +251,7 @@ export default class Handler {
 
   updateOneNote = async (req: any, done: Callback) => {
     try {
-      const updateNoteId = req.body.person.id;
+      const updateNoteId = req.body?.person?.id;
       const doc = await NoteModel.findOne({ id: updateNoteId, userId: req.auth.sub });
       if (!doc) return done('Error');
 
@@ -607,12 +607,26 @@ export default class Handler {
   deleteV2Note = async (req: any, done: Callback) => {
     try {
       const userId = req.auth.sub;
-      const { id } = req.body;
+      const { id, type } = req.body;
+      if (type === 'FOLDER') {
+        await this.moveAllChilderToParentFolder(userId, id);
+      }
       const data = await NoteV2Model.deleteOne({ id, userId });
       done(data);
     } catch (err) {
       console.log(err);
       done('Error');
+    }
+  };
+
+  moveAllChilderToParentFolder = async (userId: string, id: string) => {
+    const folderToEmpty = await NoteV2Model.findOne({ id, userId });
+    if (folderToEmpty) {
+      const resp = await NoteV2Model.updateMany(
+        { parentId: folderToEmpty.id, userId },
+        { $set: { parentId: folderToEmpty.parentId } },
+      );
+      console.log('Notes Moved to parent:', resp?.matchedCount);
     }
   };
 

@@ -334,6 +334,16 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
         dispatch(triggerLastPageReload());
       });
     }
+   
+    if (e.nativeEvent.submitter.value === 'delete' && currentNote) {
+      if (confirm('Are you sure you want to permanently delete this folder?')) {
+        deleteItem(currentNote as NoteItemType, () => {
+          // dispatch(triggerLastPageReload());
+          // Scroll back Hack
+          openPage({ personNext: { id: person.id }, parentId: person.id, hideNote: true });
+        });
+      }
+    }
   }
 
   function submitNewItem(event) {
@@ -341,13 +351,13 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     let currentPerson = person ? { ...person } : null;
     if (!currentPerson) return;
 
-    let number = event.target.number.value;
+    let number = event.target.number?.value;
     const tag = event.target.tagType.value;
     const textTag = event?.target?.tagTypeText?.value;
 
     let content: NoteContent = { data: number };
 
-    if (number.includes(';base64,')) {
+    if (number?.includes(';base64,')) {
       const b64 = number.substring(number.indexOf('base64') + 7);
       number = `${window.atob(b64)}<br />${number}`;
     }
