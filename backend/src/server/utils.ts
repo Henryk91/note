@@ -32,14 +32,21 @@ export type NoteV2Shape = {
   parentId: string;
   content: NoteV2Content;
   edit?: string;
+  type?: string;
 };
 
 export function mapNoteV2ToNoteV1(input: NoteV2Shape): any {
+  console.log('input',input);
   const [parentId, tag] = input.parentId.split('::');
 
   const data = input.content?.date
-    ? JSON.stringify({ json: true, date: input.content?.date, data: input.content.data })
+    ? JSON.stringify({
+        json: true,
+        date: input.content?.date,
+        data: input.content.data,
+      })
     : input.content.data;
+
   const person: any = {
     person: {
       dataLable: {
@@ -53,11 +60,25 @@ export function mapNoteV2ToNoteV1(input: NoteV2Shape): any {
     person.person.dataLable.edit = person.person.dataLable.data;
     person.person.dataLable.data = input.edit;
   }
+  if (input.type === 'FOLDER') {
+    return {
+      // person: {
+        id: input.id,
+        createdBy: parentId,
+        heading: input.content?.tag,
+        dataLable: [],
+      // },
+    };
+  }
 
   return person;
 }
 
-export function mapNoteV1ToNoteV2Query(req: any): { queryParams: any; newContent: any; parentId: string } {
+export function mapNoteV1ToNoteV2Query(req: any): {
+  queryParams: any;
+  newContent: any;
+  parentId: string;
+} {
   const body = req.body;
   const userId = req.auth.sub;
   const person = body.person;
@@ -66,10 +87,16 @@ export function mapNoteV1ToNoteV2Query(req: any): { queryParams: any; newContent
   let parentId = `${person.id}::${person.dataLable.tag}`;
   let newContent: any = null;
   if (person.dataLable.edit) {
-    const jsonDataLableEdit = !isNote ? JSON.parse(person.dataLable.edit) : undefined;
-    newContent = isNote ? { data: person.dataLable.edit } : { data: jsonDataLableEdit.data, date: jsonDataLableEdit.date };
+    const jsonDataLableEdit = !isNote
+      ? JSON.parse(person.dataLable.edit)
+      : undefined;
+    newContent = isNote
+      ? { data: person.dataLable.edit }
+      : { data: jsonDataLableEdit.data, date: jsonDataLableEdit.date };
   }
-  const jsonDataLableData = !isNote ? JSON.parse(person.dataLable.data) : undefined;
+  const jsonDataLableData = !isNote
+    ? JSON.parse(person.dataLable.data)
+    : undefined;
   const contentData = jsonDataLableData?.data ?? person.dataLable.data;
 
   // const logDay = jsonDataLableData?.date ? formatDate(jsonDataLableData.date.substring(0, 16).trim()) : null;

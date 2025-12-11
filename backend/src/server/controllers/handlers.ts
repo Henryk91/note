@@ -273,7 +273,6 @@ export default class Handler {
             docDataLable[ind].data = dataLable.edit;
             doc.dataLable = docDataLable;
           }
-
           if (update.heading) {
             this.syncUpdateV2Note(req, () => {});
           }
@@ -359,18 +358,18 @@ export default class Handler {
 
   getTranslationLevels = async (done: Callback) => {
     try {
-      const rows = await NoteModel.aggregate([
-        { $match: { createdBy: 'TranslationPractice' } },
-        {
-          $project: {
-            heading: 1,
-            tags: { $setUnion: ['$dataLable.tag', []] },
-          },
-        },
-        { $sort: { _id: 1 } },
-      ]);
-      const result = Object.fromEntries(rows.map(({ heading, tags }: any) => [heading, tags]));
-      done(result);
+      const docs = await this.getOneLevelDown(
+        '68988da2b947c4d46023d679',
+        'TranslationPractice',
+      );
+      const levels = Object.fromEntries(
+        Object.keys(docs).map((key) => [
+          docs[key].heading,
+          docs[key].dataLable.map((d) => d.name),
+        ]),
+      );
+      delete levels.TranslationPractice;
+      done(levels);
     } catch (err) {
       console.log(err);
       done(null);
@@ -413,21 +412,23 @@ export default class Handler {
         return;
       }
 
-      const docs = await NoteModel.find({ createdBy: 'TranslationPractice', heading: level });
-      if (docs.length < 1) {
+      const levelDoc = await NoteV2Model.findOne({name: level, parentId: "TranslationPractice"});
+      if (!levelDoc) {
         done(null);
         return;
       }
-
-      const filteredDocs = docs[0].dataLable?.filter((item: any) => item.tag.trim() === subLevel) ?? [];
-
-      if (filteredDocs.length === 0) {
+      const subLevelDoc = await NoteV2Model.findOne({name: subLevel, parentId: levelDoc.id});
+      if (!subLevelDoc) {
         done(null);
         return;
       }
+      const docs = await NoteV2Model.find({
+        parentId: subLevelDoc.id,
+        type: 'NOTE',
+      }).sort({ _id: 1 });
 
-      const english = this.splitSentences(filteredDocs[0].data);
-      const german = filteredDocs.length > 1 ? this.splitSentences(filteredDocs[1].data) : [];
+      const english = this.splitSentences(docs[0]?.content?.data ?? '');
+      const german = docs.length > 1 ? this.splitSentences(docs[1]?.content?.data ?? '') : [];
       const englishSentences = english.map((sentence, index) => ({
         sentence,
         translation: german[index] || '',
@@ -443,7 +444,7 @@ export default class Handler {
   getNoteV2Content = async (req: any, done: Callback) => {
     try {
       const userId = req?.auth?.sub;
-      const docs = await NoteV2Model.find({ userId, parentId: req.query.parentId ?? '' });
+      const docs = await NoteV2Model.find({ userId, parentId: req.query.parentId ?? '' }).sort({ _id: 1 });
       done(docs);
     } catch (err) {
       console.log(err);
@@ -451,21 +452,21 @@ export default class Handler {
     }
   };
 
-  getOneLevelDown = async (
-    userId: string,
-    rootParentId: string
-  ) => {
+  getOneLevelDown = async (userId: string, rootParentId: string) => {
     // Level 1: direct children of the root parent
     const currentNote = await NoteV2Model.findOne({ userId, id: rootParentId });
-    const level1 = await NoteV2Model.find({ userId, parentId: rootParentId });
+    const level1 = await NoteV2Model.find({
+      userId,
+      parentId: rootParentId,
+    }).sort({ _id: 1 });
 
-    const level1Ids = level1.map(n => n.id);
+    const level1Ids = level1.map((n) => n.id);
 
     // Level 2: children of each level-1 node
     const level2 = await NoteV2Model.find({
       userId,
       parentId: { $in: level1Ids },
-    });
+    }).sort({ _id: 1 });
 
     const map: NoteItemMap = {};
 
@@ -496,7 +497,6 @@ export default class Handler {
   getNoteV2ContentWithChildren = async (req: any, done: Callback) => {
     try {
       const userId = req?.auth?.sub;
-      // const docs = await NoteV2Model.find({ userId, parentId: req.query.parentId ?? '' });
       const docs = await this.getOneLevelDown(userId, req.query.parentId ?? '');
       done(docs);
     } catch (err) {
@@ -717,9 +717,18 @@ export default class Handler {
   syncCreateV1Note = (req: any, done: Callback) => {
     const mapped = mapNoteV2ToNoteV1(req.body);
     const syncReq = { ...req, body: mapped };
+    syncReq.body.userId = (req as any).auth?.sub;
 
-    this.updateOneNote(syncReq, () => {
-      console.log('Updated Note V1', mapped?.person?.id);
+    const method =
+      req.body.type === 'FOLDER' ? this.newNote : this.updateOneNote;
+    const data = req.body.type === 'FOLDER' ? syncReq.body : syncReq;
+
+    method(data, (resp) => {
+      if (resp.includes('Error')) {
+        console.log('Note V1 not updated!', mapped?.person?.id);
+      } else {
+        console.log('Updated Note V1', mapped?.person?.id);
+      }
       done('ok');
     });
   };
@@ -740,7 +749,11 @@ export default class Handler {
       const syncReq = { ...req, body: mapped };
 
       this.updateOneNote(syncReq, (resp) => {
-        console.log('Updated Note V1', mapped?.person?.id);
+        if (resp.includes('Error')) {
+          console.log('Note V1 not updated!', mapped?.person?.id);
+        } else {
+          console.log('Updated Note V1', mapped?.person?.id);
+        }
         done(resp);
       });
     } catch (err) {
@@ -762,6 +775,11 @@ export default class Handler {
       const syncReq = { ...req, body: { ...mapped, delete: true } };
 
       this.updateOneNote(syncReq, (resp) => {
+        if (resp.includes('Error')) {
+          console.log('Note V1 not updated!', mapped?.person?.id);
+        } else {
+          console.log('Updated Note V1', mapped?.person?.id);
+        }
         done(resp);
       });
     } catch (err) {
