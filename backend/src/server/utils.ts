@@ -37,7 +37,6 @@ export type NoteV2Shape = {
 };
 
 export function mapNoteV2ToNoteV1(input: NoteV2Shape): any {
-  console.log('input',input);
   const [parentId, tag] = input.parentId.split('::');
 
   const data = input.content?.date
@@ -63,12 +62,10 @@ export function mapNoteV2ToNoteV1(input: NoteV2Shape): any {
   }
   if (input.type === 'FOLDER') {
     return {
-      // person: {
-        id: input.id,
-        createdBy: parentId,
-        heading: input.content?.tag,
-        dataLable: [],
-      // },
+      id: input.id,
+      createdBy: parentId,
+      heading: input.content?.tag,
+      dataLable: [],
     };
   }
 
