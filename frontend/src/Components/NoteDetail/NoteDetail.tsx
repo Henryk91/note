@@ -294,7 +294,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   function updateNoteItem(val) {
     const dataLable = val.type === 'Log'? persons?.[person.dataLable.find(item => item.name === 'Log')?.id ?? 0]?.dataLable: person.dataLable;
     if (!dataLable) return;
-    const noteItem = dataLable.find((item) => item.content?.data === val.oldItem.data);
+    const noteItem = dataLable.find((item) => item.content?.data === val.oldItem.data && item.content?.date === val?.oldItem?.date);
     if (!noteItem) return;
     if (val.delete) {
       deleteItem(noteItem, () => {
