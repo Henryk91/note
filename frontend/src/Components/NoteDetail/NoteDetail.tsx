@@ -167,7 +167,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
           <NoteItem
             nextItem={undefined}
             prevItem={undefined}
-            item={{date: item.date }}
+            item={{content: {date: item.date }}}
             date={selectedDate}
             show={showButton && lastPage}
             set={updateNoteItem}
@@ -198,7 +198,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
           <NoteItem
             nextItem={nextItemLocal}
             prevItem={prevItemLocal}
-            item={item?.content}
+            item={item}
             date={checkDate}
             show={showButton && lastPage}
             set={updateNoteItem}
@@ -294,7 +294,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
   function updateNoteItem(val) {
     const dataLable = val.type === 'Log'? persons?.[person.dataLable.find(item => item.name === 'Log')?.id ?? 0]?.dataLable: person.dataLable;
     if (!dataLable) return;
-    const noteItem = dataLable.find((item) => item.content?.data === val.oldItem.data && item.content?.date === val?.oldItem?.date);
+    const noteItem = dataLable.find((item) => item.id === val.oldItem.id);
     if (!noteItem) return;
     if (val.delete) {
       deleteItem(noteItem, () => {
@@ -545,7 +545,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
               <NoteItem
                 nextItem={undefined}
                 prevItem={undefined}
-                item={noteItem.content}
+                item={noteItem}
                 date={displayDate?.toString() ?? ''}
                 show={lastPage}
                 set={updateNoteItem}

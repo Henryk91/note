@@ -13,7 +13,7 @@ marked.setOptions({
 });
 
 type NoteItemProps = {
-  item: NoteContent;
+  item: NoteItemType;
   date: string;
   show: boolean;
   prevItem?: string;
@@ -276,7 +276,7 @@ const NoteItem: React.FC<NoteItemProps> = ({
       delete: false,
     });
     setEditingItem(false);
-    setItem(update);
+    setItem({...item, content: update});
     removeHideClass();
   };
 
@@ -309,22 +309,22 @@ const NoteItem: React.FC<NoteItemProps> = ({
     }
   }, [show, editingItem]);
 
-  const isLog = !!item?.date && !!item?.data;
+  const content = item?.content
+  const isLog = !!content?.date && !!content?.data;
   const editing = editingItem && show;
 
   const noEditingIsLog = !editing && isLog;
   const noEditingNoLog = !editing && !isLog;
 
-  const noEditingIsLogDay = !editing && item.data === undefined;
+  const noEditingIsLogDay = !editing && content?.data === undefined;
 
-  if (!item) return <></>;
-
+  if (!content) return <></>;
   return (
     <div>
       <div className="noteTagBox">
         {editing && (
           <EditItemBox
-            item={item}
+            item={content}
             onSubmit={submitChange}
             onClose={closeEdit}
             onDelete={deleteItem}
@@ -334,7 +334,7 @@ const NoteItem: React.FC<NoteItemProps> = ({
         )}
         {noEditingIsLog && (
           <DisplayLogItemBox
-            item={item}
+            item={content}
             show={show}
             date={date}
             prevItem={prevItem}
@@ -344,7 +344,7 @@ const NoteItem: React.FC<NoteItemProps> = ({
           />
         )}
         {noEditingNoLog && (
-          <DisplayItemBox item={noEditingIsLogDay? item.date+"": item.data} showEdit={showEdit} count={count} show={show} onEdit={setEditState} />
+          <DisplayItemBox item={noEditingIsLogDay? content.date+"": content.data} showEdit={showEdit} count={count} show={show} onEdit={setEditState} />
          )}
       </div>
     </div>
