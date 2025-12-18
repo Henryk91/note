@@ -379,10 +379,10 @@ const NoteDetail: React.FC<NoteDetailProps> = ({
     if (!number || !currentPerson?.id) return;
 
     if (tag === 'Log') content.date = textTag;
-
+    dispatch(setShowAddItem(false));
+    
     addItem(content, currentPerson.id, (data) => {
       setAddLable(null);
-      dispatch(setShowAddItem(false));
 
       if (data?.parentId === currentPerson.id) {
         const updated = { ...currentPerson, dataLable: [...currentPerson.dataLable, data] };
