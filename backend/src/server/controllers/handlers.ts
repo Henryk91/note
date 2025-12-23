@@ -300,6 +300,8 @@ export default class Handler {
 
       doc.heading = 'Site Track';
       const referer = req.headers.referer;
+      if (referer.includes('localhost') || referer.includes('127.0.0.1')) return done('Not logged');
+
       const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
       let data = `Referer: ${referer}\nIp: ${ip}\n SA Date: ${calcTimeNowOffset('+2')}\n https://ipapi.co/${ip}/`;
       let siteTag = 'Site one';
