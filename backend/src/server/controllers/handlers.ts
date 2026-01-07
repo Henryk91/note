@@ -5,40 +5,16 @@ import {
   formatDate,
   mapNoteV1ToNoteV2Query,
   mapNoteV2ToNoteV1,
+  NoteV2Content,
 } from '../utils';
-import type {
-  AuthenticatedRequest,
-  Callback,
-  DeleteV2NoteBody,
-  NewNotePayload,
-  NewV2NoteBody,
+import {
   NoteAttrs,
   NoteDataLabel,
   NoteItemMap,
-  NoteQuery,
   NoteUserAttrs,
-  NoteV2Content,
   NoteV2Attrs,
-  QueryRequest,
-  SavedTranslationQuery,
-  SiteLogQuery,
-  UpdateNoteBody,
-  UpdateOneNoteBody,
-  UpdateV2NoteBody,
-  UserLoginPayload,
-  UserQuery,
-  V2ParentQuery,
+  Callback,
 } from '../types/handlers';
-
-const getErrorName = (err: unknown): string | undefined => {
-  if (err instanceof Error) return err.name;
-  if (typeof err === 'object' && err && 'name' in err) {
-    const name = (err as { name?: unknown }).name;
-    return typeof name === 'string' ? name : undefined;
-  }
-  return undefined;
-};
-
 
 const noteSchema = new Schema<NoteAttrs>({
   id: { type: String, required: true },
@@ -120,9 +96,9 @@ export default class Handler {
       await createUser.save();
       console.log('User Created', createUser);
       done(docId);
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.log(err);
-      done(getErrorName(err) ?? 'Error');
+      done(err?.name ?? 'Error');
     }
   };
 
@@ -132,25 +108,25 @@ export default class Handler {
       const docs = await NoteUserModel.find({ tempPass });
       console.log('Temp Pass Confirm');
       done(docs);
-    } catch (err: unknown) {
-      console.log('Temp Pass Error', getErrorName(err));
-      done(getErrorName(err) ?? 'Error');
+    } catch (err: any) {
+      console.log('Temp Pass Error', err?.name);
+      done(err?.name ?? 'Error');
     }
   }
 
-  newNote = async (req: NewNotePayload, done: Callback) => {
+  newNote = async (req: any, done: Callback<string>) => {
     try {
       const note = { ...req, userId: req.userId };
       const createNote = new NoteModel(note);
       await createNote.save();
       done('Created');
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.log(err);
-      done(getErrorName(err) ?? 'Error');
+      done(err?.name ?? 'Error');
     }
   };
 
-  getAllNotes = async (req: AuthenticatedRequest, done: Callback) => {
+  getAllNotes = async (req: any, done: Callback) => {
     try {
       const docs = await NoteModel.find({ userId: req.auth.sub });
       done(docs);
@@ -160,7 +136,7 @@ export default class Handler {
     }
   };
 
-  userLogin = async (req: UserLoginPayload, done: Callback) => {
+  userLogin = async (req: any, done: Callback) => {
     const user = await NoteUserModel.findOne({
       email: req.email,
       password: req.password,
@@ -187,10 +163,7 @@ export default class Handler {
     }
   };
 
-  getMyNotes = async (
-    req: AuthenticatedRequest<unknown, UserQuery>,
-    done: Callback,
-  ) => {
+  getMyNotes = async (req: any, done: Callback) => {
     try {
       const { user } = req.query;
       const decodedUser = decodeURI(user);
@@ -213,10 +186,7 @@ export default class Handler {
     }
   };
 
-  getNote = async (
-    req: AuthenticatedRequest<unknown, NoteQuery>,
-    done: Callback,
-  ) => {
+  getNote = async (req: any, done: Callback) => {
     try {
       const { user, noteHeading } = req.query;
       const decodedUser = decodeURI(user);
@@ -240,7 +210,7 @@ export default class Handler {
     }
   };
 
-  getNoteNames = async (req: AuthenticatedRequest, done: Callback) => {
+  getNoteNames = async (req: any, done: Callback) => {
     try {
       const docs = await NoteModel.find({ userId: req.auth.sub });
       const nameArray = docs.map((doc) => doc.createdBy);
@@ -252,10 +222,7 @@ export default class Handler {
     }
   };
 
-  updateNote = async (
-    req: AuthenticatedRequest<UpdateNoteBody>,
-    done: Callback,
-  ) => {
+  updateNote = async (req: any, done: Callback) => {
     try {
       const updateNoteId = req.body.person.id;
 
@@ -266,7 +233,7 @@ export default class Handler {
       if (!doc) return done('No notes');
 
       const update = req.body.person;
-      doc.heading = update.heading ?? 'Placeholder Heading';
+      doc.heading = update.heading;
       doc.dataLable = update.dataLable;
       await doc.save();
       done('success');
@@ -276,10 +243,7 @@ export default class Handler {
     }
   };
 
-  updateOneNote = async (
-    req: AuthenticatedRequest<UpdateOneNoteBody>,
-    done: Callback,
-  ) => {
+  updateOneNote = async (req: any, done: Callback<string>) => {
     try {
       const updateNoteId = req.body?.person?.id;
       const doc = await NoteModel.findOne({
@@ -293,7 +257,7 @@ export default class Handler {
       if (doc.dataLable) {
         if (req.body.delete) {
           const newLable = doc.dataLable.filter(
-            (item: NoteDataLabel) =>
+            (item: any) =>
               JSON.stringify(item) !== JSON.stringify(update.dataLable),
           );
           doc.dataLable = newLable;
@@ -303,14 +267,12 @@ export default class Handler {
           }
         } else if (update.dataLable.edit) {
           const { dataLable } = update;
-          const docDataLable = JSON.parse(
-            JSON.stringify(doc.dataLable),
-          ) as NoteDataLabel[];
+          const docDataLable = JSON.parse(JSON.stringify(doc.dataLable));
           const ind = docDataLable.findIndex(
-            (item: NoteDataLabel) => item.data === dataLable.data,
+            (item: any) => item.data === dataLable.data,
           );
           if (docDataLable[ind]) {
-            docDataLable[ind].data = dataLable.edit ?? 'Empty Value';
+            docDataLable[ind].data = dataLable.edit;
             doc.dataLable = docDataLable;
           }
           if (update.heading) {
@@ -331,10 +293,7 @@ export default class Handler {
     }
   };
 
-  updateSiteLog = async (
-    req: AuthenticatedRequest<unknown, SiteLogQuery>,
-    done: Callback,
-  ) => {
+  updateSiteLog = async (req: any, done: Callback) => {
     try {
       const sitesId = 'KdE0rnAoFwb7BaRJgaYd';
       const userId = '68988da2b947c4d46023d679';
@@ -343,18 +302,14 @@ export default class Handler {
 
       doc.heading = 'Site Track';
       const { referer } = req.headers;
-      const refererHeader = Array.isArray(referer) ? referer[0] : referer;
-      if (
-        refererHeader?.includes('localhost') ||
-        refererHeader?.includes('127.0.0.1')
-      )
+      if (referer.includes('localhost') || referer.includes('127.0.0.1'))
         return done('Not logged');
 
       const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-      let data = `Referer: ${refererHeader ?? ''}\nIp: ${ip}\n SA Date: ${calcTimeNowOffset('+2')}\n https://ipapi.co/${ip}/`;
+      let data = `Referer: ${referer}\nIp: ${ip}\n SA Date: ${calcTimeNowOffset('+2')}\n https://ipapi.co/${ip}/`;
       let siteTag = 'Site one';
-      if (refererHeader) {
-        const siteName = `${refererHeader.replace('http://', '').replace('https://', '')}`;
+      if (referer) {
+        const siteName = `${referer.replace('http://', '').replace('https://', '')}`;
         if (siteName) {
           siteTag = siteName.substring(0, siteName.indexOf('/'));
         }
@@ -442,33 +397,20 @@ export default class Handler {
   getFullTranslationPractice = async (done: Callback) => {
     try {
       const docs = await NoteModel.find({ createdBy: 'TranslationPractice' });
-      const result = docs.reduce(
-        (
-          acc: Record<string, Record<string, string>>,
-          { heading, dataLable },
-        ) => {
-          const nested = (dataLable ?? []).reduce(
-            (noteAcc: Record<string, string>, { tag, data }: NoteDataLabel) => {
-              const formatted = data.trim().endsWith('.')
-                ? `${data} `
-                : `${data}. `;
-              if (tag) {
-                noteAcc[tag] = noteAcc[tag]
-                  ? `${noteAcc[tag]}${formatted}`
-                  : formatted;
-              }
-              return noteAcc;
-            },
-            {},
-          );
+      const result = docs.reduce((acc: any, { heading, dataLable }: any) => {
+        const nested = dataLable.reduce((noteAcc: any, { tag, data }: any) => {
+          const formatted = data.trim().endsWith('.')
+            ? `${data} `
+            : `${data}. `;
+          noteAcc[tag] = noteAcc[tag]
+            ? `${noteAcc[tag]}${formatted}`
+            : formatted;
+          return noteAcc;
+        }, {});
 
-          if (heading) {
-            acc[heading] = nested;
-          }
-          return acc;
-        },
-        {},
-      );
+        acc[heading] = nested;
+        return acc;
+      }, {});
 
       done(result);
     } catch (err) {
@@ -483,10 +425,7 @@ export default class Handler {
       .map((s) => s.trim())
       .filter(Boolean);
 
-  getSavedTranslation = async (
-    req: QueryRequest<SavedTranslationQuery>,
-    done: Callback,
-  ) => {
+  getSavedTranslation = async (req: any, done: Callback) => {
     try {
       const level = req?.query?.level;
       const subLevel = req?.query?.subLevel;
@@ -533,10 +472,7 @@ export default class Handler {
     }
   };
 
-  getNoteV2Content = async (
-    req: AuthenticatedRequest<unknown, V2ParentQuery>,
-    done: Callback,
-  ) => {
+  getNoteV2Content = async (req: any, done: Callback) => {
     try {
       const userId = req?.auth?.sub;
       const docs = await NoteV2Model.find({
@@ -582,7 +518,7 @@ export default class Handler {
         const heading = level1.find((l) => l.id === child.parentId)?.name;
         map[child.parentId] = {
           id: child.parentId,
-          heading,
+          heading: heading,
           dataLable: [],
         };
       }
@@ -592,10 +528,7 @@ export default class Handler {
     return map;
   };
 
-  getNoteV2ContentWithChildren = async (
-    req: AuthenticatedRequest<unknown, V2ParentQuery>,
-    done: Callback,
-  ) => {
+  getNoteV2ContentWithChildren = async (req: any, done: Callback) => {
     try {
       const userId = req?.auth?.sub;
       const docs = await this.getOneLevelDown(userId, req.query.parentId ?? '');
@@ -606,10 +539,7 @@ export default class Handler {
     }
   };
 
-  newV2Note = async (
-    req: AuthenticatedRequest<NewV2NoteBody>,
-    done: Callback,
-  ) => {
+  newV2Note = async (req: any, done: Callback) => {
     try {
       const userId = req.auth.sub;
       const { id, parentId, type, content, name } = req.body;
@@ -681,16 +611,13 @@ export default class Handler {
       const createNote = new NoteV2Model(note);
       const data = await createNote.save();
       done(data);
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.log(err);
-      done(getErrorName(err) ?? 'Error');
+      done(err?.name ?? 'Error');
     }
   };
 
-  updateV2Note = async (
-    req: AuthenticatedRequest<UpdateV2NoteBody>,
-    done: Callback,
-  ) => {
+  updateV2Note = async (req: any, done: Callback) => {
     try {
       const userId = req.auth.sub;
       const { id, parentId, content, name } = req.body;
@@ -711,10 +638,7 @@ export default class Handler {
     }
   };
 
-  deleteV2Note = async (
-    req: AuthenticatedRequest<DeleteV2NoteBody>,
-    done: Callback,
-  ) => {
+  deleteV2Note = async (req: any, done: Callback) => {
     try {
       const userId = req.auth.sub;
       const { id, type } = req.body;
@@ -740,10 +664,7 @@ export default class Handler {
     }
   };
 
-  syncUpdateV2Note = async (
-    req: AuthenticatedRequest<UpdateOneNoteBody>,
-    done: Callback,
-  ) => {
+  syncUpdateV2Note = async (req: any, done: Callback) => {
     try {
       const { queryParams, newContent, parentId } = mapNoteV1ToNoteV2Query(req);
 
@@ -772,10 +693,7 @@ export default class Handler {
     }
   };
 
-  syncCreateV2Note = async (
-    req: AuthenticatedRequest<UpdateOneNoteBody>,
-    done: Callback,
-  ) => {
+  syncCreateV2Note = async (req: any, done: Callback) => {
     const { body } = req;
     const { person } = body;
     const isNote = !person.dataLable.data.includes('"json":true');
@@ -848,10 +766,7 @@ export default class Handler {
     }
   };
 
-  syncDeleteV2Note = async (
-    req: AuthenticatedRequest<UpdateOneNoteBody>,
-    done: Callback,
-  ) => {
+  syncDeleteV2Note = async (req: any, done: Callback) => {
     try {
       const { queryParams } = mapNoteV1ToNoteV2Query(req);
 
@@ -869,10 +784,7 @@ export default class Handler {
     }
   };
 
-  syncCreateV1Note = (
-    req: AuthenticatedRequest<NewV2NoteBody>,
-    done: Callback,
-  ) => {
+  syncCreateV1Note = (req: any, done: Callback) => {
     const mapped = mapNoteV2ToNoteV1(req.body);
     const syncReq = { ...req, body: mapped };
     syncReq.body.userId = req.auth?.sub;
@@ -891,10 +803,7 @@ export default class Handler {
     });
   };
 
-  syncUpdateV1Note = async (
-    req: AuthenticatedRequest<UpdateV2NoteBody>,
-    done: Callback,
-  ) => {
+  syncUpdateV1Note = async (req: any, done: Callback) => {
     try {
       const userId = req.auth.sub;
       const doc = await NoteV2Model.findOne({ id: req.body.id, userId });
@@ -927,10 +836,7 @@ export default class Handler {
     }
   };
 
-  syncDeleteV1Note = async (
-    req: AuthenticatedRequest<DeleteV2NoteBody>,
-    done: Callback,
-  ) => {
+  syncDeleteV1Note = async (req: any, done: Callback) => {
     try {
       const userId = req.auth.sub;
       const doc = await NoteV2Model.findOne({ id: req.body.id, userId });
