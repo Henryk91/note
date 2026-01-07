@@ -1,49 +1,44 @@
 import mongoose, { Model, Schema } from 'mongoose';
 import config from '../config';
-import { calcTimeNowOffset, formatDate, mapNoteV1ToNoteV2Query, mapNoteV2ToNoteV1 } from '../utils';
+import {
+  calcTimeNowOffset,
+  formatDate,
+  mapNoteV1ToNoteV2Query,
+  mapNoteV2ToNoteV1,
+} from '../utils';
+import type {
+  AuthenticatedRequest,
+  Callback,
+  DeleteV2NoteBody,
+  NewNotePayload,
+  NewV2NoteBody,
+  NoteAttrs,
+  NoteDataLabel,
+  NoteItemMap,
+  NoteQuery,
+  NoteUserAttrs,
+  NoteV2Content,
+  NoteV2Attrs,
+  QueryRequest,
+  SavedTranslationQuery,
+  SiteLogQuery,
+  UpdateNoteBody,
+  UpdateOneNoteBody,
+  UpdateV2NoteBody,
+  UserLoginPayload,
+  UserQuery,
+  V2ParentQuery,
+} from '../types/handlers';
 
-type Callback = (resp: any) => void;
-
-export interface NoteAttrs {
-  id: string;
-  userId: string;
-  createdBy: string;
-  heading: string;
-  dataLable?: any[];
-}
-
-type NoteDoc = mongoose.HydratedDocument<NoteAttrs>;
-
-export interface NoteV2Content {
-  data: string;
-  date?: string;
-}
-
-export interface NoteV2Attrs {
-  id: string;
-  userId: string;
-  parentId: string;
-  type: string;
-  name?: string;
-  content?: NoteV2Content;
-}
-
-export type NoteItemMap = {
-  [key: string]: { heading?: string; id: string; dataLable: NoteV2Attrs[] };
+const getErrorName = (err: unknown): string | undefined => {
+  if (err instanceof Error) return err.name;
+  if (typeof err === 'object' && err && 'name' in err) {
+    const name = (err as { name?: unknown }).name;
+    return typeof name === 'string' ? name : undefined;
+  }
+  return undefined;
 };
 
-type NoteV2Doc = mongoose.HydratedDocument<NoteV2Attrs>;
-
-export interface NoteUserAttrs {
-  email: string;
-  firstName: string;
-  lastName: string;
-  password: string;
-  tempPass: string[];
-  permId: string;
-}
-
-type NoteUserDoc = mongoose.HydratedDocument<NoteUserAttrs>;
 
 const noteSchema = new Schema<NoteAttrs>({
   id: { type: String, required: true },
@@ -76,9 +71,18 @@ const noteUserSchema = new Schema<NoteUserAttrs>({
   permId: { type: String, required: true },
 });
 
-const NoteModel: Model<NoteAttrs> = mongoose.model<NoteAttrs>('Notes', noteSchema);
-const NoteUserModel: Model<NoteUserAttrs> = mongoose.model<NoteUserAttrs>('NoteUsers', noteUserSchema);
-const NoteV2Model: Model<NoteV2Attrs> = mongoose.model<NoteV2Attrs>('notes-v2', noteV2Schema);
+const NoteModel: Model<NoteAttrs> = mongoose.model<NoteAttrs>(
+  'Notes',
+  noteSchema,
+);
+const NoteUserModel: Model<NoteUserAttrs> = mongoose.model<NoteUserAttrs>(
+  'NoteUsers',
+  noteUserSchema,
+);
+const NoteV2Model: Model<NoteV2Attrs> = mongoose.model<NoteV2Attrs>(
+  'notes-v2',
+  noteV2Schema,
+);
 
 const mongoUri = config.mongoUri || process.env.DB;
 if (mongoUri) {
@@ -92,7 +96,8 @@ if (mongoUri) {
 export default class Handler {
   docId(count: number): string {
     let text = '';
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const possible =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     for (let i = 0; i < count; i++) {
       text += possible.charAt(Math.floor(Math.random() * possible.length));
     }
@@ -115,9 +120,9 @@ export default class Handler {
       await createUser.save();
       console.log('User Created', createUser);
       done(docId);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.log(err);
-      done(err?.name ?? 'Error');
+      done(getErrorName(err) ?? 'Error');
     }
   };
 
@@ -127,25 +132,25 @@ export default class Handler {
       const docs = await NoteUserModel.find({ tempPass });
       console.log('Temp Pass Confirm');
       done(docs);
-    } catch (err: any) {
-      console.log('Temp Pass Error', err?.name);
-      done(err?.name ?? 'Error');
+    } catch (err: unknown) {
+      console.log('Temp Pass Error', getErrorName(err));
+      done(getErrorName(err) ?? 'Error');
     }
   }
 
-  newNote = async (req: any, done: Callback) => {
+  newNote = async (req: NewNotePayload, done: Callback) => {
     try {
       const note = { ...req, userId: req.userId };
       const createNote = new NoteModel(note);
       await createNote.save();
       done('Created');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.log(err);
-      done(err?.name ?? 'Error');
+      done(getErrorName(err) ?? 'Error');
     }
   };
 
-  getAllNotes = async (req: any, done: Callback) => {
+  getAllNotes = async (req: AuthenticatedRequest, done: Callback) => {
     try {
       const docs = await NoteModel.find({ userId: req.auth.sub });
       done(docs);
@@ -155,8 +160,11 @@ export default class Handler {
     }
   };
 
-  userLogin = async (req: any, done: Callback) => {
-    const user = await NoteUserModel.findOne({ email: req.email, password: req.password });
+  userLogin = async (req: UserLoginPayload, done: Callback) => {
+    const user = await NoteUserModel.findOne({
+      email: req.email,
+      password: req.password,
+    });
     if (user && user.password === req.password) {
       const newTemp = this.docId(30);
       if (user.tempPass.length > 0) {
@@ -179,12 +187,18 @@ export default class Handler {
     }
   };
 
-  getMyNotes = async (req: any, done: Callback) => {
+  getMyNotes = async (
+    req: AuthenticatedRequest<unknown, UserQuery>,
+    done: Callback,
+  ) => {
     try {
       const { user } = req.query;
       const decodedUser = decodeURI(user);
 
-      const docs = await NoteModel.find({ createdBy: decodedUser, userId: req.auth.sub });
+      const docs = await NoteModel.find({
+        createdBy: decodedUser,
+        userId: req.auth.sub,
+      });
       const trimmed = docs.map((doc) => ({
         createdBy: doc.createdBy,
         dataLable: doc.dataLable,
@@ -199,13 +213,20 @@ export default class Handler {
     }
   };
 
-  getNote = async (req: any, done: Callback) => {
+  getNote = async (
+    req: AuthenticatedRequest<unknown, NoteQuery>,
+    done: Callback,
+  ) => {
     try {
       const { user, noteHeading } = req.query;
       const decodedUser = decodeURI(user);
       const decodedNoteHeading = decodeURI(noteHeading);
 
-      const docs = await NoteModel.find({ createdBy: decodedUser, userId: req.auth.sub, id: decodedNoteHeading });
+      const docs = await NoteModel.find({
+        createdBy: decodedUser,
+        userId: req.auth.sub,
+        id: decodedNoteHeading,
+      });
       const trimmed = docs.map((doc) => ({
         createdBy: doc.createdBy,
         dataLable: doc.dataLable,
@@ -219,7 +240,7 @@ export default class Handler {
     }
   };
 
-  getNoteNames = async (req: any, done: Callback) => {
+  getNoteNames = async (req: AuthenticatedRequest, done: Callback) => {
     try {
       const docs = await NoteModel.find({ userId: req.auth.sub });
       const nameArray = docs.map((doc) => doc.createdBy);
@@ -231,15 +252,21 @@ export default class Handler {
     }
   };
 
-  updateNote = async (req: any, done: Callback) => {
+  updateNote = async (
+    req: AuthenticatedRequest<UpdateNoteBody>,
+    done: Callback,
+  ) => {
     try {
       const updateNoteId = req.body.person.id;
 
-      const doc = await NoteModel.findOne({ id: updateNoteId, userId: req.auth.sub });
+      const doc = await NoteModel.findOne({
+        id: updateNoteId,
+        userId: req.auth.sub,
+      });
       if (!doc) return done('No notes');
 
       const update = req.body.person;
-      doc.heading = update.heading;
+      doc.heading = update.heading ?? 'Placeholder Heading';
       doc.dataLable = update.dataLable;
       await doc.save();
       done('success');
@@ -249,28 +276,41 @@ export default class Handler {
     }
   };
 
-  updateOneNote = async (req: any, done: Callback) => {
+  updateOneNote = async (
+    req: AuthenticatedRequest<UpdateOneNoteBody>,
+    done: Callback,
+  ) => {
     try {
       const updateNoteId = req.body?.person?.id;
-      const doc = await NoteModel.findOne({ id: updateNoteId, userId: req.auth.sub });
+      const doc = await NoteModel.findOne({
+        id: updateNoteId,
+        userId: req.auth.sub,
+      });
       if (!doc) return done('Error');
 
       const update = req.body.person;
       if (update.heading) doc.heading = update.heading;
       if (doc.dataLable) {
         if (req.body.delete) {
-          const newLable = doc.dataLable.filter((item: any) => JSON.stringify(item) !== JSON.stringify(update.dataLable));
+          const newLable = doc.dataLable.filter(
+            (item: NoteDataLabel) =>
+              JSON.stringify(item) !== JSON.stringify(update.dataLable),
+          );
           doc.dataLable = newLable;
 
           if (update.heading) {
             this.syncDeleteV2Note(req, () => {});
           }
         } else if (update.dataLable.edit) {
-          const dataLable = update.dataLable;
-          const docDataLable = JSON.parse(JSON.stringify(doc.dataLable));
-          const ind = docDataLable.findIndex((item: any) => item.data === dataLable.data);
+          const { dataLable } = update;
+          const docDataLable = JSON.parse(
+            JSON.stringify(doc.dataLable),
+          ) as NoteDataLabel[];
+          const ind = docDataLable.findIndex(
+            (item: NoteDataLabel) => item.data === dataLable.data,
+          );
           if (docDataLable[ind]) {
-            docDataLable[ind].data = dataLable.edit;
+            docDataLable[ind].data = dataLable.edit ?? 'Empty Value';
             doc.dataLable = docDataLable;
           }
           if (update.heading) {
@@ -291,7 +331,10 @@ export default class Handler {
     }
   };
 
-  updateSiteLog = async (req: any, done: Callback) => {
+  updateSiteLog = async (
+    req: AuthenticatedRequest<unknown, SiteLogQuery>,
+    done: Callback,
+  ) => {
     try {
       const sitesId = 'KdE0rnAoFwb7BaRJgaYd';
       const userId = '68988da2b947c4d46023d679';
@@ -299,14 +342,19 @@ export default class Handler {
       if (!doc || !doc.dataLable) return done('fail');
 
       doc.heading = 'Site Track';
-      const referer = req.headers.referer;
-      if (referer.includes('localhost') || referer.includes('127.0.0.1')) return done('Not logged');
+      const { referer } = req.headers;
+      const refererHeader = Array.isArray(referer) ? referer[0] : referer;
+      if (
+        refererHeader?.includes('localhost') ||
+        refererHeader?.includes('127.0.0.1')
+      )
+        return done('Not logged');
 
       const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-      let data = `Referer: ${referer}\nIp: ${ip}\n SA Date: ${calcTimeNowOffset('+2')}\n https://ipapi.co/${ip}/`;
+      let data = `Referer: ${refererHeader ?? ''}\nIp: ${ip}\n SA Date: ${calcTimeNowOffset('+2')}\n https://ipapi.co/${ip}/`;
       let siteTag = 'Site one';
-      if (referer) {
-        let siteName = referer.replace('http://', '').replace('https://', '') + '';
+      if (refererHeader) {
+        const siteName = `${refererHeader.replace('http://', '').replace('https://', '')}`;
         if (siteName) {
           siteTag = siteName.substring(0, siteName.indexOf('/'));
         }
@@ -314,7 +362,9 @@ export default class Handler {
       const websiteName = req.query && req.query.site ? req.query.site : '';
       if (websiteName && websiteName !== '') siteTag = websiteName;
       console.log('siteTag', siteTag);
-      const ipData = await fetch(`http://ip-api.com/json/${ip}?fields=country,regionName,city,timezone,org`);
+      const ipData = await fetch(
+        `http://ip-api.com/json/${ip}?fields=country,regionName,city,timezone,org`,
+      );
       const ipDataJson = await ipData.json();
 
       if (ipDataJson && ipDataJson.country) {
@@ -345,12 +395,23 @@ export default class Handler {
 
   getTranslationPractice = async (done: Callback) => {
     try {
-      const docs = await NoteModel.find({ createdBy: 'Henry', userId: 'UUvFcBXO6Q', heading: 'TranslationPractice' });
-      const result = docs[0].dataLable?.reduce((acc: any, { tag, data }: any) => {
-        const formatted = data.trim().endsWith('.') ? `${data} ` : `${data}. `;
-        acc[tag] = acc[tag] ? `${acc[tag]}${formatted}` : formatted;
-        return acc;
-      }, {});
+      const docs = await NoteModel.find({
+        createdBy: 'Henry',
+        userId: 'UUvFcBXO6Q',
+        heading: 'TranslationPractice',
+      });
+      const result = docs[0].dataLable?.reduce(
+        (acc: Record<string, string>, { tag, data }: NoteDataLabel) => {
+          const formatted = data.trim().endsWith('.')
+            ? `${data} `
+            : `${data}. `;
+          if (tag) {
+            acc[tag] = acc[tag] ? `${acc[tag]}${formatted}` : formatted;
+          }
+          return acc;
+        },
+        {},
+      );
       done(result ?? {});
     } catch (err) {
       console.log(err);
@@ -381,16 +442,33 @@ export default class Handler {
   getFullTranslationPractice = async (done: Callback) => {
     try {
       const docs = await NoteModel.find({ createdBy: 'TranslationPractice' });
-      const result = docs.reduce((acc: any, { heading, dataLable }: any) => {
-        const nested = dataLable.reduce((noteAcc: any, { tag, data }: any) => {
-          const formatted = data.trim().endsWith('.') ? `${data} ` : `${data}. `;
-          noteAcc[tag] = noteAcc[tag] ? `${noteAcc[tag]}${formatted}` : formatted;
-          return noteAcc;
-        }, {});
+      const result = docs.reduce(
+        (
+          acc: Record<string, Record<string, string>>,
+          { heading, dataLable },
+        ) => {
+          const nested = (dataLable ?? []).reduce(
+            (noteAcc: Record<string, string>, { tag, data }: NoteDataLabel) => {
+              const formatted = data.trim().endsWith('.')
+                ? `${data} `
+                : `${data}. `;
+              if (tag) {
+                noteAcc[tag] = noteAcc[tag]
+                  ? `${noteAcc[tag]}${formatted}`
+                  : formatted;
+              }
+              return noteAcc;
+            },
+            {},
+          );
 
-        acc[heading] = nested;
-        return acc;
-      }, {});
+          if (heading) {
+            acc[heading] = nested;
+          }
+          return acc;
+        },
+        {},
+      );
 
       done(result);
     } catch (err) {
@@ -405,7 +483,10 @@ export default class Handler {
       .map((s) => s.trim())
       .filter(Boolean);
 
-  getSavedTranslation = async (req: any, done: Callback) => {
+  getSavedTranslation = async (
+    req: QueryRequest<SavedTranslationQuery>,
+    done: Callback,
+  ) => {
     try {
       const level = req?.query?.level;
       const subLevel = req?.query?.subLevel;
@@ -414,12 +495,18 @@ export default class Handler {
         return;
       }
 
-      const levelDoc = await NoteV2Model.findOne({name: level, parentId: "TranslationPractice"});
+      const levelDoc = await NoteV2Model.findOne({
+        name: level,
+        parentId: 'TranslationPractice',
+      });
       if (!levelDoc) {
         done(null);
         return;
       }
-      const subLevelDoc = await NoteV2Model.findOne({name: subLevel, parentId: levelDoc.id});
+      const subLevelDoc = await NoteV2Model.findOne({
+        name: subLevel,
+        parentId: levelDoc.id,
+      });
       if (!subLevelDoc) {
         done(null);
         return;
@@ -430,7 +517,10 @@ export default class Handler {
       }).sort({ _id: 1 });
 
       const english = this.splitSentences(docs[0]?.content?.data ?? '');
-      const german = docs.length > 1 ? this.splitSentences(docs[1]?.content?.data ?? '') : [];
+      const german =
+        docs.length > 1
+          ? this.splitSentences(docs[1]?.content?.data ?? '')
+          : [];
       const englishSentences = english.map((sentence, index) => ({
         sentence,
         translation: german[index] || '',
@@ -443,10 +533,16 @@ export default class Handler {
     }
   };
 
-  getNoteV2Content = async (req: any, done: Callback) => {
+  getNoteV2Content = async (
+    req: AuthenticatedRequest<unknown, V2ParentQuery>,
+    done: Callback,
+  ) => {
     try {
       const userId = req?.auth?.sub;
-      const docs = await NoteV2Model.find({ userId, parentId: req.query.parentId ?? '' }).sort({ _id: 1 });
+      const docs = await NoteV2Model.find({
+        userId,
+        parentId: req.query.parentId ?? '',
+      }).sort({ _id: 1 });
       done(docs);
     } catch (err) {
       console.log(err);
@@ -483,10 +579,10 @@ export default class Handler {
     // each level-1 node id -> its children
     for (const child of level2) {
       if (!map[child.parentId]) {
-        const heading = level1.find(l => l.id === child.parentId)?.name
+        const heading = level1.find((l) => l.id === child.parentId)?.name;
         map[child.parentId] = {
           id: child.parentId,
-          heading: heading,
+          heading,
           dataLable: [],
         };
       }
@@ -494,9 +590,12 @@ export default class Handler {
     }
 
     return map;
-  }
+  };
 
-  getNoteV2ContentWithChildren = async (req: any, done: Callback) => {
+  getNoteV2ContentWithChildren = async (
+    req: AuthenticatedRequest<unknown, V2ParentQuery>,
+    done: Callback,
+  ) => {
     try {
       const userId = req?.auth?.sub;
       const docs = await this.getOneLevelDown(userId, req.query.parentId ?? '');
@@ -507,7 +606,10 @@ export default class Handler {
     }
   };
 
-  newV2Note = async (req: any, done: Callback) => {
+  newV2Note = async (
+    req: AuthenticatedRequest<NewV2NoteBody>,
+    done: Callback,
+  ) => {
     try {
       const userId = req.auth.sub;
       const { id, parentId, type, content, name } = req.body;
@@ -579,13 +681,16 @@ export default class Handler {
       const createNote = new NoteV2Model(note);
       const data = await createNote.save();
       done(data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.log(err);
-      done(err?.name ?? 'Error');
+      done(getErrorName(err) ?? 'Error');
     }
   };
 
-  updateV2Note = async (req: any, done: Callback) => {
+  updateV2Note = async (
+    req: AuthenticatedRequest<UpdateV2NoteBody>,
+    done: Callback,
+  ) => {
     try {
       const userId = req.auth.sub;
       const { id, parentId, content, name } = req.body;
@@ -606,7 +711,10 @@ export default class Handler {
     }
   };
 
-  deleteV2Note = async (req: any, done: Callback) => {
+  deleteV2Note = async (
+    req: AuthenticatedRequest<DeleteV2NoteBody>,
+    done: Callback,
+  ) => {
     try {
       const userId = req.auth.sub;
       const { id, type } = req.body;
@@ -632,7 +740,10 @@ export default class Handler {
     }
   };
 
-  syncUpdateV2Note = async (req: any, done: Callback) => {
+  syncUpdateV2Note = async (
+    req: AuthenticatedRequest<UpdateOneNoteBody>,
+    done: Callback,
+  ) => {
     try {
       const { queryParams, newContent, parentId } = mapNoteV1ToNoteV2Query(req);
 
@@ -647,7 +758,11 @@ export default class Handler {
       }
       if (parentId) doc.parentId = parentId;
       if (newContent?.data) {
-        doc.content = { ...(doc.content ?? {}), data: newContent.data, date: newContent.date };
+        doc.content = {
+          ...(doc.content ?? {}),
+          data: newContent.data,
+          date: newContent.date,
+        };
       }
       const data = await doc.save();
       done(data);
@@ -657,12 +772,17 @@ export default class Handler {
     }
   };
 
-  syncCreateV2Note = async (req: any, done: Callback) => {
-    const body = req.body;
-    const person = body.person;
+  syncCreateV2Note = async (
+    req: AuthenticatedRequest<UpdateOneNoteBody>,
+    done: Callback,
+  ) => {
+    const { body } = req;
+    const { person } = body;
     const isNote = !person.dataLable.data.includes('"json":true');
-    let parentId = `${person.id}::${person.dataLable.tag}`;
-    const jsonDataLableData = !isNote ? JSON.parse(person.dataLable.data) : undefined;
+    const parentId = `${person.id}::${person.dataLable.tag}`;
+    const jsonDataLableData = !isNote
+      ? JSON.parse(person.dataLable.data)
+      : undefined;
     const content = isNote
       ? { data: person.dataLable.data }
       : { data: jsonDataLableData.data, date: jsonDataLableData.date };
@@ -670,15 +790,31 @@ export default class Handler {
     if (!isNote) {
       const userId = req.auth.sub;
 
-      const logDirCreate = { id: `${person.id}::Log`, userId, parentId: person.id, type: 'FOLDER', name: 'Log' };
+      const logDirCreate = {
+        id: `${person.id}::Log`,
+        userId,
+        parentId: person.id,
+        type: 'FOLDER',
+        name: 'Log',
+      };
       const logDirCreateReq = { ...req, body: logDirCreate };
 
       this.newV2Note(logDirCreateReq, () => {
         console.log('Log Dir created');
 
-        const logDay = jsonDataLableData?.date ? formatDate(jsonDataLableData.date.substring(0, 16).trim()) : 'unknown';
-        const logDayId = `${logDirCreate.id}::${logDay}`.trim().replaceAll(' ', '-');
-        const logDayCreate = { id: logDayId, userId, parentId: logDirCreate.id, type: 'FOLDER', name: logDay };
+        const logDay = jsonDataLableData?.date
+          ? formatDate(jsonDataLableData.date.substring(0, 16).trim())
+          : 'unknown';
+        const logDayId = `${logDirCreate.id}::${logDay}`
+          .trim()
+          .replaceAll(' ', '-');
+        const logDayCreate = {
+          id: logDayId,
+          userId,
+          parentId: logDirCreate.id,
+          type: 'FOLDER',
+          name: logDay,
+        };
         const logDayCreateReq = { ...req, body: logDayCreate };
 
         this.newV2Note(logDayCreateReq, () => {
@@ -712,7 +848,10 @@ export default class Handler {
     }
   };
 
-  syncDeleteV2Note = async (req: any, done: Callback) => {
+  syncDeleteV2Note = async (
+    req: AuthenticatedRequest<UpdateOneNoteBody>,
+    done: Callback,
+  ) => {
     try {
       const { queryParams } = mapNoteV1ToNoteV2Query(req);
 
@@ -730,10 +869,13 @@ export default class Handler {
     }
   };
 
-  syncCreateV1Note = (req: any, done: Callback) => {
+  syncCreateV1Note = (
+    req: AuthenticatedRequest<NewV2NoteBody>,
+    done: Callback,
+  ) => {
     const mapped = mapNoteV2ToNoteV1(req.body);
     const syncReq = { ...req, body: mapped };
-    syncReq.body.userId = (req as any).auth?.sub;
+    syncReq.body.userId = req.auth?.sub;
 
     const method =
       req.body.type === 'FOLDER' ? this.newNote : this.updateOneNote;
@@ -749,7 +891,10 @@ export default class Handler {
     });
   };
 
-  syncUpdateV1Note = async (req: any, done: Callback) => {
+  syncUpdateV1Note = async (
+    req: AuthenticatedRequest<UpdateV2NoteBody>,
+    done: Callback,
+  ) => {
     try {
       const userId = req.auth.sub;
       const doc = await NoteV2Model.findOne({ id: req.body.id, userId });
@@ -758,7 +903,11 @@ export default class Handler {
         return;
       }
       const edit = doc.content?.date
-        ? JSON.stringify({ json: true, date: doc.content?.date, data: doc.content.data })
+        ? JSON.stringify({
+            json: true,
+            date: doc.content?.date,
+            data: doc.content.data,
+          })
         : doc.content?.data;
       const data = { ...req.body, edit };
       const mapped = mapNoteV2ToNoteV1(data);
@@ -778,7 +927,10 @@ export default class Handler {
     }
   };
 
-  syncDeleteV1Note = async (req: any, done: Callback) => {
+  syncDeleteV1Note = async (
+    req: AuthenticatedRequest<DeleteV2NoteBody>,
+    done: Callback,
+  ) => {
     try {
       const userId = req.auth.sub;
       const doc = await NoteV2Model.findOne({ id: req.body.id, userId });

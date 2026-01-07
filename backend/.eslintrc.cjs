@@ -26,6 +26,7 @@ module.exports = {
   rules: {
     'prettier/prettier': ['error', { singleQuote: true }],
     'import/extensions': ['error', 'ignorePackages', { js: 'never', jsx: 'never', ts: 'never', tsx: 'never' }],
+    'class-methods-use-this': 'off',
     'no-underscore-dangle': 'off',
     'unused-imports/no-unused-vars': 'error',
     'unused-imports/no-unused-imports': 'error',
