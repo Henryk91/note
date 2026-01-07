@@ -122,6 +122,10 @@ const DisplayItemBox: React.FC<DisplayItemBoxProps> = ({ item, showEdit, count, 
   const themeBorder = `${theme}-border-thick`;
   const noteItemClass = count > 0 ? 'noteItemHasCount' : 'noteItem';
 
+  const markdownClick = (e) => {
+    if (e.target.tagName === 'A') e.stopPropagation();
+  }
+
   return (
     <div className="noteItemBox" onClick={onEdit}>
       {show && (
@@ -133,7 +137,7 @@ const DisplayItemBox: React.FC<DisplayItemBoxProps> = ({ item, showEdit, count, 
                 <span className="list-count-item">{count}</span>{' '}
               </div>
             )}
-            <div className={`${noteItemClass} white-color`} dangerouslySetInnerHTML={getMarkdownText(item)} />
+            <div className={`${noteItemClass} white-color`} dangerouslySetInnerHTML={getMarkdownText(item)} onClick={markdownClick} />
           </div>
           <hr />
         </>
