@@ -230,6 +230,7 @@ const App: React.FC<AppProps> = ({
       if (lastRefresh + minTimeout < now && lastRefresh) {
         setLastRefresh(now);
         checkLoginState();
+        getLastPageData(true);
       }
     };
 
