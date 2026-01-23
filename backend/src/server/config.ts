@@ -18,6 +18,8 @@ const DEFAULT_ALLOWED_ORIGINS = [
   'https://german.lingodrill.com',
   'https://bpmn-collaborator.onrender.com',
 ];
+const DEFAULT_SITE_LOG_SKIP_REFERERS = ['localhost', '127.0.0.1'];
+const DEFAULT_SITE_LOG_SKIP_IPS = ['127.0.0.1'];
 
 const EnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -31,6 +33,8 @@ const EnvSchema = z.object({
   COOKIE_SECURE: z.string().optional(),
   DB: z.string().optional(),
   MONGODB_URI: z.string().optional(),
+  SITE_LOG_SKIP_REFERERS: z.string().optional(),
+  SITE_LOG_SKIP_IPS: z.string().optional(),
 });
 
 const parsed = EnvSchema.safeParse(process.env);
@@ -45,6 +49,16 @@ const allowedOrigins =
   parsed.data.ALLOWED_ORIGINS?.split(',')
     .map((origin) => origin.trim())
     .filter(Boolean) ?? DEFAULT_ALLOWED_ORIGINS;
+
+const siteLogSkipReferers =
+  parsed.data.SITE_LOG_SKIP_REFERERS?.split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean) ?? DEFAULT_SITE_LOG_SKIP_REFERERS;
+
+const siteLogSkipIp =
+  parsed.data.SITE_LOG_SKIP_IPS?.split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean) ?? DEFAULT_SITE_LOG_SKIP_IPS;
 
 const secureCookies =
   parsed.data.COOKIE_SECURE?.toLowerCase() === 'true'
@@ -66,6 +80,8 @@ const config = {
     maxSessions: parsed.data.MAX_SESSIONS,
   },
   allowedOrigins,
+  siteLogSkipReferers,
+  siteLogSkipIp,
   secureCookies,
 };
 

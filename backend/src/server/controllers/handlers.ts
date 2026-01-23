@@ -301,11 +301,23 @@ export default class Handler {
       if (!doc || !doc.dataLable) return done('fail');
 
       doc.heading = 'Site Track';
-      const { referer } = req.headers;
-      if (referer.includes('localhost') || referer.includes('127.0.0.1'))
-        return done('Not logged');
+      const rawReferer = req.headers.referer;
+      const referer = Array.isArray(rawReferer)
+        ? rawReferer[0]
+        : (rawReferer ?? '');
+      if (
+        referer &&
+        config.siteLogSkipReferers.some((entry) => referer.includes(entry))
+      ) {
+        return done(`Not logged: ${referer}`);
+      }
 
       const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+      if (ip && config.siteLogSkipIp.some((entry) => ip.includes(entry))) {
+        return done(`Not logged IP: ${ip}`);
+      }
+
       let data = `Referer: ${referer}\nIp: ${ip}\n SA Date: ${calcTimeNowOffset('+2')}\n https://ipapi.co/${ip}/`;
       let siteTag = 'Site one';
       if (referer) {
