@@ -340,6 +340,9 @@ export default class Handler {
       doc.dataLable.push({ tag: siteTag, data });
 
       const parentId = `KdE0rnAoFwb7BaRJgaYd::${siteTag}`;
+
+      await this.ensureFolderExists(userId, siteTag, parentId, sitesId);
+
       const noteV2Id = `${parentId}::NOTE::${this.docId(10)}`;
       const note = {
         id: noteV2Id,
@@ -849,6 +852,29 @@ export default class Handler {
       done('Error');
     }
   };
+
+  private async ensureFolderExists(
+    userId: string,
+    folderName: string,
+    folderId: string,
+    parentId: string,
+  ) {
+    const parentData = await NoteV2Model.findOne({
+      userId,
+      id: folderId,
+    });
+    if (!parentData) {
+      const folder: NoteV2Attrs = {
+        name: folderName,
+        id: folderId,
+        parentId,
+        type: 'FOLDER',
+        userId,
+      };
+      const createHighLevelFolder = new NoteV2Model(folder);
+      await createHighLevelFolder.save();
+    }
+  }
 
   private async getOrCreateParentLogFolderId(
     userId: string,
