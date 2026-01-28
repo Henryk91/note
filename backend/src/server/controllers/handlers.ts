@@ -588,35 +588,11 @@ export default class Handler {
       };
 
       if (type === 'LOG') {
-        const parentData = await NoteV2Model.findOne({
+        note.parentId = await this.getOrCreateParentLogFolderId(
           userId,
-          id: parentId,
-        });
-        if (parentData?.name !== 'Log') {
-          // Parent isn't a log folder. Check if the parent has a Log folder
-          const logParent = await NoteV2Model.findOne({
-            userId,
-            parentId,
-            name: 'Log',
-          });
-
-          if (logParent) {
-            // Correct parent found
-            note.parentId = logParent.id;
-          } else {
-            // Log parent folder needs to be created;
-            const newLogParent = {
-              id: `${parentId}::Log`,
-              parentId,
-              type: 'FOLDER',
-              name: 'Log',
-              userId,
-            };
-            const createFolder = new NoteV2Model(newLogParent);
-            const folderData = await createFolder.save();
-            if (folderData) note.parentId = newLogParent.id;
-          }
-        }
+          parentId,
+          note,
+        );
       }
 
       if (name) note.name = name;
@@ -873,4 +849,39 @@ export default class Handler {
       done('Error');
     }
   };
+
+  private async getOrCreateParentLogFolderId(
+    userId: string,
+    parentId: string,
+    note: NoteV2Attrs,
+  ): Promise<string> {
+    const parentData = await NoteV2Model.findOne({
+      userId,
+      id: parentId,
+    });
+    if (parentData?.name === 'Log') return note.parentId;
+
+    // Parent isn't a log folder. Check if the parent has a Log folder
+    const logParent = await NoteV2Model.findOne({
+      userId,
+      parentId,
+      name: 'Log',
+    });
+
+    if (logParent) {
+      // Correct parent found
+      return logParent.id;
+    }
+    // Log parent folder needs to be created;
+    const newLogParent = {
+      id: `${parentId}::Log`,
+      parentId,
+      type: 'FOLDER',
+      name: 'Log',
+      userId,
+    };
+    const createFolder = new NoteV2Model(newLogParent);
+    await createFolder.save();
+    return newLogParent.id;
+  }
 }

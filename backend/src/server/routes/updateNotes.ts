@@ -24,6 +24,7 @@ export default function updateNotes(app: Application) {
   app.get('/api/log*', (req: Request, res: Response) => {
     dbHandler.updateSiteLog(req, (dbResp) => {
       console.log('req.headers', req.headers);
+      console.log('Log response:', dbResp);
       res.json({ Ok: dbResp });
     });
   });
