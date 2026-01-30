@@ -1,13 +1,8 @@
-import { Request, Response, Router } from 'express';
-import Handler from '../controllers/handlers';
+import { Router } from 'express';
+import { noteController } from '../controllers/NoteController';
 
 const router = Router();
-const dbHandler = new Handler();
 
-router.get('/', (req: Request, res: Response) => {
-  dbHandler.getNoteNames(req, (docs) => {
-    res.json(docs);
-  });
-});
+router.get('/', (req, res) => noteController.getNoteNames(req, res));
 
 export default router;

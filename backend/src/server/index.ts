@@ -1,4 +1,5 @@
 import cookieParser from 'cookie-parser';
+import mongoose from 'mongoose';
 import cors, { CorsOptions } from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
@@ -60,12 +61,7 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        styleSrc: [
-          "'self'",
-          "'unsafe-inline'",
-          'https://cdnjs.cloudflare.com',
-          'https://fonts.googleapis.com',
-        ],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://cdnjs.cloudflare.com', 'https://fonts.googleapis.com'],
         fontSrc: [
           "'self'",
           'data:',
@@ -148,10 +144,7 @@ app.get('/health', (_req, res) => {
 });
 
 app.get('/sw.js', (_req, res) => {
-  res.setHeader(
-    'Cache-Control',
-    'max-age=0, no-cache, no-store, must-revalidate',
-  );
+  res.setHeader('Cache-Control', 'max-age=0, no-cache, no-store, must-revalidate');
   res.sendFile(path.join(frontendDist, 'sw.js'));
 });
 
@@ -168,26 +161,32 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });
 });
 
-app.use(
-  (
-    err: Error & { status?: number },
-    _req: Request,
-    res: Response,
-    _next: NextFunction,
-  ) => {
-    console.error(err);
-    res.status(err.status ?? 500).json({
-      error: 'Internal server error',
-      message: config.isProd ? undefined : err.message,
-    });
-  },
-);
+app.use((err: Error & { status?: number }, _req: Request, res: Response, _next: NextFunction) => {
+  console.error(err);
+  res.status(err.status ?? 500).json({
+    error: 'Internal server error',
+    message: config.isProd ? undefined : err.message,
+  });
+});
 
 // Only start the HTTP server when running the real app, not during tests
 if (process.env.NODE_ENV !== 'test') {
   app.listen(config.port, () => {
     console.log(`Listening on port ${config.port}!`);
   });
+
+  if (config.mongoUri) {
+    mongoose
+      .connect(config.mongoUri)
+      .then(() => {
+        console.log('Connected to MongoDB');
+      })
+      .catch((err) => {
+        console.error('MongoDB connection error:', err);
+      });
+  } else {
+    console.error('No MongoDB URI provided. Running without DB connection.');
+  }
 }
 
 export default app;

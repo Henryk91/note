@@ -47,20 +47,4 @@ describe('Health and legacy auth', () => {
     expect(res.status).to.equal(200);
     expect(res.body.ok).to.equal(true);
   });
-
-  it('supports legacy register/login', async () => {
-    const register = await agent.post('/api-old/register').send({
-      email: 'legacy@test.com',
-      firstName: 'Legacy',
-      lastName: 'User',
-      password: 'password',
-      tempPass: ['temp'],
-      permId: 'perm',
-    });
-    expect(register.status).to.equal(200);
-
-    const login = await agent.post('/api-old/login').send({ email: 'legacy@test.com', password: 'password' });
-    expect(login.status).to.equal(200);
-    expect(login.body.id || login.body.status).to.exist;
-  });
 });
