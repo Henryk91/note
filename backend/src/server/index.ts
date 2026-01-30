@@ -14,14 +14,12 @@ import getNotes from './routes/getNotes';
 import handleNotesV2 from './routes/handleNotesV2';
 import getNoteNames from './routes/getNoteNames';
 import updateNotes from './routes/updateNotes';
-import userCheck from './routes/userCheck';
 import getDashData from './routes/getDashData';
 import sendEmail from './routes/sendEmail';
 import translate from './routes/translate';
 import translationScoresRouter from './routes/translationScores';
 import incorrectTranslationsRoute from './routes/incorrectTranslations';
 
-// project root is three levels up from compiled server files (backend/src/server)
 const projectRoot = path.resolve(__dirname, '../..');
 const frontendDist = path.resolve(projectRoot, 'build', 'client');
 
@@ -144,7 +142,6 @@ translate(app);
 updateNotes(app);
 getDashData(app);
 sendEmail(app);
-userCheck(app);
 
 app.get('/health', (_req, res) => {
   res.status(200).json({ ok: true, uptime: process.uptime() });

@@ -84,36 +84,6 @@ export default class Handler {
     return self.indexOf(value) === index;
   }
 
-  newUser = async (req: NoteUserAttrs, done: Callback) => {
-    try {
-      const user = { ...req };
-      const docId = this.docId(10);
-
-      user.tempPass = [docId];
-      user.permId = docId;
-      const createUser = new NoteUserModel(user);
-
-      await createUser.save();
-      console.log('User Created', createUser);
-      done(docId);
-    } catch (err: any) {
-      console.log(err);
-      done(err?.name ?? 'Error');
-    }
-  };
-
-  private async tempPassCheck(tempPass: string, done: Callback) {
-    try {
-      console.log('Temp Pass Check', tempPass);
-      const docs = await NoteUserModel.find({ tempPass });
-      console.log('Temp Pass Confirm');
-      done(docs);
-    } catch (err: any) {
-      console.log('Temp Pass Error', err?.name);
-      done(err?.name ?? 'Error');
-    }
-  }
-
   newNote = async (req: any, done: Callback<string>) => {
     try {
       const note = { ...req, userId: req.userId };
@@ -133,33 +103,6 @@ export default class Handler {
     } catch (err) {
       console.log(err);
       done('No notes');
-    }
-  };
-
-  userLogin = async (req: any, done: Callback) => {
-    const user = await NoteUserModel.findOne({
-      email: req.email,
-      password: req.password,
-    });
-    if (user && user.password === req.password) {
-      const newTemp = this.docId(30);
-      if (user.tempPass.length > 0) {
-        if (user.tempPass.length > 1) {
-          user.tempPass = user.tempPass.slice(1);
-        }
-        user.tempPass.push(newTemp);
-      } else {
-        user.tempPass = [newTemp];
-      }
-      try {
-        await user.save();
-        done(newTemp);
-      } catch (err) {
-        console.log(err);
-        done('Save Fail');
-      }
-    } else {
-      done('Login Error');
     }
   };
 
