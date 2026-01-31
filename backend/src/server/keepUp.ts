@@ -1,5 +1,6 @@
 import https from 'https';
 import { calcTimeNowOffset } from './utils';
+import logger from './utils/logger';
 
 let isRunning = false;
 
@@ -7,17 +8,19 @@ function refresh(url: string, startHour: number, endHour: number, minuteInterval
   const time = calcTimeNowOffset('+2');
   const timeNow = time.getHours();
   if ((timeNow > startHour && timeNow < endHour) || startHour === endHour) {
-    console.log('Calling KeepUp!', new Date().toLocaleString());
+    logger.info({ time: new Date().toLocaleString() }, 'Calling KeepUp!');
     https.get(url, (resp) => {
-      console.log('KeepUp Response Status:', resp.statusCode);
-      console.log('');
+      logger.info({ statusCode: resp.statusCode }, 'KeepUp Response Status');
     });
 
-    setTimeout(() => {
-      refresh(url, startHour, endHour, minuteInterval);
-    }, minuteInterval * 60 * 1000);
+    setTimeout(
+      () => {
+        refresh(url, startHour, endHour, minuteInterval);
+      },
+      minuteInterval * 60 * 1000,
+    );
   } else {
-    console.log('Done for the day!');
+    logger.info('Done for the day!');
   }
 }
 export default function keepUp(url: string, startHour: number, endHour: number, minuteInterval: number) {

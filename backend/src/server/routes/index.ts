@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { authRouter } from './authRoutes';
+import authRouter from './authRoutes';
 import dashboardRoutes from './dashboardRoutes';
 import emailRoutes from './emailRoutes';
 import noteRoutes from './noteRoutes';

@@ -19,14 +19,15 @@ const TranslationScoreSchema = new mongoose.Schema<TranslationScoreDoc>(
     score: { type: Number, required: true, min: 0, max: 100 },
     attempts: { type: Number, default: 1, min: 1 },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 TranslationScoreSchema.index({ userId: 1, exerciseId: 1 }, { unique: true });
 
 const TranslationScore: Model<TranslationScoreDoc> = mongoose.model<TranslationScoreDoc>(
   'TranslationScore',
-  TranslationScoreSchema
+  TranslationScoreSchema,
+  'translation-scores',
 );
 
 export default TranslationScore;

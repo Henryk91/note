@@ -1,41 +1,51 @@
 import { NoteModel, NoteV2Model } from '../models/Notes';
-import { NoteAttrs, NoteV2Attrs, NoteDoc, NoteV2Doc } from '../types/models';
+import { NoteAttrs, NoteV2Attrs } from '../types/models';
 
 export class NoteRepository {
-  async findNotesByUserId(userId: string): Promise<NoteDoc[]> {
-    return NoteModel.find({ userId }).exec();
+  async findNotesByUserId(userId: string): Promise<NoteAttrs[]> {
+    return NoteModel.find({ userId }).lean<NoteAttrs[]>().exec();
   }
 
-  async findNotesByUserAndCreatedBy(userId: string, createdBy: string): Promise<NoteDoc[]> {
-    return NoteModel.find({ userId, createdBy }).exec();
+  async findNotesByUserAndCreatedBy(userId: string, createdBy: string | undefined): Promise<NoteAttrs[]> {
+    const filter = createdBy ? { userId, createdBy } : { userId };
+    return NoteModel.find(filter).lean<NoteAttrs[]>().exec();
   }
 
-  async findNoteByIdAndUser(id: string, userId: string): Promise<NoteDoc | null> {
-    return NoteModel.findOne({ id, userId }).exec();
+  async findNoteByIdAndUser(id: string, userId: string): Promise<NoteAttrs | null> {
+    return NoteModel.findOne({ id, userId }).lean<NoteAttrs>().exec();
   }
 
-  async createNoteV1(data: NoteAttrs): Promise<NoteDoc> {
-    const note = new NoteModel(data);
-    return note.save();
+  async createNoteV1(data: NoteAttrs): Promise<NoteAttrs> {
+    const note = await NoteModel.create(data);
+    return note.toObject();
   }
 
-  async findNoteV2ById(userId: string, id: string): Promise<NoteV2Doc | null> {
-    return NoteV2Model.findOne({ userId, id }).exec();
+  async updateNoteV1(id: string, userId: string, updates: Partial<NoteAttrs>): Promise<NoteAttrs | null> {
+    return NoteModel.findOneAndUpdate({ id, userId }, { $set: updates }, { new: true }).lean<NoteAttrs>().exec();
   }
 
-  async findNotesV2ByParentId(userId: string, parentId: string): Promise<NoteV2Doc[]> {
-    return NoteV2Model.find({ userId, parentId }).sort({ _id: 1 }).exec();
+  async findNoteV2ById(userId: string, id: string): Promise<NoteV2Attrs | null> {
+    return NoteV2Model.findOne({ userId, id }).lean<NoteV2Attrs>().exec();
   }
 
-  async findNotesV2ByParentIds(userId: string, parentIds: string[]): Promise<NoteV2Doc[]> {
+  async findNotesV2ByParentId(userId: string, parentId: string): Promise<NoteV2Attrs[]> {
+    return NoteV2Model.find({ userId, parentId }).sort({ _id: 1 }).lean<NoteV2Attrs[]>().exec();
+  }
+
+  async findNotesV2ByParentIds(userId: string, parentIds: string[]): Promise<NoteV2Attrs[]> {
     return NoteV2Model.find({ userId, parentId: { $in: parentIds } })
       .sort({ _id: 1 })
+      .lean<NoteV2Attrs[]>()
       .exec();
   }
 
-  async createNoteV2(data: NoteV2Attrs): Promise<NoteV2Doc> {
-    const note = new NoteV2Model(data);
-    return note.save();
+  async createNoteV2(data: NoteV2Attrs): Promise<NoteV2Attrs> {
+    const note = await NoteV2Model.create(data);
+    return note.toObject();
+  }
+
+  async updateNoteV2(id: string, userId: string, updates: Partial<NoteV2Attrs>): Promise<NoteV2Attrs | null> {
+    return NoteV2Model.findOneAndUpdate({ id, userId }, { $set: updates }, { new: true }).lean<NoteV2Attrs>().exec();
   }
 
   async updateNotesV2ParentId(userId: string, oldParentId: string, newParentId: string): Promise<void> {
@@ -46,8 +56,8 @@ export class NoteRepository {
     return NoteV2Model.deleteOne({ userId, id }).exec();
   }
 
-  async findNoteV2ByNameAndParent(userId: string, parentId: string, name: string): Promise<NoteV2Doc | null> {
-    return NoteV2Model.findOne({ userId, parentId, name }).exec();
+  async findNoteV2ByNameAndParent(userId: string, parentId: string, name: string): Promise<NoteV2Attrs | null> {
+    return NoteV2Model.findOne({ userId, parentId, name }).lean<NoteV2Attrs>().exec();
   }
 }
 

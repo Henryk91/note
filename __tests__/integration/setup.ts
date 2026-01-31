@@ -5,9 +5,10 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 
 let mongoServer: MongoMemoryServer | null = null;
 let agent: ReturnType<typeof supertest.agent> | null = null;
+let mongoUri: string = '';
 
 const fetchCalls: any[] = [];
-const googleMockResponse = '[[[null,null,"[[\\"Hallo Welt\\"]]",null,null]]]';
+const googleMockResponse = '[[null,null,"[[\\"Hallo Welt\\"]]",null,null]]';
 
 const jsonResponse = (payload: any) => ({
   json: async () => payload,
@@ -57,26 +58,27 @@ const buildMongoUri = async () => {
   return mongoServer.getUri();
 };
 
-const ensureEnv = (mongoUri: string) => {
+const ensureEnv = () => {
+  process.env.JWT_SECRET = process.env.JWT_SECRET || 'super-secret-jwt-key-for-testing';
+  process.env.REFRESH_SECRET = process.env.REFRESH_SECRET || 'super-secret-refresh-key-for-testing';
   process.env.NODE_ENV = 'test';
-  process.env.DB = mongoUri;
-  process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret';
-  process.env.REFRESH_SECRET = process.env.REFRESH_SECRET || 'refresh-secret';
-  process.env.ACCESS_EXPIRES = process.env.ACCESS_EXPIRES || '15m';
-  process.env.REFRESH_EXPIRES = process.env.REFRESH_EXPIRES || '30d';
-  process.env.MAX_SESSIONS = process.env.MAX_SESSIONS || '3';
-  process.env.CORS_ALLOWED_ORIGINS = process.env.CORS_ALLOWED_ORIGINS || 'http://localhost:3000';
   process.env.COOKIE_SECURE = 'false';
   process.env.OPENAI_API_KEY = process.env.OPENAI_API_KEY || 'fake';
   process.env.WEATHER_DATA_API_KEY = process.env.WEATHER_DATA_API_KEY || 'fake';
+  process.env.ADMIN_USER_ID = process.env.ADMIN_USER_ID || 'UUvFcBXO6Q';
+  process.env.GOOGLE_TRANSLATE_TOKEN = process.env.GOOGLE_TRANSLATE_TOKEN || 'fake-token';
 };
 
+// Set environment before any modules are loaded
+ensureEnv();
+
 before(async () => {
-  const uri = await buildMongoUri();
-  ensureEnv(uri);
+  mongoUri = await buildMongoUri(); // Assign to the higher-scoped mongoUri
+  process.env.DB = mongoUri; // Set DB env var here
+
   applyModuleMocks();
 
-  await mongoose.connect(uri);
+  await mongoose.connect(mongoUri);
   if (mongoose.connection.db) {
     await mongoose.connection.db.dropDatabase();
   }
@@ -123,9 +125,17 @@ export const registerAndLogin = async (overrides = {}) => {
 
 export const resetDatabase = async () => {
   if (mongoose.connection.readyState !== 0) {
-    if (mongoose.connection.db) {
-      await mongoose.connection.db.dropDatabase();
-    }
+    const NoteModel = require('../../backend/src/server/models/Notes').NoteModel;
+    const NoteV2Model = require('../../backend/src/server/models/Notes').NoteV2Model;
+    const TranslationScore = require('../../backend/src/server/models/TranslationScore').default;
+    const IncorrectTranslation = require('../../backend/src/server/models/incorrectTranslation').default;
+
+    await Promise.all([
+      NoteModel.deleteMany({}),
+      NoteV2Model.deleteMany({}),
+      TranslationScore.deleteMany({}),
+      IncorrectTranslation.deleteMany({}),
+    ]);
   }
 };
 

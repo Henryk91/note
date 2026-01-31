@@ -23,6 +23,6 @@ const noteV2Schema = new Schema<NoteV2Attrs>({
   content: { type: noteContent },
 });
 
-export const NoteModel: Model<NoteAttrs> = mongoose.model<NoteAttrs>('Notes', noteSchema);
+export const NoteModel: Model<NoteAttrs> = mongoose.model<NoteAttrs>('Notes', noteSchema, 'notes');
 
-export const NoteV2Model: Model<NoteV2Attrs> = mongoose.model<NoteV2Attrs>('notes-v2', noteV2Schema);
+export const NoteV2Model: Model<NoteV2Attrs> = mongoose.model<NoteV2Attrs>('NoteV2', noteV2Schema, 'notes-v2');

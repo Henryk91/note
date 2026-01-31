@@ -1,14 +1,11 @@
-import { NoteModel, NoteV2Model } from '../models/Notes';
+import { NoteRepository, noteRepository } from '../repositories/NoteRepository';
 import { TranslationRepository, translationRepository } from '../repositories/TranslationRepository';
-import {
-  NoteDataLabel,
-  NoteAttrs,
-  NoteV2Attrs,
-  TranslationScoreAttrs,
-  IncorrectTranslationAttrs,
-} from '../types/models';
+import { NoteDataLabel, NoteAttrs, IncorrectTranslationAttrs } from '../types/models';
 
 import config from '../config';
+import logger from '../utils/logger';
+import { NoteModel, NoteV2Model } from '../models/Notes';
+import { TranslationScoreAttrs } from '../models/TranslationScore';
 
 interface TranslationPracticeMap {
   [key: string]: string;
@@ -21,16 +18,17 @@ interface NestedTranslationMap {
 export class TranslationService {
   private repo: TranslationRepository;
 
-  constructor(repo: TranslationRepository = translationRepository) {
+  private noteRepo: NoteRepository;
+
+  constructor(repo: TranslationRepository = translationRepository, noteRepo: NoteRepository = noteRepository) {
     this.repo = repo;
+    this.noteRepo = noteRepo;
   }
 
   async getTranslationPractice() {
-    const docs = await NoteModel.find({
-      createdBy: 'Henry',
-      userId: config.adminUserId,
-      heading: config.translationPracticeFolderId,
-    });
+    const docs = await this.noteRepo.findNotesByUserAndCreatedBy(config.adminUserId, 'Henry');
+    const folderDoc = docs.find((d) => d.heading === config.translationPracticeFolderId);
+    if (!folderDoc) return {};
 
     if (!docs || docs.length === 0) return {};
 
@@ -107,25 +105,18 @@ export class TranslationService {
   }
 
   async getSavedTranslation(level: string, subLevel: string) {
-    const levelDoc = await NoteV2Model.findOne({
-      name: level,
-      parentId: config.translationPracticeFolderId,
-    });
+    const userId = config.adminUserId;
+    const levelDoc = await this.noteRepo.findNoteV2ByNameAndParent(userId, config.translationPracticeFolderId, level);
     if (!levelDoc) return null;
 
-    const subLevelDoc = await NoteV2Model.findOne({
-      name: subLevel,
-      parentId: levelDoc.id,
-    });
+    const subLevelDoc = await this.noteRepo.findNoteV2ByNameAndParent(userId, levelDoc.id, subLevel);
     if (!subLevelDoc) return null;
 
-    const docs = (await NoteV2Model.find({
-      parentId: subLevelDoc.id,
-      type: 'NOTE',
-    }).sort({ _id: 1 })) as unknown as NoteV2Attrs[];
+    const docs = await this.noteRepo.findNotesV2ByParentId(userId, subLevelDoc.id);
+    const noteDocs = docs.filter((d) => d.type === 'NOTE');
 
-    const english = this.splitSentences(docs[0]?.content?.data ?? '');
-    const german = docs.length > 1 ? this.splitSentences(docs[1]?.content?.data ?? '') : [];
+    const english = this.splitSentences(noteDocs[0]?.content?.data ?? '');
+    const german = noteDocs.length > 1 ? this.splitSentences(noteDocs[1]?.content?.data ?? '') : [];
 
     const englishSentences = english.map((sentence, index) => ({
       sentence,
@@ -181,7 +172,7 @@ export class TranslationService {
     try {
       data = JSON.parse(translatedString) as unknown[];
     } catch (err) {
-      console.error('Failed to parse response:', err);
+      logger.error({ err }, 'Translation parsing error');
       return '';
     }
 
@@ -203,7 +194,7 @@ export class TranslationService {
           );
         translated = filteredList.join(' ');
       } catch (err) {
-        console.error('Failed to parse raw translation list:', err);
+        logger.error({ err }, 'Failed to parse raw translation list');
       }
     }
     return translated;

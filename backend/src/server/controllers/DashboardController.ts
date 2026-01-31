@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { dashboardService } from '../services/DashboardService';
+import logger from '../utils/logger';
 
 export class DashboardController {
   async getWeather(req: Request, res: Response) {
@@ -8,7 +9,7 @@ export class DashboardController {
       const data = await dashboardService.getWeather(coordinates);
       res.json(data);
     } catch (error) {
-      console.error('Weather error:', error);
+      logger.error({ err: error }, 'Weather error');
       res.status(500).json({
         error: 'Unable to fetch weather',
         detail: (error as Error).message,
@@ -21,7 +22,7 @@ export class DashboardController {
       const data = await dashboardService.getCovidCountries();
       res.json(data);
     } catch (error) {
-      console.error('Covid countries error:', error);
+      logger.error({ err: error }, 'Covid countries error');
       res.status(500).json({ error: 'Failed to fetch covid countries' });
     }
   }
@@ -31,7 +32,7 @@ export class DashboardController {
       const data = await dashboardService.getCovidHistorical();
       res.json(data);
     } catch (error) {
-      console.error('Covid historical error:', error);
+      logger.error({ err: error }, 'Covid historical error');
       res.status(500).json({ error: 'Failed to fetch covid historical data' });
     }
   }
@@ -41,7 +42,7 @@ export class DashboardController {
       const data = await dashboardService.getCovidMapData();
       res.json(data);
     } catch (error) {
-      console.error('Covid map data error:', error);
+      logger.error({ err: error }, 'Covid map data error');
       res.status(500).json({ error: 'Failed to fetch covid map data' });
     }
   }

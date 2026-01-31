@@ -3,6 +3,7 @@ import { NoteModel, NoteV2Model } from '../models/Notes';
 import { docId, calcTimeNowOffset, referralToSiteName } from '../utils';
 import config from '../config';
 import { NoteV2Attrs, SiteLogQuery, NoteDoc } from '../types/models';
+import logger from '../utils/logger';
 
 export class WebsiteTrackingService {
   async logSiteVisit(headers: IncomingHttpHeaders, query: SiteLogQuery) {
@@ -32,16 +33,12 @@ export class WebsiteTrackingService {
 
     doc.heading = 'Site Track';
     const rawReferer = headers.referer;
-    const referer = Array.isArray(rawReferer)
-      ? rawReferer[0]
-      : (rawReferer ?? '');
+    const referer = Array.isArray(rawReferer) ? rawReferer[0] : (rawReferer ?? '');
 
     if (
       referer &&
       config.siteLogSkipReferrers &&
-      config.siteLogSkipReferrers.some((entry: string) =>
-        referer.includes(entry),
-      )
+      config.siteLogSkipReferrers.some((entry: string) => referer.includes(entry))
     ) {
       throw new Error(`Not logged: ${referer}`);
     }
@@ -49,11 +46,7 @@ export class WebsiteTrackingService {
     const ip = headers['x-forwarded-for'] || headers['x-real-ip'];
     const clientIp = Array.isArray(ip) ? ip[0] : (ip ?? '');
 
-    if (
-      clientIp &&
-      config.siteLogSkipIp &&
-      config.siteLogSkipIp.some((entry: string) => clientIp.includes(entry))
-    ) {
+    if (clientIp && config.siteLogSkipIp && config.siteLogSkipIp.some((entry: string) => clientIp.includes(entry))) {
       throw new Error(`Not logged IP: ${clientIp}`);
     }
 
@@ -70,16 +63,14 @@ export class WebsiteTrackingService {
     if (websiteName) siteTag = websiteName;
 
     try {
-      const ipData = await fetch(
-        `http://ip-api.com/json/${clientIp}?fields=country,regionName,city,timezone,org`,
-      );
+      const ipData = await fetch(`http://ip-api.com/json/${clientIp}?fields=country,regionName,city,timezone,org`);
       const ipDataJson = await ipData.json();
 
       if (ipDataJson && ipDataJson.country) {
         data += `\nCountry: ${ipDataJson.country}\nRegion: ${ipDataJson.regionName}\nCity: ${ipDataJson.city}\nTimezone: ${ipDataJson.timezone}\nOrg: ${ipDataJson.org}`;
       }
     } catch (err) {
-      console.error('IP Fetch failed', err);
+      logger.error({ err }, 'IP Fetch failed');
     }
 
     doc.dataLable.push({ tag: siteTag, data });
@@ -103,12 +94,7 @@ export class WebsiteTrackingService {
     return 'success';
   }
 
-  private async ensureFolderExists(
-    userId: string,
-    folderName: string,
-    folderId: string,
-    parentId: string,
-  ) {
+  private async ensureFolderExists(userId: string, folderName: string, folderId: string, parentId: string) {
     const parentData = await NoteV2Model.findOne({
       userId,
       id: folderId,

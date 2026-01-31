@@ -9,6 +9,7 @@ import {
   NotePersonUpdate,
 } from '../types/models';
 import { onlyUnique, mapNoteV2ToNoteV1 } from '../utils';
+import logger from '../utils/logger';
 
 export class NoteService {
   private repo: NoteRepository;
@@ -23,7 +24,7 @@ export class NoteService {
 
   async getMyNotes(userId: string, userQuery?: string) {
     const decodedUser = userQuery ? decodeURI(userQuery) : undefined;
-    const notes = await this.repo.findNotesByUserAndCreatedBy(userId, decodedUser || '');
+    const notes = await this.repo.findNotesByUserAndCreatedBy(userId, decodedUser);
 
     return notes.map((doc) => ({
       createdBy: doc.createdBy,
@@ -68,9 +69,12 @@ export class NoteService {
 
     if (!doc) throw new Error('No notes');
 
-    doc.heading = updateData.heading || doc.heading;
-    doc.dataLable = [updateData.dataLable];
-    await doc.save();
+    const updates: Partial<NoteAttrs> = {
+      heading: updateData.heading || doc.heading,
+      dataLable: [updateData.dataLable],
+    };
+
+    await this.repo.updateNoteV1(updateNoteId, userId, updates);
     return 'success';
   }
 
@@ -79,25 +83,27 @@ export class NoteService {
     const doc = await this.repo.findNoteByIdAndUser(updateNoteId, userId);
     if (!doc) throw new Error('Note not found');
 
-    if (person.heading) doc.heading = person.heading;
+    const updates: Partial<NoteAttrs> = {};
+    if (person.heading) updates.heading = person.heading;
 
     if (doc.dataLable) {
+      let newDataLable = [...doc.dataLable];
       if (isDelete) {
         const targetString = JSON.stringify(person.dataLable);
-        doc.dataLable = doc.dataLable.filter((item) => JSON.stringify(item) !== targetString);
+        newDataLable = newDataLable.filter((item) => JSON.stringify(item) !== targetString);
       } else if (person.dataLable?.edit) {
         const { dataLable } = person;
-        const index = doc.dataLable.findIndex((item) => item.data === dataLable.data);
+        const index = newDataLable.findIndex((item) => item.data === dataLable.data);
         if (index !== -1 && dataLable.edit) {
-          const updatedLable = [...doc.dataLable];
-          updatedLable[index] = { ...updatedLable[index], data: dataLable.edit };
-          doc.dataLable = updatedLable;
+          newDataLable[index] = { ...newDataLable[index], data: dataLable.edit };
         }
       } else if (person.dataLable) {
-        doc.dataLable.push(person.dataLable);
+        newDataLable.push(person.dataLable);
       }
+      updates.dataLable = newDataLable;
     }
-    await doc.save();
+
+    await this.repo.updateNoteV1(updateNoteId, userId, updates);
     return 'success';
   }
 
@@ -106,8 +112,11 @@ export class NoteService {
   }
 
   async getOneLevelDown(userId: string, rootParentId: string) {
-    const currentNote = await this.repo.findNoteV2ById(userId, rootParentId);
-    const level1 = await this.repo.findNotesV2ByParentId(userId, rootParentId);
+    const [currentNote, level1] = await Promise.all([
+      this.repo.findNoteV2ById(userId, rootParentId),
+      this.repo.findNotesV2ByParentId(userId, rootParentId),
+    ]);
+
     const level1Ids = level1.map((n) => n.id);
     const level2 = await this.repo.findNotesV2ByParentIds(userId, level1Ids);
 
@@ -163,6 +172,10 @@ export class NoteService {
     };
 
     if (type === 'LOG' && parentId) {
+      logger.warn(
+        { noteId: id, parentId: (existing as any)?.parentId },
+        'Inconsistent state: Note has different parentId than requested for deletion',
+      );
       newNoteData.parentId = await this.getOrCreateParentLogFolderId(userId, parentId, newNoteData);
     }
 
@@ -171,7 +184,7 @@ export class NoteService {
     try {
       await this.syncCreateV1Note(userId, data);
     } catch (err) {
-      console.warn('V1 Sync Failed', err);
+      logger.warn({ err }, 'V1 Sync Failed');
     }
 
     return savedDoc;
@@ -182,18 +195,19 @@ export class NoteService {
     const doc = await this.repo.findNoteV2ById(userId, id);
     if (!doc) throw new Error(`Error no note id: ${id}`);
 
-    if (data.parentId !== undefined) doc.parentId = data.parentId;
-    if (data.content !== undefined) doc.content = data.content;
-    if (data.name !== undefined) doc.name = data.name;
+    const updates: Partial<NoteV2Attrs> = {};
+    if (data.parentId !== undefined) updates.parentId = data.parentId;
+    if (data.content !== undefined) updates.content = data.content;
+    if (data.name !== undefined) updates.name = data.name;
 
-    const savedDoc = await doc.save();
+    const savedDoc = await this.repo.updateNoteV2(id, userId, updates);
 
     try {
       await this.syncUpdateV1Note(userId, data);
     } catch (err) {
-      console.warn('V1 Sync Failed', err);
+      logger.warn({ err }, 'V1 Sync Failed');
     }
-    return savedDoc;
+    return savedDoc!;
   }
 
   async deleteNoteV2(userId: string, data: DeleteV2NoteBody) {
@@ -213,7 +227,7 @@ export class NoteService {
       try {
         await this.syncDeleteV1NoteWithDoc(userId, noteToDelete);
       } catch (err) {
-        console.warn('V1 Sync Failed', err);
+        logger.warn({ err }, 'V1 Sync Failed');
       }
     }
 
@@ -249,6 +263,7 @@ export class NoteService {
           createdBy: mapped.createdBy || '',
           heading: mapped.heading || '',
           dataLable: mapped.dataLable || [],
+          userId,
         });
       }
     } else {
@@ -262,14 +277,14 @@ export class NoteService {
   private async syncUpdateV1Note(userId: string, data: UpdateV2NoteBody) {
     const freshDoc = await this.repo.findNoteV2ById(userId, data.id);
     if (!freshDoc) return;
-    const mappedFresh = mapNoteV2ToNoteV1(freshDoc.toObject());
+    const mappedFresh = mapNoteV2ToNoteV1(freshDoc);
     if (mappedFresh.person) {
       await this.patchNoteV1(userId, mappedFresh.person);
     }
   }
 
-  private async syncDeleteV1NoteWithDoc(userId: string, doc: any) {
-    const mapped = mapNoteV2ToNoteV1(doc.toObject ? doc.toObject() : doc);
+  private async syncDeleteV1NoteWithDoc(userId: string, doc: NoteV2Attrs) {
+    const mapped = mapNoteV2ToNoteV1(doc);
     if (mapped.person) {
       await this.patchNoteV1(userId, mapped.person, true);
     }

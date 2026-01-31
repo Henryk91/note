@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { translationService } from '../services/TranslationService';
+import logger from '../utils/logger';
 import { SavedTranslationQuery } from '../types/models';
 
 export class TranslationController {
@@ -8,7 +9,7 @@ export class TranslationController {
       const result = await translationService.getTranslationPractice();
       return res.json(result);
     } catch (err) {
-      console.error(err);
+      logger.error({ err }, 'TranslationController Error');
       return res.status(500).json(null);
     }
   }
@@ -18,7 +19,7 @@ export class TranslationController {
       const result = await translationService.getTranslationLevels();
       return res.json(result);
     } catch (err) {
-      console.error(err);
+      logger.error({ err }, 'TranslationController Error');
       return res.status(500).json(null);
     }
   }
@@ -28,7 +29,7 @@ export class TranslationController {
       const result = await translationService.getFullTranslationPractice();
       return res.json(result);
     } catch (err) {
-      console.error(err);
+      logger.error({ err }, 'TranslationController Error');
       return res.status(500).json(null);
     }
   }
@@ -39,13 +40,10 @@ export class TranslationController {
       if (!level || !subLevel) {
         return res.json(null);
       }
-      const result = await translationService.getSavedTranslation(
-        level,
-        subLevel,
-      );
+      const result = await translationService.getSavedTranslation(level, subLevel);
       return res.json(result);
     } catch (err) {
-      console.error(err);
+      logger.error({ err }, 'TranslationController Error');
       return res.status(500).json(null);
     }
   }
@@ -53,15 +51,13 @@ export class TranslationController {
   async translate(req: Request, res: Response) {
     const { sentence } = req.body as { sentence?: string };
     if (!sentence) {
-      return res
-        .status(400)
-        .json({ error: 'Missing sentence in request body' });
+      return res.status(400).json({ error: 'Missing sentence in request body' });
     }
     try {
       const translated = await translationService.translateText(sentence);
       return res.json({ translated });
     } catch (err) {
-      console.error(err);
+      logger.error({ err }, 'TranslationController Error');
       return res.status(500).json({ error: 'Translation proxy error' });
     }
   }
@@ -71,19 +67,13 @@ export class TranslationController {
       english?: string;
       german?: string;
     };
-    if (!english || !german)
-      return res
-        .status(400)
-        .json({ error: 'Missing english/german body params' });
+    if (!english || !german) return res.status(400).json({ error: 'Missing english/german body params' });
 
     try {
-      const isCorrect = await translationService.verifyTranslation(
-        english,
-        german,
-      );
+      const isCorrect = await translationService.verifyTranslation(english, german);
       return res.json({ isCorrect });
     } catch (err) {
-      console.error(err);
+      logger.error({ err }, 'TranslationController Error');
       return res.status(500).json({ error: 'Translation check failed' });
     }
   }
@@ -95,7 +85,7 @@ export class TranslationController {
       const result = await translationService.getScores(userId);
       return res.json(result);
     } catch (err) {
-      console.error(err);
+      logger.error({ err }, 'TranslationController Error');
       return res.status(500).json({ error: 'Failed to fetch scores' });
     }
   }
@@ -107,7 +97,7 @@ export class TranslationController {
       const result = await translationService.updateScore(userId, req.body);
       return res.json(result);
     } catch (err: any) {
-      console.error(err);
+      logger.error({ err }, 'TranslationController Error');
       return res.status(400).json({ error: err.message });
     }
   }
@@ -124,13 +114,10 @@ export class TranslationController {
         isCorrected = false;
       }
 
-      const result = await translationService.getIncorrectTranslations(
-        userId,
-        isCorrected,
-      );
+      const result = await translationService.getIncorrectTranslations(userId, isCorrected);
       return res.json(result);
-    } catch (error: unknown) {
-      console.error('getIncorrect error:', error);
+    } catch (err: unknown) {
+      logger.error({ err }, 'getIncorrect error');
       return res.status(500).json({ error: 'Internal server error' });
     }
   }
@@ -139,15 +126,12 @@ export class TranslationController {
     try {
       const { userId } = req.auth!;
 
-      const result = await translationService.saveIncorrectTranslations(
-        userId,
-        req.body,
-      );
+      const result = await translationService.saveIncorrectTranslations(userId, req.body);
       return res.json({
         Ok: result,
       });
-    } catch (error: unknown) {
-      console.error('saveIncorrect error:', error);
+    } catch (err: unknown) {
+      logger.error({ err }, 'saveIncorrect error');
       return res.status(500).json({ error: 'Internal server error' });
     }
   }

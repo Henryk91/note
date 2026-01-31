@@ -7,6 +7,7 @@ import { z } from 'zod';
 
 import config from '../config';
 import User, { UserDoc } from '../models/User';
+import logger from '../utils/logger';
 
 const JWT_ALG: jwt.Algorithm = 'HS256';
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -53,14 +54,25 @@ const ACCESS_EXPIRES_IN = config.jwt.accessExpiresIn as StringValue;
 const REFRESH_EXPIRES_IN = config.jwt.refreshExpiresIn as StringValue;
 
 const getRequestDomain = (req: Request) => {
-  const referer = req?.headers?.referer;
-  if (referer?.includes('.lingodrill.com')) {
-    return '.lingodrill.com';
+  const referer = req.get('referer');
+  if (!referer) return undefined;
+  if (referer?.includes('.lingodrill.com')) return '.lingodrill.com';
+  if (referer?.includes('.henryk.co.za')) return '.henryk.co.za';
+
+  try {
+    const { hostname } = new URL(referer);
+    const allowed = config.corsAllowOrigins.some((origin) => {
+      try {
+        const allowedHost = new URL(origin).hostname;
+        return hostname === allowedHost || hostname.endsWith(`.${allowedHost}`);
+      } catch {
+        return false;
+      }
+    });
+    return allowed ? `.${hostname.split('.').slice(-2).join('.')}` : undefined;
+  } catch {
+    return undefined;
   }
-  if (referer?.includes('.henryk.co.za')) {
-    return '.henryk.co.za';
-  }
-  return undefined;
 };
 
 const setAccessCookie = (req: Request, res: Response, token: string) => {
@@ -152,10 +164,10 @@ export class AuthController {
 
       setAccessCookie(req, res, access);
       setRefreshCookie(req, res, refresh);
-      res.status(201).json({ ok: true, user: { id: user._id, email: user.email } });
+      return res.status(201).json({ ok: true, user: { id: user._id, email: user.email } });
     } catch (e) {
-      console.error(e);
-      res.status(500).json({ error: 'Server error' });
+      logger.error({ err: e }, 'Authentication Error');
+      return res.status(500).json({ error: 'Server error' });
     }
   }
 
@@ -177,10 +189,10 @@ export class AuthController {
 
       setAccessCookie(req, res, access);
       setRefreshCookie(req, res, refresh);
-      res.json({ ok: true, user: { id: user._id, email: user.email } });
+      return res.json({ ok: true, user: { id: user._id, email: user.email } });
     } catch (e) {
-      console.error(e);
-      res.status(500).json({ error: 'Server error' });
+      logger.error({ err: e }, 'Authentication Error');
+      return res.status(500).json({ error: 'Server error' });
     }
   }
 
@@ -188,7 +200,7 @@ export class AuthController {
     const userId = req.auth?.sub;
     if (!userId) return res.status(401).json({ error: 'Invalid or missing access token' });
     const user = await User.findById(userId).select('_id email');
-    res.json({ user });
+    return res.json({ user });
   }
 
   async refresh(req: Request, res: Response) {
@@ -235,10 +247,10 @@ export class AuthController {
 
       setAccessCookie(req, res, newAccess);
       setRefreshCookie(req, res, newRefresh);
-      res.json({ ok: true });
+      return res.json({ ok: true });
     } catch (e) {
-      console.error(e);
-      res.status(500).json({ error: 'Server error' });
+      logger.error({ err: e }, 'Authentication Error');
+      return res.status(500).json({ error: 'Server error' });
     }
   }
 
@@ -281,7 +293,7 @@ export class AuthController {
     }
     clearAuthCookies(res);
     res.set('Cache-Control', 'no-store');
-    res.json({ ok: true });
+    return res.json({ ok: true });
   }
 }
 

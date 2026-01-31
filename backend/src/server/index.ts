@@ -12,6 +12,7 @@ import xss from 'xss';
 import config from './config';
 import jwtSetup from './jwt-setup';
 import apiRoutes from './routes';
+import logger from './utils/logger';
 
 const projectRoot = path.resolve(__dirname, '../..');
 const frontendDist = path.resolve(projectRoot, 'build', 'client');
@@ -27,7 +28,7 @@ const isHenrykSubdomain = (origin: string) => {
     if (protocol !== 'https:') return false;
     return hostname === 'henryk.co.za' || hostname.endsWith('.henryk.co.za');
   } catch (err) {
-    console.log('Domain check error', err);
+    logger.debug({ err, origin }, 'Domain check error');
     return false;
   }
 };
@@ -48,7 +49,6 @@ const corsOptions: CorsOptions = {
 
 app.use(
   helmet({
-    // allow serving static assets and API from same domain
     crossOriginResourcePolicy: { policy: 'cross-origin' },
     contentSecurityPolicy: {
       directives: {
@@ -107,12 +107,18 @@ const sanitizeRequest = (req: Request, _res: Response, next: NextFunction) => {
   next();
 };
 
+const requestLogger = (req: Request, _res: Response, next: NextFunction) => {
+  logger.info({ method: req.method, url: req.url, ip: req.ip }, 'Incoming Request');
+  next();
+};
+
 app.use('/api', apiLimiter);
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(hpp());
 app.use(mongoSanitize({ allowDots: true }));
 app.use(sanitizeRequest);
+app.use(requestLogger);
 app.use(cookieParser());
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
@@ -133,7 +139,6 @@ app.get('/sw.js', (_req, res) => {
 });
 
 app.get(/^\/(?!api).*/, (req, res) => {
-  // Always serve the SPA entry point; redirect once to a preferred path if needed.
   const targetPath = req?.cookies?.access_token ? '/notes/main' : '/';
   if (req.url !== targetPath) {
     return res.redirect(targetPath);
@@ -141,35 +146,39 @@ app.get(/^\/(?!api).*/, (req, res) => {
   return res.sendFile(path.join(frontendDist, 'index.html'));
 });
 
-app.use((req, res) => {
-  res.status(404).json({ error: 'Not found' });
-});
-
+// Generic global error handler
 app.use((err: Error & { status?: number }, _req: Request, res: Response, _next: NextFunction) => {
-  console.error(err);
-  res.status(err.status ?? 500).json({
+  const status = err.status ?? 500;
+  logger.error({ err, status }, 'Unhandled exception');
+
+  res.status(status).json({
     error: 'Internal server error',
     message: config.isProd ? undefined : err.message,
+    ...(config.isProd ? {} : { stack: err.stack }),
   });
 });
 
-// Only start the HTTP server when running the real app, not during tests
+app.use((req, res) => {
+  logger.warn({ url: req.url, method: req.method }, '404 Not Found');
+  res.status(404).json({ error: 'Not found' });
+});
+
 if (process.env.NODE_ENV !== 'test') {
   app.listen(config.port, () => {
-    console.log(`Listening on port ${config.port}!`);
+    logger.info({ port: config.port }, 'Server started');
   });
 
   if (config.mongoUri) {
     mongoose
       .connect(config.mongoUri)
       .then(() => {
-        console.log('Connected to MongoDB');
+        logger.info('Connected to MongoDB');
       })
-      .catch((err) => {
-        console.error('MongoDB connection error:', err);
+      .catch((err: Error) => {
+        logger.error({ err }, 'MongoDB connection error');
       });
   } else {
-    console.error('No MongoDB URI provided. Running without DB connection.');
+    logger.warn('No MongoDB URI provided. Running without DB connection.');
   }
 }
 

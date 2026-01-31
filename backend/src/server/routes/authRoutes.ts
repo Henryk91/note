@@ -1,14 +1,14 @@
 import { Router } from 'express';
-import { authController, LoginSchema, RegisterSchema } from '../controllers/AuthController';
+import { authController, RegisterSchema, LoginSchema } from '../controllers/AuthController';
 import { validate } from '../middleware/validation';
 
-export const authRouter = Router();
+const router = Router();
 
-authRouter.post('/register', validate(RegisterSchema), authController.register);
-authRouter.post('/login', validate(LoginSchema), authController.login);
-authRouter.get('/me', authController.getMe);
-authRouter.post('/refresh', authController.refresh);
-authRouter.post('/logout', authController.logout);
-authRouter.post('/logout-all', authController.logoutAll);
+router.post('/register', validate(RegisterSchema), (req, res) => authController.register(req, res));
+router.post('/login', validate(LoginSchema), (req, res) => authController.login(req, res));
+router.get('/me', (req, res) => authController.getMe(req, res));
+router.post('/refresh', (req, res) => authController.refresh(req, res));
+router.post('/logout', (req, res) => authController.logout(req, res));
+router.post('/logout-all', (req, res) => authController.logoutAll(req, res));
 
-export default authRouter;
+export default router;

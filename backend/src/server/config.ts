@@ -18,9 +18,9 @@ const EnvSchema = z.object({
   CORS_ALLOWED_ORIGINS: z.string().optional(),
   COOKIE_SECURE: z.string().optional(),
   MONGODB_URI: z.string().optional(),
-  SITE_LOG_SKIP_REFERERS: z.string().optional(),
+  SITE_LOG_SKIP_REFERRER: z.string().optional(),
   SITE_LOG_SKIP_IPS: z.string().optional(),
-  ADMIN_USER_ID: z.string().optional(),
+  ADMIN_USER_ID: z.string().optional().default(''),
   GOOGLE_TRANSLATE_TOKEN: z.string().optional(),
   LOG_SITES_NOTE_ID: z.string().optional(),
   TRANSLATION_PRACTICE_FOLDER_ID: z.string().optional().default('TranslationPractice'),
@@ -43,7 +43,7 @@ const corsAllowOrigins =
     .filter(Boolean) ?? DEFAULT_CORS_ALLOWED_ORIGINS;
 
 const siteLogSkipReferrers =
-  parsed.data.SITE_LOG_SKIP_REFERERS?.split(',')
+  parsed.data.SITE_LOG_SKIP_REFERRER?.split(',')
     .map((entry) => entry.trim())
     .filter(Boolean) ?? DEFAULT_SITE_LOG_SKIP_REFERRER;
 
@@ -52,12 +52,9 @@ const siteLogSkipIp =
     .map((entry) => entry.trim())
     .filter(Boolean) ?? DEFAULT_SITE_LOG_SKIP_IPS;
 
+const lowerSecureCookie = parsed.data.COOKIE_SECURE?.toLowerCase();
 const secureCookies =
-  parsed.data.COOKIE_SECURE?.toLowerCase() === 'true'
-    ? true
-    : parsed.data.COOKIE_SECURE?.toLowerCase() === 'false'
-      ? false
-      : parsed.data.NODE_ENV === 'production';
+  lowerSecureCookie === 'true' ? true : lowerSecureCookie === 'false' ? false : parsed.data.NODE_ENV === 'production';
 
 const config = {
   env: parsed.data.NODE_ENV,

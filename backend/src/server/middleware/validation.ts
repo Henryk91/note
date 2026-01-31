@@ -4,13 +4,13 @@ import { z } from 'zod';
 export const validate =
   <T>(schema: z.ZodSchema<T>) =>
   (req: Request, res: Response, next: NextFunction) => {
-    const parsed = schema.safeParse(req.body);
-    if (!parsed.success) {
+    const result = schema.safeParse(req.body);
+    if (!result.success) {
       return res.status(400).json({
         error: 'Validation failed',
-        details: parsed.error.flatten().fieldErrors,
+        details: result.error.flatten().fieldErrors,
       });
     }
-    req.body = parsed.data as typeof req.body;
+    req.body = result.data;
     return next();
   };

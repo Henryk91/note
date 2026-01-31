@@ -11,19 +11,16 @@ declare module 'express-serve-static-core' {
 
 export type Callback<T = unknown> = (resp: T) => void;
 
-export type AuthenticatedRequest<
-  TBody = unknown,
-  TQuery = Record<string, string | undefined>,
-> = ExpressRequest<Record<string, string>, unknown, TBody, TQuery> & {
+export type AuthenticatedRequest<TBody = unknown, TQuery = Record<string, string | undefined>> = ExpressRequest<
+  Record<string, string>,
+  unknown,
+  TBody,
+  TQuery
+> & {
   auth: AuthInfo;
 };
 
-export type QueryRequest<TQuery> = ExpressRequest<
-  Record<string, string>,
-  unknown,
-  unknown,
-  TQuery
->;
+export type QueryRequest<TQuery> = ExpressRequest<Record<string, string>, unknown, unknown, TQuery>;
 
 export interface NoteDataLabel {
   tag?: string;
@@ -126,8 +123,7 @@ export interface TranslationScoreAttrs {
   attempts?: number;
 }
 
-export type TranslationScoreDoc =
-  mongoose.HydratedDocument<TranslationScoreAttrs>;
+export type TranslationScoreDoc = mongoose.HydratedDocument<TranslationScoreAttrs>;
 
 export interface IncorrectTranslationAttrs {
   userId: string;
@@ -139,5 +135,4 @@ export interface IncorrectTranslationAttrs {
   attempts?: number;
 }
 
-export type IncorrectTranslationDoc =
-  mongoose.HydratedDocument<IncorrectTranslationAttrs>;
+export type IncorrectTranslationDoc = mongoose.HydratedDocument<IncorrectTranslationAttrs>;

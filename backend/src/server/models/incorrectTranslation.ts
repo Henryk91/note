@@ -25,14 +25,15 @@ const IncorrectTranslationSchema = new mongoose.Schema<IncorrectTranslationDoc>(
     corrected: { type: Boolean, default: false },
     attempts: { type: Number, default: 1, min: 1 },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 IncorrectTranslationSchema.index({ userId: 1, exerciseId: 1, sentence: 1 }, { unique: true });
 
 const IncorrectTranslation: Model<IncorrectTranslationDoc> = mongoose.model<IncorrectTranslationDoc>(
   'IncorrectTranslation',
-  IncorrectTranslationSchema
+  IncorrectTranslationSchema,
+  'incorrect-translations',
 );
 
 export default IncorrectTranslation;

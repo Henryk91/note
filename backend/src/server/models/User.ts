@@ -39,7 +39,7 @@ const userSchema = new mongoose.Schema<UserDoc>(
     refreshSessions: { type: [refreshSessionSchema], default: [] },
     refreshTokenHash: { type: String },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const User: Model<UserDoc> = mongoose.model<UserDoc>('User', userSchema);

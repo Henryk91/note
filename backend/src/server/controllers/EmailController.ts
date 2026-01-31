@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { emailService } from '../services/EmailService';
+import logger from '../utils/logger';
 
 export class EmailController {
   async sendEmail(req: Request, res: Response) {
@@ -11,7 +12,7 @@ export class EmailController {
       });
       res.json({ Ok: '100' });
     } catch (err) {
-      console.error('Email sending error:', err);
+      logger.error({ err }, 'Email sending error');
       res.json({ Ok: '50' });
     }
   }

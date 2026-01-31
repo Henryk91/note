@@ -1,12 +1,7 @@
 import { FilterQuery, AnyBulkWriteOperation } from 'mongoose';
 import TranslationScore from '../models/TranslationScore';
 import IncorrectTranslation from '../models/incorrectTranslation';
-import {
-  TranslationScoreAttrs,
-  TranslationScoreDoc,
-  IncorrectTranslationDoc,
-  IncorrectTranslationAttrs,
-} from '../types/models';
+import { TranslationScoreAttrs, TranslationScoreDoc, IncorrectTranslationDoc } from '../types/models';
 
 export class TranslationRepository {
   async findScoresByUserId(userId: string): Promise<TranslationScoreDoc[]> {
