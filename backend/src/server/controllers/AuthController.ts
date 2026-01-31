@@ -95,10 +95,10 @@ const clearAuthCookies = (res: Response) => {
     path: '/',
   };
 
-  for (const name of ['access_token', 'refresh_token']) {
+  ['access_token', 'refresh_token'].forEach((name) => {
     res.clearCookie(name, opts);
     res.cookie(name, '', { ...opts, expires: new Date(0), maxAge: 0 });
-  }
+  });
 };
 
 const signAccessToken = (user: UserDoc) => {
