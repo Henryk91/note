@@ -1,50 +1,52 @@
 import { Request, Response } from 'express';
 import { translationService } from '../services/TranslationService';
+import { SavedTranslationQuery } from '../types/models';
 
 export class TranslationController {
   async getPractice(req: Request, res: Response) {
     try {
-      const userId = (req as any).auth?.sub; // Not used in service currently (hardcoded)
+      const userId = req.auth?.sub;
+      if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
       const result = await translationService.getTranslationPractice(userId);
-      res.json(result);
+      return res.json(result);
     } catch (err) {
       console.error(err);
-      res.status(500).json(null);
+      return res.status(500).json(null);
     }
   }
 
-  async getLevels(req: Request, res: Response) {
+  async getLevels(_req: Request, res: Response) {
     try {
-      const userId = (req as any).auth?.sub;
-      const result = await translationService.getTranslationLevels(userId);
-      res.json(result);
+      const result = await translationService.getTranslationLevels();
+      return res.json(result);
     } catch (err) {
       console.error(err);
-      res.status(500).json(null);
+      return res.status(500).json(null);
     }
   }
 
-  async getFullPractice(req: Request, res: Response) {
+  async getFullPractice(_req: Request, res: Response) {
     try {
       const result = await translationService.getFullTranslationPractice();
-      res.json(result);
+      return res.json(result);
     } catch (err) {
       console.error(err);
-      res.status(500).json(null);
+      return res.status(500).json(null);
     }
   }
 
   async getSaved(req: Request, res: Response) {
     try {
-      const { level, subLevel } = req.query as { level?: string; subLevel?: string };
+      const { level, subLevel } = req.query as SavedTranslationQuery;
       if (!level || !subLevel) {
         return res.json(null);
       }
       const result = await translationService.getSavedTranslation(level, subLevel);
-      res.json(result);
+      return res.json(result);
     } catch (err) {
       console.error(err);
-      res.status(500).json(null);
+      return res.status(500).json(null);
     }
   }
 
@@ -55,10 +57,10 @@ export class TranslationController {
     }
     try {
       const translated = await translationService.translateText(sentence);
-      res.json({ translated });
+      return res.json({ translated });
     } catch (err) {
       console.error(err);
-      res.status(500).json({ error: 'Translation proxy error' });
+      return res.status(500).json({ error: 'Translation proxy error' });
     }
   }
 
@@ -68,10 +70,10 @@ export class TranslationController {
 
     try {
       const isCorrect = await translationService.verifyTranslation(english, german);
-      res.json({ isCorrect });
+      return res.json({ isCorrect });
     } catch (err) {
       console.error(err);
-      res.status(500).json({ error: 'Translation check failed' });
+      return res.status(500).json({ error: 'Translation check failed' });
     }
   }
 }

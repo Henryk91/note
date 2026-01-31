@@ -1,8 +1,8 @@
 import { Application, Request, Response } from 'express';
 import nodemailer from 'nodemailer';
 
-const name = process.env.EMAIL_ADDRESS;
-const pass = process.env.EMAIL_PASS;
+const name = process.env.SMTP_USER_NAME;
+const pass = process.env.SMTP_EMAIL_PASSWORD;
 
 const createTransport = () =>
   nodemailer.createTransport({

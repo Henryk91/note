@@ -43,7 +43,7 @@ const isHenrykSubdomain = (origin: string) => {
 const corsOptions: CorsOptions = {
   origin(origin, cb) {
     if (!origin) return cb(null, true);
-    if (config.allowedOrigins.includes(origin) || isHenrykSubdomain(origin)) {
+    if (config.corsAllowOrigins.includes(origin) || isHenrykSubdomain(origin)) {
       return cb(null, origin);
     }
     return cb(new Error('CORS not allowed'));

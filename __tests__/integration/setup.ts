@@ -65,10 +65,10 @@ const ensureEnv = (mongoUri: string) => {
   process.env.ACCESS_EXPIRES = process.env.ACCESS_EXPIRES || '15m';
   process.env.REFRESH_EXPIRES = process.env.REFRESH_EXPIRES || '30d';
   process.env.MAX_SESSIONS = process.env.MAX_SESSIONS || '3';
-  process.env.ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS || 'http://localhost:3000';
+  process.env.CORS_ALLOWED_ORIGINS = process.env.CORS_ALLOWED_ORIGINS || 'http://localhost:3000';
   process.env.COOKIE_SECURE = 'false';
   process.env.OPENAI_API_KEY = process.env.OPENAI_API_KEY || 'fake';
-  process.env.Api_Key = process.env.Api_Key || 'fake';
+  process.env.WEATHER_DATA_API_KEY = process.env.WEATHER_DATA_API_KEY || 'fake';
 };
 
 before(async () => {

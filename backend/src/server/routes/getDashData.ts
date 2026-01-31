@@ -3,9 +3,9 @@ import { Application, Request, Response } from 'express';
 export default function getDashData(app: Application) {
   app.get('/api/dash-data/weather', async (req: Request, res: Response) => {
     try {
-      const Api_Key = process.env.Api_Key;
+      const darkSkyApiKey = process.env.WEATHER_DATA_API_KEY;
       const coordinates = (req.query.coordinates as string) ?? '';
-      const fetchRes = await fetch(`https://api.darksky.net/forecast/${Api_Key}/${coordinates}?units=auto&exclude=alerts`);
+      const fetchRes = await fetch(`https://api.darksky.net/forecast/${darkSkyApiKey}/${coordinates}?units=auto&exclude=alerts`);
       const json = await fetchRes.json();
       res.setHeader('Content-Type', 'application/json');
       res.send(JSON.stringify(json));
