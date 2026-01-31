@@ -27,6 +27,9 @@ const EnvSchema = z.object({
   WEATHER_DATA_API_KEY: z.string().optional(),
   SMTP_USER_NAME: z.string().optional(),
   SMTP_EMAIL_PASSWORD: z.string().optional(),
+  OPENAI_MODEL: z.string().default('gpt-4o'),
+  OPENAI_MAX_TOKENS: z.coerce.number().int().positive().default(5),
+  OPENAI_TEMPERATURE: z.coerce.number().min(0).max(2).default(0.0),
 });
 
 const parsed = EnvSchema.safeParse(process.env);
@@ -79,6 +82,11 @@ const config = {
   weatherApiKey: parsed.data.WEATHER_DATA_API_KEY,
   smtpUserName: parsed.data.SMTP_USER_NAME,
   smtpEmailPassword: parsed.data.SMTP_EMAIL_PASSWORD,
+  openAI: {
+    model: parsed.data.OPENAI_MODEL,
+    maxTokens: parsed.data.OPENAI_MAX_TOKENS,
+    temperature: parsed.data.OPENAI_TEMPERATURE,
+  },
 };
 
 export type AppConfig = typeof config;

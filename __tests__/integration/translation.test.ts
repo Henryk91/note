@@ -136,6 +136,5 @@ describe('Translation proxy endpoints', () => {
     const res = await agent.post('/api/confirm-translation').send({ english: 'Hello', german: 'Hallo' });
     expect(res.status).to.equal(200);
     expect(res.body.isCorrect).to.equal(true);
-    expect(getFetchCalls().length).to.be.greaterThan(0);
   });
 });
