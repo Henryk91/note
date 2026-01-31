@@ -1,16 +1,24 @@
-import type { Request } from 'express';
 import type mongoose from 'mongoose';
+import type { Request as ExpressRequest } from 'express';
+
+export type AuthInfo = { sub: string; userId: string };
+
+declare module 'express-serve-static-core' {
+  interface Request {
+    auth?: AuthInfo;
+  }
+}
 
 export type Callback<T = unknown> = (resp: T) => void;
 
-export type AuthInfo = { sub: string };
 export type AuthenticatedRequest<
   TBody = unknown,
   TQuery = Record<string, string | undefined>,
-> = Request<Record<string, string>, unknown, TBody, TQuery> & {
+> = ExpressRequest<Record<string, string>, unknown, TBody, TQuery> & {
   auth: AuthInfo;
 };
-export type QueryRequest<TQuery> = Request<
+
+export type QueryRequest<TQuery> = ExpressRequest<
   Record<string, string>,
   unknown,
   unknown,
@@ -110,3 +118,26 @@ export interface DeleteV2NoteBody {
   id: string;
   type?: string;
 }
+
+export interface TranslationScoreAttrs {
+  userId: string;
+  exerciseId: string;
+  score: number;
+  attempts?: number;
+}
+
+export type TranslationScoreDoc =
+  mongoose.HydratedDocument<TranslationScoreAttrs>;
+
+export interface IncorrectTranslationAttrs {
+  userId: string;
+  exerciseId: string;
+  sentence: string;
+  userInput: string;
+  translation: string;
+  corrected?: boolean;
+  attempts?: number;
+}
+
+export type IncorrectTranslationDoc =
+  mongoose.HydratedDocument<IncorrectTranslationAttrs>;

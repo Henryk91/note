@@ -1,5 +1,12 @@
 import { NoteModel, NoteV2Model } from '../models/Notes';
-import { NoteDataLabel, NoteAttrs, NoteV2Attrs } from '../types/models';
+import { TranslationRepository, translationRepository } from '../repositories/TranslationRepository';
+import {
+  NoteDataLabel,
+  NoteAttrs,
+  NoteV2Attrs,
+  TranslationScoreAttrs,
+  IncorrectTranslationAttrs,
+} from '../types/models';
 
 import config from '../config';
 
@@ -12,7 +19,13 @@ interface NestedTranslationMap {
 }
 
 export class TranslationService {
-  async getTranslationPractice(_userId: string) {
+  private repo: TranslationRepository;
+
+  constructor(repo: TranslationRepository = translationRepository) {
+    this.repo = repo;
+  }
+
+  async getTranslationPractice() {
     const docs = await NoteModel.find({
       createdBy: 'Henry',
       userId: config.adminUserId,
@@ -61,14 +74,16 @@ export class TranslationService {
     ]);
 
     const map: Record<string, string[]> = {};
-    for (const res of results) {
-      map[res.name ?? ''] = (res.children || []).map((c: any) => c.name || '');
-    }
+    results.forEach((res) => {
+      map[res.name ?? ''] = (res.children || []).map((c: { name?: string }) => c.name || '');
+    });
     return map;
   }
 
   async getFullTranslationPractice() {
-    const docs = (await NoteModel.find({ createdBy: config.translationPracticeFolderId })) as unknown as NoteAttrs[];
+    const docs = (await NoteModel.find({
+      createdBy: config.translationPracticeFolderId,
+    })) as unknown as NoteAttrs[];
     const result = docs.reduce((acc: NestedTranslationMap, { heading, dataLable }: NoteAttrs) => {
       const nested = (dataLable || []).reduce((noteAcc: TranslationPracticeMap, { tag, data }: NoteDataLabel) => {
         const formatted = data.trim().endsWith('.') ? `${data} ` : `${data}. `;
@@ -249,6 +264,62 @@ false
     }
     const text = data.choices?.[0]?.message?.content?.trim().toLowerCase();
     return text === 'true';
+  }
+
+  async getScores(userId: string) {
+    return this.repo.findScoresByUserId(userId);
+  }
+
+  async updateScore(userId: string, data: Partial<TranslationScoreAttrs>) {
+    const { exerciseId, score, attempts } = data;
+    if (!exerciseId || typeof score !== 'number') {
+      throw new Error('exerciseId and numeric score are required');
+    }
+    if (score < 0 || score > 100) {
+      throw new Error('score must be between 0 and 100');
+    }
+
+    const update: Partial<TranslationScoreAttrs> = { score };
+    if (typeof attempts === 'number' && attempts >= 1) {
+      update.attempts = attempts;
+    }
+
+    return this.repo.upsertScore(userId, exerciseId, update);
+  }
+
+  async getIncorrectTranslations(userId: string, corrected?: boolean) {
+    return this.repo.findIncorrectByUserId(userId, corrected);
+  }
+
+  async saveIncorrectTranslations(userId: string, raw: IncorrectTranslationAttrs[]) {
+    if (!Array.isArray(raw) || raw.length === 0) {
+      throw new Error('Expected a non-empty array');
+    }
+
+    const ops = raw.map((it) => {
+      const { exerciseId, sentence, userInput, translation, corrected } = it;
+      if (!exerciseId || !sentence || !userInput || !translation) {
+        throw new Error('Missing required fields in item');
+      }
+      return {
+        updateOne: {
+          filter: { userId, exerciseId, sentence },
+          update: {
+            $set: {
+              userInput,
+              translation,
+              ...(typeof corrected === 'boolean' ? { corrected } : {}),
+            },
+            $setOnInsert: { userId, exerciseId, sentence },
+            $inc: { attempts: 1 },
+          },
+          upsert: true,
+          setDefaultsOnInsert: true,
+        },
+      };
+    });
+
+    return this.repo.bulkUpsertIncorrect(ops);
   }
 }
 

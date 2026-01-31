@@ -5,10 +5,7 @@ import { SavedTranslationQuery } from '../types/models';
 export class TranslationController {
   async getPractice(req: Request, res: Response) {
     try {
-      const userId = req.auth?.sub;
-      if (!userId) return res.status(401).json({ error: 'Unauthorized' });
-
-      const result = await translationService.getTranslationPractice(userId);
+      const result = await translationService.getTranslationPractice();
       return res.json(result);
     } catch (err) {
       console.error(err);
@@ -42,7 +39,10 @@ export class TranslationController {
       if (!level || !subLevel) {
         return res.json(null);
       }
-      const result = await translationService.getSavedTranslation(level, subLevel);
+      const result = await translationService.getSavedTranslation(
+        level,
+        subLevel,
+      );
       return res.json(result);
     } catch (err) {
       console.error(err);
@@ -53,7 +53,9 @@ export class TranslationController {
   async translate(req: Request, res: Response) {
     const { sentence } = req.body as { sentence?: string };
     if (!sentence) {
-      return res.status(400).json({ error: 'Missing sentence in request body' });
+      return res
+        .status(400)
+        .json({ error: 'Missing sentence in request body' });
     }
     try {
       const translated = await translationService.translateText(sentence);
@@ -65,15 +67,88 @@ export class TranslationController {
   }
 
   async confirm(req: Request, res: Response) {
-    const { english, german } = req.body as { english?: string; german?: string };
-    if (!english || !german) return res.status(400).json({ error: 'Missing english/german body params' });
+    const { english, german } = req.body as {
+      english?: string;
+      german?: string;
+    };
+    if (!english || !german)
+      return res
+        .status(400)
+        .json({ error: 'Missing english/german body params' });
 
     try {
-      const isCorrect = await translationService.verifyTranslation(english, german);
+      const isCorrect = await translationService.verifyTranslation(
+        english,
+        german,
+      );
       return res.json({ isCorrect });
     } catch (err) {
       console.error(err);
       return res.status(500).json({ error: 'Translation check failed' });
+    }
+  }
+
+  async getScores(req: Request, res: Response) {
+    try {
+      const { userId } = req.auth!;
+
+      const result = await translationService.getScores(userId);
+      return res.json(result);
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Failed to fetch scores' });
+    }
+  }
+
+  async updateScore(req: Request, res: Response) {
+    try {
+      const { userId } = req.auth!;
+
+      const result = await translationService.updateScore(userId, req.body);
+      return res.json(result);
+    } catch (err: any) {
+      console.error(err);
+      return res.status(400).json({ error: err.message });
+    }
+  }
+
+  async getIncorrect(req: Request, res: Response) {
+    try {
+      const { userId } = req.auth!;
+
+      const { corrected } = req.query as { corrected?: string };
+      let isCorrected: boolean | undefined;
+      if (corrected === 'true') {
+        isCorrected = true;
+      } else if (corrected === 'false') {
+        isCorrected = false;
+      }
+
+      const result = await translationService.getIncorrectTranslations(
+        userId,
+        isCorrected,
+      );
+      return res.json(result);
+    } catch (error: unknown) {
+      console.error('getIncorrect error:', error);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+
+  async saveIncorrect(req: Request, res: Response) {
+    try {
+      const { userId } = req.auth!;
+
+      const result = await translationService.saveIncorrectTranslations(
+        userId,
+        req.body,
+      );
+      return res.json({
+        Ok: result,
+      });
+    } catch (error: unknown) {
+      console.error('saveIncorrect error:', error);
+      return res.status(500).json({ error: 'Internal server error' });
     }
   }
 }

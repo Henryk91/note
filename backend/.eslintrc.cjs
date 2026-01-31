@@ -24,7 +24,7 @@ module.exports = {
     },
   },
   rules: {
-    'prettier/prettier': ['error', { singleQuote: true }],
+    'prettier/prettier': ['error', { singleQuote: true, 'printWidth': 120 }],
     'import/extensions': ['error', 'ignorePackages', { js: 'never', jsx: 'never', ts: 'never', tsx: 'never' }],
     'class-methods-use-this': 'off',
     'no-underscore-dangle': 'off',

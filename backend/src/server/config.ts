@@ -3,10 +3,7 @@ import { z } from 'zod';
 
 dotenv.config();
 
-const DEFAULT_CORS_ALLOWED_ORIGINS = [
-  'http://localhost:8080',
-  'http://localhost:3000',
-];
+const DEFAULT_CORS_ALLOWED_ORIGINS = ['http://localhost:8080', 'http://localhost:3000'];
 const DEFAULT_SITE_LOG_SKIP_REFERRER = ['localhost', '127.0.0.1'];
 const DEFAULT_SITE_LOG_SKIP_IPS = ['127.0.0.1'];
 
@@ -27,6 +24,9 @@ const EnvSchema = z.object({
   GOOGLE_TRANSLATE_TOKEN: z.string().optional(),
   LOG_SITES_NOTE_ID: z.string().optional(),
   TRANSLATION_PRACTICE_FOLDER_ID: z.string().optional().default('TranslationPractice'),
+  WEATHER_DATA_API_KEY: z.string().optional(),
+  SMTP_USER_NAME: z.string().optional(),
+  SMTP_EMAIL_PASSWORD: z.string().optional(),
 });
 
 const parsed = EnvSchema.safeParse(process.env);
@@ -79,6 +79,9 @@ const config = {
   googleTranslateToken: parsed.data.GOOGLE_TRANSLATE_TOKEN,
   logSitesNoteId: parsed.data.LOG_SITES_NOTE_ID,
   translationPracticeFolderId: parsed.data.TRANSLATION_PRACTICE_FOLDER_ID,
+  weatherApiKey: parsed.data.WEATHER_DATA_API_KEY,
+  smtpUserName: parsed.data.SMTP_USER_NAME,
+  smtpEmailPassword: parsed.data.SMTP_EMAIL_PASSWORD,
 };
 
 export type AppConfig = typeof config;

@@ -1,4 +1,4 @@
-import { NoteModel, NoteV2Model } from '../models/Notes';
+import { NoteRepository, noteRepository } from '../repositories/NoteRepository';
 import {
   NoteAttrs,
   NoteV2Attrs,
@@ -7,21 +7,23 @@ import {
   UpdateV2NoteBody,
   DeleteV2NoteBody,
   NotePersonUpdate,
-  NoteDoc,
 } from '../types/models';
-import { docId, onlyUnique, mapNoteV2ToNoteV1 } from '../utils';
+import { onlyUnique, mapNoteV2ToNoteV1 } from '../utils';
 
 export class NoteService {
+  private repo: NoteRepository;
+
+  constructor(repo: NoteRepository = noteRepository) {
+    this.repo = repo;
+  }
+
   async getNotes(userId: string) {
-    return NoteModel.find({ userId });
+    return this.repo.findNotesByUserId(userId);
   }
 
   async getMyNotes(userId: string, userQuery?: string) {
     const decodedUser = userQuery ? decodeURI(userQuery) : undefined;
-    const notes = (await NoteModel.find({
-      createdBy: decodedUser,
-      userId,
-    })) as NoteDoc[];
+    const notes = await this.repo.findNotesByUserAndCreatedBy(userId, decodedUser || '');
 
     return notes.map((doc) => ({
       createdBy: doc.createdBy,
@@ -34,39 +36,35 @@ export class NoteService {
   async getNote(userId: string, userQuery: string, noteHeading: string) {
     const decodedUser = decodeURI(userQuery);
     const decodedHeading = decodeURI(noteHeading);
-    const notes = (await NoteModel.find({
-      createdBy: decodedUser,
-      userId,
-      id: decodedHeading,
-    })) as NoteDoc[];
+    const doc = await this.repo.findNoteByIdAndUser(decodedHeading, userId);
 
-    return notes.map((doc) => ({
-      createdBy: doc.createdBy,
-      dataLable: doc.dataLable,
-      heading: doc.heading,
-      id: doc.id,
-    }));
+    if (!doc || doc.createdBy !== decodedUser) return [];
+
+    return [
+      {
+        createdBy: doc.createdBy,
+        dataLable: doc.dataLable,
+        heading: doc.heading,
+        id: doc.id,
+      },
+    ];
   }
 
   async getNoteNames(userId: string) {
-    const notes = (await NoteModel.find({ userId })) as NoteDoc[];
+    const notes = await this.repo.findNotesByUserId(userId);
     const names = notes.map((doc) => doc.createdBy).filter((name): name is string => !!name);
     return names.filter(onlyUnique);
   }
 
   async createNoteV1(userId: string, data: Partial<NoteAttrs>) {
-    const note = { ...data, userId };
-    const newNote = new NoteModel(note);
-    await newNote.save();
+    const note = { ...data, userId } as NoteAttrs;
+    await this.repo.createNoteV1(note);
     return 'Created';
   }
 
   async updateNoteV1(userId: string, updateData: NotePersonUpdate) {
     const updateNoteId = updateData.id;
-    const doc = (await NoteModel.findOne({
-      id: updateNoteId,
-      userId,
-    })) as NoteDoc | null;
+    const doc = await this.repo.findNoteByIdAndUser(updateNoteId, userId);
 
     if (!doc) throw new Error('No notes');
 
@@ -76,9 +74,9 @@ export class NoteService {
     return 'success';
   }
 
-  async patchNoteV1(userId: string, person: NotePersonUpdate, isDelete: boolean = false) {
+  async patchNoteV1(userId: string, person: NotePersonUpdate, isDelete = false) {
     const updateNoteId = person?.id;
-    const doc = (await NoteModel.findOne({ id: updateNoteId, userId })) as NoteDoc | null;
+    const doc = await this.repo.findNoteByIdAndUser(updateNoteId, userId);
     if (!doc) throw new Error('Note not found');
 
     if (person.heading) doc.heading = person.heading;
@@ -104,23 +102,14 @@ export class NoteService {
   }
 
   async getNoteV2Content(userId: string, parentId: string) {
-    return NoteV2Model.find({
-      userId,
-      parentId: parentId ?? '',
-    }).sort({ _id: 1 });
+    return this.repo.findNotesV2ByParentId(userId, parentId ?? '');
   }
 
   async getOneLevelDown(userId: string, rootParentId: string) {
-    const currentNote = await NoteV2Model.findOne({ userId, id: rootParentId });
-    const level1 = await NoteV2Model.find({
-      userId,
-      parentId: rootParentId,
-    }).sort({ _id: 1 });
+    const currentNote = await this.repo.findNoteV2ById(userId, rootParentId);
+    const level1 = await this.repo.findNotesV2ByParentId(userId, rootParentId);
     const level1Ids = level1.map((n) => n.id);
-    const level2 = await NoteV2Model.find({
-      userId,
-      parentId: { $in: level1Ids },
-    }).sort({ _id: 1 });
+    const level2 = await this.repo.findNotesV2ByParentIds(userId, level1Ids);
 
     const map: NoteItemMap = {
       [rootParentId]: {
@@ -148,20 +137,19 @@ export class NoteService {
     const { id, parentId, type, content, name } = data;
     if (!id || !type) throw new Error('Missing required fields');
 
-    const existing = await NoteV2Model.findOne({ userId, id });
+    const existing = await this.repo.findNoteV2ById(userId, id);
     if (existing) return existing;
 
     if (parentId) {
-      const existingParent = await NoteV2Model.findOne({ userId, id: parentId });
+      const existingParent = await this.repo.findNoteV2ById(userId, parentId);
       if (!existingParent) {
-        const folder = new NoteV2Model({
+        await this.repo.createNoteV2({
           name: parentId,
           id: parentId,
           parentId: '',
           type: 'FOLDER',
           userId,
         });
-        await folder.save();
       }
     }
 
@@ -178,8 +166,7 @@ export class NoteService {
       newNoteData.parentId = await this.getOrCreateParentLogFolderId(userId, parentId, newNoteData);
     }
 
-    const newNote = new NoteV2Model(newNoteData);
-    const savedDoc = await newNote.save();
+    const savedDoc = await this.repo.createNoteV2(newNoteData);
 
     try {
       await this.syncCreateV1Note(userId, data);
@@ -192,7 +179,7 @@ export class NoteService {
 
   async updateNoteV2(userId: string, data: UpdateV2NoteBody) {
     const { id } = data;
-    const doc = await NoteV2Model.findOne({ id, userId });
+    const doc = await this.repo.findNoteV2ById(userId, id);
     if (!doc) throw new Error(`Error no note id: ${id}`);
 
     if (data.parentId !== undefined) doc.parentId = data.parentId;
@@ -213,17 +200,14 @@ export class NoteService {
     const { id, type } = data;
 
     if (type === 'FOLDER') {
-      const folderToEmpty = await NoteV2Model.findOne({ id, userId });
+      const folderToEmpty = await this.repo.findNoteV2ById(userId, id);
       if (folderToEmpty) {
-        await NoteV2Model.updateMany(
-          { parentId: folderToEmpty.id, userId },
-          { $set: { parentId: folderToEmpty.parentId } },
-        );
+        await this.repo.updateNotesV2ParentId(userId, folderToEmpty.id, folderToEmpty.parentId);
       }
     }
 
-    const noteToDelete = await NoteV2Model.findOne({ id, userId });
-    const result = await NoteV2Model.deleteOne({ id, userId });
+    const noteToDelete = await this.repo.findNoteV2ById(userId, id);
+    const result = await this.repo.deleteNoteV2(userId, id);
 
     if (noteToDelete) {
       try {
@@ -237,20 +221,19 @@ export class NoteService {
   }
 
   private async getOrCreateParentLogFolderId(userId: string, parentId: string, note: NoteV2Attrs): Promise<string> {
-    const parentData = await NoteV2Model.findOne({ userId, id: parentId });
+    const parentData = await this.repo.findNoteV2ById(userId, parentId);
     if (parentData?.name === 'Log') return note.parentId;
 
-    const logParent = await NoteV2Model.findOne({ userId, parentId, name: 'Log' });
+    const logParent = await this.repo.findNoteV2ByNameAndParent(userId, parentId, 'Log');
     if (logParent) return logParent.id;
 
-    const newLogParent = new NoteV2Model({
+    const newLogParent = await this.repo.createNoteV2({
       id: `${parentId}::Log`,
       parentId,
       type: 'FOLDER',
       name: 'Log',
       userId,
     });
-    await newLogParent.save();
     return newLogParent.id;
   }
 
@@ -277,7 +260,7 @@ export class NoteService {
   }
 
   private async syncUpdateV1Note(userId: string, data: UpdateV2NoteBody) {
-    const freshDoc = await NoteV2Model.findOne({ id: data.id, userId });
+    const freshDoc = await this.repo.findNoteV2ById(userId, data.id);
     if (!freshDoc) return;
     const mappedFresh = mapNoteV2ToNoteV1(freshDoc.toObject());
     if (mappedFresh.person) {

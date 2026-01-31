@@ -1,16 +1,13 @@
-import { Application } from 'express';
+import { Router } from 'express';
 import { translationController } from '../controllers/TranslationController';
+import { isAuthenticated } from '../middleware/auth';
 
-export default function translate(app: Application) {
-  app.get('/api/translate-practice', (req, res) => translationController.getPractice(req, res));
+const router = Router();
+router.get('/translate-practice', isAuthenticated, (req, res) => translationController.getPractice(req, res));
+router.get('/translate-levels', (req, res) => translationController.getLevels(req, res));
+router.get('/full-translate-practice', (req, res) => translationController.getFullPractice(req, res));
+router.get('/saved-translation', (req, res) => translationController.getSaved(req, res));
+router.post('/translate', (req, res) => translationController.translate(req, res));
+router.post('/confirm-translation', (req, res) => translationController.confirm(req, res));
 
-  app.get('/api/translate-levels', (req, res) => translationController.getLevels(req, res));
-
-  app.get('/api/full-translate-practice', (req, res) => translationController.getFullPractice(req, res));
-
-  app.get('/api/saved-translation', (req, res) => translationController.getSaved(req, res));
-
-  app.post('/api/translate', (req, res) => translationController.translate(req, res));
-
-  app.post('/api/confirm-translation', (req, res) => translationController.confirm(req, res));
-}
+export default router;

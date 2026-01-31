@@ -11,6 +11,8 @@ import xss from 'xss';
 
 import config from './config';
 import jwtSetup from './jwt-setup';
+import { authRouter } from './routes/authRoutes';
+
 import getNotes from './routes/getNotes';
 import handleNotesV2 from './routes/handleNotesV2';
 import getNoteNames from './routes/getNoteNames';
@@ -128,16 +130,18 @@ app.options('*', cors(corsOptions));
 jwtSetup(app);
 
 app.use(express.static(frontendDist));
+
 app.use('/api/note', getNotes);
 app.use('/api/note-v2', handleNotesV2);
 app.use('/api/note-names', getNoteNames);
 app.use('/api/translation-scores', translationScoresRouter);
 app.use('/api/incorrect-translations', incorrectTranslationsRoute);
 
-translate(app);
-updateNotes(app);
-getDashData(app);
-sendEmail(app);
+app.use('/api', translate);
+app.use('/api', updateNotes);
+app.use('/api', getDashData);
+app.use('/api', sendEmail);
+app.use('/api', authRouter);
 
 app.get('/health', (_req, res) => {
   res.status(200).json({ ok: true, uptime: process.uptime() });

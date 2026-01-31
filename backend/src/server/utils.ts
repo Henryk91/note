@@ -1,4 +1,5 @@
-import { NoteAttrs, NotePersonUpdate, NoteV2Attrs, NoteV2Content } from './types/models';
+import { Request } from 'express';
+import { NoteDataLabel, NotePersonUpdate, NoteV2Attrs, NoteV2Content } from './types/models';
 
 export function calcTimeNowOffset(offset: number | string): Date {
   const offsetNum = typeof offset === 'number' ? offset : Number(offset);
@@ -43,7 +44,7 @@ export interface MapV1Result {
   id?: string;
   createdBy?: string;
   heading?: string;
-  dataLable?: any[];
+  dataLable?: NoteDataLabel[];
 }
 
 export function mapNoteV2ToNoteV1(input: NoteV2Attrs & { edit?: string }): MapV1Result {
@@ -84,29 +85,34 @@ export function mapNoteV2ToNoteV1(input: NoteV2Attrs & { edit?: string }): MapV1
   return result;
 }
 
-// Keeping this as any for now as it's very dynamic and old legacy logic
-export function mapNoteV1ToNoteV2Query(req: any): {
-  queryParams: any;
-  newContent: any;
+export interface MapV1ToV2QueryResult {
+  queryParams: Record<string, unknown>;
+  newContent: NoteV2Content | null;
   parentId: string;
-} {
-  const body = req.body;
-  const userId = req.auth.sub;
-  const person = body.person;
+}
+
+export function mapNoteV1ToNoteV2Query(req: Request): MapV1ToV2QueryResult {
+  const body = req.body as { person: NotePersonUpdate };
+  const userId = req.auth?.sub;
+  const { person } = body;
   const isNote = !person.dataLable.data.includes('"json":true');
 
   const parentId = `${person.id}::${person.dataLable.tag}`;
-  let newContent: any = null;
+  let newContent: NoteV2Content | null = null;
   if (person.dataLable.edit) {
-    const jsonDataLableEdit = !isNote ? JSON.parse(person.dataLable.edit) : undefined;
+    const jsonDataLableEdit = !isNote
+      ? (JSON.parse(person.dataLable.edit) as { data: string; date?: string })
+      : undefined;
     newContent = isNote
       ? { data: person.dataLable.edit }
-      : { data: jsonDataLableEdit.data, date: jsonDataLableEdit.date };
+      : { data: jsonDataLableEdit?.data || '', date: jsonDataLableEdit?.date };
   }
-  const jsonDataLableData = !isNote ? JSON.parse(person.dataLable.data) : undefined;
+  const jsonDataLableData = !isNote
+    ? (JSON.parse(person.dataLable.data) as { data: string; date?: string })
+    : undefined;
   const contentData = jsonDataLableData?.data ?? person.dataLable.data;
 
-  const queryParams: any = { parentId, userId, 'content.data': contentData };
+  const queryParams: Record<string, unknown> = { parentId, userId, 'content.data': contentData };
   if (jsonDataLableData) queryParams['content.date'] = jsonDataLableData?.date;
 
   return { queryParams, newContent, parentId };
