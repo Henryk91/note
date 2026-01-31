@@ -9,6 +9,10 @@ export class LogService {
     const logSitesNoteId = config.logSitesNoteId;
     const userId = config.adminUserId;
 
+    if (!logSitesNoteId || !userId) {
+      throw new Error('Log sites not configured');
+    }
+
     // Check V1 Doc (Legacy tracking?)
     let doc = (await NoteModel.findOne({ id: logSitesNoteId, userId })) as NoteDoc | null;
 

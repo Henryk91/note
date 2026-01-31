@@ -120,6 +120,8 @@ export class TranslationService {
   }
 
   async translateText(sentence: string) {
+    if (!config.googleTranslateToken) return '';
+
     const inner = JSON.stringify([[sentence, 'en', 'de', 1], []]);
     const fReq = JSON.stringify([[['MkEWBc', inner, null, 'generic']]]);
 
