@@ -10,7 +10,7 @@ import {
 
 export class TranslationRepository {
   async findScoresByUserId(userId: string): Promise<TranslationScoreDoc[]> {
-    return TranslationScore.find({ userId }).lean().exec();
+    return TranslationScore.find({ userId }).exec();
   }
 
   async upsertScore(
