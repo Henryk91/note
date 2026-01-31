@@ -14,12 +14,12 @@ import jwtSetup from './jwt-setup';
 import { authRouter } from './routes/authRoutes';
 
 import getNotes from './routes/getNotes';
-import handleNotesV2 from './routes/handleNotesV2';
+import handleNotesV2 from './routes/noteRoutes';
 import getNoteNames from './routes/getNoteNames';
 import updateNotes from './routes/updateNotes';
-import getDashData from './routes/getDashData';
-import sendEmail from './routes/sendEmail';
-import translate from './routes/translate';
+import getDashData from './routes/dashboardRoutes';
+import sendEmail from './routes/emailRoutes';
+import translate from './routes/translationRoutes';
 import translationScoresRouter from './routes/translationScores';
 import incorrectTranslationsRoute from './routes/incorrectTranslations';
 
