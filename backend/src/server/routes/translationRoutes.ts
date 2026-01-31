@@ -10,4 +10,10 @@ router.get('/saved-translation', (req, res) => translationController.getSaved(re
 router.post('/translate', (req, res) => translationController.translate(req, res));
 router.post('/confirm-translation', (req, res) => translationController.confirm(req, res));
 
+router.get('/incorrect-translations/', isAuthenticated, translationController.getIncorrect);
+router.post('/incorrect-translations/', isAuthenticated, translationController.saveIncorrect);
+
+router.get('/translation-scores/', isAuthenticated, translationController.getScores);
+router.post('/translation-scores/', isAuthenticated, translationController.updateScore);
+
 export default router;

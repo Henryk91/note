@@ -13,15 +13,10 @@ import config from './config';
 import jwtSetup from './jwt-setup';
 import { authRouter } from './routes/authRoutes';
 
-import getNotes from './routes/getNotes';
-import handleNotesV2 from './routes/noteRoutes';
-import getNoteNames from './routes/getNoteNames';
-import updateNotes from './routes/updateNotes';
-import getDashData from './routes/dashboardRoutes';
-import sendEmail from './routes/emailRoutes';
-import translate from './routes/translationRoutes';
-import translationScoresRouter from './routes/translationScores';
-import incorrectTranslationsRoute from './routes/incorrectTranslations';
+import noteRoutes from './routes/noteRoutes';
+import dashboardRoutes from './routes/dashboardRoutes';
+import emailRoutes from './routes/emailRoutes';
+import translationRoutes from './routes/translationRoutes';
 
 const projectRoot = path.resolve(__dirname, '../..');
 const frontendDist = path.resolve(projectRoot, 'build', 'client');
@@ -131,16 +126,10 @@ jwtSetup(app);
 
 app.use(express.static(frontendDist));
 
-app.use('/api/note', getNotes);
-app.use('/api/note-v2', handleNotesV2);
-app.use('/api/note-names', getNoteNames);
-app.use('/api/translation-scores', translationScoresRouter);
-app.use('/api/incorrect-translations', incorrectTranslationsRoute);
-
-app.use('/api', translate);
-app.use('/api', updateNotes);
-app.use('/api', getDashData);
-app.use('/api', sendEmail);
+app.use('/api', noteRoutes);
+app.use('/api', translationRoutes);
+app.use('/api', dashboardRoutes);
+app.use('/api', emailRoutes);
 app.use('/api', authRouter);
 
 app.get('/health', (_req, res) => {
