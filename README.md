@@ -1,86 +1,275 @@
-# React Note List
+# 📝 Note: Modern Productivity Hub
 
-## Introduction
+A high-performance, full-stack personal organization and productivity application built with **React**, **Node.js**, and **MongoDB**. This project combines structured note-taking with cognitive tools like Pomodoro, Memento, and offline synchronization.
 
-This is React note list app that gets data via a Node back-end server from a Mongo Database.
+---
 
-Once loaded add a username at the top and click on either my notes or all notes
+## ✨ Key Features
 
-- My Notes will only show notes created by you.
+- 📑 **Advanced Note Management**: Nested note structures with deep linking and search capabilities
+- 🔄 **Offline-First Synchronization**: Robust offline support using IndexedDB (Dexie) with background sync queue
+- 🌓 **Dynamic Theming**: Multiple premium themes (Ocean, Dark, Night, Green, Red)
+- ⏱️ **Cognitive Tools**: Built-in Pomodoro timer and Stoic Memento practices
+- 🔐 **Hardened Security**:
+  - JWT-based authentication with refresh token rotation
+  - Multi-layer request sanitization (HPP, XSS, MongoSanitize)
+  - Rate limiting and secure cookie handling
+  - Helmet security headers with CSP
 
-A live demo version can be found [here](https://henryk91-note.glitch.me) 
+---
 
-### Development mode
+## 🛠️ Tech Stack
 
-In dev mode, 2 servers are running. The front end code is served by a webpack dev server for hot and live reloading (now in `frontend/`). The Express code is served by a node server using ts-node-dev (now in `backend/`) to automatically restart whenever server side code changes.
+### Frontend
 
-### Production mode
+- **Framework**: React 18 with TypeScript
+- **Build Tool**: Vite 7
+- **State Management**: Redux Toolkit
+- **Routing**: React Router v5
+- **Icons**: FontAwesome 5
+- **Offline Storage**: Dexie.js (IndexedDB wrapper)
+- **Styling**: Vanilla CSS with dynamic theming
 
-In production, only the backend server runs. Client side code is bundled into static files using webpack and served by the Node.js/Express server from `/dist`.
+### Backend
 
-### Testing
+- **Runtime**: Node.js 20 with TypeScript
+- **Framework**: Express 4
+- **Database**: MongoDB with Mongoose ODM
+- **Authentication**: JWT with express-jwt
+- **Validation**: Zod schemas
+- **Security**: Helmet, CORS, HPP, express-mongo-sanitize, xss
+- **Logging**: Pino with pino-pretty
+- **Email**: NodeMailer
+- **Testing**: Mocha, Chai, Supertest, mongodb-memory-server
 
-Frontend snapshots run with Jest/Enzyme. Backend integration tests run with Mocha/Chai/Supertest against an in-memory MongoDB.
+---
 
-## Quick Start
+## 🚀 Getting Started
+
+### Prerequisites
+
+- **Node.js**: v20.x
+- **npm**: v10.x
+- **MongoDB**: Local instance or MongoDB Atlas URI
+
+### Installation
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/Henryk91/note.git
+   cd note
+   ```
+
+2. **Install dependencies:**
+
+   ```bash
+   npm install --prefix frontend
+   npm install --prefix backend
+   npm install
+   ```
+
+3. **Configure environment variables:**
+
+   Create a `.env` file in the **project root** with the following:
+
+   ```env
+   # Required
+   NODE_ENV=development
+   PORT=8080
+   JWT_SECRET=your_jwt_secret_min_10_chars
+   REFRESH_SECRET=your_refresh_secret_min_10_chars
+   MONGODB_URI=mongodb://localhost:27017/note
+
+   # Optional - Authentication
+   ACCESS_EXPIRES=15m
+   REFRESH_EXPIRES=30d
+   MAX_SESSIONS=3
+   COOKIE_SECURE=false
+
+   # Optional - CORS (comma-separated)
+   CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8080
+
+   # Optional - Features
+   ADMIN_USER_ID=
+   GOOGLE_TRANSLATE_TOKEN=
+   LOG_SITES_NOTE_ID=
+   TRANSLATION_PRACTICE_FOLDER_ID=TranslationPractice
+   WEATHER_DATA_API_KEY=
+
+   # Optional - Email
+   SMTP_USER_NAME=
+   SMTP_EMAIL_PASSWORD=
+
+   # Optional - Logging
+   SITE_LOG_SKIP_REFERRER=localhost,127.0.0.1
+   SITE_LOG_SKIP_IPS=127.0.0.1
+   ```
+
+### Running the Application
+
+#### Development Mode
+
+Runs frontend dev server (port 3000) and backend server (port 8080) concurrently:
 
 ```bash
-# Clone the repository
-git clone https://github.com/Henryk91/note.git
-
-# Go inside the directory
-cd note
-
-# Install dependencies per package
-npm install --prefix frontend
-npm install --prefix backend
-
-# Start dev servers (frontend + backend together)
 npm run dev
-
-# Build for production (frontend first, then backend)
-npm run build
-
-# Start production server (serves built assets from /dist)
-npm start
-
-# Run backend integration tests
-npm run test
-
-# Run frontend snapshot tests
-npm run test:frontend
-
 ```
 
-## Documentation
+Frontend: http://localhost:3000  
+Backend API: http://localhost:8080/api  
+Health Check: http://localhost:8080/health
 
-### Folder Structure
+#### Production Mode
 
-- `frontend/` — package.json and node_modules for the React app. Source lives in `frontend/src/client`; static assets live in `frontend/public`.
-- `backend/` — package.json and node_modules for the API. Source lives in `backend/src/server` (types in `backend/src/types`).
-- Configs are scoped per package: `frontend/webpack.config.js`, `frontend/.babelrc`, `frontend/.eslintrc.cjs`, `frontend/jest.config.js` (with `frontend/enzyme.config.js`); backend TypeScript + ESLint live in `backend/tsconfig*.json` and `backend/.eslintrc.cjs`.
+Build and serve optimized production bundle:
 
-All components are in their own folder (frontend/src/client/view/component) with the CSS file. For ease of testing all component CSS is linked into the main `app.css` file that is linked into the index.
+```bash
+npm run build
+npm start
+```
 
-## Specifics
+Serves on http://localhost:8080 (configurable via `PORT` env var)
 
-### Mongo Database Key
+#### Docker Deployment
 
-A file with the name .env needs to be set up to store the api key in this format: DB='<url-with-username-and-password>' (no spaces as this is a shell file)
+```bash
+docker-compose up
+```
 
-### Ports
+---
 
-In dev mode there will be 2 servers running, the webpack dev server for react is open on port 3000
-the node server for the back end is on port 8080.
+## 🧪 Testing & Quality
 
-### Concurrently
+### Backend Integration Tests
 
-[Concurrently](https://github.com/kimmobrunfeldt/concurrently) is used to serve both servers at the same time in dev mode.
+Run against in-memory MongoDB:
 
-### React Router
+```bash
+npm run test
+```
 
-React-router-dom is used for client side routing.
+### Frontend Snapshot Tests
 
-### ESLint
+```bash
+npm run test:frontend
+```
 
-ESLint is a linter tool that has been added to help identify and report JavaScript patterns.
+### Linting
+
+```bash
+npm run lint           # Check all
+npm run lint:backend   # Backend only
+npm run lint:frontend  # Frontend only
+npm run lint:fix       # Auto-fix issues
+```
+
+---
+
+## 📂 Project Structure
+
+```
+note/
+├── backend/
+│   ├── src/
+│   │   ├── server/
+│   │   │   ├── controllers/      # Request handlers
+│   │   │   ├── middleware/       # Auth, validation, error handling
+│   │   │   ├── models/           # Mongoose schemas
+│   │   │   ├── repositories/     # Data access layer
+│   │   │   ├── routes/           # API route definitions
+│   │   │   ├── services/         # Business logic
+│   │   │   ├── types/            # TypeScript type definitions
+│   │   │   ├── utils/            # Helpers and utilities
+│   │   │   ├── config.ts         # Environment configuration
+│   │   │   ├── index.ts          # Express app entry point
+│   │   │   └── jwt-setup.ts      # JWT middleware configuration
+│   │   └── types/                # Shared type definitions
+│   ├── package.json
+│   └── tsconfig.json             # Outputs to ../build/server
+│
+├── frontend/
+│   ├── src/
+│   │   ├── Components/           # React components
+│   │   │   ├── Home/
+│   │   │   ├── Login/
+│   │   │   ├── Memento/
+│   │   │   ├── NewNote/
+│   │   │   ├── NoteDetail/
+│   │   │   ├── NoteDetailPage/
+│   │   │   ├── Pomodoro/
+│   │   │   └── SearchBar/
+│   │   ├── Helpers/              # Utilities and API requests
+│   │   ├── hooks/                # Custom React hooks
+│   │   ├── offlineQueue/         # Offline sync logic
+│   │   ├── store/                # Redux store and slices
+│   │   └── App.tsx               # Root component
+│   ├── public/                   # Static assets
+│   ├── package.json
+│   └── vite.config.ts            # Outputs to ../build/client
+│
+├── __tests__/
+│   ├── integration/              # Backend API tests
+│   │   ├── auth.test.ts
+│   │   ├── notes.test.ts
+│   │   ├── translation.test.ts
+│   │   └── setup.ts
+│   └── *.snapshot.js             # Frontend component snapshots
+│
+├── build/                        # Production build output
+│   ├── client/                   # Vite frontend bundle
+│   └── server/                   # Compiled TypeScript backend
+│
+├── .env                          # Environment variables (gitignored)
+├── docker-compose.yml            # Docker orchestration
+├── Dockerfile                    # Multi-stage production build
+├── package.json                  # Root workspace scripts
+└── README.md
+```
+
+---
+
+## 🔌 API Routes
+
+- **Authentication**: `/api/auth/*` - Login, logout, token refresh
+- **Notes**: `/api/notes/*` - CRUD operations for notes
+- **Translations**: `/api/translations/*` - Translation practice management
+- **Dashboard**: `/api/dashboard/*` - User analytics and stats
+- **Email**: `/api/email/*` - Email notifications
+- **Health**: `/health` - Server health check
+
+---
+
+## 🛡️ Security Features
+
+- **Helmet**: Comprehensive security headers including CSP
+- **CORS**: Configurable origin whitelist with subdomain support
+- **Rate Limiting**: 300 requests per 15 minutes per IP
+- **Input Sanitization**: XSS protection and MongoDB injection prevention
+- **HPP**: HTTP Parameter Pollution protection
+- **JWT**: Secure token-based authentication with rotation
+- **Cookie Security**: HttpOnly, Secure, SameSite cookies in production
+
+---
+
+## 🐳 Docker Support
+
+The project includes a multi-stage Dockerfile optimized for production:
+
+- **Builder stage**: Installs dev dependencies and builds both frontend and backend
+- **Runner stage**: Minimal production image with only runtime dependencies
+- **Output**: Serves from `/app/build` with Node.js 20 Alpine
+
+---
+
+## 👤 Author
+
+**Henry Koekemoer**
+
+- GitHub: [@Henryk91](https://github.com/Henryk91)
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
