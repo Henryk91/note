@@ -11,12 +11,7 @@ import xss from 'xss';
 
 import config from './config';
 import jwtSetup from './jwt-setup';
-import { authRouter } from './routes/authRoutes';
-
-import noteRoutes from './routes/noteRoutes';
-import dashboardRoutes from './routes/dashboardRoutes';
-import emailRoutes from './routes/emailRoutes';
-import translationRoutes from './routes/translationRoutes';
+import apiRoutes from './routes';
 
 const projectRoot = path.resolve(__dirname, '../..');
 const frontendDist = path.resolve(projectRoot, 'build', 'client');
@@ -126,11 +121,7 @@ jwtSetup(app);
 
 app.use(express.static(frontendDist));
 
-app.use('/api', noteRoutes);
-app.use('/api', translationRoutes);
-app.use('/api', dashboardRoutes);
-app.use('/api', emailRoutes);
-app.use('/api', authRouter);
+app.use('/api', apiRoutes);
 
 app.get('/health', (_req, res) => {
   res.status(200).json({ ok: true, uptime: process.uptime() });
