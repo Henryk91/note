@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import supertest from 'supertest';
 import mock from 'mock-require';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import config from '../../backend/src/server/config';
 
 let mongoServer: MongoMemoryServer | null = null;
 let agent: ReturnType<typeof supertest.agent> | null = null;
@@ -48,7 +49,22 @@ const nodemailerMock = {
 const applyModuleMocks = () => {
   mock.stopAll();
   mock('node-fetch', fetchMock);
+  global.fetch = fetchMock as any;
   mock('nodemailer', nodemailerMock);
+
+  mock('../../backend/src/server/clients/GoogleTranslateClient', {
+    googleTranslateClient: {
+      translateText: async (text: string) => (text === 'Hello world' ? 'Hallo Welt' : ''),
+    },
+  });
+
+  mock('../../backend/src/server/clients/OpenAIClient', {
+    getOpenAIClient: () => ({
+      createChatCompletion: async () => ({
+        choices: [{ message: { content: 'true' } }],
+      }),
+    }),
+  });
 };
 
 const buildMongoUri = async () => {
@@ -84,6 +100,9 @@ before(async () => {
   }
 
   // import app after env + mocks + db are ready
+  config.adminUserId = 'UUvFcBXO6Q';
+  config.googleTranslateToken = 'mock-token';
+  config.translationPracticeFolderId = 'TranslationPractice';
   const { default: app } = await import('../../backend/src/server/index');
   agent = supertest.agent(app as any);
 });
@@ -105,6 +124,7 @@ after(async () => {
     await mongoServer.stop();
   }
   mock.stopAll();
+  (global.fetch as any) = undefined;
 });
 
 export const getAgent = (): ReturnType<typeof supertest.agent> => {

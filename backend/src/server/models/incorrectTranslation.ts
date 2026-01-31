@@ -33,7 +33,7 @@ IncorrectTranslationSchema.index({ userId: 1, exerciseId: 1, sentence: 1 }, { un
 const IncorrectTranslation: Model<IncorrectTranslationDoc> = mongoose.model<IncorrectTranslationDoc>(
   'IncorrectTranslation',
   IncorrectTranslationSchema,
-  'incorrect-translations',
+  'incorrecttranslations',
 );
 
 export default IncorrectTranslation;

@@ -27,7 +27,7 @@ TranslationScoreSchema.index({ userId: 1, exerciseId: 1 }, { unique: true });
 const TranslationScore: Model<TranslationScoreDoc> = mongoose.model<TranslationScoreDoc>(
   'TranslationScore',
   TranslationScoreSchema,
-  'translation-scores',
+  'translationscores',
 );
 
 export default TranslationScore;

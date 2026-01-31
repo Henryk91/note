@@ -3,80 +3,52 @@ import { noteService } from '../services/NoteService';
 import { websiteTrackingService } from '../services/WebsiteTrackingService';
 import { NewV2NoteBody, UpdateV2NoteBody, DeleteV2NoteBody, SiteLogQuery } from '../types/models';
 import logger from '../utils/logger';
+import { asyncHandler } from '../middleware/errorHandler';
 
 export class NoteController {
-  async getNotes(req: Request, res: Response) {
-    try {
-      const { userId } = req.auth!;
+  getNotes = asyncHandler(async (req: Request, res: Response) => {
+    const { userId } = req.auth!;
 
-      const { user } = req.query as { user?: string };
-      const decodedUser = user ? decodeURI(user) : '';
+    const { user } = req.query as { user?: string };
+    const decodedUser = user ? decodeURI(user) : '';
 
-      if (decodedUser.toLowerCase() === 'all') {
-        const result = await noteService.getNotes(userId);
-        return res.json(result);
-      }
-      const { noteHeading } = req.query as { noteHeading?: string };
-
-      if (noteHeading) {
-        const result = await noteService.getNote(userId, user ?? '', noteHeading);
-        return res.json(result);
-      }
-      const result = await noteService.getMyNotes(userId, user);
+    if (decodedUser.toLowerCase() === 'all') {
+      const result = await noteService.getNotes(userId);
       return res.json(result);
-    } catch (err) {
-      logger.error({ err }, 'NoteController Error');
-      return res.status(500).json({ error: 'Server error' });
     }
-  }
+    const { noteHeading } = req.query as { noteHeading?: string };
 
-  async getNoteNames(req: Request, res: Response) {
-    try {
-      const { userId } = req.auth!;
-
-      const result = await noteService.getNoteNames(userId);
+    if (noteHeading) {
+      const result = await noteService.getNote(userId, user ?? '', noteHeading);
       return res.json(result);
-    } catch (err) {
-      logger.error({ err }, 'NoteController Error');
-      return res.status(500).json({ error: 'Server error' });
     }
-  }
+    const result = await noteService.getMyNotes(userId, user);
+    res.json(result);
+  });
 
-  async saveNote(req: Request, res: Response) {
-    try {
-      const { userId } = req.auth!;
+  getNoteNames = asyncHandler(async (req: Request, res: Response) => {
+    const { userId } = req.auth!;
+    const result = await noteService.getNoteNames(userId);
+    res.json(result);
+  });
 
-      const result = await noteService.createNoteV1(userId, req.body);
-      return res.json({ Ok: result });
-    } catch (err) {
-      logger.error({ err }, 'NoteController Error');
-      return res.status(500).json({ Ok: 'Error' });
-    }
-  }
+  saveNote = asyncHandler(async (req: Request, res: Response) => {
+    const { userId } = req.auth!;
+    const result = await noteService.createNoteV1(userId, req.body);
+    res.json({ Ok: result });
+  });
 
-  async updateNote(req: Request, res: Response) {
-    try {
-      const { userId } = req.auth!;
+  updateNote = asyncHandler(async (req: Request, res: Response) => {
+    const { userId } = req.auth!;
+    const result = await noteService.updateNoteV1(userId, req.body.person);
+    res.json({ Ok: result });
+  });
 
-      const result = await noteService.updateNoteV1(userId, req.body.person);
-      return res.json({ Ok: result });
-    } catch (err) {
-      logger.error({ err }, 'NoteController Error');
-      return res.status(500).json({ Ok: 'Error' });
-    }
-  }
-
-  async updateOneNote(req: Request, res: Response) {
-    try {
-      const { userId } = req.auth!;
-
-      const result = await noteService.patchNoteV1(userId, req.body.person, req.body.delete);
-      return res.json({ Ok: result });
-    } catch (err) {
-      logger.error({ err }, 'NoteController Error');
-      return res.json({ Ok: 'Error' });
-    }
-  }
+  updateOneNote = asyncHandler(async (req: Request, res: Response) => {
+    const { userId } = req.auth!;
+    const result = await noteService.patchNoteV1(userId, req.body.person, req.body.delete);
+    res.json({ Ok: result });
+  });
 
   async siteLog(req: Request, res: Response) {
     try {
@@ -117,41 +89,23 @@ export class NoteController {
     }
   }
 
-  async createV2(req: Request, res: Response) {
-    try {
-      const { userId } = req.auth!;
+  createV2 = asyncHandler(async (req: Request, res: Response) => {
+    const { userId } = req.auth!;
+    const doc = await noteService.createNoteV2(userId, req.body as NewV2NoteBody);
+    res.json(doc);
+  });
 
-      const doc = await noteService.createNoteV2(userId, req.body as NewV2NoteBody);
-      return res.json(doc);
-    } catch (err) {
-      logger.error({ err }, 'NoteController Error');
-      return res.status(500).send('Error');
-    }
-  }
+  updateV2 = asyncHandler(async (req: Request, res: Response) => {
+    const { userId } = req.auth!;
+    const doc = await noteService.updateNoteV2(userId, req.body as UpdateV2NoteBody);
+    res.json(doc);
+  });
 
-  async updateV2(req: Request, res: Response) {
-    try {
-      const { userId } = req.auth!;
-
-      const doc = await noteService.updateNoteV2(userId, req.body as UpdateV2NoteBody);
-      return res.json(doc);
-    } catch (err) {
-      logger.error({ err }, 'NoteController Error');
-      return res.status(500).send('Error');
-    }
-  }
-
-  async deleteV2(req: Request, res: Response) {
-    try {
-      const { userId } = req.auth!;
-
-      const result = await noteService.deleteNoteV2(userId, req.body as DeleteV2NoteBody);
-      return res.json(result);
-    } catch (err) {
-      logger.error({ err }, 'NoteController Error');
-      return res.status(500).send('Error');
-    }
-  }
+  deleteV2 = asyncHandler(async (req: Request, res: Response) => {
+    const { userId } = req.auth!;
+    const result = await noteService.deleteNoteV2(userId, req.body as DeleteV2NoteBody);
+    res.json(result);
+  });
 }
 
 export const noteController = new NoteController();

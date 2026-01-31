@@ -13,6 +13,7 @@ import config from './config';
 import jwtSetup from './jwt-setup';
 import apiRoutes from './routes';
 import logger from './utils/logger';
+import { errorHandler } from './middleware/errorHandler';
 
 const projectRoot = path.resolve(__dirname, '../..');
 const frontendDist = path.resolve(projectRoot, 'build', 'client');
@@ -146,18 +147,10 @@ app.get(/^\/(?!api).*/, (req, res) => {
   return res.sendFile(path.join(frontendDist, 'index.html'));
 });
 
-// Generic global error handler
-app.use((err: Error & { status?: number }, _req: Request, res: Response, _next: NextFunction) => {
-  const status = err.status ?? 500;
-  logger.error({ err, status }, 'Unhandled exception');
+// Centralized error handler
+app.use(errorHandler);
 
-  res.status(status).json({
-    error: 'Internal server error',
-    message: config.isProd ? undefined : err.message,
-    ...(config.isProd ? {} : { stack: err.stack }),
-  });
-});
-
+// 404 handler
 app.use((req, res) => {
   logger.warn({ url: req.url, method: req.method }, '404 Not Found');
   res.status(404).json({ error: 'Not found' });

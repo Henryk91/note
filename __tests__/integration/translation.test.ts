@@ -14,6 +14,7 @@ beforeEach(async () => {
 });
 
 const Note = () => mongoose.model('Notes');
+const NoteV2 = () => mongoose.model('NoteV2');
 
 describe('Translation practice endpoints', () => {
   it('serve practice, levels and saved content', async () => {
@@ -28,26 +29,53 @@ describe('Translation practice endpoints', () => {
       ],
     });
 
-    await Note().create({
+    await NoteV2().create({
       id: 'level-1',
-      userId: 'tester',
-      createdBy: 'TranslationPractice',
-      heading: 'Level1',
-      dataLable: [
-        { tag: 'Intro', data: 'One.' },
-        { tag: 'Intro', data: 'Two.' },
-      ],
+      userId: 'UUvFcBXO6Q',
+      parentId: 'TranslationPractice',
+      name: 'Level1',
+      type: 'FOLDER',
     });
 
-    await Note().create({
-      id: 'save-1',
-      userId: 'tester',
-      createdBy: 'TranslationPractice',
-      heading: 'A1',
-      dataLable: [
-        { tag: 'intro', data: 'Sentence one. Sentence two.' },
-        { tag: 'intro', data: 'Satz eins. Satz zwei.' },
-      ],
+    await NoteV2().create({
+      id: 'sub-level-1',
+      userId: 'UUvFcBXO6Q',
+      parentId: 'level-1',
+      name: 'Intro',
+      type: 'NOTE',
+      content: { data: 'One. Two.' },
+    });
+
+    await NoteV2().create({
+      id: 'saved-A1',
+      userId: 'UUvFcBXO6Q',
+      parentId: 'TranslationPractice',
+      name: 'A1',
+      type: 'FOLDER',
+    });
+
+    await NoteV2().create({
+      id: 'saved-intro',
+      userId: 'UUvFcBXO6Q',
+      parentId: 'saved-A1',
+      name: 'intro',
+      type: 'NOTE',
+    });
+
+    await NoteV2().create({
+      id: 'saved-content-1',
+      userId: 'UUvFcBXO6Q',
+      parentId: 'saved-intro',
+      type: 'NOTE',
+      content: { data: 'Sentence one. Sentence two.' },
+    });
+
+    await NoteV2().create({
+      id: 'saved-content-2',
+      userId: 'UUvFcBXO6Q',
+      parentId: 'saved-intro',
+      type: 'NOTE',
+      content: { data: 'Satz eins. Satz zwei.' },
     });
 
     const practice = await agent.get('/api/translate-practice');
@@ -62,9 +90,7 @@ describe('Translation practice endpoints', () => {
     expect(full.status).to.equal(200);
     expect(full.body.Level1.Intro).to.contain('One.');
 
-    const saved = await agent
-      .get('/api/saved-translation')
-      .query({ level: 'A1', subLevel: 'intro' });
+    const saved = await agent.get('/api/saved-translation').query({ level: 'A1', subLevel: 'intro' });
     expect(saved.status).to.equal(200);
     expect(saved.body[0].translation).to.contain('Satz eins');
   });
@@ -107,9 +133,7 @@ describe('Translation proxy endpoints', () => {
   });
 
   it('checks translations via OpenAI', async () => {
-    const res = await agent
-      .post('/api/confirm-translation')
-      .send({ english: 'Hello', german: 'Hallo' });
+    const res = await agent.post('/api/confirm-translation').send({ english: 'Hello', german: 'Hallo' });
     expect(res.status).to.equal(200);
     expect(res.body.isCorrect).to.equal(true);
     expect(getFetchCalls().length).to.be.greaterThan(0);

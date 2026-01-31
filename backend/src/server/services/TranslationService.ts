@@ -1,11 +1,10 @@
 import { NoteRepository, noteRepository } from '../repositories/NoteRepository';
 import { TranslationRepository, translationRepository } from '../repositories/TranslationRepository';
-import { NoteDataLabel, NoteAttrs, IncorrectTranslationAttrs } from '../types/models';
-
+import { NoteDataLabel, IncorrectTranslationAttrs } from '../types/models';
+import { getOpenAIClient } from '../clients/OpenAIClient';
 import config from '../config';
-import logger from '../utils/logger';
-import { NoteModel, NoteV2Model } from '../models/Notes';
 import { TranslationScoreAttrs } from '../models/TranslationScore';
+import { GoogleTranslateClient, googleTranslateClient } from '../clients/GoogleTranslateClient';
 
 interface TranslationPracticeMap {
   [key: string]: string;
@@ -20,9 +19,16 @@ export class TranslationService {
 
   private noteRepo: NoteRepository;
 
-  constructor(repo: TranslationRepository = translationRepository, noteRepo: NoteRepository = noteRepository) {
+  private googleClient: GoogleTranslateClient;
+
+  constructor(
+    repo: TranslationRepository = translationRepository,
+    noteRepo: NoteRepository = noteRepository,
+    googleClient: GoogleTranslateClient = googleTranslateClient,
+  ) {
     this.repo = repo;
     this.noteRepo = noteRepo;
+    this.googleClient = googleClient;
   }
 
   async getTranslationPractice() {
@@ -45,31 +51,7 @@ export class TranslationService {
   async getTranslationLevels() {
     const { translationPracticeFolderId, adminUserId } = config;
 
-    const results = await NoteV2Model.aggregate([
-      {
-        $match: {
-          userId: adminUserId,
-          parentId: translationPracticeFolderId,
-        },
-      },
-      {
-        $lookup: {
-          from: 'notes-v2',
-          localField: 'id',
-          foreignField: 'parentId',
-          as: 'children',
-        },
-      },
-      {
-        $sort: { _id: 1 },
-      },
-      {
-        $project: {
-          name: 1,
-          'children.name': 1,
-        },
-      },
-    ]);
+    const results = await this.noteRepo.getTranslationLevelsAggregate(adminUserId, translationPracticeFolderId);
 
     const map: Record<string, string[]> = {};
     results.forEach((res) => {
@@ -79,10 +61,9 @@ export class TranslationService {
   }
 
   async getFullTranslationPractice() {
-    const docs = (await NoteModel.find({
-      createdBy: config.translationPracticeFolderId,
-    })) as unknown as NoteAttrs[];
-    const result = docs.reduce((acc: NestedTranslationMap, { heading, dataLable }: NoteAttrs) => {
+    const docs = await this.noteRepo.findTranslationPracticeNotes(config.translationPracticeFolderId);
+
+    const result = docs.reduce((acc: NestedTranslationMap, { heading, dataLable }) => {
       const nested = (dataLable || []).reduce((noteAcc: TranslationPracticeMap, { tag, data }: NoteDataLabel) => {
         const formatted = data.trim().endsWith('.') ? `${data} ` : `${data}. `;
         if (tag) {
@@ -126,78 +107,7 @@ export class TranslationService {
   }
 
   async translateText(sentence: string) {
-    if (!config.googleTranslateToken) return '';
-
-    const inner = JSON.stringify([[sentence, 'en', 'de', 1], []]);
-    const fReq = JSON.stringify([[['MkEWBc', inner, null, 'generic']]]);
-
-    const url = new URL('https://translate.google.com/_/TranslateWebserverUi/data/batchexecute');
-    const params: Record<string, string> = {
-      rpcids: 'MkEWBc',
-      'source-path': '/',
-      'f.sid': '3888633823004036940',
-      bl: 'boq_translate-webserver_20250409.05_p0',
-      hl: 'en-US',
-      'soc-app': '1',
-      'soc-platform': '1',
-      'soc-device': '1',
-      _reqid: '40663570',
-      rt: 'c',
-    };
-    Object.entries(params).forEach(([k, v]) => url.searchParams.append(k, v));
-
-    const body = new URLSearchParams();
-    body.set('f.req', fReq);
-    body.set('at', config.googleTranslateToken);
-
-    const googleRes = await fetch(url.toString(), {
-      method: 'POST',
-      headers: {
-        Accept: '*/*',
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-        Origin: 'https://translate.google.com',
-        Referer: 'https://translate.google.com/',
-      },
-      credentials: 'include',
-      body: body.toString(),
-    });
-
-    const text = await googleRes.text();
-    const batches = text.split('\n').filter((row) => row.startsWith('[['));
-    if (batches.length === 0) return '';
-
-    const translatedString = batches.reduce((a, b) => (a.length >= b.length ? a : b));
-
-    let data: unknown[] = [];
-    try {
-      data = JSON.parse(translatedString) as unknown[];
-    } catch (err) {
-      logger.error({ err }, 'Translation parsing error');
-      return '';
-    }
-
-    const raw = (data[0] as unknown[])?.[2] as string | undefined;
-    let translated = '';
-    if (typeof raw === 'string') {
-      try {
-        const rawList = JSON.parse(raw) as unknown[];
-        const filteredList = rawList
-          .flat(Infinity)
-          .filter(
-            (i: unknown): i is string =>
-              typeof i === 'string' &&
-              i.length > 0 &&
-              i !== sentence &&
-              i !== 'en' &&
-              i !== 'de' &&
-              !sentence.includes(i),
-          );
-        translated = filteredList.join(' ');
-      } catch (err) {
-        logger.error({ err }, 'Failed to parse raw translation list');
-      }
-    }
-    return translated;
+    return this.googleClient.translateText(sentence);
   }
 
   async verifyTranslation(english: string, german: string) {
@@ -234,27 +144,16 @@ or
 false
 `;
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.0,
-        max_tokens: 5,
-      }),
+    const openai = getOpenAIClient();
+    const response = await openai.createChatCompletion({
+      model: 'gpt-4o',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.0,
+      max_tokens: 5,
     });
 
-    const data = await response.json();
-    const errorCode = data?.error?.code;
-    if (errorCode) {
-      throw new Error(`OpenAI API Error: ${errorCode}`);
-    }
-    const text = data.choices?.[0]?.message?.content?.trim().toLowerCase();
-    return text === 'true';
+    const answer = response.choices[0]?.message?.content?.trim().toLowerCase();
+    return answer === 'true';
   }
 
   async getScores(userId: string) {
@@ -282,7 +181,7 @@ false
     return this.repo.findIncorrectByUserId(userId, corrected);
   }
 
-  async saveIncorrectTranslations(userId: string, raw: IncorrectTranslationAttrs[]) {
+  async saveIncorrectTranslations(userId: string, raw: Omit<IncorrectTranslationAttrs, 'userId'>[]) {
     if (!Array.isArray(raw) || raw.length === 0) {
       throw new Error('Expected a non-empty array');
     }
@@ -310,7 +209,8 @@ false
       };
     });
 
-    return this.repo.bulkUpsertIncorrect(ops);
+    await this.repo.bulkUpsertIncorrect(ops);
+    return true;
   }
 }
 
