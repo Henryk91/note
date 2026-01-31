@@ -4,7 +4,7 @@ import { docId, calcTimeNowOffset, referralToSiteName } from '../utils';
 import config from '../config';
 import { NoteV2Attrs, SiteLogQuery, NoteDoc } from '../types/models';
 
-export class LogService {
+export class WebsiteTrackingService {
   async logSiteVisit(headers: IncomingHttpHeaders, query: SiteLogQuery) {
     const logSitesNoteId = config.logSitesNoteId;
     const userId = config.adminUserId;
@@ -105,4 +105,4 @@ export class LogService {
   }
 }
 
-export const logService = new LogService();
+export const websiteTrackingService = new WebsiteTrackingService();

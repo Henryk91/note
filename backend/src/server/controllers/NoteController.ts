@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { noteService } from '../services/NoteService';
-import { logService } from '../services/LogService';
+import { websiteTrackingService } from '../services/WebsiteTrackingService';
 import { NewV2NoteBody, UpdateV2NoteBody, DeleteV2NoteBody, SiteLogQuery } from '../types/models';
 
 export class NoteController {
@@ -86,7 +86,7 @@ export class NoteController {
 
   async siteLog(req: Request, res: Response) {
     try {
-      const result = await logService.logSiteVisit(req.headers, req.query as SiteLogQuery);
+      const result = await websiteTrackingService.logSiteVisit(req.headers, req.query as SiteLogQuery);
       return res.json({ Ok: result });
     } catch (err: unknown) {
       console.error('Log Error', err);
