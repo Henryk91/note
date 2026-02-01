@@ -124,6 +124,7 @@ const signRefreshToken = (user: UserDoc, sid: string) => {
 };
 
 const addSession = async (user: UserDoc, plainRefresh: string, sid: string, req: Request) => {
+  // eslint-disable-next-line no-param-reassign
   user.refreshSessions = user.refreshSessions ?? [];
   const tokenHash = await bcrypt.hash(plainRefresh, 12);
   user.refreshSessions.push({
