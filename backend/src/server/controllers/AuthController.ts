@@ -56,12 +56,21 @@ const REFRESH_EXPIRES_IN = config.jwt.refreshExpiresIn as StringValue;
 const getRequestDomain = (req: Request) => {
   const referer = req.get('referer');
   if (!referer) return undefined;
-  if (referer?.includes('.lingodrill.com')) return '.lingodrill.com';
-  if (referer?.includes('.henryk.co.za')) return '.henryk.co.za';
+
+  // Dedicated production domain handling
+  if (referer.includes('.lingodrill.com')) return '.lingodrill.com';
+  if (referer.includes('.henryk.co.za')) return '.henryk.co.za';
 
   try {
     const { hostname } = new URL(referer);
-    const allowed = config.corsAllowOrigins.some((origin) => {
+
+    // Never set Domain=.localhost or Domain=.127.0.0.1
+    // This allows cookies to default to the host that set them
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return undefined;
+    }
+
+    const isAllowed = config.corsAllowOrigins.some((origin) => {
       try {
         const allowedHost = new URL(origin).hostname;
         return hostname === allowedHost || hostname.endsWith(`.${allowedHost}`);
@@ -69,7 +78,16 @@ const getRequestDomain = (req: Request) => {
         return false;
       }
     });
-    return allowed ? `.${hostname.split('.').slice(-2).join('.')}` : undefined;
+
+    if (!isAllowed) return undefined;
+
+    const parts = hostname.split('.');
+    // Only return a domain if it has at least one dot (e.g., example.com -> .example.com)
+    if (parts.length >= 2) {
+      return `.${parts.slice(-2).join('.')}`;
+    }
+
+    return undefined;
   } catch {
     return undefined;
   }
