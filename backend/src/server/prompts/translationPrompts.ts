@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/prefer-default-export
 export const getVerifyTranslationPrompt = (english: string, german: string) => `
 You are a strict but fair German translation evaluator.
 

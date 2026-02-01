@@ -28,8 +28,10 @@ module.exports = {
     'import/extensions': ['error', 'ignorePackages', { js: 'never', jsx: 'never', ts: 'never', tsx: 'never' }],
     'class-methods-use-this': 'off',
     'no-underscore-dangle': 'off',
-    'unused-imports/no-unused-vars': 'error',
+    'unused-imports/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     'unused-imports/no-unused-imports': 'error',
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }]
   },
   overrides: [
     {

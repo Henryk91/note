@@ -23,6 +23,7 @@ export function formatDate(input: string): string {
 export function docId(count: number): string {
   let text = '';
   const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  // eslint-disable-next-line no-plusplus
   for (let i = 0; i < count; i++) {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   }

@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 export class AppError extends Error {
   constructor(
     public statusCode: number,
