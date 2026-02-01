@@ -28,6 +28,7 @@ export class EmailController {
           try {
             parsedBody = JSON.parse(keys[0]);
           } catch (e) {
+            logger.error({ err: e }, 'Email body parse error');
             // Not JSON, just use as is
           }
         }
@@ -43,7 +44,7 @@ export class EmailController {
       });
       res.json({ Ok: '100' });
     } catch (err) {
-      console.error('Emails sending error:', err);
+      logger.error({ err }, 'Emails sending error');
       res.json({ Ok: '50' });
     }
   }
