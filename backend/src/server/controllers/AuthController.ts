@@ -61,6 +61,12 @@ const getRequestDomain = (req: Request) => {
 
   try {
     const { hostname } = new URL(referer);
+    // Never set Domain=.localhost or Domain=.127.0.0.1
+    // This allows cookies to default to the host that set them
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return undefined;
+    }
+
     const allowed = config.corsAllowOrigins.some((origin) => {
       try {
         const allowedHost = new URL(origin).hostname;
