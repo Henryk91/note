@@ -1,6 +1,6 @@
 import { FilterQuery, AnyBulkWriteOperation } from 'mongoose';
 import TranslationScore from '../models/TranslationScore';
-import IncorrectTranslation from '../models/incorrectTranslation';
+import IncorrectTranslation from '../models/IncorrectTranslation';
 import { TranslationScoreAttrs, TranslationScoreDoc, IncorrectTranslationDoc } from '../types/models';
 
 export class TranslationRepository {
