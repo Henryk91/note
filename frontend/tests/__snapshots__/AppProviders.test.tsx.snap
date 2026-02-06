@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AppProviders matches snapshot 1`] = `
+<DocumentFragment>
+  <div>
+    <div>
+      <div>
+        <div>
+          <div>
+            Child
+          </div>
+          <div
+            data-rht-toaster=""
+            style="position: fixed; z-index: 9999; top: 20px; left: 16px; right: 20px; bottom: 16px; pointer-events: none;"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;

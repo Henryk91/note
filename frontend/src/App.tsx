@@ -1,244 +1,24 @@
-import React, { useCallback, useEffect, useState, lazy, Suspense } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars } from '@fortawesome/free-solid-svg-icons';
-import { connect } from 'react-redux';
-import { BrowserRouter as Router, Route, Link, Redirect, Switch } from 'react-router-dom';
-import { SearchBar, NoteDetailPage } from './Components/index';
-import {
-  saveNewNote,
-  updateOneNoteRec,
-  getNotesV2WithChildrenByParentId,
-  getNotesV2ByParentId,
-} from './Helpers/requests';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from './core/store';
+import { setTheme } from './core/store/themeSlice';
+import { useOfflineSync } from './shared/hooks/useOfflineSync';
+import { useNotesLogic } from './features/notes/hooks/useNotesLogic';
+import { useNoteNavigation } from './features/notes/hooks/useNoteNavigation';
+import { AppRoutes } from './core/routes/AppRoutes';
 
-import { compareSort } from './Helpers/utils';
-import { KeyValue, Note, PageDescriptor } from './Helpers/types';
-import { RootState } from './store';
-import { setTheme } from './store/themeSlice';
-import { setNotes, setNoteNames, setSelectedNoteName, bulkUpdatePerson } from './store/personSlice';
-
-import { useOfflineSync } from "./hooks/useOfflineSync";
-import { sendOrQueueJSON } from "./offlineQueue/queue";
-import { useOnlineStatus } from './hooks/useOnlineStatus';
-
-const Home = lazy(() => import('./Components/Home/Home'));
-const NewNote = lazy(() => import('./Components/NewNote/NewNote'));
-const Login = lazy(() => import('./Components/Login/Login'));
-const Pomodoro = lazy(() => import('./Components/Pomodoro/Pomodoro'));
-const Memento = lazy(() => import('./Components/Memento/Memento'));
-
-type ProtectedRoutesProps = {
-  children: React.ReactElement;
-};
-
-function ProtectedRoutes({ children }: ProtectedRoutesProps) {
-  const loginKey = localStorage.getItem('loginKey');
-  if (!loginKey) return <Redirect to="/login" />;
-  return children;
-}
-
-type AppProps = {
-  notes: Note[] | null;
-  theme: string;
-  noteNames: string[] | undefined;
-  selectedNoteName?: string;
-  lastPage: PageDescriptor;
-  pages: PageDescriptor[];
-  reloadLastPage: boolean;
-  setTheme: (theme: string) => void;
-  setNotes: (notes: Note[] | null) => void;
-  setNoteNames: (notes: string[]) => void;
-  setSelectedNoteName: (notes: string) => void;
-  bulkUpdatePerson: (notes: KeyValue<Note>) => void;
-};
-
-const App: React.FC<AppProps> = ({
-  theme,
-  setTheme,
-  notes,
-  setNotes,
-  noteNames,
-  setNoteNames,
-  selectedNoteName,
-  setSelectedNoteName,
-  lastPage,
-  pages,
-  bulkUpdatePerson,
-  reloadLastPage
-}) => {
+/**
+ * AppContent - Inner component that uses hooks requiring QueryClient
+ * This must be rendered INSIDE AppProviders
+ */
+const AppContent: React.FC = () => {
   useOfflineSync();
-  const isOnline = useOnlineStatus();
-  
-  const [notesInitialLoad, setNotesInitialLoad] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [lastRefresh, setLastRefresh] = useState<number | null>(null);
-  const [loadingData, setLoadingData] = useState(false);
+  const theme = useSelector((state: RootState) => state.theme.value);
 
-  const setRedirect = useCallback(() => {
-    const path = window.location.pathname;
-    if (path === '/' || window.location.href.includes('index.html')) {
-      if ((notes && noteNames) || selectedNoteName) window.history.pushState('', '', './notes/main');
-    }
-  }, [noteNames, notes, selectedNoteName]);
+  const { loadingData, noteDetailSet, setFilterNote, checkLoginState, getLastPageData, setRedirect } =
+    useNotesLogic();
 
-  const getMyNotes = useCallback(
-    (noteName?: string | null) => {
-      if (sessionStorage.getItem('loading')) return;
-      let currentUser = selectedNoteName;
-      if (noteName) currentUser = noteName;
-
-      if (currentUser && currentUser !== '') {
-        setLoadingData(true);
-        sessionStorage.setItem('loading', 'true');
-        getNotesV2WithChildrenByParentId(currentUser, (resp) => {
-          setLoadingData(false);
-          if (resp) {
-            bulkUpdatePerson(resp);
-            sessionStorage.removeItem('loading');
-            setRedirect();
-          }
-        });
-      }
-    },
-    [notes, setRedirect, selectedNoteName, loadingData, setLoadingData]
-  );
-
-  const getNotesOnLoad = useCallback(
-    (loggedIn, loggedUser) => {
-      if (!notesInitialLoad) {
-        if (loggedIn && !notesInitialLoad && loggedUser !== '') {
-          setNotesInitialLoad(true);
-          getMyNotes(loggedUser);
-        }
-      }
-    },
-    [getMyNotes, notesInitialLoad, loadingData]
-  );
-
-  const setFilterNote = useCallback(
-    (val) => {
-      if (selectedNoteName !== val.user) {
-        getMyNotes(val.user);
-      }
-      setSelectedNoteName(val.user);
-      setSearchTerm(val.searchTerm);
-    },
-    [getMyNotes, selectedNoteName]
-  );
-
-  const getNoteNamesHandler = useCallback(
-    (loginKey) => {
-      if (loginKey && !notesInitialLoad && !noteNames) {
-        getNotesV2ByParentId(undefined, (resp) => {
-          const names: string[] = resp?.map((item) => item.name);
-          if (names.length) {
-            setNoteNames([...names, 'All', 'None']);
-            if (!selectedNoteName) {
-              setSelectedNoteName(names[0]);
-              getMyNotes(names[0]);
-            }
-          }
-        });
-      }
-    },
-    [getMyNotes, noteNames, notesInitialLoad, selectedNoteName, loadingData]
-  );
-
-  const updateNote = useCallback(
-    (update) => {
-      let person = null;
-      if (update.updateData) {
-        person = update.updateData;
-      } else if (update.person) {
-        person = update.person;
-      } else {
-        person = update;
-      }
-      updateOneNoteRec({ person, delete: update.delete }, () => {
-        getMyNotes(selectedNoteName);
-      });
-    },
-    [getMyNotes, selectedNoteName]
-  );
-
-  const addNewNote = useCallback(
-    (newNote) => {
-      const usedNewNote = newNote;
-      if (selectedNoteName !== '') usedNewNote.note.createdBy = selectedNoteName;
-      let updatedNote: Note[] = [];
-
-      if (notes) {
-        updatedNote = [...notes, usedNewNote.note];
-      } else {
-        updatedNote = [usedNewNote.note];
-      }
-
-      if (searchTerm === '' || searchTerm === null) {
-        saveNewNote(usedNewNote.note);
-        if (updatedNote) setNotes(updatedNote);
-      } else {
-        alert('Cant update in search');
-      }
-    },
-    [notes, searchTerm, selectedNoteName]
-  );
-
-  const noteDetailSet = useCallback(
-    (msg) => {
-      if (msg.noteName) {
-        const { noteName } = msg;
-        setSelectedNoteName(noteName);
-        getMyNotes(noteName);
-      } else {
-        updateNote(msg);
-      }
-    },
-    [getMyNotes, setTheme, updateNote]
-  );
-
-  const checkLoginState = useCallback(() => {
-    const loginKey = localStorage.getItem('loginKey');
-    if (loginKey !== null) {
-      getNoteNamesHandler(loginKey);
-      getNotesOnLoad(loginKey, selectedNoteName);
-    }
-  }, [getNoteNamesHandler, getNotesOnLoad, setTheme, selectedNoteName]);
-
-  const menuButton = useCallback(
-    (event) => {
-      if (document.location.pathname.includes('note-names')) {
-        event.preventDefault();
-        window.history.back();
-        checkLoginState();
-        getLastPageData(true);
-      }
-    },
-    [checkLoginState]
-  );
-
-  useEffect(() => {
-    setRedirect();
-    const handleFocus = () => {
-      setRedirect();
-      const now = new Date().getTime();
-      if (!lastRefresh) {
-        setLastRefresh(now);
-        return;
-      }
-
-      const minTimeout = 1000 * 60 * 5;
-      if (lastRefresh + minTimeout < now && lastRefresh) {
-        setLastRefresh(now);
-        checkLoginState();
-        getLastPageData(true);
-      }
-    };
-
-    window.addEventListener('focus', handleFocus);
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-    };
-  }, [checkLoginState, lastRefresh, setRedirect]);
+  const { menuButton } = useNoteNavigation(checkLoginState, getLastPageData, setRedirect);
 
   useEffect(() => {
     const menuBtn = document.getElementById('menuButton');
@@ -272,103 +52,12 @@ const App: React.FC<AppProps> = ({
     }
   }, [loadingData, theme]);
 
-  const getLastPageData = (override: boolean = false) => {
-    if(loadingData) return;
-    if ((lastPage?.params.id && lastPage?.params.id !== selectedNoteName && selectedNoteName) || override) {
-      setLoadingData(true);
-      getNotesV2WithChildrenByParentId(lastPage?.params.id, (resp) => {
-        if (resp) bulkUpdatePerson(resp);
-        setLoadingData(false);
-      });
-    }
-  };
-
-  useEffect(() => {
-    sessionStorage.removeItem('loading');
-    checkLoginState();
-  }, []);
-
-  useEffect(() => {
-    if(isOnline && notesInitialLoad){
-      setTimeout(() => {
-        sessionStorage.removeItem('loading');
-        getLastPageData(true);
-      }, 3000);
-    }
-  }, [isOnline]);
-
-  useEffect(() => {
-    if (lastPage?.params.id && notesInitialLoad) {
-      getLastPageData(true);
-    }
-  }, [lastPage?.params.id, reloadLastPage]);
-
-  const themeBack = `${theme.toLowerCase()}-back`;
-
   return (
-    <Router>
-      <Suspense fallback={<div>Loading...</div>}>
-        <Switch>
-          <Route path="/login" render={() => <Login />} />
-          <ProtectedRoutes>
-            <>
-              <header>
-                <SearchBar set={setFilterNote} />
-                <nav className="bigScreen" id="links">
-                  <Link
-                    style={{ textDecoration: 'none' }}
-                    className={`dark-hover ${themeBack}`}
-                    onClick={(e) => menuButton(e)}
-                    id="menuButton"
-                    to="/notes/note-names"
-                  >
-                    <FontAwesomeIcon icon={faBars} />
-                  </Link>
-                </nav>
-              </header>
-              <Route exact path="/all" render={(props) => <Home {...props} searchTerm={searchTerm} notes={notes} />} />
-              <Route
-                exact
-                path="/index.html"
-                render={(props) => <NoteDetailPage searchTerm={searchTerm} {...props} set={noteDetailSet} />}
-              />
-              <Route
-                exact
-                path="/"
-                render={(props) => <NoteDetailPage searchTerm={searchTerm} {...props} set={noteDetailSet} />}
-              />
-              <Route
-                exact
-                path="/notes/:id"
-                render={(props) => <NoteDetailPage searchTerm={searchTerm} {...props} set={noteDetailSet} />}
-              />
-              <Route exact path="/new-note" render={() => <NewNote set={addNewNote} />} />
-              <Route exact path="/pomodoro" render={() => <Pomodoro />} />
-              <Route exact path="/memento" render={() => <Memento />} />
-            </>
-          </ProtectedRoutes>
-        </Switch>
-      </Suspense>
-    </Router>
+    <AppRoutes
+      setFilterNote={setFilterNote}
+      menuButton={menuButton}
+    />
   );
 };
 
-const mapStateToProps = (state: RootState) => ({
-  theme: state.theme.value,
-  notes: state.person.notes,
-  noteNames: state.person.noteNames,
-  selectedNoteName: state.person.selectedNoteName,
-  lastPage: state.person.pages.slice(-1)[0],
-  pages: state.person.pages,
-  reloadLastPage: state.person.reloadLastPage,
-});
-
-const mapDispatchToProps = {
-  setTheme,
-  setNotes,
-  setNoteNames,
-  setSelectedNoteName,
-  bulkUpdatePerson,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(App);
+export default AppContent;

@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`NoteDetailPage matches snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="slide-in"
+  >
+    <div
+      data-testid="back-button"
+    >
+      BackButton
+    </div>
+    <div
+      id="multiple-pages"
+    >
+      <div
+        data-testid="note-detail-page-item"
+      >
+        NoteDetailPageItem
+      </div>
+    </div>
+    <div
+      data-testid="scroll-buttons"
+    >
+      ScrollButtons
+    </div>
+  </div>
+</DocumentFragment>
+`;

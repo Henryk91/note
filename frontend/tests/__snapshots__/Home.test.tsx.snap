@@ -1,0 +1,87 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`Home matches snapshot loading 1`] = `
+<DocumentFragment>
+  <h3>
+    Loading notes...
+  </h3>
+</DocumentFragment>
+`;
+
+exports[`Home matches snapshot with data 1`] = `
+<DocumentFragment>
+  <div
+    id="home1"
+  >
+    <button
+      class="backButton dark-back"
+    >
+      <svg
+        aria-hidden="true"
+        class="svg-inline--fa fa-times fa-w-11 "
+        data-icon="times"
+        data-prefix="fas"
+        focusable="false"
+        role="img"
+        viewBox="0 0 352 512"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"
+          fill="currentColor"
+        />
+      </svg>
+    </button>
+    <div
+      class="detail-scroll"
+    >
+      <a
+        class="detailAddButton dark-hover dark-back"
+        href="/new-note/"
+        style="text-decoration: none;"
+      >
+        <svg
+          aria-hidden="true"
+          class="svg-inline--fa fa-plus fa-w-14 "
+          data-icon="plus"
+          data-prefix="fas"
+          focusable="false"
+          role="img"
+          viewBox="0 0 448 512"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M416 208H272V64c0-17.67-14.33-32-32-32h-32c-17.67 0-32 14.33-32 32v144H32c-17.67 0-32 14.33-32 32v32c0 17.67 14.33 32 32 32h144v144c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32V304h144c17.67 0 32-14.33 32-32v-32c0-17.67-14.33-32-32-32z"
+            fill="currentColor"
+          />
+        </svg>
+      </a>
+    </div>
+    <div
+      class="slide-in"
+    >
+      <div
+        class="page-content-top1"
+      />
+      <a
+        href="/notes/2"
+        style="text-decoration: none;"
+      >
+        <div
+          class="listNameButton dark-hover"
+        >
+          <div
+            class="listCountBox dark-border-thick"
+          >
+             0 
+          </div>
+          <h3>
+            Note 2
+          </h3>
+        </div>
+      </a>
+      <br />
+    </div>
+  </div>
+</DocumentFragment>
+`;

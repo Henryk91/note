@@ -1,0 +1,56 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EditNoteCheck matches snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="slide-in1"
+  >
+    <div
+      class="radioBox"
+    >
+      <label>
+        Note
+      </label>
+      <label>
+        Log
+      </label>
+      <label>
+        Link
+      </label>
+      <label>
+        Upload
+      </label>
+      <br />
+      <input
+        checked=""
+        name="tagType"
+        readonly=""
+        type="radio"
+        value="Note"
+      />
+      <input
+        name="tagType"
+        readonly=""
+        type="radio"
+        value="Log"
+      />
+      <input
+        id="linkRadio"
+        name="tagType"
+        readonly=""
+        type="radio"
+        value="Link"
+      />
+      <input
+        name="tagType"
+        readonly=""
+        type="radio"
+        value="Upload"
+      />
+    </div>
+    <div>
+      NewNoteField
+    </div>
+  </div>
+</DocumentFragment>
+`;

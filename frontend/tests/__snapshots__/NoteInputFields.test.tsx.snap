@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NoteInputFields NewNoteField matches snapshot 1`] = `
+<DocumentFragment>
+  <div>
+    <input
+      class="dark-back"
+      name="tagTypeText"
+      placeholder="Sub Heading"
+      type="text"
+      value=""
+    />
+    <br />
+    <input
+      class="dark-back input-div-text-area"
+      id="dynamic-text-area-a"
+      name="number"
+      placeholder="eg: Company, Note"
+      type="text"
+      value=""
+    />
+    <br />
+  </div>
+</DocumentFragment>
+`;

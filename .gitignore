@@ -24,3 +24,6 @@ yarn-error.log*
 .vscode
 dist
 
+
+*storybook.log
+storybook-static

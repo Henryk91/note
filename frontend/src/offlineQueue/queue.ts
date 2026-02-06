@@ -1,9 +1,7 @@
-import { apiFetch } from "../Helpers/apiFetch";
-import { db, QueuedRequest } from "./db";
+import { apiFetch } from '../shared/utils/Helpers/apiFetch';
+import { db, QueuedRequest } from './db';
 
-export async function enqueueRequest(
-  req: Omit<QueuedRequest, "id" | "createdAt">
-) {
+export async function enqueueRequest(req: Omit<QueuedRequest, 'id' | 'createdAt'>) {
   await db.requests.add({
     ...req,
     createdAt: Date.now(),
@@ -11,7 +9,7 @@ export async function enqueueRequest(
 }
 
 export async function getAllRequests() {
-  return db.requests.orderBy("createdAt").toArray();
+  return db.requests.orderBy('createdAt').toArray();
 }
 
 export async function deleteRequest(id: number) {
@@ -25,16 +23,13 @@ export async function sendOrQueueJSON<TResponse = unknown>(
   url: string,
   body: any,
   init?: {
-    method?: "POST" | "PUT" | "PATCH" | "DELETE";
+    method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE';
     headers?: Record<string, string>;
-  }
-): Promise<
-  | { queued: true; response?: undefined; error?: string }
-  | { queued: false; response: TResponse }
-> {
-  const method = init?.method ?? "POST";
+  },
+): Promise<{ queued: true; response?: undefined; error?: string } | { queued: false; response: TResponse }> {
+  const method = init?.method ?? 'POST';
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
     ...(init?.headers ?? {}),
   };
 

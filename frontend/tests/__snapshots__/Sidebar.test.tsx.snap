@@ -1,0 +1,165 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Sidebar matches snapshot 1`] = `
+<DocumentFragment>
+  <div>
+    <br />
+    <h3
+      class="page-content-top1"
+    >
+      Note Book Names
+    </h3>
+    <a
+      href="/notes/main"
+      style="text-decoration: none;"
+      title="Note List"
+    >
+      <div
+        class="listNameButton"
+      >
+        <h3>
+           Note1 
+        </h3>
+      </div>
+    </a>
+    <a
+      href="/notes/main"
+      style="text-decoration: none;"
+      title="Note List"
+    >
+      <div
+        class="listNameButton"
+      >
+        <h3>
+           Note2 
+        </h3>
+      </div>
+    </a>
+    <a
+      href="/notes/main"
+      style="text-decoration: none;"
+      title="Note List"
+    >
+      <div
+        class="listNameButton"
+      >
+        <h3>
+           All 
+        </h3>
+      </div>
+    </a>
+    <a
+      href="/notes/main"
+      style="text-decoration: none;"
+      title="Note List"
+    >
+      <div
+        class="listNameButton"
+      >
+        <h3>
+           None 
+        </h3>
+      </div>
+    </a>
+    <br />
+    <h3>
+      Apps
+    </h3>
+    <a
+      href="/memento"
+      style="text-decoration: none;"
+      title="Note List"
+    >
+      <div
+        class="listNameButton"
+      >
+        <h3>
+           Memento 
+        </h3>
+      </div>
+    </a>
+    <a
+      href="/pomodoro"
+      style="text-decoration: none;"
+      title="Note List"
+    >
+      <div
+        class="listNameButton"
+      >
+        <h3>
+           Pomodoro 
+        </h3>
+      </div>
+    </a>
+    <br />
+    <h3>
+      Themes
+    </h3>
+    <a
+      href="/notes/main"
+      style="text-decoration: none;"
+      title="Theme List"
+    >
+      <div
+        class="listNameButton"
+      >
+        <h3>
+           Red Theme 
+        </h3>
+      </div>
+    </a>
+    <a
+      href="/notes/main"
+      style="text-decoration: none;"
+      title="Theme List"
+    >
+      <div
+        class="listNameButton"
+      >
+        <h3>
+           Ocean Theme 
+        </h3>
+      </div>
+    </a>
+    <a
+      href="/notes/main"
+      style="text-decoration: none;"
+      title="Theme List"
+    >
+      <div
+        class="listNameButton"
+      >
+        <h3>
+           Green Theme 
+        </h3>
+      </div>
+    </a>
+    <a
+      href="/notes/main"
+      style="text-decoration: none;"
+      title="Theme List"
+    >
+      <div
+        class="listNameButton"
+      >
+        <h3>
+           Dark Theme 
+        </h3>
+      </div>
+    </a>
+    <a
+      href="/notes/main"
+      style="text-decoration: none;"
+      title="Theme List"
+    >
+      <div
+        class="listNameButton"
+      >
+        <h3>
+           Night Theme 
+        </h3>
+      </div>
+    </a>
+  </div>
+</DocumentFragment>
+`;

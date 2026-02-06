@@ -16,7 +16,7 @@ module.exports = {
     },
   },
   plugins: ['react', 'prettier', 'unused-imports'],
-  extends: ['airbnb', 'prettier'],
+  extends: ['airbnb', 'prettier', 'plugin:storybook/recommended'],
   settings: {
     'import/resolver': {
       node: {
