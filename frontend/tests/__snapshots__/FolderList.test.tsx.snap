@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`NoteDetailListItem matches snapshot 1`] = `
+exports[`FolderList matches snapshot 1`] = `
 <DocumentFragment>
   <div
-    class="detailTitleBox dark-hover undefined"
+    class="detailTitleBox dark-hover link-border"
   >
     <div
       class="listCountBox white-color dark-border-thick"
@@ -29,17 +29,16 @@ exports[`NoteDetailListItem matches snapshot 1`] = `
         </svg>
         <span
           class="list-count-folder-number"
-        />
+        >
+          5
+        </span>
       </span>
     </div>
     <h3
       class="detailBoxTitle white-color"
     >
-      &lt;NAME NOT SET&gt; 
+      Folder Name 
     </h3>
   </div>
-  <div
-    class="logToggleHeader detailTitleBox dark-hover undefined"
-  />
 </DocumentFragment>
 `;

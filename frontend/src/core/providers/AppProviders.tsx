@@ -14,7 +14,7 @@ export const AppProviders: React.FC<{ children: React.ReactNode }> = ({ children
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 5 * 60 * 1000, // 5 minutes
+            staleTime: 30 * 1000, // 30 seconds
             gcTime: 24 * 60 * 60 * 1000, // 24 hours (formerly cacheTime)
             retry: 1,
             refetchOnWindowFocus: true,

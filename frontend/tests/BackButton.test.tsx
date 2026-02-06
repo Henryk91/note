@@ -4,7 +4,7 @@ import { BackButton } from '../src/shared/components/atoms/BackButton';
 
 describe('BackButton', () => {
   test('matches snapshot', () => {
-    const { asFragment } = renderWithProviders(<BackButton hasPages={true} onBack={jest.fn()} onLogout={jest.fn()} />);
+    const { asFragment } = renderWithProviders(<BackButton />);
     expect(asFragment()).toMatchSnapshot();
   });
 });

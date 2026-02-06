@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`NoteDetailPage matches snapshot 1`] = `
 <DocumentFragment>
@@ -14,9 +14,33 @@ exports[`NoteDetailPage matches snapshot 1`] = `
       id="multiple-pages"
     >
       <div
-        data-testid="note-detail-page-item"
+        class="multiple-pages1"
+        style="min-width: 1024px;"
       >
-        NoteDetailPageItem
+        <div
+          class="slide-in"
+        >
+          <div
+            class=" note-detail-item"
+            id=""
+          >
+            <div
+              class="page-content-top1"
+              id="personContainer"
+            >
+              <h1
+                class="nameBox"
+                id="personHead"
+              >
+                &lt;NAME NOT SET&gt;
+              </h1>
+            </div>
+            <div
+              class="detailedBox"
+            />
+            <br />
+          </div>
+        </div>
       </div>
     </div>
     <div

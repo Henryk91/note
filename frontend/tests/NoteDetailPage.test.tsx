@@ -5,6 +5,7 @@ import * as useNotesQueries from '../src/features/notes/hooks/useNotesQueries';
 
 jest.mock('../src/features/notes/hooks/useNotesQueries', () => ({
   useNoteNames: jest.fn(),
+  useNotesWithChildren: jest.fn(() => ({ data: { notes: {} }, isLoading: false })),
 }));
 
 jest.mock('../src/shared/components/organisms/Sidebar', () => ({
@@ -26,13 +27,7 @@ describe('NoteDetailPage', () => {
       isLoading: false,
     });
 
-    const props = {
-      set: jest.fn(),
-      searchTerm: '',
-      match: { url: '/notes/1', params: {}, isExact: true, path: '' },
-    } as any;
-
-    const { asFragment } = renderWithProviders(<NoteDetailPage {...props} />);
+    const { asFragment } = renderWithProviders(<NoteDetailPage />);
     expect(asFragment()).toMatchSnapshot();
   });
 });

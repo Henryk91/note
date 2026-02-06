@@ -4,7 +4,7 @@ import { ScrollButtons } from '../src/features/notes/components/ScrollButtons';
 
 describe('ScrollButtons', () => {
   test('matches snapshot', () => {
-    const { asFragment } = renderWithProviders(<ScrollButtons showBackButton={true} />);
+    const { asFragment } = renderWithProviders(<ScrollButtons />);
     expect(asFragment()).toMatchSnapshot();
   });
 });

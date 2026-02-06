@@ -5,7 +5,22 @@ exports[`NoteItem matches snapshot 1`] = `
   <div>
     <div
       class="noteTagBox"
-    />
+    >
+      <div
+        class="noteItemBox"
+      >
+        <div
+          class="logLine"
+        >
+          <div
+            class="noteItem white-color"
+          >
+            Test Data
+          </div>
+        </div>
+        <hr />
+      </div>
+    </div>
   </div>
 </DocumentFragment>
 `;

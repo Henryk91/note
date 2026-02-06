@@ -6,9 +6,24 @@ exports[`NoteDetail matches snapshot 1`] = `
     class="slide-in"
   >
     <div
-      data-testid="page-content"
+      class=" note-detail-item"
+      id=""
     >
-      PageContent
+      <div
+        class="page-content-top1"
+        id="personContainer"
+      >
+        <h1
+          class="nameBox"
+          id="personHead"
+        >
+          main
+        </h1>
+      </div>
+      <div
+        class="detailedBox"
+      />
+      <br />
     </div>
   </div>
 </DocumentFragment>

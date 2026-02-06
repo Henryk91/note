@@ -34,7 +34,7 @@ export function useNotes(parentId?: string, enabled: boolean = true) {
   return useQuery({
     queryKey: notesKeys.list(parentId),
     queryFn: () => notesApi.getNotesByParentId(parentId),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 30 * 1000, // 30 seconds
     enabled: enabled && !!parentId,
   });
 }

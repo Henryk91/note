@@ -30,13 +30,10 @@ describe('NoteItem', () => {
 
     const props = {
       item: { id: '1', content: { data: 'Test', date: '2021-01-01' } },
-      date: '2021-01-01',
       show: true,
       index: 0,
       type: 'Note',
       set: jest.fn(),
-      count: 1,
-      cont: jest.fn(),
     } as any;
 
     const { asFragment } = renderWithProviders(<NoteItem {...props} />);

@@ -8,12 +8,7 @@ jest.mock('../src/features/notes/components/EditNoteCheck/NoteInputFields', () =
 
 describe('NewNote', () => {
   test('matches snapshot', () => {
-    const props = {
-      addNewNote: jest.fn(),
-      searchTerm: '',
-      set: jest.fn(),
-    };
-    const { asFragment } = renderWithProviders(<NewNote {...props} />);
+    const { asFragment } = renderWithProviders(<NewNote />);
     expect(asFragment()).toMatchSnapshot();
   });
 });

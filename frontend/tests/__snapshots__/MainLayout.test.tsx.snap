@@ -40,7 +40,7 @@ exports[`MainLayout matches snapshot 1`] = `
       id="links"
     >
       <a
-        class="dark-hover light-back"
+        class="dark-hover dark-back"
         href="/notes/note-names"
         id="menuButton"
         style="text-decoration: none;"

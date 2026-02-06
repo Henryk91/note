@@ -5,7 +5,7 @@ import { MainLayout } from '../src/layouts/MainLayout';
 describe('MainLayout', () => {
   test('matches snapshot', () => {
     const { asFragment } = renderWithProviders(
-      <MainLayout theme="Light" setFilterNote={() => {}} menuButton={() => {}}>
+      <MainLayout setFilterNote={() => {}} menuButton={() => {}}>
         <div data-testid="child">Child Content</div>
       </MainLayout>,
     );

@@ -7,17 +7,21 @@ jest.mock('../src/features/notes/hooks/useNoteDetailLogic', () => ({
   useNoteDetailLogic: jest.fn(),
 }));
 
-jest.mock('../src/features/notes/components/NoteDetail/../NoteItem/NoteItem', () => () => <div data-testid="note-item">NoteItem</div>);
+jest.mock('../src/features/notes/components/NoteDetail/../NoteItem/NoteItem', () => () => (
+  <div data-testid="note-item">NoteItem</div>
+));
 jest.mock('../src/features/notes/components/NoteDetail/forms', () => ({
-  NoteDetailListItem: () => <div data-testid="note-detail-list-item">NoteDetailListItem</div>,
+  FolderList: () => <div data-testid="folder-list">FolderList</div>,
+  AddItemForm: () => <div data-testid="add-item-form">AddItemForm</div>,
+  EditNameForm: () => <div data-testid="edit-name-form">EditNameForm</div>,
 }));
 
 describe('NoteDetail', () => {
   test('matches snapshot', () => {
     (useNoteDetailLogic.useNoteDetailLogic as jest.Mock).mockReturnValue({
-      person: { id: '1', dataLable: [] },
+      person: { id: '1', dataLable: [], heading: 'Test Heading' },
       persons: {},
-      addLable: [],
+      addLabel: [],
       displayDate: '2021-01-01',
       continueData: null,
       showLogDaysBunch: false,
@@ -41,18 +45,7 @@ describe('NoteDetail', () => {
       cancelAddItemEdit: jest.fn(),
     });
 
-    const props = {
-      searchTerm: '',
-      set: jest.fn(),
-      openPage: jest.fn(),
-      lastPage: true,
-      showAddItem: false,
-      pageCount: 1,
-      match: { params: { id: '1' }, url: '/notes/1', isExact: true, path: '/notes/:id' },
-      initShowtag: 'Note' as any,
-    } as any;
-
-    const { asFragment } = renderWithProviders(<NoteDetail {...props} />);
+    const { asFragment } = renderWithProviders(<NoteDetail index={0} />);
     expect(asFragment()).toMatchSnapshot();
   });
 });

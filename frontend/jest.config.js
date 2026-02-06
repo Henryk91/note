@@ -13,7 +13,8 @@ module.exports = {
   testEnvironmentOptions: {
     url: 'http://localhost',
   },
-  transformIgnorePatterns: ['<rootDir>/node_modules/(?!@fortawesome)'],
+  setupFilesAfterEnv: ['<rootDir>/tests/setupTests.ts'],
+  transformIgnorePatterns: ['<rootDir>/node_modules/(?!(@fortawesome|marked))'],
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
