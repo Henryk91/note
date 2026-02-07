@@ -36,22 +36,21 @@ const Home: React.FC<HomeProps> = () => {
   const selectedNoteName = useSelector((state: RootState) => state.person.selectedNoteName);
   const theme = useSelector((state: RootState) => state.theme.themeLower);
 
-  const { data: notesData, isLoading } = useNotesWithChildren(selectedNoteName || undefined, !!selectedNoteName);
+  const { isLoading } = useNotesWithChildren(selectedNoteName || undefined, !!selectedNoteName);
+  const byId = useSelector((state: RootState) => state.person.byId);
 
   const notes = React.useMemo(() => {
-    if (!notesData?.notes || !selectedNoteName) return null;
-
-    const notesMap = (notesData as any).notes;
+    if (!byId || !selectedNoteName) return null;
 
     // If the notebook itself is in the data, its dataLable contains the immediate children
-    if (notesMap[selectedNoteName]) {
-      const parentNode = notesMap[selectedNoteName];
+    if (byId[selectedNoteName]) {
+      const parentNode = byId[selectedNoteName];
       if (parentNode.dataLable && parentNode.dataLable.length > 0) {
         return parentNode.dataLable.map((item: any) => {
           // If the child is already a full note in the map, use it.
           // Otherwise, create a placeholder Note object for createList.
           return (
-            notesMap[item.id] || {
+            byId[item.id] || {
               id: item.id,
               heading: item.name || item.content?.data || 'Unnamed',
               dataLable: [],
@@ -61,12 +60,12 @@ const Home: React.FC<HomeProps> = () => {
       }
     }
 
-    const allNotes = Object.values(notesMap) as Note[];
+    const allNotes = Object.values(byId) as Note[];
 
     // Safety check: Filter for valid notes that have a heading and are not the parent itself
     let filtered = allNotes.filter((n) => n.id !== selectedNoteName && (n.heading || n.dataLable));
     return filtered.length > 0 ? filtered : null;
-  }, [notesData, selectedNoteName]);
+  }, [byId, selectedNoteName]);
 
   // Safely wrap createList call with the new memoized notes
   const listItems = React.useMemo(() => {

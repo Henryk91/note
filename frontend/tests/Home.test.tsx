@@ -22,20 +22,22 @@ describe('Home', () => {
     (useNotesQueries.useNotesWithChildren as jest.Mock).mockReturnValue({
       data: {
         notes: {
-          '1': { id: '1', heading: 'Note 1', dataLable: [] },
+          '1': { id: '1', heading: 'Note 1', dataLable: [{ id: '2', name: 'Note 2' }] },
           '2': { id: '2', heading: 'Note 2', dataLable: [] },
         },
       },
       isLoading: false,
     });
-    // Mock state for selectedNoteName if needed, but renderWithProviders uses default state.
-    // If Home relies on selectedState, we should pass preloadedState.
+
     const { asFragment } = renderWithProviders(<Home />, {
       preloadedState: {
         person: {
-          selectedNoteName: '1', // Needs careful matching with store type
-          // Add other required properties for person slice if '1' is not enough
-        } as any, // quick fix for type complexity in test, refine later
+          selectedNoteName: '1',
+          byId: {
+            '1': { id: '1', heading: 'Note 1', dataLable: [{ id: '2', name: 'Note 2' }] },
+            '2': { id: '2', heading: 'Note 2', dataLable: [] },
+          },
+        } as any,
       },
     });
     expect(asFragment()).toMatchSnapshot();

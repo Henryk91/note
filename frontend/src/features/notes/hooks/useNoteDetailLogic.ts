@@ -10,9 +10,15 @@ import {
   setShowTag,
   triggerLastPageReload,
 } from '../../../features/auth/store/personSlice';
-import { addFolder, addItem, deleteItem, updateItem } from '../../../shared/utils/Helpers/crud';
-import { KeyValue, Note, NoteContent, NoteItemType, PageDescriptor } from '../../../shared/utils/Helpers/types';
-import { useNotesWithChildren } from './useNotesQueries';
+import {
+  KeyValue,
+  Note,
+  NoteContent,
+  NoteItemType,
+  PageDescriptor,
+  ItemType,
+} from '../../../shared/utils/Helpers/types';
+import { useCreateNote, useDeleteNote, useUpdateNote } from './useNotesQueries';
 
 export type LogDay = { date: string; count: number };
 
@@ -20,29 +26,22 @@ type UseNoteDetailLogicProps = {
   searchTerm?: string;
   isLastPage: boolean;
   editName?: boolean;
-  index: number
+  index: number;
 };
 
-export const useNoteDetailLogic = ({
-  searchTerm,
-  isLastPage,
-  editName,
-  index,
-}: UseNoteDetailLogicProps) => {
+export const useNoteDetailLogic = ({ searchTerm, isLastPage, editName, index }: UseNoteDetailLogicProps) => {
   const dispatch = useDispatch();
   const loginKey = typeof window !== 'undefined' ? localStorage.getItem('loginKey') : null;
   const isLoggedIn = !!loginKey;
   const { pages, showTag, selectedNoteName, byId } = useSelector((state: RootState) => state.person);
 
-  const pageLink = pages[index];
-  // Fetch data using TanStack Query instead of Redux
-  const { data: notesData } = useNotesWithChildren(
-    pageLink?.params.id,
-    isLoggedIn && !!pageLink?.params.id,
-  );
+  const createNoteMutation = useCreateNote();
+  const updateNoteMutation = useUpdateNote();
+  const deleteNoteMutation = useDeleteNote();
 
-  const tanStackPerson = notesData ? (notesData as any).notes?.[pageLink?.params.id] || (notesData as any).person : null;
-  const person = byId ? byId?.[pageLink?.params.id] || tanStackPerson : null;
+  const pageLink = pages[index];
+
+  const person = byId?.[pageLink?.params.id] || null;
   const persons = byId;
 
   const [addLabel, setAddLabel] = useState<any>(null);
@@ -128,59 +127,59 @@ export const useNoteDetailLogic = ({
   // Yes, it strictly checks 'Log Days'.
 
   const openPage = useCallback(
-      (msg: any) => {
-        if (!msg.personNext) return;
-  
-        const heading = msg.personNext.heading || msg.personNext.name || msg.personNext.id;
-        const tempId = `${msg.personNext.id}-${heading}`;
-        const nextPage: PageDescriptor = { params: { id: msg.personNext.id, tempId } };
-  
-        const pageFoundIndex = pages.findIndex((page) => page.params.id === msg.personNext.id);
-  
-        // If page is not found, add it to the stack
-        if (pageFoundIndex === -1) {
-          // If we are coming from a parent, we might want to truncate the stack to that parent
-          const parentPageIndex = pages.findIndex((page) => page.params.id === msg.parentId);
-          let basePages = pages;
-          if (parentPageIndex > -1) {
-            basePages = pages.slice(0, parentPageIndex + 1);
-          }
-  
-          const newPages =
-            basePages.length === 1 && basePages[0].params.id === '' ? [nextPage] : [...basePages, nextPage];
-  
-          dispatch(setPages(newPages));
-  
-          // Scroll to the new page after a short delay to allow DOM to update
-          const noteDetailPage = document.getElementById('multiple-pages');
-          if (noteDetailPage) {
-            const scrollOptions: ScrollToOptions = {
-              left: noteDetailPage.scrollWidth,
-              behavior: 'smooth',
-            };
-            noteDetailPage.scrollTo(scrollOptions);
-  
-            // Fallback for slower DOM updates: try again after a bit more time
-            setTimeout(() => {
-              if (noteDetailPage.scrollLeft < noteDetailPage.scrollWidth - noteDetailPage.clientWidth) {
-                noteDetailPage.scrollTo(scrollOptions);
-              }
-            }, 20);
-          }
-        } else {
-          // Page found - just scroll to it
-          const noteDetailPage = document.getElementById('multiple-pages');
-          if (noteDetailPage) {
-            const pageWidth = noteDetailPage.scrollWidth / pages.length;
-            noteDetailPage.scrollTo({
-              left: pageWidth * pageFoundIndex,
-              behavior: 'smooth',
-            });
-          }
+    (msg: any) => {
+      if (!msg.personNext) return;
+
+      const heading = msg.personNext.heading || msg.personNext.name || msg.personNext.id;
+      const tempId = `${msg.personNext.id}-${heading}`;
+      const nextPage: PageDescriptor = { params: { id: msg.personNext.id, tempId } };
+
+      const pageFoundIndex = pages.findIndex((page) => page.params.id === msg.personNext.id);
+
+      // If page is not found, add it to the stack
+      if (pageFoundIndex === -1) {
+        // If we are coming from a parent, we might want to truncate the stack to that parent
+        const parentPageIndex = pages.findIndex((page) => page.params.id === msg.parentId);
+        let basePages = pages;
+        if (parentPageIndex > -1) {
+          basePages = pages.slice(0, parentPageIndex + 1);
         }
-      },
-      [pages, dispatch],
-    );
+
+        const newPages =
+          basePages.length === 1 && basePages[0].params.id === '' ? [nextPage] : [...basePages, nextPage];
+
+        dispatch(setPages(newPages));
+
+        // Scroll to the new page after a short delay to allow DOM to update
+        const noteDetailPage = document.getElementById('multiple-pages');
+        if (noteDetailPage) {
+          const scrollOptions: ScrollToOptions = {
+            left: noteDetailPage.scrollWidth,
+            behavior: 'smooth',
+          };
+          noteDetailPage.scrollTo(scrollOptions);
+
+          // Fallback for slower DOM updates: try again after a bit more time
+          setTimeout(() => {
+            if (noteDetailPage.scrollLeft < noteDetailPage.scrollWidth - noteDetailPage.clientWidth) {
+              noteDetailPage.scrollTo(scrollOptions);
+            }
+          }, 20);
+        }
+      } else {
+        // Page found - just scroll to it
+        const noteDetailPage = document.getElementById('multiple-pages');
+        if (noteDetailPage) {
+          const pageWidth = noteDetailPage.scrollWidth / pages.length;
+          noteDetailPage.scrollTo({
+            left: pageWidth * pageFoundIndex,
+            behavior: 'smooth',
+          });
+        }
+      }
+    },
+    [pages, dispatch],
+  );
 
   const openDetailOnNewPage = useCallback(
     (personParam: Note | null) => {
@@ -277,9 +276,11 @@ export const useNoteDetailLogic = ({
       const noteItem = dataLable.find((item) => item.id === val.oldItem.id);
       if (!noteItem) return;
       if (val.delete) {
-        deleteItem(noteItem, () => {
-          if (val.type === 'Log') dispatch(removePersonById({ id: noteItem.parentId }));
-          dispatch(triggerLastPageReload());
+        deleteNoteMutation.mutate(noteItem as any, {
+          onSuccess: () => {
+            if (val.type === 'Log') dispatch(removePersonById({ id: noteItem.parentId }));
+            dispatch(triggerLastPageReload());
+          },
         });
         return;
       }
@@ -289,8 +290,10 @@ export const useNoteDetailLogic = ({
         content: noteItem?.content ? { ...val.item } : val.item,
       };
 
-      updateItem(updatedItem, () => {
-        dispatch(triggerLastPageReload());
+      updateNoteMutation.mutate(updatedItem as any, {
+        onSuccess: () => {
+          dispatch(triggerLastPageReload());
+        },
       });
     },
     [person, persons, dispatch],
@@ -311,23 +314,68 @@ export const useNoteDetailLogic = ({
       const heading = e.target.heading.value;
 
       const parentId = pages[pages.length - 2]?.params?.id;
-      let currentNote = { ...persons[parentId]?.dataLable?.find((d) => d.id === person?.id) };
+      let currentNote = persons[parentId]?.dataLable?.find((d) => d.id === person?.id);
+      if (currentNote) {
+        currentNote = { ...currentNote };
+      }
 
       dispatch(setEditName(false));
       if (currentNote && currentNote.name !== heading) {
-        currentNote.name = heading;
-        updateItem(currentNote as NoteItemType, () => {
-          dispatch(triggerLastPageReload());
+        const noteToUpdate = {
+          ...currentNote,
+          heading: heading,
+          name: heading,
+          dataLable: persons[currentNote.id]?.dataLable || [],
+          // noteToUpdate is passed to updateNoteMutation which optimistically updates 'persons[id]'.
+          // We must include existing dataLable to avoid wiping children.
+        };
+
+        // Snapshot state for rollback
+        const originalParentNote = persons[parentId];
+        const originalShowTag = showTag;
+
+        // Optimistic Update: Parent's dataLable
+        if (originalParentNote && originalParentNote.dataLable) {
+          const updatedDataLable = originalParentNote.dataLable.map((item) => {
+            if (item.id === currentNote.id) {
+              return { ...item, name: heading, heading: heading };
+            }
+            return item;
+          });
+          const updatedParent = { ...originalParentNote, dataLable: updatedDataLable };
+          dispatch(setPersonById({ id: parentId, person: updatedParent as any }));
+        }
+
+        // Optimistic Update: showTag
+        if (showTag === currentNote.name || showTag === currentNote.heading) {
+          dispatch(setShowTag(heading));
+        }
+
+        updateNoteMutation.mutate(noteToUpdate as any, {
+          onSuccess: () => {
+            dispatch(triggerLastPageReload());
+          },
+          onError: () => {
+            // Rollback
+            if (originalParentNote) {
+              dispatch(setPersonById({ id: parentId, person: originalParentNote }));
+            }
+            if (originalShowTag) {
+              dispatch(setShowTag(originalShowTag));
+            }
+          },
         });
       }
 
       if (e.nativeEvent.submitter.value === 'delete' && currentNote) {
         if (confirm('Are you sure you want to permanently delete this folder?')) {
           // Note: Original code had a commented out scroll back hack or similar
-          deleteItem(currentNote as NoteItemType, () => {
-            if (person) {
-              openPage({ personNext: { id: person.id }, parentId: person.id, hideNote: true });
-            }
+          deleteNoteMutation.mutate(currentNote as any, {
+            onSuccess: () => {
+              if (person) {
+                openPage({ personNext: { id: person.id }, parentId: person.id, hideNote: true });
+              }
+            },
           });
         }
       }
@@ -353,15 +401,37 @@ export const useNoteDetailLogic = ({
       }
 
       if (tag === 'Link') {
-        addFolder(textTag, currentPerson.id, (data) => {
-          setAddLabel(null);
-          dispatch(setShowAddItem(false));
-          if (data?.parentId === currentPerson.id) {
-            const updated = { ...currentPerson, dataLable: [...currentPerson.dataLable, data] };
-            dispatch(setPersonById({ id: `${currentPerson.id}`, person: updated }));
-          } else {
-            dispatch(triggerLastPageReload());
-          }
+        // Logic for adding folder (Link)
+        const newItem: NoteItemType = {
+          id: currentPerson.id + '::' + ItemType.FOLDER + '::' + Date.now().toString(),
+          name: textTag.trim(),
+          parentId: currentPerson.id,
+          type: ItemType.FOLDER,
+          heading: textTag.trim(),
+          content: { data: '' },
+        };
+
+        // Optimistic Update: Append to parent's dataLable
+        const updatedParent = {
+          ...currentPerson,
+          dataLable: [...(currentPerson.dataLable || []), newItem],
+        };
+        dispatch(setPersonById({ id: currentPerson.id, person: updatedParent }));
+
+        createNoteMutation.mutate(newItem as any, {
+          onSuccess: (data) => {
+            setAddLabel(null);
+            dispatch(setShowAddItem(false));
+            if (!(data as any)?.parentId || (data as any)?.parentId !== currentPerson?.id) {
+              dispatch(triggerLastPageReload());
+            }
+          },
+          onError: () => {
+            // Rollback
+            if (currentPerson) {
+              dispatch(setPersonById({ id: currentPerson.id, person: currentPerson }));
+            }
+          },
         });
         return;
       }
@@ -371,15 +441,35 @@ export const useNoteDetailLogic = ({
       if (tag === 'Log') content.date = textTag;
       dispatch(setShowAddItem(false));
 
-      addItem(content, currentPerson.id, (data) => {
-        setAddLabel(null);
+      const noteType = content.date ? ItemType.LOG : ItemType.NOTE;
+      const newItem: NoteItemType = {
+        id: currentPerson.id + '::' + noteType + '::' + Date.now().toString(),
+        content: content,
+        parentId: currentPerson.id,
+        type: noteType,
+        heading: '',
+      };
 
-        if (data?.parentId === currentPerson.id) {
-          const updated = { ...currentPerson, dataLable: [...currentPerson.dataLable, data] };
-          dispatch(setPersonById({ id: `${currentPerson.id}`, person: updated }));
-        } else {
-          if (data) dispatch(triggerLastPageReload());
-        }
+      // Optimistic Update: Append to parent's dataLable
+      const updatedParent = {
+        ...currentPerson,
+        dataLable: [...(currentPerson.dataLable || []), newItem],
+      };
+      dispatch(setPersonById({ id: currentPerson.id, person: updatedParent }));
+
+      createNoteMutation.mutate(newItem as any, {
+        onSuccess: (data) => {
+          setAddLabel(null);
+          if (!(data as any)?.parentId || (data as any)?.parentId !== currentPerson?.id) {
+            dispatch(triggerLastPageReload());
+          }
+        },
+        onError: () => {
+          // Rollback
+          if (currentPerson) {
+            dispatch(setPersonById({ id: currentPerson.id, person: currentPerson }));
+          }
+        },
       });
     },
     [person, dispatch],
@@ -427,7 +517,7 @@ export const useNoteDetailLogic = ({
   }, [dispatch]);
 
   const initLogDayMap = useCallback(() => {
-    const logItem = person?.dataLable.find((item) => item.name === 'Log');
+    const logItem = person?.dataLable?.find((item) => item.name === 'Log');
     if (!logItem) return 0;
 
     let allDates = getDataLableFilteredAndSorted(persons?.[logItem.id]?.dataLable, 'Log', searchTermState);

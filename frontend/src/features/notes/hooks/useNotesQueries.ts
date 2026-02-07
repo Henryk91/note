@@ -4,8 +4,8 @@ import { Note } from '../../../shared/utils/Helpers/types';
 import { toastNotifications, formatApiError } from '../../../shared/utils/toast';
 import { processGetAllNotes, allNotesToItems } from '../../../shared/utils/Helpers/utils';
 import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { setByIdState } from '../../auth/store/personSlice';
+import { useDispatch, useStore } from 'react-redux';
+import { setByIdState, setPersonById, removePersonById } from '../../auth/store/personSlice';
 
 /**
  * Query Keys - Hierarchical structure for easy cache invalidation
@@ -117,10 +117,10 @@ export function useNotesWithChildren(parentId?: string, enabled: boolean = true)
           if (isLog) logFolder = item;
           return !isLog;
         });
-        if(logFolder !== null) {
+        if (logFolder !== null) {
           notesMap[key].dataLable.unshift(logFolder); // Ensure Log folder is always first
         }
-      })
+      });
       return {
         notes: notesMap,
         rawData,
@@ -163,16 +163,32 @@ export function useNoteNames(enabled: boolean = true) {
  */
 export function useCreateNote() {
   const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const store = useStore();
 
   return useMutation({
     mutationFn: notesApi.createNote,
-    onSuccess: () => {
-      toastNotifications.success('Note created successfully');
-      // Invalidate all note lists to refetch with new note
+    onMutate: async (newNote: any) => {
+      // Optimistic update
+      if (newNote && newNote.id) {
+        const noteToStore = { ...newNote, dataLable: newNote.dataLable || [] };
+        dispatch(setPersonById({ id: newNote.id, person: noteToStore }));
+      }
+      return { tempId: newNote.id };
+    },
+    onSuccess: (newNote) => {
+      // Sync with server response
+      if (newNote && newNote.id) {
+        dispatch(setPersonById({ id: newNote.id, person: newNote }));
+      }
       queryClient.invalidateQueries({ queryKey: notesKeys.lists() });
       queryClient.invalidateQueries({ queryKey: notesKeys.all });
     },
-    onError: (error) => {
+    onError: (error, _newNote, context) => {
+      // Rollback
+      if ((context as any)?.tempId) {
+        dispatch(removePersonById({ id: (context as any).tempId }));
+      }
       const message = formatApiError(error);
       toastNotifications.error(`Failed to create note: ${message}`);
       console.error('Failed to create note:', error);
@@ -187,20 +203,40 @@ export function useCreateNote() {
  */
 export function useUpdateNote() {
   const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const store = useStore();
 
   return useMutation({
     mutationFn: notesApi.updateNote,
+    onMutate: async (updatedNote: any) => {
+      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({ queryKey: notesKeys.detail(updatedNote.id) });
+
+      // Snapshot the previous value
+      const previousNote = (store.getState() as any).person.byId[updatedNote.id];
+
+      // Optimistic update
+      if (updatedNote && updatedNote.id) {
+        dispatch(setPersonById({ id: updatedNote.id, person: updatedNote }));
+      }
+
+      return { previousNote };
+    },
     onSuccess: (updatedNote) => {
-      toastNotifications.success('Note updated successfully');
-      // Invalidate specific note detail
+      if (updatedNote && updatedNote.id) {
+        dispatch(setPersonById({ id: updatedNote.id, person: updatedNote }));
+      }
       if (updatedNote.id) {
         queryClient.invalidateQueries({ queryKey: notesKeys.detail(updatedNote.id) });
       }
-      // Invalidate all lists to show updated data
       queryClient.invalidateQueries({ queryKey: notesKeys.lists() });
       queryClient.invalidateQueries({ queryKey: notesKeys.all });
     },
-    onError: (error) => {
+    onError: (error, _updatedNote, context) => {
+      // Rollback
+      if ((context as any)?.previousNote) {
+        dispatch(setPersonById({ id: (context as any).previousNote.id, person: (context as any).previousNote }));
+      }
       const message = formatApiError(error);
       toastNotifications.error(`Failed to update note: ${message}`);
       console.error('Failed to update note:', error);
@@ -215,16 +251,35 @@ export function useUpdateNote() {
  */
 export function useDeleteNote() {
   const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const store = useStore();
 
   return useMutation({
     mutationFn: notesApi.deleteNote,
-    onSuccess: () => {
-      toastNotifications.success('Note deleted successfully');
-      // Invalidate all note lists to remove deleted note
+    onMutate: async (noteToDelete: any) => {
+      // Snapshot the previous value
+      const previousNote = (store.getState() as any).person.byId[noteToDelete.id] || noteToDelete;
+
+      // Optimistic update
+      if (noteToDelete && noteToDelete.id) {
+        dispatch(removePersonById({ id: noteToDelete.id }));
+      }
+
+      return { previousNote };
+    },
+    onSuccess: (_, deletedNote) => {
+      // Ensure it's removed (idempotent)
+      if (deletedNote && deletedNote.id) {
+        dispatch(removePersonById({ id: deletedNote.id }));
+      }
       queryClient.invalidateQueries({ queryKey: notesKeys.lists() });
       queryClient.invalidateQueries({ queryKey: notesKeys.all });
     },
-    onError: (error) => {
+    onError: (error, _noteToDelete, context) => {
+      // Rollback
+      if ((context as any)?.previousNote) {
+        dispatch(setPersonById({ id: (context as any).previousNote.id, person: (context as any).previousNote }));
+      }
       const message = formatApiError(error);
       toastNotifications.error(`Failed to delete note: ${message}`);
       console.error('Failed to delete note:', error);
