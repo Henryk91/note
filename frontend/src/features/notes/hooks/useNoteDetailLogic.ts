@@ -442,37 +442,60 @@ export const useNoteDetailLogic = ({ searchTerm, isLastPage, editName, index }: 
       dispatch(setShowAddItem(false));
 
       const noteType = content.date ? ItemType.LOG : ItemType.NOTE;
+
+      // Check for existing Log folder
+      const logFolder = currentPerson.dataLable?.find((item) => item.name === 'Log' && item.type === ItemType.FOLDER);
+
+      let targetParentId = currentPerson.id;
+      let originalLogFolder: any = null;
+
+      if (logFolder && noteType === ItemType.LOG) {
+        targetParentId = logFolder.id;
+        originalLogFolder = persons?.[logFolder.id] || logFolder;
+      }
+
       const newItem: NoteItemType = {
-        id: currentPerson.id + '::' + noteType + '::' + Date.now().toString(),
+        id: targetParentId + '::' + noteType + '::' + Date.now().toString(),
         content: content,
-        parentId: currentPerson.id,
+        parentId: targetParentId,
         type: noteType,
         heading: '',
       };
 
-      // Optimistic Update: Append to parent's dataLable
-      const updatedParent = {
-        ...currentPerson,
-        dataLable: [...(currentPerson.dataLable || []), newItem],
-      };
-      dispatch(setPersonById({ id: currentPerson.id, person: updatedParent }));
+      if (logFolder && noteType === ItemType.LOG && originalLogFolder) {
+        // Optimistic Update: Append to Log Folder
+        const updatedLogFolder = {
+          ...originalLogFolder,
+          dataLable: [...(originalLogFolder.dataLable || []), newItem],
+        };
+        dispatch(setPersonById({ id: targetParentId, person: updatedLogFolder as any }));
+      } else {
+        // Optimistic Update: Append to parent
+        const updatedParent = {
+          ...currentPerson,
+          dataLable: [...(currentPerson.dataLable || []), newItem],
+        };
+        dispatch(setPersonById({ id: currentPerson.id, person: updatedParent }));
+      }
 
       createNoteMutation.mutate(newItem as any, {
         onSuccess: (data) => {
           setAddLabel(null);
-          if (!(data as any)?.parentId || (data as any)?.parentId !== currentPerson?.id) {
+          if (!(data as any)?.parentId || (data as any)?.parentId !== targetParentId) {
             dispatch(triggerLastPageReload());
           }
         },
         onError: () => {
           // Rollback
-          if (currentPerson) {
+          if (logFolder && noteType === ItemType.LOG && originalLogFolder) {
+            dispatch(setPersonById({ id: targetParentId, person: originalLogFolder as any }));
+          } else if (currentPerson) {
             dispatch(setPersonById({ id: currentPerson.id, person: currentPerson }));
           }
         },
       });
     },
-    [person, dispatch],
+    [person, persons, dispatch],
   );
 
   const dateBackForward = useCallback(
