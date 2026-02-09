@@ -7,8 +7,7 @@ import { RootState } from '../../../core/store';
 import { setEditName, setShowAddItem } from '../../../features/auth/store/personSlice';
 import { useOnlineStatus } from '../../../shared/hooks/useOnlineStatus';
 
-export type ScrollButtonsProps = {
-};
+export type ScrollButtonsProps = {};
 
 export const ScrollButtons: React.FC<ScrollButtonsProps> = ({}) => {
   const isOnline = useOnlineStatus();
@@ -42,7 +41,13 @@ export const ScrollButtons: React.FC<ScrollButtonsProps> = ({}) => {
       <div
         className={`detailUpButton ${themeHover} ${themeBack}`}
         onClick={() => {
-          window.scrollTo(0, 0);
+          // Find the active slide's scrollable container
+          const activeSlide = document.querySelector('.swiper-slide-active .scrollable-content');
+          if (activeSlide) {
+            activeSlide.scrollTo({ top: 0 });
+          } else {
+            window.scrollTo(0, 0);
+          }
         }}
       >
         <FontAwesomeIcon icon={faArrowUp} size="lg" />
@@ -50,7 +55,12 @@ export const ScrollButtons: React.FC<ScrollButtonsProps> = ({}) => {
       <div
         className={`detailUpButton ${themeHover} ${themeBack}`}
         onClick={() => {
-          window.scrollBy(0, document.body.scrollHeight);
+          const activeSlide = document.querySelector('.swiper-slide-active .scrollable-content');
+          if (activeSlide) {
+            activeSlide.scrollBy({ top: activeSlide.scrollHeight });
+          } else {
+            window.scrollBy(0, document.body.scrollHeight);
+          }
         }}
       >
         <FontAwesomeIcon icon={faArrowDown} size="lg" />

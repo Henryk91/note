@@ -160,6 +160,7 @@ h2 {
   align-items: center;
   bottom: 6vw;
   right: 3vw;
+  z-index: 300;
 }
 .detail-scroll > div {
   text-align: center;
