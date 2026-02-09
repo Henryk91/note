@@ -12,12 +12,10 @@ const Memento = lazy(() => import('../../features/memento/pages/Memento/Memento'
 
 type AppRoutesProps = {
   setFilterNote: (val: any) => void;
-  menuButton: (e: any) => void;
 };
 
 export const AppRoutes: React.FC<AppRoutesProps> = ({
   setFilterNote,
-  menuButton,
 }) => {
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -27,7 +25,7 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({
           path="/"
           render={() => (
             <ProtectedRoutes>
-              <MainLayout setFilterNote={setFilterNote} menuButton={menuButton}>
+              <MainLayout setFilterNote={setFilterNote}>
                 <Switch>
                   <Route exact path="/all" render={(props: any) => <Home {...props} />} />
                   <Route

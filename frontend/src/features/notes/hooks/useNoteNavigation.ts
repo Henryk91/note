@@ -49,30 +49,6 @@ export const useNoteNavigation = ({ person, isLastPage }: UseNoteNavigationProps
           basePages.length === 1 && basePages[0].params.id === '' ? [nextPage] : [...basePages, nextPage];
 
         dispatch(setPages(newPages));
-
-        // Scroll logic is now handled by Swiper in NoteDetailPage.tsx via useEffect on pages change.
-      } else {
-        // Page found - Swiper should arguably slide to it?
-        // If the user clicks a link to an *existing* page, we currently just setPages (which might not change pages array ref if we don't update it).
-        // BUT wait, `dispatch(setPages(newPages))` is only called if pageFoundIndex === -1.
-        // If pageFoundIndex !== -1, we might want to slide to it.
-        // However, we don't have access to the swiper instance here.
-        // The previous logic used direct DOM manipulation.
-        // Ideally, we should update some state "activePageIndex" that NoteDetailPage observes.
-        // Or, we assume that "Navigation" mainly happens by adding pages.
-        // If we want to navigate purely to an existing page, we currently don't have a mechanism in Redux for "Active Page Index".
-        // The component logic in NoteDetailPage only slides on `pages.length` change.
-        // For now, removing the DOM logic. If we need "Jump to existing page", we should add `activePageIndex` to Redux.
-        // But `swiper` handles its own active index.
-        // Let's rely on the user manually swiping if they want to go back, OR if we strictly need to jump, we need to add state.
-        // Given the requirement is "scroll functionality/ multi page functionality", default Swiper behavior (swiping) covers "Go to existing page" mostly.
-        // But `openPage` is called when clicking a link. If I click a link to a page that is ALREADY open (e.g. index 0), I expect it to slide there.
-        // I will add a TO-DO or strictly implement `setActivePage`.
-        // Let's implement `activePage` index in Redux would be best practice, but that requires store changes.
-        // Alternative: we can retain a simplified DOM event or custom event? No.
-        // Since I can't easily change the Redux store structure without potentially bigger impact (though I am refactoring),
-        // I will stick to: Remove the DOM IO.
-        // Note: The previous logic tried to scroll to `pageWidth * pageFoundIndex`.
       }
     },
     [pages, dispatch],

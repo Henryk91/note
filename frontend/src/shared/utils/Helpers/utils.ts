@@ -1,4 +1,4 @@
-import { ItemType, Note, NoteItemType, NoteItemMap, NoteLabel, NoteContent, KeyValue } from './types';
+import { Note, NoteItemType, NoteContent } from './types';
 
 export const generateDocId = (count: number = 20): string => {
   let text = '';
@@ -9,15 +9,6 @@ export const generateDocId = (count: number = 20): string => {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   }
   return text;
-};
-
-export const compareSort = (a: Note, b: Note): number => {
-  const nameA = a.heading.toUpperCase();
-  const nameB = b.heading.toUpperCase();
-
-  if (nameA > nameB) return 1;
-  if (nameA < nameB) return -1;
-  return 0;
 };
 
 export const checkIsSameDate = (dateOne: Date, dateTwo: Date): boolean => {
@@ -86,23 +77,4 @@ export const setLogDirAtTop = (person: Note) => {
     ...person,
     dataLable: [logFolder, ...person?.dataLable?.filter((d) => d?.name !== 'Log')],
   };
-};
-
-export const setPersonDataToLocalStorage = (
-  freshState: KeyValue<Note>,
-  selectedNoteName?: string,
-  noteNames?: string[],
-) => {
-  if (selectedNoteName && freshState) {
-    const storageKey = `${selectedNoteName}-data`;
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(freshState));
-    } catch (error) {
-      console.error('QuotaExceededError. Clearing data stored.', error);
-      noteNames?.forEach((key: string) => {
-        localStorage.removeItem(key + '-data');
-      });
-      localStorage.setItem(storageKey, JSON.stringify(freshState));
-    }
-  }
 };

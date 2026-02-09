@@ -7,22 +7,6 @@ type BaseProps = {
   themeBack: string;
 };
 
-export const NewEmailField: React.FC<BaseProps> = ({ themeBack }) => (
-  <div>
-    <input className={themeBack} name="number" type="email" placeholder="Add Email" />
-    <br />
-    <br />
-  </div>
-);
-
-export const NewNumberField: React.FC<BaseProps> = ({ themeBack }) => (
-  <div>
-    <input className={themeBack} name="number" type="number" placeholder="Add Number" />
-    <br />
-    <br />
-  </div>
-);
-
 type NewUploadFieldProps = BaseProps & {
   showTag?: string | null;
   upload: string | null;

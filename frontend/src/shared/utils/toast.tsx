@@ -101,38 +101,7 @@ export const toastNotifications = {
       position: 'top-right',
     });
   },
-
-  loading: (message: string) => {
-    return toast.custom((t) => <CustomToast t={t} message={message} type="loading" />, {
-      position: 'top-right',
-      duration: Infinity,
-    });
-  },
-
-  dismiss: (toastId: string) => {
-    toast.dismiss(toastId);
-  },
-
-  dismissAll: () => {
-    toast.dismiss();
-  },
 };
-
-/**
- * Promise-based toast notification
- */
-export function toastPromise<T>(
-  promise: Promise<T>,
-  messages: {
-    loading: string;
-    success: string;
-    error: string;
-  },
-) {
-  return toast.promise(promise, messages, {
-    position: 'top-right',
-  });
-}
 
 /**
  * Format API errors for user-friendly display

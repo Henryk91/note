@@ -23,16 +23,6 @@ export type NoteContent = {
   data: string;
 };
 
-export type NoteItemTypeA = {
-  userId?: string;
-  id: string;
-  type: ItemType;
-  name?: string;
-  content?: NoteContent;
-  parentId: string;
-  edit?: string;
-};
-
 export type NoteItemType = {
   userId?: string;
   id: string;
@@ -43,18 +33,11 @@ export type NoteItemType = {
   heading?: string;
 };
 
-export type NoteLabel = {
-  tag: string;
-  data: string;
-  edit?: string;
-  date?: string;
-};
-
 export type KeyValue<T = any> = {
   [key: string]: T;
 };
 
-type NewNoteItemType = "FOLDER" | "NOTE" | "LOG";
+type NewNoteItemType = 'FOLDER' | 'NOTE' | 'LOG';
 
 interface BaseDataLabel {
   _id: string;
@@ -66,17 +49,17 @@ interface BaseDataLabel {
 }
 
 interface FolderDataLabel extends BaseDataLabel {
-  type: "FOLDER";
+  type: 'FOLDER';
   name: string;
 }
 
 interface NoteDataLabel extends BaseDataLabel {
-  type: "NOTE";
+  type: 'NOTE';
   content: { data: string };
 }
 
 interface LogDataLabel extends BaseDataLabel {
-  type: "LOG";
+  type: 'LOG';
   content: { data: string; date: string; _id: string };
 }
 

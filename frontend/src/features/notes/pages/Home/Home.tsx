@@ -28,11 +28,9 @@ const createList = (notes: Note[] | null, theme: string) => {
   return null;
 };
 
-type HomeProps = {};
-
 import { useNotesWithChildren } from '../../hooks/useNotesQueries';
 
-const Home: React.FC<HomeProps> = () => {
+const Home: React.FC = () => {
   const selectedNoteName = useSelector((state: RootState) => state.person.selectedNoteName);
   const theme = useSelector((state: RootState) => state.theme.themeLower);
 

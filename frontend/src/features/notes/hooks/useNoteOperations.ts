@@ -15,11 +15,10 @@ import { useCreateNote, useDeleteNote, useUpdateNote } from './useNotesQueries';
 
 type UseNoteOperationsProps = {
   person: Note | null;
-  index: number;
   openPage: (msg: any) => void; // needed for delete redirect
 };
 
-export const useNoteOperations = ({ person, index, openPage }: UseNoteOperationsProps) => {
+export const useNoteOperations = ({ person, openPage }: UseNoteOperationsProps) => {
   const dispatch = useDispatch();
   const { pages, showTag, byId } = useSelector((state: RootState) => state.person);
   const persons = byId;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars } from '@fortawesome/free-solid-svg-icons';
 import SearchBar from '../features/notes/components/SearchBar/SearchBar';
@@ -9,12 +9,14 @@ import { RootState } from '../core/store';
 type MainLayoutProps = {
   children: React.ReactNode;
   setFilterNote: (val: any) => void;
-  menuButton: (e: any) => void;
 };
 
-export const MainLayout: React.FC<MainLayoutProps> = ({ children, setFilterNote, menuButton }) => {
+export const MainLayout: React.FC<MainLayoutProps> = ({ children, setFilterNote }) => {
   const theme = useSelector((state: RootState) => state.theme.value);
   const themeBack = `${theme.toLowerCase()}-back`;
+
+  const location = useLocation();
+  const isNoteNames = location.pathname === '/notes/note-names';
   return (
     <>
       <header>
@@ -23,9 +25,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, setFilterNote,
           <Link
             style={{ textDecoration: 'none' }}
             className={`dark-hover ${themeBack}`}
-            onClick={menuButton}
             id="menuButton"
-            to="/notes/note-names"
+            to={isNoteNames ? '/notes/main' : '/notes/note-names'}
           >
             <FontAwesomeIcon icon={faBars} />
           </Link>

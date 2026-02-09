@@ -3,16 +3,15 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../../core/store';
 import { useCreateNote, useUpdateNote } from './useNotesQueries';
 import { Note } from '../../../shared/utils/Helpers/types';
-import { toastNotifications } from '../../../shared/utils/toast';
+
 import { setSelectedNoteName } from '../../auth/store/personSlice';
 import { useDispatch } from 'react-redux';
 
 /**
  * Hook for managing note actions (Create, Update, Delete)
  */
-export const useNotesActions = (searchTerm: string | null) => {
+export const useNotesActions = () => {
   const dispatch = useDispatch();
-  const selectedNoteName = useSelector((state: RootState) => state.person.selectedNoteName);
 
   const updateNoteMutation = useUpdateNote();
   const createNoteMutation = useCreateNote();
@@ -35,20 +34,6 @@ export const useNotesActions = (searchTerm: string | null) => {
     [updateNoteMutation],
   );
 
-  const addNewNote = useCallback(
-    (newNote: any) => {
-      const usedNewNote = { ...newNote };
-      if (selectedNoteName !== '') usedNewNote.note.createdBy = selectedNoteName;
-
-      if (searchTerm === '' || searchTerm === null) {
-        createNoteMutation.mutate(usedNewNote.note);
-      } else {
-        toastNotifications.error('Cannot update notes while in search mode');
-      }
-    },
-    [searchTerm, selectedNoteName, createNoteMutation],
-  );
-
   const noteDetailSet = useCallback(
     (msg: any) => {
       if (msg.noteName) {
@@ -62,7 +47,6 @@ export const useNotesActions = (searchTerm: string | null) => {
 
   return {
     updateNote,
-    addNewNote,
     noteDetailSet,
     isUpdating: updateNoteMutation.status === 'pending',
     isCreating: createNoteMutation.status === 'pending',

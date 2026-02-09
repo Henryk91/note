@@ -66,6 +66,7 @@ const personSlice = createSlice({
       // Reset navigation stack when selecting new notebook
       state.pages = [createInitPage(state.selectedNoteName)];
       localStorage.setItem('saved-pages', JSON.stringify(state.pages));
+      state.showTag = null;
     },
     setShowTag(state, action: PayloadAction<string | null>) {
       state.showTag = action.payload;
@@ -80,28 +81,10 @@ const personSlice = createSlice({
       state.pages = action.payload;
       localStorage.setItem('saved-pages', JSON.stringify(state.pages));
     },
-    addPage(state, action: PayloadAction<PageDescriptor>) {
-      state.pages.push(action.payload);
-      localStorage.setItem('saved-pages', JSON.stringify(state.pages));
-    },
-    removePage(state, action: PayloadAction<PageDescriptor>) {
-      state.pages = state.pages.filter((page) => page.params.id !== action.payload.params.id);
-      localStorage.setItem('saved-pages', JSON.stringify(state.pages));
-    },
     removeLastPage(state) {
       if (state.pages.length > 0) {
         state.pages = state.pages.slice(0, state.pages.length - 1);
         localStorage.setItem('saved-pages', JSON.stringify(state.pages));
-      }
-    },
-    resetPages(state) {
-      if (state.selectedNoteName) {
-        const initialPages = [createInitPage(state.selectedNoteName)];
-        state.pages = initialPages;
-        localStorage.setItem('saved-pages', JSON.stringify(initialPages));
-      } else {
-        state.pages = [];
-        localStorage.removeItem('saved-pages');
       }
     },
     triggerLastPageReload(state) {
@@ -133,10 +116,7 @@ export const {
   setShowTag,
   setShowAddItem,
   setEditName,
-  addPage,
-  removePage,
   removeLastPage,
-  resetPages,
   setPages,
   triggerLastPageReload,
   setInitialLoadComplete,
@@ -146,6 +126,5 @@ export const {
 
 export const selectPersonById = (state: { person: PersonState }, id: string) => state.person.byId[id] || null;
 export const getAllPersonById = (state: { person: PersonState }) => state.person.byId || null;
-export const getAuthToken = (state: { person: PersonState }) => state.person.authToken;
 
 export default personSlice.reducer;

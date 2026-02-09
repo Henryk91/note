@@ -1,10 +1,8 @@
 import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from './core/store';
-import { setTheme } from './core/store/themeSlice';
 import { useOfflineSync } from './shared/hooks/useOfflineSync';
 import { useNotesLogic } from './features/notes/hooks/useNotesLogic';
-import { useNoteNavigation } from './features/notes/hooks/useNoteNavigation';
 import { AppRoutes } from './core/routes/AppRoutes';
 
 /**
@@ -15,10 +13,7 @@ const AppContent: React.FC = () => {
   useOfflineSync();
   const theme = useSelector((state: RootState) => state.theme.value);
 
-  const { loadingData, noteDetailSet, setFilterNote, checkLoginState, getLastPageData, setRedirect } =
-    useNotesLogic();
-
-  const { menuButton } = useNoteNavigation(checkLoginState, getLastPageData, setRedirect);
+  const { loadingData, setFilterNote } = useNotesLogic();
 
   useEffect(() => {
     const menuBtn = document.getElementById('menuButton');
@@ -52,12 +47,7 @@ const AppContent: React.FC = () => {
     }
   }, [loadingData, theme]);
 
-  return (
-    <AppRoutes
-      setFilterNote={setFilterNote}
-      menuButton={menuButton}
-    />
-  );
+  return <AppRoutes setFilterNote={setFilterNote} />;
 };
 
 export default AppContent;

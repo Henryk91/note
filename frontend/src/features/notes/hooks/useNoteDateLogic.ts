@@ -176,14 +176,9 @@ export const useNoteDateLogic = ({ person, persons, searchTerm, saveShowTag }: U
 
   return {
     displayDate,
-    setDisplayDate,
     showLogDaysBunch,
-    setShowLogDaysBunch,
-    prevDate: prevDateDerived,
-    nextDate: nextDateDerived,
     logDayMap,
     totalLogCount,
-    getDataLableFilteredAndSorted,
     setDate,
     changeDate,
     dateBackForward,

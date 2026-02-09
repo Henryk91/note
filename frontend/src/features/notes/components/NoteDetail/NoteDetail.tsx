@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import NoteDetailTags from './NoteDetailTags';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../core/store';
@@ -7,7 +7,6 @@ import { AddItemForm, EditNameForm } from './forms';
 import { Note } from '../../../../shared/utils/Helpers/types';
 import { useNoteNavigation } from '../../hooks/useNoteNavigation';
 import { useNoteOperations } from '../../hooks/useNoteOperations';
-import { useNoteDateLogic } from '../../hooks/useNoteDateLogic';
 
 type NoteDetailProps = {
   index?: number;
@@ -22,15 +21,11 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
   const person = byId?.[pageLink?.params.id] || null;
 
   // 1. Navigation Hook
-  const {
-    openPage,
-    saveShowTag,
-    showHideBox,
-  } = useNoteNavigation({ person, isLastPage });
+  const { openPage, saveShowTag, showHideBox } = useNoteNavigation({ person, isLastPage });
 
   // 2. Operations Hook
   const { addLabel, submitNameChange, submitNewItem, cancelAddItemEdit, updateNoteItem, continueLog } =
-    useNoteOperations({ person, index, openPage });
+    useNoteOperations({ person, openPage });
 
   const location = useLocation();
 

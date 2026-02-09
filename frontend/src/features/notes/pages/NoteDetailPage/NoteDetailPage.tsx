@@ -15,8 +15,6 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Swiper as SwiperType } from 'swiper';
 import 'swiper/css';
 
-type NoteDetailPageProps = {};
-
 // Wrapper component to ensure new slides start at top
 const PreservedScrollSlide: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -43,7 +41,7 @@ const PreservedScrollSlide: React.FC<{ children: React.ReactNode }> = ({ childre
   );
 };
 
-const NoteDetailPage: React.FC<NoteDetailPageProps> = ({}) => {
+const NoteDetailPage: React.FC = () => {
   const { pages, authToken } = useSelector((state: RootState) => state.person);
   const dispatch = useDispatch();
 

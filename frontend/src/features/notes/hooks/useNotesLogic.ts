@@ -25,7 +25,6 @@ export const useNotesLogic = () => {
   const initialLoadComplete = useSelector((state: RootState) => state.person.initialLoadComplete); // From Redux
 
   const isLastPage = Array.isArray(pages) && pages.length > 0 ? pages[pages.length - 1] : undefined;
-  const reloadLastPage = useSelector((state: RootState) => state.person.reloadLastPage);
 
   // 3. Local State
   const isOnline = useOnlineStatus();
@@ -43,7 +42,7 @@ export const useNotesLogic = () => {
 
   // 5. Decomposed Logics
   const { setRedirect } = useRedirectLogic();
-  const { noteDetailSet, addNewNote } = useNotesActions(searchTerm);
+  const { noteDetailSet } = useNotesActions();
 
   const checkLoginState = useCallback(() => {
     if (!authToken) {
@@ -101,7 +100,7 @@ export const useNotesLogic = () => {
     if (isLastPage?.params.id && initialLoadComplete) {
       getLastPageData(true);
     }
-  }, [isLastPage?.params.id, reloadLastPage, initialLoadComplete, getLastPageData]);
+  }, [isLastPage?.params.id, initialLoadComplete, getLastPageData]);
 
   // Handle root path redirects when data is ready
   useEffect(() => {
@@ -115,7 +114,6 @@ export const useNotesLogic = () => {
     searchTerm,
     loadingData: loadingData || loadingNoteNames,
     noteDetailSet,
-    addNewNote,
     setFilterNote,
     checkLoginState,
     getLastPageData,

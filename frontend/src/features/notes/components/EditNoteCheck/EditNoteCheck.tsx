@@ -1,12 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  NewEmailField,
-  NewLinkField,
-  NewLogField,
-  NewNoteField,
-  NewNumberField,
-  NewUploadField,
-} from './NoteInputFields';
+import { NewLinkField, NewLogField, NewNoteField, NewUploadField } from './NoteInputFields';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../core/store';
 import { setNewNoteMode } from '../../../auth/store/personSlice';
@@ -155,8 +148,6 @@ const EditNoteCheck: React.FC<EditNoteCheckProps> = ({ lable }) => {
           onFileChange={handleChangeFile}
         />
       )}
-      {effectiveRadioType === 'Number' && <NewNumberField themeBack={themeBack} />}
-      {effectiveRadioType === 'Email' && <NewEmailField themeBack={themeBack} />}
     </div>
   );
 };
