@@ -7,36 +7,42 @@ type UseNoteItemLogicProps = {
   type: string;
   set: (payload: any) => void;
   show: boolean;
+  onEditStart?: () => void;
+  onEditEnd?: () => void;
 };
 
-export const useNoteItemLogic = ({ item: initialItem, index, type, set, show }: UseNoteItemLogicProps) => {
+export const useNoteItemLogic = ({
+  item: initialItem,
+  index,
+  type,
+  set,
+  show,
+  onEditStart,
+  onEditEnd,
+}: UseNoteItemLogicProps) => {
   const [item, setItem] = useState<NoteItemType | null>(initialItem);
   const [editingItem, setEditingItem] = useState(false);
   const [scrollPos, setScrollPos] = useState(0);
   const dateInputRef = useRef<HTMLInputElement>(null);
 
-  const removeHideClass = useCallback(() => {
-    const nodes = document.querySelectorAll('.hidden-noteItemBox');
-    nodes.forEach((node) => node.classList.remove('hidden-noteItemBox'));
-    window.scrollTo({ top: scrollPos });
-  }, [scrollPos]);
-
-  const hideLogLines = useCallback(() => {
-    const nodes = document.querySelectorAll('.noteItemBox');
-    nodes.forEach((node) => node.classList.add('hidden-noteItemBox'));
-  }, []);
-
   const setEditState = useCallback(() => {
     setEditingItem(true);
     setScrollPos(window.scrollY);
-    hideLogLines();
+
+    // Call parent callback to hide others
+    if (onEditStart) onEditStart();
+
     window.scrollTo({ top: 0 });
-  }, [hideLogLines]);
+  }, [onEditStart]);
 
   const closeEdit = useCallback(() => {
     setEditingItem(false);
-    removeHideClass();
-  }, [removeHideClass]);
+
+    // Call parent callback to show others
+    if (onEditEnd) onEditEnd();
+
+    window.scrollTo({ top: scrollPos });
+  }, [onEditEnd, scrollPos]);
 
   const submitChange = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
@@ -57,9 +63,11 @@ export const useNoteItemLogic = ({ item: initialItem, index, type, set, show }: 
       });
       setEditingItem(false);
       setItem({ ...item, content: update });
-      removeHideClass();
+
+      if (onEditEnd) onEditEnd();
+      window.scrollTo({ top: scrollPos });
     },
-    [item, index, type, set, removeHideClass],
+    [item, index, type, set, onEditEnd, scrollPos],
   );
 
   const deleteItemHandler = useCallback(
@@ -67,17 +75,18 @@ export const useNoteItemLogic = ({ item: initialItem, index, type, set, show }: 
       e.preventDefault();
       if (confirm('Are you sure you want to permanently delete this?')) {
         setItem(null);
-        setScrollPos(window.scrollY);
         set({
           oldItem: item,
           index,
           type,
           delete: true,
         });
-        removeHideClass();
+
+        if (onEditEnd) onEditEnd();
+        window.scrollTo({ top: scrollPos });
       }
     },
-    [item, index, type, set, removeHideClass],
+    [item, index, type, set, onEditEnd, scrollPos],
   );
 
   const changeDate = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -109,8 +118,9 @@ export const useNoteItemLogic = ({ item: initialItem, index, type, set, show }: 
   useEffect(() => {
     if (!show && editingItem) {
       setEditingItem(false);
+      if (onEditEnd) onEditEnd();
     }
-  }, [show, editingItem]);
+  }, [show, editingItem, onEditEnd]);
 
   return {
     item,

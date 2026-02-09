@@ -18,6 +18,8 @@ type NoteItemProps = {
   type: string;
   set: (payload: any) => void;
   show: boolean;
+  onEditStart?: () => void;
+  onEditEnd?: () => void;
 };
 
 type EditItemBoxProps = {

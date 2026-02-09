@@ -1,56 +1,34 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import NoteItem from '../NoteItem/NoteItem';
 import { FolderList } from './forms';
 import { Note } from '../../../../shared/utils/Helpers/types';
 import { useSelector } from 'react-redux';
-import { getAllPersonById } from '../../../auth/store/personSlice';
+import { RootState } from '../../../../core/store';
 import { CompleteLogContent } from './CompleteLogContent';
+import { useNoteDateLogic } from '../../hooks/useNoteDateLogic';
 
 interface NoteDetailTagsProps {
   person: Note;
-  totalLogCount: number;
-  displayDate: Date | string | null;
   isLastPage: boolean;
-  showLogDaysBunch: boolean;
-  logDayMap: Record<string, any[]> | null;
   actions: {
     showHideBox: (prop: string) => void;
-    showLogDays: (prop: string) => void;
     saveShowTag: (tag: string) => void;
-    changeDate: (e: any) => void;
-    dateBackForward: (e: any, dir: string) => void;
     continueLog: (payload: any) => void;
-    setDate: (type: string, date: string) => void;
     updateNoteItem: (payload: any) => void;
-    enableAnimationCheck: (tag: string | null, prop: string) => string;
-    setPrevDate: (date: string | null) => void;
-    setNextDate: (date: string | null) => void;
   };
 }
 
-const NoteDetailTags: React.FC<NoteDetailTagsProps> = ({
-  person,
-  totalLogCount,
-  displayDate,
-  isLastPage,
-  showLogDaysBunch,
-  logDayMap,
-  actions,
-}) => {
-  const persons = useSelector(getAllPersonById);
-  const {
-    showHideBox,
-    showLogDays,
-    saveShowTag,
-    changeDate,
-    dateBackForward,
-    continueLog,
-    setDate,
-    updateNoteItem,
-    enableAnimationCheck,
-    setPrevDate,
-    setNextDate,
-  } = actions;
+const NoteDetailTags: React.FC<NoteDetailTagsProps> = ({ person, isLastPage, actions }) => {
+  const { byId, searchTerm } = useSelector((state: RootState) => state.person);
+  const persons = byId;
+
+  const { showHideBox, saveShowTag, continueLog, updateNoteItem } = actions;
+
+  const { displayDate, showLogDaysBunch, totalLogCount, logDayMap, setDate, changeDate, dateBackForward, showLogDays } =
+    useNoteDateLogic({ person, persons, searchTerm, saveShowTag });
+
+  // State to track which item is being edited (to hide others)
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const calculatedContinueData = useMemo(() => {
     if (!logDayMap || !displayDate) return null;
@@ -64,36 +42,24 @@ const NoteDetailTags: React.FC<NoteDetailTagsProps> = ({
     return null;
   }, [logDayMap, displayDate]);
 
-  useEffect(() => {
-    if (!logDayMap || !displayDate) return;
-
-    const logDays = Object.keys(logDayMap)
-      .map((key) => ({ date: key, count: logDayMap[key]?.length }))
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-    const selectedDateString = `${displayDate}`.substring(0, 15).trim();
-    const ind = logDays.findIndex((item) => item.date === selectedDateString);
-
-    if (ind !== -1) {
-      const prevItemLocal = ind > 0 ? logDays[ind - 1] : undefined;
-      const nextItemLocal = ind < logDays.length - 1 ? logDays[ind + 1] : undefined;
-      setPrevDate(prevItemLocal?.date ?? null);
-      setNextDate(nextItemLocal?.date ?? null);
-    }
-  }, [logDayMap, displayDate, setPrevDate, setNextDate]);
-
   return (
     <div className={'detailedBox'}>
       {person?.dataLable?.map((noteItem, i) => {
-        
         const isLink = noteItem.type === 'FOLDER';
         const isNote = noteItem.type === 'NOTE';
         const isLogDirectory = noteItem.name === 'Log';
         const prop = (noteItem as any).heading ?? noteItem.name ?? noteItem?.content?.data ?? 'Unknown';
         const contentCount = isLogDirectory ? totalLogCount : persons?.[noteItem.id]?.dataLable?.length;
 
+        // Determine if this item should be hidden (when another item is being edited)
+        const isHidden = editingId !== null && editingId !== noteItem.id;
+
         return (
-          <div className={'detailedBox'} key={(noteItem.id || prop) + i}>
+          <div
+            className={`detailedBox ${isHidden ? 'hidden-noteItemBox' : ''}`}
+            key={(noteItem.id || prop) + i}
+            style={isHidden ? { display: 'none' } : {}}
+          >
             {isLink && (
               <>
                 <FolderList
@@ -119,7 +85,6 @@ const NoteDetailTags: React.FC<NoteDetailTagsProps> = ({
                     setDate,
                     updateNoteItem,
                     continueLog,
-                    enableAnimationCheck,
                   }}
                 />
               </>
@@ -131,6 +96,8 @@ const NoteDetailTags: React.FC<NoteDetailTagsProps> = ({
                 set={updateNoteItem}
                 type={prop}
                 index={i}
+                onEditStart={() => setEditingId(noteItem.id)}
+                onEditEnd={() => setEditingId(null)}
               />
             )}
           </div>

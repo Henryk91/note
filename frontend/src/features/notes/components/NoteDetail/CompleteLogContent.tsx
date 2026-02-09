@@ -15,7 +15,6 @@ interface CompleteLogContentProps {
     setDate: (type: string, date: string) => void;
     updateNoteItem: (payload: any) => void;
     continueLog: (payload: any) => void;
-    enableAnimationCheck: (tag: string | null, prop: string) => string;
   };
   onDateBackForward: (e: React.MouseEvent<HTMLButtonElement>, dir: 'back' | 'forward') => void;
   onContinueLog: (payload: any) => void;
@@ -33,32 +32,34 @@ export const CompleteLogContent: React.FC<CompleteLogContentProps> = ({
   continueData,
   onDateBackForward,
   onContinueLog,
-  contentCount
+  contentCount,
 }) => {
   const { showTag, selectedNoteName } = useSelector((state: RootState) => state.person);
-  const { setDate, updateNoteItem, continueLog, enableAnimationCheck } = actions;
+  const { setDate, updateNoteItem, continueLog } = actions;
 
   const prop = noteItem.name ?? noteItem.content.data;
 
   if (prop !== 'Log' || !logDayMap || !displayDate) return <></>;
 
   const showTagValue = showTag ?? selectedNoteName ?? 'main';
-  const animate = enableAnimationCheck(showTagValue, prop);
+
+  const enableAnimationCheck = (tag: string | null, prop: string) => {
+    if (tag === prop && tag !== '' && prop !== 'Log') return 'grow';
+    if (tag === prop && tag !== '' && prop === 'Log') return 'growb';
+    return '';
+  };
 
   const showButton = showTagValue === prop;
 
   return (
-    <div className={`${animate}`}>
+    <div className={enableAnimationCheck(showTagValue, prop)}>
       <div className={`logToggleHeader detailTitleBox dark-hover link-border`}>
         {showTag === 'Log' && prop === 'Log' && contentCount && (
           <LogHeader continueData={continueData} onDateBackForward={onDateBackForward} onContinueLog={onContinueLog} />
         )}
       </div>
       {showLogDaysBunch ? (
-        <LogDayList
-          logDayMap={logDayMap}
-          setDate={setDate}
-        />
+        <LogDayList logDayMap={logDayMap} setDate={setDate} />
       ) : (
         <LogItemsList
           logDayMap={logDayMap}

@@ -4,13 +4,25 @@ import { Provider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
-import { useNoteDetailLogic } from '../src/features/notes/hooks/useNoteDetailLogic';
+import { useNoteOperations } from '../src/features/notes/hooks/useNoteOperations';
 import { notesApi } from '../src/features/notes/api/notesApi';
 import personReducer from '../src/features/auth/store/personSlice';
 import themeReducer from '../src/core/store/themeSlice';
 
 // Mock the API
-jest.mock('../src/features/notes/api/notesApi');
+jest.mock('../src/features/notes/api/notesApi', () => ({
+  notesApi: {
+    createNote: jest.fn(),
+  },
+}));
+
+// Mock global fetch
+global.fetch = jest.fn(() =>
+  Promise.resolve({
+    json: () => Promise.resolve({}),
+    ok: true,
+  }),
+) as jest.Mock;
 
 const createTestWrapper = (preloadedState = {}) => {
   const store = configureStore({
@@ -73,9 +85,10 @@ describe('Offline Log Creation Nested', () => {
 
     const { result } = renderHook(
       () =>
-        useNoteDetailLogic({
+        useNoteOperations({
+          person: store.getState().person.byId[parentId] as any,
           index: 1,
-          isLastPage: true,
+          openPage: jest.fn(),
         }),
       { wrapper: Wrapper },
     );
