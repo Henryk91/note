@@ -69,23 +69,6 @@ export const getLogDuration = (nextItem: NoteItemType | undefined | null, parsed
   return duration;
 };
 
-function formatDate(input: string): string {
-  const date = new Date(input);
-
-  if (isNaN(date.getTime())) {
-    throw new Error('Invalid date format');
-  }
-
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-
-  // Extract the weekday from the original input (first 3 chars)
-  const weekday = input.slice(0, 3);
-
-  return `${year}/${month}/${day} ${weekday}`;
-}
-
 function convertDataLableToType(item, label, userId, newNotes, subSubFolderNames) {
   let forReturn: { newLogDay?: any; subSubFolder?: NoteItemType; newNote?: NoteItemType } = {};
   const subSubFolderId = (item.id + '::' + label.tag).replaceAll(' ', '-');
@@ -124,84 +107,6 @@ function convertDataLableToType(item, label, userId, newNotes, subSubFolderNames
     forReturn = { ...forReturn, newNote };
   }
   return forReturn;
-}
-
-export function processGetAllNotesA(data: any) {
-  let logDays: any = {};
-  let createdByList: string[] = [];
-  let newFolders: NoteItemType[] = [];
-  let newNotes: NoteItemType[] = [];
-  const userId = localStorage.getItem('userId') ?? '';
-  data?.forEach((item: any) => {
-    if (!createdByList.includes(item.createdBy)) {
-      const mainFolder: NoteItemType = {
-        userId,
-        id: item.createdBy,
-        name: item.createdBy,
-        parentId: '',
-        type: ItemType.FOLDER,
-      };
-      newFolders.push(mainFolder);
-      createdByList.push(item.createdBy);
-    }
-
-    if (!item.heading?.startsWith('Sub: ')) {
-      const subFolder: NoteItemType = {
-        userId,
-        id: item.id,
-        name: item.heading === '' ? 'Unnamed' : item.heading,
-        parentId: item.createdBy,
-        type: ItemType.FOLDER,
-      };
-      newFolders.push(subFolder);
-    }
-
-    let subSubFolderNames: string[] = [];
-    item?.dataLable.forEach((label: any) => {
-      const subSubFolderId = (item.id + '::' + label.tag).replaceAll(' ', '-');
-      if (!subSubFolderNames.includes(label.tag)) {
-        subSubFolderNames.push(label.tag);
-        const subSubFolder: NoteItemType = {
-          userId,
-          id: label.data.startsWith('href:') ? label.data.replace('href:', '') : subSubFolderId,
-          name: label?.tag + '',
-          parentId: item.id,
-          type: ItemType.FOLDER,
-        };
-        newFolders.push(subSubFolder);
-      }
-      let content = { data: label.data, date: item.date };
-      let noteType = ItemType.NOTE;
-
-      let parentId = subSubFolderId;
-      if (label.data.includes('"json":true')) {
-        noteType = ItemType.LOG;
-        const jsonData = label.data ? JSON.parse(label.data) : { data: '', date: '' };
-        content = { data: jsonData.data, date: jsonData.date };
-        const logDayId = subSubFolderId.trim().replaceAll(' ', '-');
-        parentId = logDayId;
-      }
-      const newNote: NoteItemType = {
-        userId,
-        id: parentId + '::' + noteType + '::' + newNotes.length.toString(),
-        content: content,
-        parentId: parentId,
-        type: noteType,
-      };
-      // logDays
-      if (!label.data.startsWith('href:')) {
-        newNotes.push(newNote);
-      }
-    });
-  });
-  if (newFolders?.length) {
-    const logDayFolders: NoteItemType[] = Object.values(logDays);
-
-    const sortedLogDayFolders = logDayFolders.sort((a, b) => (b?.name ?? '').localeCompare(a?.name ?? ''));
-    const itemsToSet = [...newFolders, ...newNotes, ...sortedLogDayFolders];
-    return itemsToSet;
-  }
-  return [];
 }
 
 export function processGetAllNotes(data: any): NoteItemType[] {

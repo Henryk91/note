@@ -27,14 +27,12 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
 
   const {
     person,
-    persons,
     addLabel,
     displayDate,
     showLogDaysBunch,
     totalLogCount,
     logDayMap,
     showTag,
-    selectedNoteName,
     setPrevDate,
     setNextDate,
     setDate,

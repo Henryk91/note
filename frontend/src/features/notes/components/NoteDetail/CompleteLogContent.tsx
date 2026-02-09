@@ -40,7 +40,7 @@ export const CompleteLogContent: React.FC<CompleteLogContentProps> = ({
 
   const prop = noteItem.name ?? noteItem.content.data;
 
-  if (prop !== 'Log' || !logDayMap) return <></>;
+  if (prop !== 'Log' || !logDayMap || !displayDate) return <></>;
 
   const showTagValue = showTag ?? selectedNoteName ?? 'main';
   const animate = enableAnimationCheck(showTagValue, prop);

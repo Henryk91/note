@@ -54,76 +54,21 @@ export function useNotesWithChildren(parentId?: string, enabled: boolean = true)
 
       if (!rawData) return { notes: {}, rawData: null };
 
-      let notesMap: any = {};
-
-      const processNote = (note: any) => {
-        if (!note.id) return;
-        const heading = note.heading || note.name || note.id;
-        const processed = {
-          ...note,
-          heading: heading,
-          name: note.name || heading, // Ensure name is also set
-        };
-
-        // Normalize nested folders in dataLable for navigation consistency
-        if (processed.dataLable && Array.isArray(processed.dataLable)) {
-          processed.dataLable = processed.dataLable.map((item: any) => {
-            if (item.type === 'FOLDER' || item.id?.includes('FOLDER')) {
-              const itemHeading = item.heading || item.name || item.id;
-              return {
-                ...item,
-                heading: itemHeading,
-                name: item.name || itemHeading,
-              };
-            }
-            return item;
-          });
-        }
-        notesMap[note.id] = processed;
-      };
-
-      // Handle Normalized Map structure or NotesResponse
-      if (typeof rawData === 'object' && !Array.isArray(rawData)) {
-        const rawNotes = rawData.notes || rawData;
-        Object.values(rawNotes).forEach(processNote);
-      }
-      // Handle Note[] Array (V2 Style)
-      else if (Array.isArray(rawData) && rawData.length > 0 && (rawData[0].dataLable || rawData[0].heading)) {
-        rawData.forEach(processNote);
-      }
-      // Handle Legacy flat array (V1 Style)
-      else if (Array.isArray(rawData)) {
-        const flatNotes = processGetAllNotes(rawData);
-        const grouped = allNotesToItems(flatNotes);
-        Object.values(grouped).forEach(processNote);
-      }
-
-      // Ensure the requested parentId exists in the map for UI traversal
-      if (parentId && !notesMap[parentId]) {
-        // Use available items as children if we have any
-        const hasProcessedItems = Object.keys(notesMap).length > 0;
-        notesMap[parentId] = {
-          id: parentId,
-          heading: parentId,
-          dataLable: hasProcessedItems ? Object.values(notesMap) : Array.isArray(rawData) ? rawData : [],
-        };
-      }
-
-      const keys = Object.keys(notesMap);
+      const keys = Object.keys(rawData);
       keys.forEach((key) => {
         let logFolder = null;
-        notesMap[key].dataLable = notesMap[key].dataLable.filter((item: any) => {
+        rawData[key].dataLable = rawData[key].dataLable.filter((item: any) => {
           const isLog = item.type === 'FOLDER' && item.name === 'Log';
           if (isLog) logFolder = item;
           return !isLog;
         });
         if (logFolder !== null) {
-          notesMap[key].dataLable.unshift(logFolder); // Ensure Log folder is always first
+          rawData[key].dataLable.unshift(logFolder); // Ensure Log folder is always first
         }
       });
+
       return {
-        notes: notesMap,
-        rawData,
+        notes: rawData
       };
     },
     staleTime: 5 * 60 * 1000,

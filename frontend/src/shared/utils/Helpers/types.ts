@@ -53,3 +53,40 @@ export type NoteLabel = {
 export type KeyValue<T = any> = {
   [key: string]: T;
 };
+
+type NewNoteItemType = "FOLDER" | "NOTE" | "LOG";
+
+interface BaseDataLabel {
+  _id: string;
+  userId: string;
+  id: string;
+  parentId: string;
+  type: NewNoteItemType;
+  __v?: number;
+}
+
+interface FolderDataLabel extends BaseDataLabel {
+  type: "FOLDER";
+  name: string;
+}
+
+interface NoteDataLabel extends BaseDataLabel {
+  type: "NOTE";
+  content: { data: string };
+}
+
+interface LogDataLabel extends BaseDataLabel {
+  type: "LOG";
+  content: { data: string; date: string; _id: string };
+}
+
+export type DataLabelItem = FolderDataLabel | NoteDataLabel | LogDataLabel;
+
+interface NodeEntry {
+  id: string;
+  heading: string;
+  dataLable: DataLabelItem[];
+}
+
+type NodeMap = Record<string, NodeEntry>;
+export type NodeRoot = NodeEntry | NodeMap;

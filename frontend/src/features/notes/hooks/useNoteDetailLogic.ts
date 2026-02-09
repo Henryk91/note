@@ -31,8 +31,6 @@ type UseNoteDetailLogicProps = {
 
 export const useNoteDetailLogic = ({ searchTerm, isLastPage, editName, index }: UseNoteDetailLogicProps) => {
   const dispatch = useDispatch();
-  const loginKey = typeof window !== 'undefined' ? localStorage.getItem('loginKey') : null;
-  const isLoggedIn = !!loginKey;
   const { pages, showTag, selectedNoteName, byId } = useSelector((state: RootState) => state.person);
 
   const createNoteMutation = useCreateNote();
@@ -109,22 +107,6 @@ export const useNoteDetailLogic = ({ searchTerm, isLastPage, editName, index }: 
     },
     [saveShowTag],
   );
-
-  // Override setDate to match exact behavior including the likely bug/feature where only 'Log Days' did something
-  // or maybe I missed something. Re-reading:
-  /*
-    function setDate(prop: string, date: string | Date) {
-        if (prop === 'Log Days') {
-        if (date) setDisplayDate(date);
-        setShowLogDaysBunch(false);
-        setTimeout(() => {
-            window.scrollTo(0, 0);
-            saveShowTag('Log');
-        }, 10);
-        }
-    }
-  */
-  // Yes, it strictly checks 'Log Days'.
 
   const openPage = useCallback(
     (msg: any) => {

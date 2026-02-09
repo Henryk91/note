@@ -1,8 +1,8 @@
 import { apiFetch } from '../../../shared/utils/Helpers/apiFetch';
-import { Note, KeyValue } from '../../../shared/utils/Helpers/types';
+import { Note, NodeRoot } from '../../../shared/utils/Helpers/types';
 
 export interface NotesResponse {
-  notes: KeyValue<Note>; // Object with note IDs as keys
+  notes: NodeRoot;
   noteNames: string[];
   selectedNoteName: string;
 }
@@ -15,7 +15,7 @@ export const notesApi = {
   /**
    * Fetch notes by parent ID
    */
-  getNotesByParentId: async (parentId?: string): Promise<Note[]> => {
+  getNotesByParentId: async (parentId?: string): Promise<NodeRoot[]> => {
     const url = '/api/note-v2' + (parentId && parentId !== '' ? `?parentId=${parentId}` : '');
     const res = await apiFetch(url);
     if (!res.ok) {
