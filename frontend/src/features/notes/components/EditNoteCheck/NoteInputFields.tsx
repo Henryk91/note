@@ -104,9 +104,9 @@ export const NewLogField: React.FC<NewLogFieldProps> = ({
 
 export const NewNoteField: React.FC = () => {
   const theme = useSelector((state: RootState) => state.theme.themeLower);
-  const showTag = useSelector((state: RootState) => state.person.showTag);
+  const { showTag, newNoteMode } = useSelector((state: RootState) => state.person);
   let localShowTag = showTag ?? '';
-  const creatingNewFolder = localStorage.getItem('new-folder-edit');
+  const creatingNewFolder = !!newNoteMode;
   let defaultVal = '';
   if (creatingNewFolder) {
     localShowTag = 'Note';

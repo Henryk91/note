@@ -1,10 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { KeyValue, Note, PageDescriptor } from '../../../shared/utils/Helpers/types';
-import {
-  createInitPage,
-  getStorageJsonData,
-  setLogDirAtTop,
-} from '../../../shared/utils/Helpers/utils';
+import { createInitPage, setLogDirAtTop, getStorageJsonData } from '../../../shared/utils/Helpers/utils';
 
 type PersonState = {
   byId: KeyValue<Note>;
@@ -15,6 +11,9 @@ type PersonState = {
   pages: PageDescriptor[];
   reloadLastPage: boolean;
   searchTerm: string;
+  initialLoadComplete: boolean;
+  authToken: string | null;
+  newNoteMode: string | null;
 };
 
 type SetPersonPayload = {
@@ -24,11 +23,12 @@ type SetPersonPayload = {
 
 const initSelectedNoteName = localStorage.getItem('user') || undefined;
 
+// Start with clean initial state (no localStorage)
 const initialState: PersonState = {
-  byId: getStorageJsonData(`${initSelectedNoteName}-data`, {}),
+  byId: {},
   selectedNoteName: initSelectedNoteName,
-  showTag: localStorage.getItem('showTag') || null,
-  showAddItem: !!localStorage.getItem('new-folder-edit'),
+  showTag: null,
+  showAddItem: false,
   editName: false,
   pages: (() => {
     const savedPages = getStorageJsonData('saved-pages', [createInitPage(initSelectedNoteName)]);
@@ -36,6 +36,9 @@ const initialState: PersonState = {
   })(),
   reloadLastPage: false,
   searchTerm: '',
+  initialLoadComplete: false,
+  authToken: localStorage.getItem('loginKey'),
+  newNoteMode: null, // Replaces new-folder-edit/was-new-folder-edit
 };
 
 const personSlice = createSlice({
@@ -60,20 +63,15 @@ const personSlice = createSlice({
     setSelectedNoteName(state, action: PayloadAction<string>) {
       state.selectedNoteName = action.payload;
       localStorage.setItem('user', action.payload);
+      // Reset navigation stack when selecting new notebook
       state.pages = [createInitPage(state.selectedNoteName)];
       localStorage.setItem('saved-pages', JSON.stringify(state.pages));
     },
     setShowTag(state, action: PayloadAction<string | null>) {
       state.showTag = action.payload;
-      if (action.payload) {
-        localStorage.setItem('showTag', action.payload);
-      } else {
-        localStorage.removeItem('showTag');
-      }
     },
     setShowAddItem(state, action: PayloadAction<boolean>) {
       state.showAddItem = action.payload;
-      if (!action.payload) localStorage.removeItem('new-folder-edit');
     },
     setEditName(state, action: PayloadAction<boolean>) {
       state.editName = action.payload;
@@ -91,16 +89,37 @@ const personSlice = createSlice({
       localStorage.setItem('saved-pages', JSON.stringify(state.pages));
     },
     removeLastPage(state) {
-      state.pages = state.pages.slice(0, state.pages.length - 1);
-      localStorage.setItem('saved-pages', JSON.stringify(state.pages));
+      if (state.pages.length > 0) {
+        state.pages = state.pages.slice(0, state.pages.length - 1);
+        localStorage.setItem('saved-pages', JSON.stringify(state.pages));
+      }
     },
     resetPages(state) {
-      const initialPages = [createInitPage(state.selectedNoteName)];
-      state.pages = initialPages;
-      localStorage.setItem('saved-pages', JSON.stringify(initialPages));
+      if (state.selectedNoteName) {
+        const initialPages = [createInitPage(state.selectedNoteName)];
+        state.pages = initialPages;
+        localStorage.setItem('saved-pages', JSON.stringify(initialPages));
+      } else {
+        state.pages = [];
+        localStorage.removeItem('saved-pages');
+      }
     },
     triggerLastPageReload(state) {
       state.reloadLastPage = !state.reloadLastPage;
+    },
+    setInitialLoadComplete(state, action: PayloadAction<boolean>) {
+      state.initialLoadComplete = action.payload;
+    },
+    setAuthToken(state, action: PayloadAction<string | null>) {
+      state.authToken = action.payload;
+      if (action.payload) {
+        localStorage.setItem('loginKey', action.payload);
+      } else {
+        localStorage.removeItem('loginKey');
+      }
+    },
+    setNewNoteMode(state, action: PayloadAction<string | null>) {
+      state.newNoteMode = action.payload;
     },
   },
 });
@@ -120,9 +139,13 @@ export const {
   resetPages,
   setPages,
   triggerLastPageReload,
+  setInitialLoadComplete,
+  setAuthToken,
+  setNewNoteMode,
 } = personSlice.actions;
 
 export const selectPersonById = (state: { person: PersonState }, id: string) => state.person.byId[id] || null;
 export const getAllPersonById = (state: { person: PersonState }) => state.person.byId || null;
+export const getAuthToken = (state: { person: PersonState }) => state.person.authToken;
 
 export default personSlice.reducer;

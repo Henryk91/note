@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { notesApi, NotesResponse } from '../api/notesApi';
 import { Note } from '../../../shared/utils/Helpers/types';
 import { toastNotifications, formatApiError } from '../../../shared/utils/toast';
-import { processGetAllNotes, allNotesToItems } from '../../../shared/utils/Helpers/utils';
+import { createInitPage, setLogDirAtTop, getStorageJsonData } from '../../../shared/utils/Helpers/utils';
 import { useEffect } from 'react';
 import { useDispatch, useStore } from 'react-redux';
 import { setByIdState, setPersonById, removePersonById } from '../../auth/store/personSlice';
@@ -68,7 +68,7 @@ export function useNotesWithChildren(parentId?: string, enabled: boolean = true)
       });
 
       return {
-        notes: rawData
+        notes: rawData,
       };
     },
     staleTime: 5 * 60 * 1000,

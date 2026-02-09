@@ -1,17 +1,15 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setTheme } from '../../../core/store/themeSlice';
 import { THEMES } from '../../utils/Helpers/const';
 import { RootState } from '../../../core/store';
 import { useNoteNames } from '../../../features/notes/hooks/useNotesQueries';
 import { useNotesLogic } from '../../../features/notes/hooks/useNotesLogic';
 
-export type SidebarProps = {
-};
+export type SidebarProps = {};
 
-type NoteNamesListProps = {
-};
+type NoteNamesListProps = {};
 
 type NoteThemesListProps = {
   names: string[];
@@ -19,8 +17,8 @@ type NoteThemesListProps = {
 };
 
 const NoteNamesList: React.FC<NoteNamesListProps> = () => {
-  const loginKey = localStorage.getItem('loginKey');
-  const { data: noteNames } = useNoteNames(!!loginKey);
+  const authToken = useSelector((state: RootState) => state.person.authToken);
+  const { data: noteNames } = useNoteNames(!!authToken);
 
   const { noteDetailSet } = useNotesLogic();
 

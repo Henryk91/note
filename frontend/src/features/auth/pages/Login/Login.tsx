@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { loginRequest, createAccount } from '../../../../shared/utils/Helpers/requests';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../core/store';
+import { setAuthToken } from '../../store/personSlice';
 import { toastNotifications } from '../../../../shared/utils/toast';
 
 const Login: React.FC = () => {
+  const dispatch = useDispatch();
   const theme = useSelector((state: RootState) => state.theme.themeLower);
   const [signUp, setSignUp] = useState(false);
   const themeBack = `${theme}-back`;
@@ -19,10 +21,10 @@ const Login: React.FC = () => {
     const user = { email, password };
     loginRequest(user, (res) => {
       if (res?.id) {
-        localStorage.setItem('loginKey', res.id);
+        dispatch(setAuthToken(res.id));
         window.location.href = '/notes/main';
       } else if (res?.user?.id) {
-        localStorage.setItem('loginKey', res?.user?.id);
+        dispatch(setAuthToken(res?.user?.id));
         window.location.href = '/notes/main';
       } else {
         toastNotifications.error('Login failed. Please check your credentials.');
@@ -55,7 +57,7 @@ const Login: React.FC = () => {
     };
     createAccount(user, (res) => {
       if (res.id) {
-        localStorage.setItem('loginKey', res.id);
+        dispatch(setAuthToken(res.id));
         window.location.reload();
       }
     });

@@ -44,11 +44,10 @@ const PreservedScrollSlide: React.FC<{ children: React.ReactNode }> = ({ childre
 };
 
 const NoteDetailPage: React.FC<NoteDetailPageProps> = ({}) => {
-  const { pages } = useSelector((state: RootState) => state.person);
+  const { pages, authToken } = useSelector((state: RootState) => state.person);
   const dispatch = useDispatch();
 
-  const loginKey = typeof window !== 'undefined' || localStorage.getItem('loginKey');
-  const isLoggedIn = !!loginKey;
+  const isLoggedIn = !!authToken;
   const { data: noteNames } = useNoteNames(isLoggedIn);
 
   const location = useLocation();

@@ -8,6 +8,7 @@ import {
   setShowAddItem,
   triggerLastPageReload,
   setShowTag,
+  setNewNoteMode,
 } from '../../auth/store/personSlice';
 import { Note, NoteContent, NoteItemType, ItemType } from '../../../shared/utils/Helpers/types';
 import { useCreateNote, useDeleteNote, useUpdateNote } from './useNotesQueries';
@@ -254,7 +255,7 @@ export const useNoteOperations = ({ person, index, openPage }: UseNoteOperations
   const cancelAddItemEdit = useCallback(() => {
     dispatch(setShowAddItem(false));
     setAddLabel(null);
-    localStorage.removeItem('new-folder-edit');
+    dispatch(setNewNoteMode(null));
   }, [dispatch]);
 
   return {

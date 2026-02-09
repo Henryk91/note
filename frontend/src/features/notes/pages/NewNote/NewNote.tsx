@@ -13,7 +13,7 @@ type NewNoteProps = {};
 const NewNote: React.FC<NewNoteProps> = () => {
   const dispatch = useDispatch();
   const theme = useSelector((state: RootState) => state.theme.themeLower);
-  const { selectedNoteName } = useSelector((state: RootState) => state.person);
+  const { selectedNoteName, newNoteMode } = useSelector((state: RootState) => state.person);
   const themeBack = `${theme}-back`;
   const themeHover = `${theme}-hover`;
 
@@ -27,7 +27,7 @@ const NewNote: React.FC<NewNoteProps> = () => {
   const addNewUser = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget;
-    const isEditing = localStorage.getItem('new-folder-edit');
+    const isEditing = !!newNoteMode;
     const heading = (isEditing ? 'Sub: ' : '') + (form.heading as HTMLInputElement).value;
     let number = (form.number as HTMLInputElement).value;
     let tag = (form.tagType as HTMLInputElement).value;

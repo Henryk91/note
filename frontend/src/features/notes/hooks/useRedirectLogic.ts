@@ -7,9 +7,8 @@ import { useNotesWithChildren, useNoteNames } from './useNotesQueries';
  * Hook for handling root path redirects and browser history management
  */
 export const useRedirectLogic = () => {
-  const selectedNoteName = useSelector((state: RootState) => state.person.selectedNoteName);
-  const loginKey = typeof window !== 'undefined' ? localStorage.getItem('loginKey') : null;
-  const isLoggedIn = !!loginKey;
+  const { selectedNoteName, authToken } = useSelector((state: RootState) => state.person);
+  const isLoggedIn = !!authToken;
 
   const { data: notesData } = useNotesWithChildren(selectedNoteName || undefined, isLoggedIn && !!selectedNoteName);
   const { data: noteNames } = useNoteNames(isLoggedIn);

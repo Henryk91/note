@@ -7,8 +7,9 @@ import {
   NewNumberField,
   NewUploadField,
 } from './NoteInputFields';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../core/store';
+import { setNewNoteMode } from '../../../auth/store/personSlice';
 
 type EditNoteCheckProps = {
   lable?: string;
@@ -28,7 +29,8 @@ const dateToInputDisplayDate = (date: Date) => {
 
 const EditNoteCheck: React.FC<EditNoteCheckProps> = ({ lable }) => {
   const theme = useSelector((state: RootState) => state.theme.themeLower);
-  const showTag = useSelector((state: RootState) => state.person.showTag);
+  const { showTag, newNoteMode } = useSelector((state: RootState) => state.person);
+  const dispatch = useDispatch();
 
   const [radioType, setRadioType] = useState('Note');
   const [upload, setUpload] = useState<string | null>(null);
@@ -68,27 +70,27 @@ const EditNoteCheck: React.FC<EditNoteCheckProps> = ({ lable }) => {
       localRadioType = 'Log';
     }
 
-    const wasEditing = localStorage.getItem('was-new-folder-edit');
+    const wasEditing = newNoteMode === 'edit-link'; // Use newNoteMode
     if (wasEditing) {
       localRadioType = 'Link';
     }
 
     return localRadioType;
-  }, [radioType, showTag]);
+  }, [radioType, showTag, newNoteMode]);
 
   useEffect(() => {
-    const wasEditing = localStorage.getItem('was-new-folder-edit');
+    const wasEditing = newNoteMode === 'edit-link';
     if (wasEditing) {
       setRadioType('Link');
       const timeout = setTimeout(() => {
         const el = document.getElementById('submit-new-note') as HTMLButtonElement;
         if (el) el.click();
-        localStorage.removeItem('was-new-folder-edit');
+        dispatch(setNewNoteMode(null));
       }, 100);
       return () => clearTimeout(timeout);
     }
     return undefined;
-  }, []);
+  }, [newNoteMode, dispatch]);
 
   return (
     <div className="slide-in1">

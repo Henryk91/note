@@ -74,7 +74,6 @@ const SearchBar: React.FC<SearchBarProps> = ({ set }) => {
       const term = searchTerm.toLowerCase();
       nextNotes = nextNotes.filter((val) => val.heading.toLowerCase().includes(term));
     }
-    if (userName) localStorage.setItem('user', userName);
     set({
       filteredNotes: nextNotes,
       user: userName,

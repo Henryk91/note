@@ -1,12 +1,11 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../core/store';
 import { useNotesWithChildren, useNoteNames } from './useNotesQueries';
 import { useOnlineStatus } from '../../../shared/hooks/useOnlineStatus';
-import { useNotesInitializer } from './useNotesInitializer';
 import { useRedirectLogic } from './useRedirectLogic';
 import { useNotesActions } from './useNotesActions';
-import { setSelectedNoteName, setSearchTerm } from '../../auth/store/personSlice';
+import { setSelectedNoteName, setSearchTerm, setInitialLoadComplete } from '../../auth/store/personSlice';
 
 /**
  * Cleaned up useNotesLogic using decomposed hooks
@@ -15,14 +14,16 @@ export const useNotesLogic = () => {
   const dispatch = useDispatch();
 
   // 1. Initial State & Auth
-  const { notesInitialLoad, checkLoginState, markAsInitialized } = useNotesInitializer();
-  const loginKey = typeof window !== 'undefined' ? localStorage.getItem('loginKey') : null;
-  const isLoggedIn = !!loginKey;
+  // Replaced useNotesInitializer with Redux state
+  const authToken = useSelector((state: RootState) => state.person.authToken);
+  const isLoggedIn = !!authToken;
 
   // 2. Client State (Redux)
   const selectedNoteName = useSelector((state: RootState) => state.person.selectedNoteName);
   const pages = useSelector((state: RootState) => state.person.pages);
   const searchTerm = useSelector((state: RootState) => state.person.searchTerm);
+  const initialLoadComplete = useSelector((state: RootState) => state.person.initialLoadComplete); // From Redux
+
   const isLastPage = Array.isArray(pages) && pages.length > 0 ? pages[pages.length - 1] : undefined;
   const reloadLastPage = useSelector((state: RootState) => state.person.reloadLastPage);
 
@@ -43,6 +44,12 @@ export const useNotesLogic = () => {
   // 5. Decomposed Logics
   const { setRedirect } = useRedirectLogic();
   const { noteDetailSet, addNewNote } = useNotesActions(searchTerm);
+
+  const checkLoginState = useCallback(() => {
+    if (!authToken) {
+      dispatch(setInitialLoadComplete(false));
+    }
+  }, [dispatch, authToken]);
 
   // 6. Navigation Helpers
   const getLastPageData = useCallback(
@@ -69,31 +76,32 @@ export const useNotesLogic = () => {
 
   // Auto-select first notebook name on initial load/login
   useEffect(() => {
+    // Only run if we have note names, are logged in, and haven't selected a note yet
     if (noteNamesData && isLoggedIn && !selectedNoteName) {
-      const hasInitialized = sessionStorage.getItem('notesInitialLoad') === 'true';
-      if (!hasInitialized && noteNamesData.length > 0) {
+      // Logic replaced sessionStorage with Redux state
+      if (!initialLoadComplete && noteNamesData.length > 0) {
         dispatch(setSelectedNoteName(noteNamesData[0]));
-        markAsInitialized();
+        dispatch(setInitialLoadComplete(true));
       }
     }
-  }, [noteNamesData, isLoggedIn, selectedNoteName, dispatch, markAsInitialized]);
+  }, [noteNamesData, isLoggedIn, selectedNoteName, dispatch, initialLoadComplete]);
 
   // Refetch when coming back online
   useEffect(() => {
-    if (isOnline && notesInitialLoad) {
+    if (isOnline && initialLoadComplete) {
       const timer = setTimeout(() => {
         getLastPageData(true);
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [isOnline, notesInitialLoad, getLastPageData]);
+  }, [isOnline, initialLoadComplete, getLastPageData]);
 
   // Refetch when last page changes
   useEffect(() => {
-    if (isLastPage?.params.id && notesInitialLoad) {
+    if (isLastPage?.params.id && initialLoadComplete) {
       getLastPageData(true);
     }
-  }, [isLastPage?.params.id, reloadLastPage, notesInitialLoad, getLastPageData]);
+  }, [isLastPage?.params.id, reloadLastPage, initialLoadComplete, getLastPageData]);
 
   // Handle root path redirects when data is ready
   useEffect(() => {
