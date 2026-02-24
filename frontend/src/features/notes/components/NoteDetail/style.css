@@ -15,6 +15,9 @@
   padding: 0px;
   margin: 0px;
 }
+.logDetailPadding {
+  padding-bottom: 40vh;
+}
 .detailEditBoxButton {
   font-size: 20px;
   display: inline-block !important;

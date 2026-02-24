@@ -43,7 +43,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
   }
 
   return (
-    <div className="slide-in">
+    <div className={`slide-in ${heading === 'Log' && 'logDetailPadding' }`}>
       <div id={!isLastPage ? 'isFirstPage' : ''} className={`${className} note-detail-item`} key={personToRender?.id}>
         {editName ? (
           <div>
