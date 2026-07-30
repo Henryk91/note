@@ -76,7 +76,7 @@ const DisplayLogItemBox: React.FC<DisplayLogItemBoxProps> = ({
             )}
           </span>
           <div
-            className={`noteItem ${hasBreak ? 'logNoteItem' : null} dangerous-text`}
+            className={`noteItem ${hasBreak ? 'logNoteItem' : null} dangerous-text swiper-no-swiping`}
             dangerouslySetInnerHTML={getMarkdownText(item.data)}
           />
         </div>
