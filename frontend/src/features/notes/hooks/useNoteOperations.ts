@@ -11,6 +11,7 @@ import {
   setNewNoteMode,
 } from '../../auth/store/personSlice';
 import { Note, NoteContent, NoteItemType, ItemType } from '../../../shared/utils/Helpers/types';
+import { scrollActiveSlideToTop } from '../../../shared/utils/Helpers/utils';
 import { useCreateNote, useDeleteNote, useUpdateNote } from './useNotesQueries';
 
 type UseNoteOperationsProps = {
@@ -66,7 +67,7 @@ export const useNoteOperations = ({ person, openPage }: UseNoteOperationsProps) 
     (val: any) => {
       setAddLabel(val.cont);
       dispatch(setShowAddItem(true));
-      window.scrollTo(0, 0);
+      scrollActiveSlideToTop();
     },
     [dispatch],
   );

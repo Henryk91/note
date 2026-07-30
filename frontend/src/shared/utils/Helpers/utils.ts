@@ -70,6 +70,15 @@ export const getStorageJsonData = (key: string, defaultValue?: any) => {
   return defaultValue;
 };
 
+export const scrollActiveSlideToTop = () => {
+  const activeSlide = document.querySelector('.swiper-slide-active .scrollable-content');
+  if (activeSlide) {
+    activeSlide.scrollTo({ top: 0 });
+  } else {
+    window.scrollTo(0, 0);
+  }
+};
+
 export const setLogDirAtTop = (person: Note) => {
   const logFolder = person?.dataLable?.find((d) => d.name === 'Log');
   if (!logFolder) return person;

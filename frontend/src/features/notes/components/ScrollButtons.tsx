@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { RootState } from '../../../core/store';
 import { setEditName, setShowAddItem } from '../../../features/auth/store/personSlice';
 import { useOnlineStatus } from '../../../shared/hooks/useOnlineStatus';
+import { scrollActiveSlideToTop } from '../../../shared/utils/Helpers/utils';
 
 export type ScrollButtonsProps = {};
 
@@ -20,11 +21,11 @@ export const ScrollButtons: React.FC<ScrollButtonsProps> = ({}) => {
 
   const addButtonClicked = () => {
     dispatch(setShowAddItem(!showAddItem));
-    if (!showAddItem) window.scrollTo(0, 0);
+    if (!showAddItem) scrollActiveSlideToTop();
   };
 
   const editNameClick = () => {
-    window.scrollTo(0, 0);
+    scrollActiveSlideToTop();
     dispatch(setEditName(!editName));
   };
 
@@ -38,18 +39,7 @@ export const ScrollButtons: React.FC<ScrollButtonsProps> = ({}) => {
       <button className={`editButtons1 detailUpButton ${themeHover} ${themeBack}`} onClick={editNameClick}>
         <FontAwesomeIcon icon={faPen} />
       </button>
-      <div
-        className={`detailUpButton ${themeHover} ${themeBack}`}
-        onClick={() => {
-          // Find the active slide's scrollable container
-          const activeSlide = document.querySelector('.swiper-slide-active .scrollable-content');
-          if (activeSlide) {
-            activeSlide.scrollTo({ top: 0 });
-          } else {
-            window.scrollTo(0, 0);
-          }
-        }}
-      >
+      <div className={`detailUpButton ${themeHover} ${themeBack}`} onClick={scrollActiveSlideToTop}>
         <FontAwesomeIcon icon={faArrowUp} size="lg" />
       </div>
       <div
