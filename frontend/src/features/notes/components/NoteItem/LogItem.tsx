@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NoteContent, NoteItemType } from '../../../../shared/utils/Helpers/types';
 import { useNoteItemLogic } from '../../hooks/useNoteItemLogic';
 import { EditItemBox, getMarkdownText } from './NoteItem';
@@ -40,6 +40,21 @@ const DisplayLogItemBox: React.FC<DisplayLogItemBoxProps> = ({
   onEdit,
 }) => {
   const theme = useSelector((state: RootState) => state.theme.themeLower);
+  const [, setNow] = useState(0);
+
+  // The open-ended duration is based on the current time, so refresh it when the app regains focus.
+  useEffect(() => {
+    if (nextItem) return;
+    const refresh = () => {
+      if (document.visibilityState === 'visible') setNow(Date.now());
+    };
+    document.addEventListener('visibilitychange', refresh);
+    window.addEventListener('focus', refresh);
+    return () => {
+      document.removeEventListener('visibilitychange', refresh);
+      window.removeEventListener('focus', refresh);
+    };
+  }, [nextItem]);
 
   if (!show) return null;
 
