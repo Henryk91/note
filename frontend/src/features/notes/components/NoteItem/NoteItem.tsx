@@ -65,8 +65,10 @@ export const EditItemBox: React.FC<EditItemBoxProps> = ({
     editInputDate = dateToInputDisplayDate(new Date(editDate));
   }
 
+  // swiper-no-swiping: stops Swiper from blurring the focused field on the
+  // smallest finger move, which closed the keyboard and swallowed the first tap.
   return (
-    <form onSubmit={onSubmit} className="noteItemEditBox">
+    <form onSubmit={onSubmit} className="noteItemEditBox swiper-no-swiping">
       {isLog && (
         <>
           <input

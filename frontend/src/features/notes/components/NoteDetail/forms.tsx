@@ -31,8 +31,10 @@ export const EditNameForm: React.FC<EditNameFormProps> = ({ heading, onSubmit })
   const theme = useSelector((state: RootState) => state.theme.themeLower);
   const themeBack = `${theme}-back`;
   const themeHover = `${theme}-hover`;
+  // swiper-no-swiping: stops Swiper from blurring the focused field on the
+  // smallest finger move, which closed the keyboard and swallowed the first tap.
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={onSubmit} className="swiper-no-swiping">
       <br />
       <input
         autoFocus
@@ -64,8 +66,10 @@ export const AddItemForm: React.FC<AddItemFormProps> = ({ addLabel, onSubmit, on
   const theme = useSelector((state: RootState) => state.theme.themeLower);
   const themeBack = `${theme}-back`;
   const themeHover = `${theme}-hover`;
+  // swiper-no-swiping: stops Swiper from blurring the focused field on the
+  // smallest finger move, which closed the keyboard and swallowed the first tap.
   return (
-    <div className="add-item-comp">
+    <div className="add-item-comp swiper-no-swiping">
       <form onSubmit={onSubmit}>
         <EditNoteCheck lable={addLabel} />
         <br />
