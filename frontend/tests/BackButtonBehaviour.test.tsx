@@ -19,11 +19,11 @@ describe('BackButton', () => {
 
   test('renders a labelled back button inside a folder', () => {
     renderWithProviders(<BackButton />, { preloadedState: stateWithPages(['Henry', 'Henry::FOLDER::Train']) });
-    expect(screen.getByRole('button', { name: 'Back' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /^Back/ })).toBeTruthy();
   });
 
   test('toPath makes it always visible for pages outside the folder stack', () => {
     renderWithProviders(<BackButton toPath="/notes/main" />, { preloadedState: stateWithPages(['Henry']) });
-    expect(screen.getByRole('button', { name: 'Back' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /^Back/ })).toBeTruthy();
   });
 });

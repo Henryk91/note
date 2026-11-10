@@ -12,6 +12,8 @@ import { LogListRow } from '../../log/LogListRow';
 interface NoteDetailTagsProps {
   person: Note;
   isLastPage: boolean;
+  /** Wide layouts show folders and logs in the list pane, so the editor only shows the note's own blocks. */
+  hideFolders?: boolean;
   actions: {
     showHideBox: (prop: string) => void;
     saveShowTag: (tag: string) => void;
@@ -21,7 +23,7 @@ interface NoteDetailTagsProps {
   };
 }
 
-const NoteDetailTags: React.FC<NoteDetailTagsProps> = ({ person, isLastPage, actions }) => {
+const NoteDetailTags: React.FC<NoteDetailTagsProps> = ({ person, isLastPage, hideFolders = false, actions }) => {
   const byId = useSelector((state: RootState) => state.person.byId);
   const persons = byId;
 
@@ -32,7 +34,7 @@ const NoteDetailTags: React.FC<NoteDetailTagsProps> = ({ person, isLastPage, act
 
   return (
     <div className={'detailedBox'}>
-      {person?.dataLable?.map((noteItem, i) => {
+      {person?.dataLable?.filter((item) => !(hideFolders && item.type === 'FOLDER')).map((noteItem, i) => {
         const isLink = noteItem.type === 'FOLDER';
         const isNote = noteItem.type === 'NOTE';
         const isLogDirectory = noteItem.name === 'Log';

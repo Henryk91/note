@@ -38,6 +38,7 @@ export const LogListRow: React.FC<LogListRowProps> = ({ logItem, items, onOpen }
             <div className="log-row-sub">No entries yet</div>
           )}
         </span>
+        {items && items.length > 0 && <span className="row-count">{items.length}</span>}
       </button>
     </div>
   );

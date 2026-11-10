@@ -1,14 +1,16 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Sidebar } from '../../../../shared/components/organisms/Sidebar';
-import { ScrollButtons } from '../../components/ScrollButtons';
+import { BottomToolbar } from '../../layout/BottomToolbar';
 import { BackButton } from '../../../../shared/components/atoms/BackButton';
 
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../../../core/store';
-import { removeLastPage, setShowTag } from '../../../auth/store/personSlice';
+import { removeLastPage, setPages, setShowTag } from '../../../auth/store/personSlice';
 
 import { useNoteNames } from '../../hooks/useNotesQueries';
 import { useLocation } from 'react-router-dom';
+import { useBreakpoint } from '../../layout/useBreakpoint';
+import { DesktopLayout } from '../../layout/DesktopLayout';
 import { useFolderUrlSync } from '../../hooks/useFolderUrlSync';
 import { isLogId } from '../../log/useLogData';
 import NoteDetail from '../../components/NoteDetail/NoteDetail';
@@ -35,7 +37,7 @@ const PreservedScrollSlide: React.FC<{ children: React.ReactNode; isLog?: boolea
       style={{
         height: '100%',
         overflowY: 'auto',
-        paddingBottom: '15vh',
+        paddingBottom: 'calc(var(--toolbar-h) + 24px)',
       }}
     >
       {children}
@@ -53,7 +55,8 @@ const NoteDetailPage: React.FC = () => {
   const location = useLocation();
   const isNoteNames = location.pathname === '/notes/note-names';
 
-  useFolderUrlSync();
+  const breakpoint = useBreakpoint();
+  useFolderUrlSync({ selectionMode: breakpoint !== 'mobile' });
 
   const [swiperInstance, setSwiperInstance] = useState<SwiperType | null>(null);
 
@@ -66,12 +69,9 @@ const NoteDetailPage: React.FC = () => {
 
   const handleBack = () => {
     if (swiperInstance) {
+      // The stack is trimmed when the slide has finished moving (see onSlideChangeTransitionEnd), which also covers
+      // swiping back with a finger.
       swiperInstance.slidePrev();
-
-      setTimeout(() => {
-        dispatch(setShowTag(null));
-        dispatch(removeLastPage());
-      }, 350);
     } else {
       dispatch(setShowTag(null));
       dispatch(removeLastPage());
@@ -79,6 +79,9 @@ const NoteDetailPage: React.FC = () => {
   };
 
   if (isNoteNames) return <Sidebar />;
+
+  // Wide screens: sidebar + list + editor instead of the stacked pages.
+  if (breakpoint !== 'mobile') return <DesktopLayout breakpoint={breakpoint} />;
 
   return (
     <div
@@ -111,6 +114,12 @@ const NoteDetailPage: React.FC = () => {
             spaceBetween={0}
             slidesPerView={1}
             onSwiper={(swiper) => setSwiperInstance(swiper)}
+            onSlideChangeTransitionEnd={(swiper) => {
+              if (swiper.activeIndex < pages.length - 1) {
+                dispatch(setShowTag(null));
+                dispatch(setPages(pages.slice(0, swiper.activeIndex + 1)));
+              }
+            }}
             style={{ width: '100%', height: '100%' }}
             allowTouchMove={true}
           >
@@ -128,7 +137,7 @@ const NoteDetailPage: React.FC = () => {
       </div>
 
       <div style={{ pointerEvents: 'auto' }}>
-        <ScrollButtons />
+        <BottomToolbar />
       </div>
     </div>
   );

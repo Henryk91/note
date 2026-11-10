@@ -107,6 +107,12 @@ export class NoteController {
     res.json(result);
   });
 
+  getPathV2 = asyncHandler(async (req: Request, res: Response) => {
+    const { userId } = req.auth!;
+    const { id } = req.query as { id: string };
+    res.json(await noteService.getPath(userId, id));
+  });
+
   getPinnedLogsV2 = asyncHandler(async (req: Request, res: Response) => {
     const { userId } = req.auth!;
     res.json(await noteService.getPinnedLogs(userId));

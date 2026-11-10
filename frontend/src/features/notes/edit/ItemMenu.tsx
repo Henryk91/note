@@ -25,7 +25,11 @@ export const ItemMenu: React.FC<{ label: string; items: ItemMenuEntry[] }> = ({ 
 
   return (
     <span ref={ref} className="item-menu">
-      <button type="button" className="item-menu-btn" aria-label={label} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+      <button type="button" className="item-menu-btn" aria-label={label} aria-haspopup="menu" aria-expanded={open} onClick={(e) => {
+          e.stopPropagation(); // do not also select / open the row this menu sits in
+          setOpen((v) => !v);
+        }}
+      >
         <FontAwesomeIcon icon={faEllipsisH} />
       </button>
       {open && (
@@ -36,7 +40,8 @@ export const ItemMenu: React.FC<{ label: string; items: ItemMenuEntry[] }> = ({ 
               role="menuitem"
               key={it.label}
               className={it.danger ? 'danger' : ''}
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 setOpen(false);
                 it.onSelect();
               }}

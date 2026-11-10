@@ -62,6 +62,10 @@ export const EmptyDeletedQuerySchema = z.object({
   olderThanDays: z.coerce.number().int().min(0).optional(),
 });
 
+export const PathQuerySchema = z.object({
+  id: z.string().min(1, 'ID is required'),
+});
+
 export const SearchQuerySchema = z.object({
   q: z.string().trim().min(1, 'Query is required').max(200),
   limit: z.coerce.number().int().min(1).max(100).optional(),

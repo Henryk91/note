@@ -92,7 +92,10 @@ export const QuickLogSheet: React.FC<{ enabled: boolean }> = ({ enabled }) => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'l') {
         e.preventDefault();
-        setOpen((v) => !v);
+        // Inside a log: new log entry (focus the box). Anywhere else: the quick log sheet.
+        const box = document.querySelector<HTMLTextAreaElement>('.log-screen textarea');
+        if (box) box.focus();
+        else setOpen((v) => !v);
       } else if (e.key === 'Escape') {
         setOpen(false);
       }

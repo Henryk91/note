@@ -11,6 +11,7 @@ import {
   V2ParentQuerySchema,
   DeletedQuerySchema,
   EmptyDeletedQuerySchema,
+  PathQuerySchema,
 } from '../validation/schemas';
 
 const router = Router();
@@ -24,6 +25,7 @@ router.get(
   validateQuery(V2ParentQuerySchema),
   noteController.getV2ContentWithChildren,
 );
+router.get('/note-v2/path', isAuthenticated, validateQuery(PathQuerySchema), noteController.getPathV2);
 router.get('/note-v2/pinned-logs', isAuthenticated, noteController.getPinnedLogsV2);
 router.get('/note-v2/deleted', isAuthenticated, validateQuery(DeletedQuerySchema), noteController.getDeletedV2);
 router.delete(

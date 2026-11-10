@@ -17,6 +17,7 @@ type SearchBarState = {
 };
 
 import { useNotesWithChildren } from '../../hooks/useNotesQueries';
+import { FOCUS_SEARCH_EVENT } from '../../layout/events';
 
 const SearchBar: React.FC<SearchBarProps> = ({ set }) => {
   const selectedNoteName = useSelector((state: RootState) => state.person.selectedNoteName);
@@ -34,6 +35,16 @@ const SearchBar: React.FC<SearchBarProps> = ({ set }) => {
   useEffect(() => {
     setState((prev) => ({ ...prev, currentNoteName: selectedNoteName }));
   }, [selectedNoteName]);
+
+  // Ctrl/Cmd+F: open the search box and focus it.
+  useEffect(() => {
+    const open = () => {
+      setState((prev) => ({ ...prev, showSearch: true, editName: false }));
+      setTimeout(() => document.getElementById('searchBox')?.focus(), 50);
+    };
+    window.addEventListener(FOCUS_SEARCH_EVENT, open);
+    return () => window.removeEventListener(FOCUS_SEARCH_EVENT, open);
+  }, []);
 
   const toggleSearch = (e) => {
     e.stopPropagation();

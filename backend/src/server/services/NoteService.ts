@@ -283,6 +283,20 @@ export class NoteService {
     return { ok: true, deletedCount: subtreeIds.length, deletedAt };
   }
 
+  /** The real chain of ancestors (root first, the item last), following `parentId`. Survives moved items. */
+  async getPath(userId: string, id: string) {
+    const chain: Array<{ id: string; name?: string; parentId: string; type: string }> = [];
+    const seen = new Set<string>();
+    let current = await this.repo.findNoteV2ById(userId, id);
+    while (current && !seen.has(current.id)) {
+      seen.add(current.id);
+      chain.unshift({ id: current.id, name: current.name, parentId: current.parentId, type: current.type });
+      // eslint-disable-next-line no-await-in-loop
+      current = current.parentId ? await this.repo.findNoteV2ById(userId, current.parentId) : null;
+    }
+    return chain;
+  }
+
   /** Pinned logs with a label made from the parent path ("Koorvi / Track"), for the quick-log sheet. */
   async getPinnedLogs(userId: string) {
     const pinned = await this.repo.findPinnedLogsV2(userId);

@@ -182,6 +182,28 @@ describe('Pinned logs', () => {
   });
 });
 
+describe('Move and path', () => {
+  it('moves an item with PUT parentId and returns its real ancestor path afterwards', async () => {
+    await seedTree();
+    const before = await agent.get('/api/note-v2/path').query({ id: 'nb::f::sub::n2' });
+    expect(before.body.map((n: any) => n.id)).to.deep.equal(['nb', 'nb::f', 'nb::f::sub', 'nb::f::sub::n2']);
+
+    const moved = await agent.put('/api/note-v2').send({ id: 'nb::f::sub::n2', parentId: 'nb' });
+    expect(moved.status).to.equal(200);
+    expect(moved.body.parentId).to.equal('nb');
+    const after = await agent.get('/api/note-v2/path').query({ id: 'nb::f::sub::n2' });
+    expect(after.body.map((n: any) => n.id)).to.deep.equal(['nb', 'nb::f::sub::n2']);
+    const sub = await agent.get('/api/note-v2').query({ parentId: 'nb::f::sub' });
+    expect(sub.body).to.have.length(0);
+  });
+
+  it('path is scoped to the user and empty for unknown ids', async () => {
+    const res = await agent.get('/api/note-v2/path').query({ id: 'does-not-exist' });
+    expect(res.status).to.equal(200);
+    expect(res.body).to.deep.equal([]);
+  });
+});
+
 describe('SPA routing', () => {
   it('serves index.html for deep links instead of redirecting', async () => {
     for (const p of ['/f/abc', '/n/abc', '/notes/main']) {

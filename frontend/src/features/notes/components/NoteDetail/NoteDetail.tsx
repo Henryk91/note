@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import NoteDetailTags from './NoteDetailTags';
@@ -16,6 +16,7 @@ import { Note } from '../../../../shared/utils/Helpers/types';
 import { useNoteNavigation } from '../../hooks/useNoteNavigation';
 import { LogScreen } from '../../log/LogScreen';
 import { isLogId } from '../../log/useLogData';
+import { MoveToSheet } from '../../layout/MoveToSheet';
 import { PinnedLogs } from '../../log/PinnedLogs';
 import { useNoteOperations } from '../../hooks/useNoteOperations';
 
@@ -54,6 +55,19 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
   const parentMutations = useItemMutations(parentId || pageLink?.params.id || '');
   const deleteWithUndo = useDeleteWithUndo(parentMutations);
 
+  // Large title that collapses into a small sticky title once it scrolls out of view (iOS style).
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const [collapsed, setCollapsed] = useState(false);
+  const [moving, setMoving] = useState(false);
+  useEffect(() => {
+    const el = titleRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return undefined;
+    const root = el.closest('.scrollable-content');
+    const io = new IntersectionObserver(([entry]) => setCollapsed(!entry.isIntersecting), { root: root as Element | null, threshold: 0 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [pageLink?.params.id, editName]);
+
   // A log is not a list of items: it gets its own screen (quick entry box, day navigation, timeline).
   if (isLogId(pageLink?.params.id)) return <LogScreen logId={pageLink.params.id} />;
 
@@ -61,6 +75,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
   const titleMenu: ItemMenuEntry[] = [];
   if (folderItem) {
     titleMenu.push({ label: 'Rename', onSelect: () => dispatch(setEditName(true)) });
+    titleMenu.push({ label: 'Move to...', onSelect: () => setMoving(true) });
     titleMenu.push({
       label: 'Delete folder',
       danger: true,
@@ -97,6 +112,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
   return (
     <div className={`slide-in ${heading === 'Log' && 'logDetailPadding' }`}>
       <div id={!isLastPage ? 'isFirstPage' : ''} className={`${className} note-detail-item`} key={personToRender?.id}>
+        {collapsed && isLastPage && !editName && <div className="sticky-title">{heading}</div>}
         {editName ? (
           <div>
             <EditNameForm heading={person?.heading ?? ''} onSubmit={submitNameChange} />
@@ -104,7 +120,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
         ) : (
           <div id="personContainer" className="page-content-top1">
             <div className="doc-title-row">
-              <h1 id="personHead" className="nameBox">
+              <h1 id="personHead" className="nameBox" ref={titleRef}>
                 {heading || '<NAME NOT SET>'}
               </h1>
               {isLastPage && <ItemMenu label="Folder options" items={titleMenu} />}
@@ -130,6 +146,19 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
         />
         <br />
       </div>
+      {moving && folderItem && (
+        <MoveToSheet
+          item={folderItem as any}
+          notebook={pages[0]?.params.id ?? ''}
+          initiallyOpen={pages.map((p) => p.params.id)}
+          onPick={(target) => {
+            void parentMutations.move(folderItem as any, target);
+            dispatch(setShowTag(null));
+            dispatch(removeLastPage());
+          }}
+          onClose={() => setMoving(false)}
+        />
+      )}
     </div>
   );
 };

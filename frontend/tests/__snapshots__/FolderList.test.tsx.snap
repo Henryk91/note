@@ -27,11 +27,6 @@ exports[`FolderList matches snapshot 1`] = `
             fill="currentColor"
           />
         </svg>
-        <span
-          class="list-count-folder-number"
-        >
-          5
-        </span>
       </span>
     </div>
     <h3
@@ -39,6 +34,11 @@ exports[`FolderList matches snapshot 1`] = `
     >
       Folder Name 
     </h3>
+    <span
+      class="row-count"
+    >
+      5
+    </span>
   </div>
 </DocumentFragment>
 `;

@@ -16,7 +16,7 @@ export const BackButton: React.FC<BackButtonProps> = ({ onCustomBack, toPath }) 
   const dispatch = useDispatch();
   const history = useHistory();
 
-  const { pages } = useSelector((state: RootState) => state.person);
+  const { pages, byId, selectedNoteName } = useSelector((state: RootState) => state.person);
 
   const onBack = useCallback(() => {
     if (onCustomBack) {
@@ -33,6 +33,14 @@ export const BackButton: React.FC<BackButtonProps> = ({ onCustomBack, toPath }) 
   const theme = useSelector((state: RootState) => state.theme.themeLower);
   const themeBack = `${theme}-back`;
   const hasPages = pages?.length > 1;
+  // iOS style: the chevron is labelled with the name of the folder it goes back to.
+  const parentId = hasPages && !toPath ? pages[pages.length - 2]?.params.id : '';
+  const grandParentId = hasPages && !toPath && pages.length > 2 ? pages[pages.length - 3]?.params.id : '';
+  const parentLabel = parentId
+    ? parentId === pages[0]?.params.id
+      ? (selectedNoteName ?? parentId)
+      : (byId[grandParentId]?.dataLable?.find((d) => d.id === parentId)?.name ?? byId[parentId]?.heading ?? '')
+    : '';
 
   // Back never turns into Logout: at the root there is simply no back button (Logout lives in the menu).
   if (!hasPages && !toPath) return null;
@@ -41,10 +49,11 @@ export const BackButton: React.FC<BackButtonProps> = ({ onCustomBack, toPath }) 
     <button
       className={`backButton ${themeBack}`}
       onClick={toPath ? () => history.push(toPath) : onBack}
-      aria-label="Back"
+      aria-label={parentLabel ? `Back to ${parentLabel}` : 'Back'}
       title="Back"
     >
       <FontAwesomeIcon icon={faArrowLeft} />
+      {parentLabel && <span className="back-label">{parentLabel}</span>}
     </button>
   );
 };

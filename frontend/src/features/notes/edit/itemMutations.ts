@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { sendOrQueueJSON } from '../../../offlineQueue/queue';
 import { ItemType, NoteItemType } from '../../../shared/utils/Helpers/types';
 import { formatApiError, toastNotifications } from '../../../shared/utils/toast';
+import { notesKeys } from '../hooks/useNotesQueries';
 import { clearPendingId, markPendingId, newItemId, patchLog, trackQueued } from '../log/logApi';
 
 // ---- "Saving... / Saved" indicator ------------------------------------------------------------------
@@ -60,6 +61,8 @@ export type ItemMutations = {
   rename: (item: NoteItemType, name: string) => Promise<void>;
   remove: (item: NoteItemType) => Promise<void>;
   restore: (item: NoteItemType) => Promise<void>;
+  /** Moves an item (PUT parentId) from this folder into another one. The id stays the same. */
+  move: (item: NoteItemType, newParentId: string) => Promise<void>;
 };
 
 /**
@@ -72,7 +75,14 @@ export const useItemMutations = (folderId: string): ItemMutations => {
   const create = useCallback<ItemMutations['create']>(
     async (type, text, id, extra) => {
       const itemId = id ?? newItemId(folderId, type);
-      const item = { id: itemId, parentId: folderId, type, content: { data: text }, ...extra } as NoteItemType;
+      // Folders have no content (an empty `data` string is rejected by the schema's `required`).
+      const item = {
+        id: itemId,
+        parentId: folderId,
+        type,
+        ...(type === ItemType.FOLDER ? {} : { content: { data: text } }),
+        ...extra,
+      } as NoteItemType;
       patchLog(qc, folderId, (items) => (items.some((i) => i.id === itemId) ? items : [...items, item]));
       markPendingId(itemId);
       beginSave();
@@ -165,5 +175,32 @@ export const useItemMutations = (folderId: string): ItemMutations => {
     [qc, folderId],
   );
 
-  return useMemo(() => ({ create, updateText, rename, remove, restore }), [create, updateText, rename, remove, restore]);
+  const move = useCallback<ItemMutations['move']>(
+    async (item, newParentId) => {
+      if (item.id === newParentId || item.parentId === newParentId) return;
+      const moved = { ...item, parentId: newParentId } as NoteItemType;
+      patchLog(qc, folderId, (items) => items.filter((i) => i.id !== item.id));
+      // The destination list is only patched if it is already loaded; otherwise it simply loads fresh later.
+      if (qc.getQueryData(notesKeys.withChildren(newParentId))) {
+        patchLog(qc, newParentId, (items) => (items.some((i) => i.id === item.id) ? items : [...items, moved]));
+      }
+      beginSave();
+      try {
+        const res = await sendOrQueueJSON('/api/note-v2', { id: item.id, parentId: newParentId }, { method: 'PUT' });
+        endSave({ queued: res.queued });
+        qc.invalidateQueries({ queryKey: [...notesKeys.all, 'path'] });
+      } catch (err) {
+        endSave({ failed: true });
+        patchLog(qc, folderId, (items) => (items.some((i) => i.id === item.id) ? items : [...items, item]));
+        patchLog(qc, newParentId, (items) => items.filter((i) => i.id !== item.id));
+        toastNotifications.error(`Failed to move: ${formatApiError(err)}`);
+      }
+    },
+    [qc, folderId],
+  );
+
+  return useMemo(
+    () => ({ create, updateText, rename, remove, restore, move }),
+    [create, updateText, rename, remove, restore, move],
+  );
 };

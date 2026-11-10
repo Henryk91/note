@@ -4,6 +4,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { RootState } from '../../../core/store';
 import { setPages, setSelectedNoteName } from '../../auth/store/personSlice';
 import { PageDescriptor } from '../../../shared/utils/Helpers/types';
+import { apiFetch } from '../../../shared/utils/Helpers/apiFetch';
 
 const page = (id: string): PageDescriptor => ({ params: { id, tempId: id } });
 
@@ -52,7 +53,15 @@ const isStackRoute = (pathname: string) =>
  * Keeps the URL and the navigation stack (Redux `pages`) in sync, so a folder has a real URL (`/f/:folderId`),
  * a refresh stays on the same folder and the browser Back button walks back up the stack.
  */
-export const useFolderUrlSync = () => {
+type SyncOptions = {
+  /**
+   * Wide layouts: `/n/:id` means "folder = parent of id, with id selected in the list pane". On phones `/n/:id`
+   * is the same screen as `/f/:id`.
+   */
+  selectionMode?: boolean;
+};
+
+export const useFolderUrlSync = ({ selectionMode = false }: SyncOptions = {}) => {
   const dispatch = useDispatch();
   const history = useHistory();
   const { pathname } = useLocation();
@@ -70,8 +79,11 @@ export const useFolderUrlSync = () => {
 
     const folderId = folderIdFromPath(pathname);
     if (folderId) {
-      const chain = buildFolderChain(folderId);
+      const full = buildFolderChain(folderId);
+      const isSelection = selectionMode && pathname.startsWith('/n/') && full.length > 1;
+      const chain = isSelection ? full.slice(0, -1) : full;
       const targetId = chain[chain.length - 1];
+
       if (targetId === lastId) return;
       pendingTarget.current = targetId;
       const existing = pages.findIndex((p) => p.params.id === targetId);
@@ -81,6 +93,19 @@ export const useFolderUrlSync = () => {
       }
       if (chain[0] !== selectedNoteName) dispatch(setSelectedNoteName(chain[0]));
       dispatch(setPages(chain.map(page)));
+      // Items can be moved, so the id alone may not be the real path: ask the server once and correct the stack.
+      void apiFetch(`/api/note-v2/path?id=${encodeURIComponent(folderId)}`)
+        .then((r) => (r.ok ? r.json() : []))
+        .then((path: Array<{ id: string; type: string }>) => {
+          if (!Array.isArray(path) || path.length === 0 || window.location.pathname !== pathname) return;
+          const folders = path.filter((p) => p.type === 'FOLDER');
+          const ids = (isSelection ? folders.filter((p) => p.id !== folderId) : folders).map((p) => p.id);
+          if (ids.length === 0 || ids.join('|') === chain.join('|')) return;
+          pendingTarget.current = ids[ids.length - 1];
+          if (ids[0] !== chain[0]) dispatch(setSelectedNoteName(ids[0]));
+          dispatch(setPages(ids.map(page)));
+        })
+        .catch(() => undefined);
       return;
     }
 
@@ -98,6 +123,11 @@ export const useFolderUrlSync = () => {
     if (pendingTarget.current) {
       if (pendingTarget.current === lastId) pendingTarget.current = null;
       return;
+    }
+    if (selectionMode && pathname.startsWith('/n/')) {
+      const sel = folderIdFromPath(pathname);
+      const chain = sel ? buildFolderChain(sel) : [];
+      if (chain.length > 1 && chain[chain.length - 2] === lastId) return; // the folder of the selected item is open
     }
     const desired = pages.length > 1 && lastId ? pathForFolder(lastId) : '/notes/main';
     if (desired === pathname || (desired === '/notes/main' && pathname === '/')) return;
