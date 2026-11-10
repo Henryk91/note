@@ -13,6 +13,7 @@ import { LogRow } from './LogRow';
 import { DailyValueSummary } from './Summaries';
 import { SummaryScreen, summaryCopyText } from './SummaryScreen';
 import { TallyView } from './TallyView';
+import { useDismiss } from '../edit/useDismiss';
 import { useHeader } from '../../../shared/header/headerStore';
 import { useBreakpoint } from '../layout/useBreakpoint';
 import { ItemMenuEntry } from '../edit/ItemMenu';
@@ -95,6 +96,8 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
   const [otherOpen, setOtherOpen] = useState(false);
   const [draft, setDraft] = useState<StoredDraft | null>(() => readDraft(logId));
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const titleMenuRef = useRef<HTMLDivElement>(null);
+  useDismiss(menuOpen, titleMenuRef, () => setMenuOpen(false));
   const timelineRef = useRef<HTMLDivElement>(null);
   const prefilledDay = useRef<string | null>(null);
   const touchStart = useRef<{ x: number; y: number; t: number; selected: boolean } | null>(null);
@@ -506,7 +509,7 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
           <div className="log-path">{label}</div>
           <h1>Log</h1>
         </div>
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: 'relative' }} ref={titleMenuRef}>
           <button type="button" className="log-icon-btn" aria-label="Log options" aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)}>
             <IconDots size={20} />
           </button>

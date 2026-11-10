@@ -116,7 +116,7 @@ export const AppHeader: React.FC = () => {
         {header.menu && header.menu.length > 0 ? (
           <ItemMenu label="Page options" items={header.menu} />
         ) : (
-          <span style={{ width: 24 }} />
+          <span style={{ width: 20 }} />
         )}
       </div>
     </header>

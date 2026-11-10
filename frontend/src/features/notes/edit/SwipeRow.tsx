@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { useDismiss } from './useDismiss';
 
 const REVEAL = 88;
 
@@ -10,6 +11,9 @@ export const SwipeRow: React.FC<{ onDelete: () => void; children: React.ReactNod
   const [dx, setDx] = useState(0);
   const start = useRef<{ x: number; y: number; base: number } | null>(null);
   const horizontal = useRef(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  // A revealed Delete goes away as soon as anything else is pressed (and with the page, since it unmounts).
+  useDismiss(dx !== 0, rootRef, () => setDx(0));
 
   const onTouchStart = (e: React.TouchEvent) => {
     const t = e.touches[0];
@@ -32,6 +36,7 @@ export const SwipeRow: React.FC<{ onDelete: () => void; children: React.ReactNod
 
   return (
     <div
+      ref={rootRef}
       className="swipe-row swiper-no-swiping"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}

@@ -1,5 +1,6 @@
 import { IconDots } from '@tabler/icons-react';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
+import { useDismiss } from './useDismiss';
 
 export type ItemMenuEntry = { label: string; onSelect: () => void; danger?: boolean };
 
@@ -8,18 +9,23 @@ export const ItemMenu: React.FC<{ label: string; items: ItemMenuEntry[] }> = ({ 
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLSpanElement>(null);
 
-  useEffect(() => {
-    if (!open) return undefined;
-    const close = (e: MouseEvent) => {
-      if (!ref.current?.contains(e.target as Node)) setOpen(false);
-    };
-    const esc = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
-    document.addEventListener('mousedown', close);
-    document.addEventListener('keydown', esc);
-    return () => {
-      document.removeEventListener('mousedown', close);
-      document.removeEventListener('keydown', esc);
-    };
+  useDismiss(open, ref, () => setOpen(false));
+
+  // Opens downwards; flips upwards when the list would run under the bottom toolbar / off the screen.
+  const [up, setUp] = useState(false);
+  const listRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    if (!open) {
+      setUp(false);
+      return;
+    }
+    const list = listRef.current;
+    const btn = ref.current;
+    if (!list || !btn) return;
+    const limit = window.innerHeight - (document.querySelector('.bottom-toolbar')?.getBoundingClientRect().height ?? 0) - 8;
+    const below = list.getBoundingClientRect().bottom;
+    const spaceAbove = btn.getBoundingClientRect().top;
+    if (below > limit && spaceAbove > list.getBoundingClientRect().height) setUp(true);
   }, [open]);
 
   return (
@@ -32,7 +38,7 @@ export const ItemMenu: React.FC<{ label: string; items: ItemMenuEntry[] }> = ({ 
         <IconDots size={20} />
       </button>
       {open && (
-        <div className="item-menu-list" role="menu">
+        <div className={`item-menu-list ${up ? 'is-up' : ''}`} role="menu" ref={listRef}>
           {items.map((it) => (
             <button
               type="button"

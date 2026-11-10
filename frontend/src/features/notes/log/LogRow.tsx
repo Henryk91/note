@@ -1,5 +1,6 @@
 import { IconClock, IconDots } from '@tabler/icons-react';
 import React, { useEffect, useRef, useState } from 'react';
+import { useDismiss } from '../edit/useDismiss';
 import { getMarkdownText } from '../../../shared/utils/markdown';
 import {
   dayKeyOf,
@@ -56,14 +57,7 @@ export const LogRow: React.FC<LogRowProps> = ({
   const longPressed = useRef(false);
   const rowRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!menuOpen) return undefined;
-    const close = (e: MouseEvent) => {
-      if (!rowRef.current?.contains(e.target as Node)) setMenuOpen(false);
-    };
-    document.addEventListener('mousedown', close);
-    return () => document.removeEventListener('mousedown', close);
-  }, [menuOpen]);
+  useDismiss(menuOpen, rowRef, () => setMenuOpen(false));
 
   const isBreak = isBreakText(entry.text, breakWords);
   const long = isLongEntry(entry.text);

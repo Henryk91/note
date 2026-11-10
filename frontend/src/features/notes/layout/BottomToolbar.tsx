@@ -1,5 +1,6 @@
 import { IconBolt, IconEdit, IconWifi } from '@tabler/icons-react';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import { useDismiss } from '../edit/useDismiss';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../core/store';
 import { useOnlineStatus } from '../../../shared/hooks/useOnlineStatus';
@@ -19,6 +20,8 @@ export const BottomToolbar: React.FC = () => {
   const folderId = pages[pages.length - 1]?.params.id ?? '';
   const mutations = useItemMutations(folderId);
   const [menu, setMenu] = useState(false);
+  const composeRef = useRef<HTMLSpanElement>(null);
+  useDismiss(menu, composeRef, () => setMenu(false));
 
   if (!folderId || isLogId(folderId)) return null;
 
@@ -50,7 +53,7 @@ export const BottomToolbar: React.FC = () => {
         {folderCount} {folderCount === 1 ? 'folder' : 'folders'}
         {!isOnline && <IconWifi size={"1em"} style={{ marginLeft: 8, color: 'var(--danger)' }} title="Offline" />}
       </span>
-      <span className="bt-compose">
+      <span className="bt-compose" ref={composeRef}>
         <button type="button" className="bt-edit" aria-label="Compose" aria-expanded={menu} onClick={() => setMenu((v) => !v)}>
           <IconEdit size={22} />
         </button>

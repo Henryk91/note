@@ -35,8 +35,9 @@ const PreservedScrollSlide: React.FC<{ children: React.ReactNode; isLog?: boolea
       className={`multiple-pages1 scrollable-content${isLog ? ' log-slide' : ''}`}
       style={{
         height: '100%',
+        boxSizing: 'border-box',
         overflowY: 'auto',
-        paddingBottom: 'calc(var(--toolbar-h) + 24px)',
+        paddingBottom: 'calc(var(--toolbar-h) + env(safe-area-inset-bottom, 0px) + 24px)',
       }}
     >
       {children}

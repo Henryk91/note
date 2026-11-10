@@ -59,7 +59,7 @@ export const Sidebar: React.FC<SidebarProps> = ({}) => {
   const setSelectedTheme = (name: string) => dispatch(setTheme(name));
 
   return (
-    <div>
+    <div className="menu-page">
       <br />
       <h3 className="page-content-top1">Note Book Names</h3>
       <NoteNamesList />

@@ -483,7 +483,7 @@
 
 /* ---- phone layout: bottom toolbar, back label, counts, collapsing title --------------------------------- */
 :root {
-  --toolbar-h: 56px;
+  --toolbar-h: 57px;
 }
 .row-count {
   margin-left: auto;
@@ -1552,4 +1552,58 @@ header.app-header .hd-log {
 /* log-screen.html: `font: inherit` inside the 12 px labels, so the date / time fields are 12 px (height 32.8). */
 .log-screen .log-panel-fields input {
   font-size: inherit !important;
+}
+
+/* The header (and its menus) sits above the page container (z 200) and the bottom toolbar (300), below sheets (2000). */
+header.app-header {
+  z-index: 400;
+}
+
+/* Header search box (open): same text size as the "Search" pill (13px wide, 14px phone), left aligned, no legacy input styles. */
+header.app-header .hd-search.is-open input {
+  font: inherit !important;
+  font-size: inherit !important;
+  text-align: left !important;
+  margin: 0 !important;
+  width: auto !important;
+  flex: 1;
+  min-width: 0;
+  color: #fff !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+}
+header.app-header.is-wide .hd-search.is-open {
+  font-size: 13px;
+}
+header.app-header.is-phone .hd-search.is-open {
+  font-size: 14px;
+}
+header.app-header .hd-search.is-open {
+  height: 1.45em;
+  align-items: center;
+}
+header.app-header .hd-search.is-open button {
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+/* Weights are 400 / 500 only on the phone screens (README); the menu page and Recently Deleted follow. */
+.deleted-page h1 {
+  font-size: 26px;
+  font-weight: 500;
+}
+.menu-page h3,
+.menu-page .page-content-top1 {
+  font-size: 14px;
+  font-weight: 500;
+}
+.menu-page .listNameButton h3 {
+  font-weight: 400;
+}
+
+.item-menu-list.is-up {
+  top: auto;
+  bottom: 100%;
 }
