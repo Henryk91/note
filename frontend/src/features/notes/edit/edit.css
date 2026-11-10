@@ -1231,3 +1231,67 @@ header.app-header .item-menu-list button {
   width: 48px;
   color: var(--muted);
 }
+
+/* The mockups use the system UI font at 14 px / 1.4; the redesigned screens follow them. */
+body,
+.app-main,
+header.app-header,
+.desk,
+.bottom-toolbar,
+.log-sheet,
+.search-results {
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+.app-main,
+header.app-header,
+.bottom-toolbar {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Header heights measured from the mockups: 54 px on the phone, 49 px wide. */
+:root {
+  --header-h: 54px;
+}
+@media (min-width: 768px) {
+  :root {
+    --header-h: 49px;
+  }
+}
+header.app-header.is-phone {
+  padding: 0 12px;
+}
+.folder-row-chev {
+  font-size: 11px;
+}
+
+.tally-view .cap {
+  margin: 12px 0 4px;
+}
+header.app-header .hd-back {
+  font-size: 14px;
+}
+
+header.app-header.is-phone .hd-title {
+  line-height: 1.4;
+}
+
+/* Desktop: list rows have no visible menu until hovered (mockup), notes render lists flush left like the mockup text. */
+.desk .list-card .item-menu {
+  opacity: 0;
+}
+.desk .list-card:hover .item-menu,
+.desk .list-card:focus-within .item-menu,
+.desk .list-card.is-selected .item-menu {
+  opacity: 1;
+}
+.desk .note-block-view ol,
+.desk .note-block-view ul {
+  list-style-position: inside;
+  padding-left: 0;
+  margin: 0;
+}
+.desk .note-block-view p {
+  margin: 0 0 10px;
+  font-size: inherit;
+}

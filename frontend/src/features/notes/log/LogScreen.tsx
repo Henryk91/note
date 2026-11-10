@@ -3,6 +3,7 @@ import { RootState } from '../../../core/store';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCopy } from '@fortawesome/free-regular-svg-icons';
 import { faChevronLeft, faChevronRight, faEllipsisH, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { useLogData } from './useLogData';
 import { prefillKey } from './QuickLogSheet';
@@ -463,13 +464,13 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
           title: 'Summary',
           back: { label: 'Log', onClick: () => setView('log') },
           action: {
-            label: 'Copy',
+            icon: faCopy,
             ariaLabel: 'Copy summary',
             onClick: () => void navigator.clipboard?.writeText(summaryCopyText(day, grouped.byDay, now, breakWords)),
           },
         }
       : {
-          kicker: isTally ? notebook : label,
+          kicker: notebook,
           title: isTally ? parentName : 'Log',
           back: { label: (isTally ? grandName : parentName) || 'Back', onClick: () => window.dispatchEvent(new Event('page-back')) },
           menu: logMenu,

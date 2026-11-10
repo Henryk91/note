@@ -452,7 +452,7 @@ export const recentDayBars = (
   selected: string,
   nowTs: number,
   words?: string[],
-  max = 8,
+  max = 6,
 ): Array<{ day: string; workedMs: number }> => {
   const days = Object.keys(byDay)
     .filter((d) => d <= selected && d >= addDaysToKey(selected, -13))

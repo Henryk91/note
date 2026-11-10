@@ -12,8 +12,13 @@
 
 /* One source of truth for the fixed header; everything below it starts at --header-h. */
 :root {
-  --header-h: 64px;
+  --header-h: 54px;
   --app-h: 100vh;
+}
+@media (min-width: 768px) {
+  :root {
+    --header-h: 49px;
+  }
 }
 @supports (height: 100dvh) {
   :root {

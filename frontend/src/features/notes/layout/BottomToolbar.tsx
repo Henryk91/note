@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBolt, faEdit, faWifi } from '@fortawesome/free-solid-svg-icons';
+import { faBolt, faWifi } from '@fortawesome/free-solid-svg-icons';
+import { faEdit } from '@fortawesome/free-regular-svg-icons';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../core/store';
 import { useOnlineStatus } from '../../../shared/hooks/useOnlineStatus';

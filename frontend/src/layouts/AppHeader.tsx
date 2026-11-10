@@ -41,6 +41,12 @@ export const AppHeader: React.FC = () => {
   };
   const menuTo = pathname === '/notes/note-names' ? '/notes/main' : '/notes/note-names';
   const wide = bp !== 'mobile';
+  // One-line titles (Summary) use a compact bar, like the mockups: 40 px instead of 54 px.
+  const compact = !wide && header.kicker !== undefined && header.kicker.trim() === '';
+  useEffect(() => {
+    if (wide) document.documentElement.style.removeProperty('--header-h');
+    else document.documentElement.style.setProperty('--header-h', compact ? '40px' : '54px');
+  }, [wide, compact]);
 
   const searchBox = (
     <div className="hd-search is-open">
@@ -90,7 +96,7 @@ export const AppHeader: React.FC = () => {
   return (
     <header className="app-header is-phone">
       {header.back ? (
-        <button type="button" id="menuButton" className="hd-back" onClick={header.back.onClick} aria-label={`Back to ${header.back.label}`}>
+        <button type="button" className="hd-back" onClick={header.back.onClick} aria-label={`Back to ${header.back.label}`}>
           <FontAwesomeIcon icon={faChevronLeft} /> <span className="hd-back-label">{header.back.label}</span>
         </button>
       ) : (
@@ -99,13 +105,13 @@ export const AppHeader: React.FC = () => {
         </Link>
       )}
       <div className="hd-title">
-        <div className="hd-kicker">{header.kicker ?? 'NOTEBOOK'}</div>
+        {!compact && <div className="hd-kicker">{header.kicker ?? 'NOTEBOOK'}</div>}
         <div className="hd-main">{header.title ?? notebook}</div>
       </div>
       <div className="hd-right">
         {header.action && (
           <button type="button" className="hd-icon" aria-label={header.action.ariaLabel} onClick={header.action.onClick}>
-            {header.action.label}
+            <FontAwesomeIcon icon={header.action.icon} />
           </button>
         )}
         {header.menu && header.menu.length > 0 ? (
