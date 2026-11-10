@@ -1,6 +1,5 @@
+import { IconClock } from '@tabler/icons-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faClock } from '@fortawesome/free-solid-svg-icons';
 import { getMarkdownText } from '../../../shared/utils/markdown';
 import { NoteItemType } from '../../../shared/utils/Helpers/types';
 import { usePendingEntries } from '../log/logApi';
@@ -189,7 +188,7 @@ export const NoteBlock: React.FC<NoteBlockProps> = ({ item, mutations, onDelete,
         </div>
       )}
       {!hideMenu && <div className="note-block-side">
-        {pending && <FontAwesomeIcon icon={faClock} title="Waiting to sync" aria-label="Waiting to sync" />}
+        {pending && <IconClock size={"1em"} title="Waiting to sync" aria-label="Waiting to sync" />}
         <ItemMenu
           label="Note actions"
           items={[

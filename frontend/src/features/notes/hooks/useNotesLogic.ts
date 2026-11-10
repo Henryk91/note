@@ -83,12 +83,8 @@ export const useNotesLogic = () => {
 
   // No timer-based polling: TanStack Query refetches on window focus and on reconnect (see AppProviders).
 
-  // Refetch when last page changes
-  useEffect(() => {
-    if (isLastPage?.params.id && initialLoadComplete) {
-      getLastPageData(true);
-    }
-  }, [isLastPage?.params.id, initialLoadComplete, getLastPageData]);
+  // No forced refetch when the page changes: the cached folder is shown at once and TanStack Query revalidates it
+  // (stale time, window focus, reconnect). One request per folder open.
 
   // Handle root path redirects when data is ready
   useEffect(() => {

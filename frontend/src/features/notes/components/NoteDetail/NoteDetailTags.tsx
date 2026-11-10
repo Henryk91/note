@@ -13,6 +13,8 @@ interface NoteDetailTagsProps {
   isLastPage: boolean;
   /** Wide layouts show folders and logs in the list pane, so the editor only shows the note's own blocks. */
   hideFolders?: boolean;
+  /** The notebook home (first page) has no empty "Add a note" box, like the home mockup. */
+  isRoot?: boolean;
   actions: {
     showHideBox: (prop: string) => void;
     saveShowTag: (tag: string) => void;
@@ -22,7 +24,7 @@ interface NoteDetailTagsProps {
   };
 }
 
-const NoteDetailTags: React.FC<NoteDetailTagsProps> = ({ person, isLastPage, hideFolders = false, actions }) => {
+const NoteDetailTags: React.FC<NoteDetailTagsProps> = ({ person, isLastPage, hideFolders = false, isRoot = false, actions }) => {
   const byId = useSelector((state: RootState) => state.person.byId);
   const persons = byId;
 
@@ -61,7 +63,7 @@ const NoteDetailTags: React.FC<NoteDetailTagsProps> = ({ person, isLastPage, hid
       {notes.map((n) => (
         <NoteBlock key={n.id} item={n} mutations={mutations} onDelete={deleteWithUndo} />
       ))}
-      {isLastPage && <TrailingBlock key={person.id} folderId={person.id} mutations={mutations} />}
+      {isLastPage && !isRoot && <TrailingBlock key={person.id} folderId={person.id} mutations={mutations} />}
     </div>
   );
 };

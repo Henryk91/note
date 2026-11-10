@@ -1,6 +1,5 @@
+import { IconBolt, IconChevronLeft, IconMenu2, IconSearch, IconX } from '@tabler/icons-react';
 import React, { useEffect, useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars, faBolt, faChevronLeft, faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { Link, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '../core/store';
@@ -45,12 +44,12 @@ export const AppHeader: React.FC = () => {
   const compact = !wide && header.kicker !== undefined && header.kicker.trim() === '';
   useEffect(() => {
     if (wide) document.documentElement.style.removeProperty('--header-h');
-    else document.documentElement.style.setProperty('--header-h', compact ? '40px' : '54px');
+    else document.documentElement.style.setProperty('--header-h', compact ? '39.6px' : '55px');
   }, [wide, compact]);
 
   const searchBox = (
     <div className="hd-search is-open">
-      <FontAwesomeIcon icon={faSearch} />
+      <IconSearch size={"1em"} />
       <input
         id="searchBox"
         aria-label="Search all notes and logs"
@@ -60,7 +59,7 @@ export const AppHeader: React.FC = () => {
         onKeyDown={(e) => e.key === 'Escape' && closeSearch()}
       />
       <button type="button" aria-label="Close search" onClick={closeSearch}>
-        <FontAwesomeIcon icon={faTimes} />
+        <IconX size={"1em"} />
       </button>
       {query.trim() && <SearchResults query={query} onDone={closeSearch} />}
     </div>
@@ -70,7 +69,7 @@ export const AppHeader: React.FC = () => {
     return (
       <header className="app-header is-wide">
         <Link id="menuButton" to={menuTo} className="hd-icon" aria-label="Menu" title="Menu">
-          <FontAwesomeIcon icon={faBars} />
+          <IconMenu2 size={20} />
         </Link>
         <span className="hd-name">{notebook}</span>
         <span className="hd-sub">notebook</span>
@@ -79,11 +78,11 @@ export const AppHeader: React.FC = () => {
           searchBox
         ) : (
           <button type="button" className="hd-search" onClick={() => setSearching(true)} aria-label="Search">
-            <FontAwesomeIcon icon={faSearch} /> Search&nbsp;&nbsp;{MOD}F
+            <IconSearch size={"1em"} /> Search&nbsp;&nbsp;{MOD}F
           </button>
         )}
         <button type="button" className="hd-log" onClick={() => window.dispatchEvent(new Event(QUICK_LOG_EVENT))}>
-          <FontAwesomeIcon icon={faBolt} /> Log&nbsp;&nbsp;{MOD}L
+          <IconBolt size={"1em"} /> Log&nbsp;&nbsp;{MOD}L
         </button>
       </header>
     );
@@ -97,11 +96,11 @@ export const AppHeader: React.FC = () => {
     <header className="app-header is-phone">
       {header.back ? (
         <button type="button" className="hd-back" onClick={header.back.onClick} aria-label={`Back to ${header.back.label}`}>
-          <FontAwesomeIcon icon={faChevronLeft} /> <span className="hd-back-label">{header.back.label}</span>
+          <IconChevronLeft size={"1em"} /> <span className="hd-back-label">{header.back.label}</span>
         </button>
       ) : (
         <Link id="menuButton" to={menuTo} className="hd-icon" aria-label="Menu" title="Menu">
-          <FontAwesomeIcon icon={faBars} />
+          <IconMenu2 size={20} />
         </Link>
       )}
       <div className="hd-title">
@@ -111,7 +110,7 @@ export const AppHeader: React.FC = () => {
       <div className="hd-right">
         {header.action && (
           <button type="button" className="hd-icon" aria-label={header.action.ariaLabel} onClick={header.action.onClick}>
-            <FontAwesomeIcon icon={header.action.icon} />
+            {header.action.icon}
           </button>
         )}
         {header.menu && header.menu.length > 0 ? (

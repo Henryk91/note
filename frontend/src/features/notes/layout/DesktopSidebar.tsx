@@ -1,7 +1,6 @@
+import { IconBook, IconClock } from '@tabler/icons-react';
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBook, faClock } from '@fortawesome/free-solid-svg-icons';
 import { RootState } from '../../../core/store';
 import { useNoteNames } from '../hooks/useNotesQueries';
 import { usePinnedLogs } from '../log/QuickLogSheet';
@@ -39,7 +38,7 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = (props) => {
             aria-current={name === notebook ? 'true' : undefined}
             onClick={() => onSelectNotebook(name)}
           >
-            <FontAwesomeIcon icon={faBook} className="side-icon" />
+            <IconBook size={"1em"} className="side-icon" />
             {name}
           </button>
         ))}
@@ -49,8 +48,8 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = (props) => {
           <div className="side-title">Pinned logs</div>
           {mine.map((p) => (
             <button type="button" key={p.id} className="side-item" onClick={() => onOpenLog(p.id)}>
-              <FontAwesomeIcon icon={faClock} className="side-icon is-accent" />
-              {p.label}
+              <IconClock size={"1em"} className="side-icon is-accent" />
+              {p.label.startsWith(`${notebook} / `) ? p.label.slice(notebook.length + 3) : p.label}
             </button>
           ))}
         </div>
@@ -77,7 +76,7 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = (props) => {
             className={`side-item ${notebook === 'Site Track' ? 'is-selected' : ''}`}
             onClick={() => onSelectNotebook('Site Track')}
           >
-            <FontAwesomeIcon icon={faBook} className="side-icon" />
+            <IconBook size={"1em"} className="side-icon" />
             Site Track
           </button>
         </div>

@@ -1,6 +1,5 @@
+import { IconAlertTriangle } from '@tabler/icons-react';
 import React from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 import {
   breaksMs,
   daySummaryText,
@@ -56,7 +55,7 @@ export const SummaryScreen: React.FC<SummaryProps> = ({ day, byDay, nowTs, break
           <strong>{entries.length}</strong>
         </div>
       </div>
-      <div className="cap">By task</div>
+      <div className="cap summary-cap-1">By task</div>
       <div className="summary-tasks">
         {rows.map((r) => (
           <div key={r.label}>
@@ -69,7 +68,7 @@ export const SummaryScreen: React.FC<SummaryProps> = ({ day, byDay, nowTs, break
         ))}
         {rows.length === 0 && <div className="log-empty">No tracked time on this day.</div>}
       </div>
-      <div className="cap">This week and last</div>
+      <div className="cap summary-cap-2">This week and last</div>
       <div className="summary-week">
         {bars.map((b) => {
           const tiny = b.workedMs < 30 * 60 * 1000;
@@ -83,7 +82,7 @@ export const SummaryScreen: React.FC<SummaryProps> = ({ day, byDay, nowTs, break
       </div>
       {warn && (
         <div className="summary-warning" role="status">
-          <FontAwesomeIcon icon={faExclamationTriangle} /> {formatDayShort(warn.day)}: Break ran {formatDuration(warn.ms)}
+          <IconAlertTriangle size={"1em"} /> {formatDayShort(warn.day)}: Break ran {formatDuration(warn.ms)}
           {warn.untilStop ? ' until Stop' : ''}. Missing an entry?
         </div>
       )}

@@ -1,6 +1,5 @@
+import { IconDots } from '@tabler/icons-react';
 import React, { useEffect, useRef, useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEllipsisH } from '@fortawesome/free-solid-svg-icons';
 
 export type ItemMenuEntry = { label: string; onSelect: () => void; danger?: boolean };
 
@@ -30,7 +29,7 @@ export const ItemMenu: React.FC<{ label: string; items: ItemMenuEntry[] }> = ({ 
           setOpen((v) => !v);
         }}
       >
-        <FontAwesomeIcon icon={faEllipsisH} />
+        <IconDots size={20} />
       </button>
       {open && (
         <div className="item-menu-list" role="menu">

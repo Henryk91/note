@@ -1261,9 +1261,6 @@ header.app-header,
 header.app-header.is-phone {
   padding: 0 12px;
 }
-.folder-row-chev {
-  font-size: 11px;
-}
 
 .tally-view .cap {
   margin: 12px 0 4px;
@@ -1281,8 +1278,7 @@ header.app-header.is-phone .hd-title {
   opacity: 0;
 }
 .desk .list-card:hover .item-menu,
-.desk .list-card:focus-within .item-menu,
-.desk .list-card.is-selected .item-menu {
+.desk .list-card:focus-within .item-menu {
   opacity: 1;
 }
 .desk .note-block-view ol,
@@ -1294,4 +1290,266 @@ header.app-header.is-phone .hd-title {
 .desk .note-block-view p {
   margin: 0 0 10px;
   font-size: inherit;
+}
+
+/* ---- ui-review fixes: values read from docs/mockups/*.html ------------------------------------------------ */
+.pin-card {
+  font-size: 14px !important;
+}
+.log-screen .log-daynav {
+  padding: 10px 12px 6px;
+}
+.log-screen .log-day-date {
+  font-size: 14px;
+  font-weight: 500;
+}
+.log-screen .log-day-date-btn {
+  display: block;
+  width: 100%;
+}
+.log-screen .log-day-sub {
+  display: block;
+  width: 100%;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+.log-screen .log-day-sub.is-link {
+  cursor: pointer;
+}
+.log-row .log-time {
+  width: 42px;
+  padding: 0 !important;
+}
+.log-screen .log-continue-chip {
+  max-width: 118px;
+}
+.log-screen .log-input-row textarea {
+  font-size: 14px !important;
+  line-height: 1.4;
+  padding: 9px 10px;
+}
+.log-screen .log-input-row textarea::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+.log-screen .log-input-row textarea:focus,
+.log-screen .log-input-row textarea:focus-visible {
+  outline: none;
+}
+.log-composer {
+  padding: 8px 12px 14px;
+}
+.log-panel-head {
+  font-weight: 500;
+}
+.log-panel-fields label {
+  margin: 0;
+}
+.log-panel-fields label:first-child {
+  flex: 1.3;
+}
+.log-panel-fields label:last-child {
+  flex: 1;
+}
+.log-panel-fields input {
+  font-size: 14px !important;
+  line-height: 1.4;
+}
+.log-stepper button {
+  width: 26px;
+  height: 30px;
+}
+.tally-buttons button {
+  font-weight: 500;
+}
+.tally-buttons button.is-long {
+  font-size: 20px !important;
+}
+.desk {
+  overflow: clip;
+}
+.desk .doc-title,
+.desk .note-block-view.white-color {
+  color: var(--text);
+}
+/* Row actions: hover only, wide screens only (phone: long press). */
+.log-row .log-menu-btn {
+  display: none;
+}
+@media (min-width: 768px) and (hover: hover) {
+  .log-row .log-menu-btn {
+    display: inline-block;
+  }
+}
+.folder-row {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  margin: 0;
+  text-align: left;
+  font-size: 14px;
+}
+
+/* Folder card: every row but the last has a 1px divider (rows are 41 px, the last 40 px, as in the mockup). */
+.card-list .swipe-row + .swipe-row {
+  border-top: 0;
+}
+.card-list .swipe-row {
+  border-bottom: 1px solid var(--line);
+}
+.card-list .swipe-row:last-child {
+  border-bottom: 0;
+}
+.folder-row-chev {
+  width: 14px;
+  height: 14px;
+}
+.bottom-toolbar .bt-edit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0 !important;
+  line-height: 1;
+}
+
+/* Header icons: 20 px, at 12 px from the edges (mockup `.hd`). */
+header.app-header.is-phone #menuButton {
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  justify-content: center;
+}
+header.app-header.is-phone .hd-right {
+  min-width: 20px;
+}
+header.app-header .item-menu-btn {
+  padding: 0 !important;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+header.app-header .item-menu {
+  display: flex;
+}
+
+/* log-screen.html forces `line-height: 1.3` on its buttons (BS.base); the rest of the screen is 1.4. */
+.log-screen button {
+  line-height: 1.3;
+}
+.log-screen .log-icon-btn svg {
+  display: block;
+}
+.app-main .log-screen button,
+.app-main .log-screen .log-time {
+  line-height: 1.3;
+}
+
+.app-main .log-screen .log-day-sub {
+  line-height: 1.4;
+}
+
+.log-screen .log-continue-top svg {
+  flex: none;
+}
+.app-main .log-screen .log-day-date-btn {
+  line-height: 1.4;
+}
+
+/* The mockup header is `justify-content: space-between` with natural-width items: the title sits between them. */
+header.app-header.is-phone {
+  justify-content: space-between;
+}
+header.app-header.is-phone .hd-title {
+  flex: 0 1 auto;
+  max-width: 62%;
+}
+
+.summary-screen .summary-cap-1 {
+  margin: 4px 0 6px;
+}
+.summary-screen .summary-cap-2 {
+  margin: 10px 0 6px;
+}
+.summary-week {
+  height: 90px;
+}
+
+.tally-tiles .summary-tile:first-child strong {
+  font-size: 20px;
+}
+
+.tally-view .tally-day + .tally-day .cap {
+  margin-top: 10px;
+}
+
+.doc-pane-top .item-menu-btn {
+  height: 19px;
+  padding: 0 4px !important;
+  line-height: 1;
+}
+.desk .note-block-view ol,
+.desk .note-block-view ul {
+  margin: 0 0 10px;
+}
+
+.desk .list-new {
+  margin: -3px 0 !important;
+}
+
+/* Desktop header: 13 px, search box 240 + 2 x 10 px padding, 5 px vertical padding (desktop.html). */
+header.app-header.is-wide {
+  font-size: 13px;
+  line-height: 1.45;
+}
+header.app-header .hd-search {
+  box-sizing: content-box;
+  width: 240px;
+  padding: 5px 10px;
+  line-height: 1.45;
+  font-size: 13px;
+}
+header.app-header .hd-log {
+  padding: 4px 12px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.doc-pane-top .item-menu-btn {
+  margin: -3px 0;
+  height: 24px;
+}
+.doc-pane-top .item-menu-btn svg {
+  width: 16px;
+  height: 16px;
+}
+.doc-pane-top .item-menu {
+  display: flex;
+  align-items: center;
+  height: 19px;
+}
+.doc-pane-top .item-menu-btn {
+  margin: 0;
+  height: 19px;
+}
+.desk .desk-editor {
+  position: relative;
+}
+.desk .doc-pane {
+  position: static;
+  min-height: 0;
+  padding-bottom: 0;
+}
+.doc-pane-hint {
+  position: absolute;
+  left: 28px;
+  bottom: 14px;
+}
+
+/* log-screen.html: `font: inherit` inside the 12 px labels, so the date / time fields are 12 px (height 32.8). */
+.log-screen .log-panel-fields input {
+  font-size: inherit !important;
 }

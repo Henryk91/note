@@ -1,6 +1,5 @@
+import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 import React, { useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { addDaysToKey, dayKeyOf, dayKeyToDate } from './logModel';
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -36,13 +35,13 @@ export const Calendar: React.FC<CalendarProps> = ({ selected, daysWithEntries, o
     <div className="log-cal" role="dialog" aria-label="Jump to a day">
       <div className="log-cal-head">
         <button type="button" className="log-icon-btn" aria-label="Previous month" onClick={() => move(-1)}>
-          <FontAwesomeIcon icon={faChevronLeft} />
+          <IconChevronLeft size={"1em"} />
         </button>
         <span>
           {MONTHS[view.m]} {view.y}
         </span>
         <button type="button" className="log-icon-btn" aria-label="Next month" onClick={() => move(1)}>
-          <FontAwesomeIcon icon={faChevronRight} />
+          <IconChevronRight size={"1em"} />
         </button>
       </div>
       <div className="log-cal-grid">

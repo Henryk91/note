@@ -18,7 +18,8 @@ import { Breakpoint } from './useBreakpoint';
 import { FOCUS_SEARCH_EVENT, NEW_NOTE_EVENT } from './events';
 
 const WIDTHS_KEY = 'desk-widths';
-const DEFAULT_WIDTHS = { sidebar: 220, list: 300 };
+// The 1 px divider is a separate column here; in the mockup it is part of the 220 / 300 px columns.
+const DEFAULT_WIDTHS = { sidebar: 219, list: 299 };
 
 const readWidths = () => {
   try {

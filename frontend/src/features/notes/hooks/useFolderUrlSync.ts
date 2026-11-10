@@ -118,8 +118,9 @@ export const useFolderUrlSync = ({ selectionMode = false }: SyncOptions = {}) =>
       return;
     }
 
-    // Going back to the plain notebook URL (not on first load, where the saved stack is restored).
-    if (!isFirst && (pathname === '/notes/main' || pathname === '/') && pages.length > 1) {
+    // The URL decides the screen: the plain notebook URL always shows the notebook, also on first load
+    // (the saved stack from the last visit must not take over).
+    if ((pathname === '/notes/main' || pathname === '/') && pages.length > 1) {
       pendingTarget.current = pages[0].params.id;
       dispatch(setPages(pages.slice(0, 1)));
     }

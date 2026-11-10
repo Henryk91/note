@@ -1,7 +1,6 @@
 @import url('https://fonts.googleapis.com/css?family=Open+Sans');
 
 @import url('./shared/styles/themes.css');
-@import url('./features/notes/edit/edit.css');
 @import url('./features/notes/log/log.css');
 @import url('./features/notes/components/SearchBar/style.css');
 @import url('./features/notes/pages/Home/style.css');
@@ -9,10 +8,11 @@
 @import url('./features/notes/pages/NewNote/style.css');
 @import url('./features/notes/components/NoteItem/style.css');
 @import url('./features/notes/components/EditNoteCheck/style.css');
+@import url('./features/notes/edit/edit.css');
 
 /* One source of truth for the fixed header; everything below it starts at --header-h. */
 :root {
-  --header-h: 54px;
+  --header-h: 55px;
   --app-h: 100vh;
 }
 @media (min-width: 768px) {
@@ -46,9 +46,11 @@ header {
 
 body {
   background-color: #030303;
-  color: #7c7c80;
+  color: var(--text, #e8f1f6);
   text-align: center;
-  font-family: 'Open Sans', sans-serif;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
   margin: auto;
   overscroll-behavior-x: none;
 }
@@ -415,4 +417,22 @@ h2 {
 /* The page carousel must never be scrolled by focus() / scrollIntoView(): that pushed the log title out of view. */
 #multiple-pages .swiper {
   overflow: clip;
+}
+
+/* G1: form controls inherit the page font (system-ui 14px / 1.4) in every redesigned screen. */
+.app-main button,
+.app-main input,
+.app-main textarea,
+.app-main select,
+header.app-header button,
+header.app-header input,
+.desk button,
+.desk input,
+.desk textarea,
+.bottom-toolbar button,
+.log-sheet button,
+.log-sheet input,
+.search-results button {
+  font-family: inherit;
+  line-height: inherit;
 }

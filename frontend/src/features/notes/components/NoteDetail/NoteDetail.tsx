@@ -1,3 +1,4 @@
+import { IconSearch } from '@tabler/icons-react';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
@@ -18,8 +19,6 @@ import { isLogId } from '../../log/useLogData';
 import { MoveToSheet } from '../../layout/MoveToSheet';
 import { PinnedCards } from '../../layout/PinnedCards';
 import { FOCUS_SEARCH_EVENT } from '../../layout/events';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch } from '@fortawesome/free-solid-svg-icons';
 import { useHeader } from '../../../../shared/header/headerStore';
 import { useNoteOperations } from '../../hooks/useNoteOperations';
 
@@ -134,7 +133,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
         {index === 0 && (
           <>
             <button type="button" className="phone-search" onClick={() => window.dispatchEvent(new Event(FOCUS_SEARCH_EVENT))}>
-              <FontAwesomeIcon icon={faSearch} /> Search all notes and logs
+              <IconSearch size={"1em"} /> Search all notes and logs
             </button>
             <PinnedCards />
           </>
@@ -146,6 +145,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
         <NoteDetailTags
           person={personToRender}
           isLastPage={isLastPage}
+          isRoot={index === 0}
           actions={{
             showHideBox,
             saveShowTag,

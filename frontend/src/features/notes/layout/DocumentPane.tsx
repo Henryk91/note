@@ -1,6 +1,5 @@
+import { IconCheck } from '@tabler/icons-react';
 import React, { useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheck } from '@fortawesome/free-solid-svg-icons';
 import { NoteBlock } from '../edit/NoteBlock';
 import { ItemMenu } from '../edit/ItemMenu';
 import { ItemMutations, useSaveStatus } from '../edit/itemMutations';
@@ -38,7 +37,7 @@ export const DocumentPane: React.FC<DocumentPaneProps> = ({ note, path, mutation
       <div className="doc-pane-top">
         <span>{path}</span>
         <span className="doc-pane-status" role="status" aria-live="polite">
-          <FontAwesomeIcon icon={faCheck} /> {STATUS[status]}
+          <IconCheck size={"1em"} /> {STATUS[status]}
         </span>
         <ItemMenu
           label="Note options"

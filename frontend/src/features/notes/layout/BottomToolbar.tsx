@@ -1,7 +1,5 @@
+import { IconBolt, IconEdit, IconWifi } from '@tabler/icons-react';
 import React, { useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBolt, faWifi } from '@fortawesome/free-solid-svg-icons';
-import { faEdit } from '@fortawesome/free-regular-svg-icons';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../core/store';
 import { useOnlineStatus } from '../../../shared/hooks/useOnlineStatus';
@@ -46,15 +44,15 @@ export const BottomToolbar: React.FC = () => {
   return (
     <div className="bottom-toolbar" role="toolbar" aria-label="Actions">
       <button type="button" className="bt-log" onClick={() => window.dispatchEvent(new Event(QUICK_LOG_EVENT))}>
-        <FontAwesomeIcon icon={faBolt} /> Log
+        <IconBolt size={"1em"} /> Log
       </button>
       <span className="bt-count" data-testid="item-count">
         {folderCount} {folderCount === 1 ? 'folder' : 'folders'}
-        {!isOnline && <FontAwesomeIcon icon={faWifi} style={{ marginLeft: 8, color: 'var(--danger)' }} title="Offline" />}
+        {!isOnline && <IconWifi size={"1em"} style={{ marginLeft: 8, color: 'var(--danger)' }} title="Offline" />}
       </span>
       <span className="bt-compose">
         <button type="button" className="bt-edit" aria-label="Compose" aria-expanded={menu} onClick={() => setMenu((v) => !v)}>
-          <FontAwesomeIcon icon={faEdit} />
+          <IconEdit size={22} />
         </button>
         {menu && (
           <div className="item-menu-list bt-menu" role="menu">

@@ -15,6 +15,7 @@
   --text: #e8f1f6;
   --muted: #9fb6c4;
   --danger: #ff8a80;
+  --surface-2: #12364f;
 }
 :root[data-theme='ocean'] {
   --bg: #1e2024;
@@ -52,7 +53,10 @@
   --accent-text: #ff7a3d;
   --bar: #bb3b00;
 }
-:root {
+:root[data-theme='ocean'],
+:root[data-theme='green'],
+:root[data-theme='night'],
+:root[data-theme='red'] {
   --surface-2: color-mix(in srgb, var(--surface), white 7%);
 }
 body {

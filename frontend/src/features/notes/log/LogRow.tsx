@@ -1,8 +1,8 @@
+import { IconClock, IconDots } from '@tabler/icons-react';
 import React, { useEffect, useRef, useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faClock, faEllipsisH } from '@fortawesome/free-solid-svg-icons';
 import { getMarkdownText } from '../../../shared/utils/markdown';
 import {
+  dayKeyOf,
   entryDuration,
   firstLine,
   formatDuration,
@@ -68,6 +68,8 @@ export const LogRow: React.FC<LogRowProps> = ({
   const isBreak = isBreakText(entry.text, breakWords);
   const long = isLongEntry(entry.text);
   const duration = entryDuration(dayEntries, index, nowTs);
+  // The last entry of today has no end yet: the mockup shows "running" instead of a growing duration.
+  const openEnded = !dayEntries[index + 1] && dayKeyOf(nowTs) === entry.day;
   const prevTask = isBreak && showContinue ? taskBefore(dayEntries, index, breakWords) : null;
 
   const startPress = () => {
@@ -140,9 +142,8 @@ export const LogRow: React.FC<LogRowProps> = ({
         )}
       </div>
       <div className="log-side">
-        {isEditing && <span className="log-editing-marker">Editing</span>}
-        {pending && <FontAwesomeIcon icon={faClock} title="Waiting to sync" aria-label="Waiting to sync" />}
-        {duration !== null && <span>{duration === null ? '' : formatDuration(duration)}</span>}
+        {pending && <IconClock size={"1em"} title="Waiting to sync" aria-label="Waiting to sync" />}
+        {duration !== null && <span>{openEnded ? 'running' : formatDuration(duration)}</span>}
         <button
           type="button"
           className="log-menu-btn"
@@ -151,7 +152,7 @@ export const LogRow: React.FC<LogRowProps> = ({
           aria-expanded={menuOpen}
           onClick={() => setMenuOpen((v) => !v)}
         >
-          <FontAwesomeIcon icon={faEllipsisH} />
+          <IconDots size={20} />
         </button>
       </div>
       {menuOpen && (

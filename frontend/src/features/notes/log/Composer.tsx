@@ -1,6 +1,5 @@
+import { IconArrowUp, IconCheck, IconChevronDown, IconChevronUp, IconClock } from '@tabler/icons-react';
 import React, { useEffect, useRef } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowUp, faCheck, faChevronDown, faChevronUp, faClock } from '@fortawesome/free-solid-svg-icons';
 import { PanelValue } from './entryTime';
 
 type Unit = 'd' | 'h' | 'min';
@@ -189,29 +188,11 @@ export const Composer: React.FC<ComposerProps> = (props) => {
             ))}
           </div>
         )}
-        {quickChips && quickChips.length > 0 && !editing && (
-          <div className="log-chips" data-testid="quick-chips">
-            {quickChips.map((c) => (
-              <button type="button" key={c} onClick={() => onChip?.(c)} title={c}>
-                {c}
-              </button>
-            ))}
-          </div>
-        )}
         <button type="button" className="log-time-chip" onClick={onTogglePanel} aria-expanded={panelOpen} aria-label="Entry date and time">
-          <FontAwesomeIcon icon={faClock} />
+          <IconClock size={"1em"} />
           <span data-testid="time-chip">{chipLabel}</span>
-          <FontAwesomeIcon icon={panelOpen ? faChevronDown : faChevronUp} style={{ fontSize: 12 }} />
+          {panelOpen ? <IconChevronDown size={"1em"} style={{ fontSize: 13 }} /> : <IconChevronUp size={"1em"} style={{ fontSize: 13 }} />}
         </button>
-        {suggestions && suggestions.length > 0 && (
-          <div className="log-suggest" data-testid="suggestions">
-            {suggestions.map((s) => (
-              <button type="button" key={s} onClick={() => onSuggest?.(s)}>
-                {s}
-              </button>
-            ))}
-          </div>
-        )}
         {showInput ? (
           <div className="log-input-row">
             <textarea
@@ -230,7 +211,7 @@ export const Composer: React.FC<ComposerProps> = (props) => {
               aria-label={editing ? 'Save entry' : 'Add entry'}
               onClick={onSend}
             >
-              <FontAwesomeIcon icon={editing ? faCheck : faArrowUp} />
+              {editing ? <IconCheck size={"1em"} /> : <IconArrowUp size={"1em"} />}
             </button>
           </div>
         ) : (

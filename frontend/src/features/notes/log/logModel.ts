@@ -67,6 +67,12 @@ export const formatDayLong = (key: string): string => {
 };
 
 /** `Mon 9 Nov` (header of a day inside the current year is still shown with the year elsewhere) */
+/** `Tue, 10 Nov 2026` (the log screen's day title and time line). */
+export const formatDayComma = (key: string): string => {
+  const d = dayKeyToDate(key);
+  return `${WEEKDAYS[d.getDay()]}, ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+};
+
 export const formatDayShort = (key: string): string => {
   const d = dayKeyToDate(key);
   return `${WEEKDAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`;
@@ -486,16 +492,15 @@ export const findLongBreak = (
   return null;
 };
 
-/** Average gap between consecutive entries of the last 14 days ("Usual gap" of a tally log). */
+/** Average gap between consecutive entries of the same day over the last 14 days ("Usual gap" of a tally log). */
 export const usualGapMs = (entries: LogEntry[], nowTs: number): number | null => {
   const from = nowTs - 14 * 24 * 60 * MINUTE;
   const recent = entries.filter((e) => e.ts >= from && e.ts <= nowTs);
   let sum = 0;
   let n = 0;
   for (let i = 1; i < recent.length; i += 1) {
-    const gap = recent[i].ts - recent[i - 1].ts;
-    if (gap < 24 * 60 * MINUTE) {
-      sum += gap;
+    if (recent[i].day === recent[i - 1].day) {
+      sum += recent[i].ts - recent[i - 1].ts;
       n += 1;
     }
   }

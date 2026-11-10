@@ -81,14 +81,11 @@ describe('Composer', () => {
     expect(screen.queryByRole('button', { name: 'Add entry' })).toBeNull();
   });
 
-  test('chips fill the box instead of saving; tally buttons log in one tap', () => {
-    const p = props({ quickChips: ['Break', 'DEV-1 work'], onChip: jest.fn(), tallyCodes: ['P', 'V'], onTally: jest.fn(), showInput: false });
+  test('no quick chips row (ui-review L6: not in the mockup); a tally log hides the box until "Other text..."', () => {
+    const p = props({ quickChips: ['Break', 'DEV-1 work'], showInput: false });
     render(<Composer {...(p as any)} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Break' }));
-    expect((p.onChip as jest.Mock).mock.calls[0][0]).toBe('Break');
-    expect(p.onSend).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('button', { name: 'Log V' }));
-    expect((p.onTally as jest.Mock).mock.calls[0][0]).toBe('V');
+    expect(screen.queryByRole('button', { name: 'Break' })).toBeNull();
     expect(screen.queryByLabelText('Log entry text')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Other text...' })).toBeTruthy();
   });
 });

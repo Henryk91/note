@@ -31,7 +31,6 @@ export const TallyView: React.FC<TallyViewProps> = ({ entries, codes, nowTs, edi
   const today = dayKeyOf(nowTs);
   const stats = tallyStats(entries, today, nowTs, 14);
   const gap = usualGapMs(entries, nowTs);
-  const max = Math.max(1, ...stats.perDay.map((d) => d.count));
   const { days, byDay } = groupByDay(entries);
   const shown = [...days].reverse().slice(0, 7);
 
@@ -53,7 +52,7 @@ export const TallyView: React.FC<TallyViewProps> = ({ entries, codes, nowTs, edi
       </div>
       <div className="tally-buttons" data-testid="tally-buttons">
         {codes.slice(0, 3).map((code, i) => (
-          <button type="button" key={code} className={i === 0 ? 'is-primary' : ''} aria-label={`Log ${code}`} onClick={() => onCode(code)}>
+          <button type="button" key={code} className={`${i === 0 ? 'is-primary' : ''} ${code.length > 2 ? 'is-long' : ''}`} aria-label={`Log ${code}`} onClick={() => onCode(code)}>
             {code}
           </button>
         ))}
@@ -74,12 +73,12 @@ export const TallyView: React.FC<TallyViewProps> = ({ entries, codes, nowTs, edi
             key={d.day}
             title={`${d.day}: ${d.count}`}
             className={i === stats.perDay.length - 1 ? 'is-today' : ''}
-            style={{ height: `${Math.max(3, (d.count / max) * 54)}px` }}
+            style={{ height: `${Math.min(56, d.count * 7 + 2)}px` }}
           />
         ))}
       </div>
       {shown.map((day) => (
-        <div key={day}>
+        <div key={day} className="tally-day">
           <div className="cap">{label(day, today)}</div>
           {[...byDay[day]].reverse().map((e) => (
             <div

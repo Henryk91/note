@@ -1,10 +1,9 @@
+import { IconCopy, IconChevronLeft, IconChevronRight, IconDots, IconPlayerPlay } from '@tabler/icons-react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../core/store';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCopy } from '@fortawesome/free-regular-svg-icons';
-import { faChevronLeft, faChevronRight, faEllipsisH, faPlay } from '@fortawesome/free-solid-svg-icons';
 import { useLogData } from './useLogData';
 import { prefillKey } from './QuickLogSheet';
 import { useLogMutations, usePendingEntries } from './logApi';
@@ -25,6 +24,7 @@ import {
   dayKeyOf,
   firstLine,
   formatDayLong,
+  formatDayComma,
   formatDuration,
   isLongEntry,
   lastTask,
@@ -70,7 +70,11 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
   const { entries, grouped, settings, mode, label, notebook, parentName, loaded, saveSettings, refetch } = useLogData(logId);
   const bp = useBreakpoint();
   const phone = bp === 'mobile';
-  const [view, setView] = useState<'log' | 'summary'>('log');
+  const history = useHistory();
+  const location = useLocation();
+  const view: 'log' | 'summary' = new URLSearchParams(location.search).get('view') === 'summary' ? 'summary' : 'log';
+  const openSummary = () => history.push(`${location.pathname}?view=summary`);
+  const closeSummary = () => history.replace(location.pathname);
   const pagesState = useSelector((st: RootState) => st.person.pages);
   const byIdState = useSelector((st: RootState) => st.person.byId);
   const mutations = useLogMutations(logId);
@@ -148,7 +152,7 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
 
   // ---- the time chip -------------------------------------------------------------------------------
   const chipTs = customTs ?? (day === todayKey ? now : defaultTsForDay(day, now));
-  const chipText = chipLabel(chipTs, formatDayLong(dayKeyOf(chipTs)));
+  const chipText = chipLabel(chipTs, formatDayComma(dayKeyOf(chipTs)));
 
   // While the panel is open and untouched it keeps following the clock.
   useEffect(() => {
@@ -289,7 +293,6 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
   };
 
   const fill = (value: string) => {
-    if (editing) return;
     setText(value);
     setTimeout(() => {
       const el = inputRef.current;
@@ -364,6 +367,12 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [editing, finishEdit, goDay, prevDay, nextDay]);
+
+  // the newest entry stays in view when the time panel opens or closes
+  useEffect(() => {
+    if (!editing) scrollToEnd();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [panelOpen]);
 
   // stay at the newest entry when the day or the number of entries changes
   useEffect(() => {
@@ -462,9 +471,9 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
       ? {
           kicker: ' ',
           title: 'Summary',
-          back: { label: 'Log', onClick: () => setView('log') },
+          back: { label: 'Log', onClick: () => closeSummary() },
           action: {
-            icon: faCopy,
+            icon: <IconCopy size="1em" />,
             ariaLabel: 'Copy summary',
             onClick: () => void navigator.clipboard?.writeText(summaryCopyText(day, grouped.byDay, now, breakWords)),
           },
@@ -499,7 +508,7 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
         </div>
         <div style={{ position: 'relative' }}>
           <button type="button" className="log-icon-btn" aria-label="Log options" aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)}>
-            <FontAwesomeIcon icon={faEllipsisH} />
+            <IconDots size={20} />
           </button>
           {menuOpen && (
             <div className="log-menu" role="menu" style={{ top: 40 }}>
@@ -529,7 +538,7 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
         <>
           {!phone && (
             <div className="log-title">
-              <button type="button" className="log-today-btn" onClick={() => setView('log')}>
+              <button type="button" className="log-today-btn" onClick={() => closeSummary()}>
                 &lsaquo; Log
               </button>
               <button type="button" className="log-today-btn" onClick={() => void navigator.clipboard?.writeText(summaryCopyText(day, grouped.byDay, now, breakWords))}>
@@ -544,21 +553,29 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
       {isTally ? null : (
       <div className="log-daynav">
         <button type="button" className="log-icon-btn" aria-label="Previous day with entries" disabled={!prevDay} onClick={() => goDay(prevDay)}>
-          <FontAwesomeIcon icon={faChevronLeft} />
+          <IconChevronLeft size={16} />
         </button>
-        <button type="button" className="log-day-label" onClick={() => setCalOpen((v) => !v)} aria-label="Pick a day" aria-expanded={calOpen}>
-          <div className="log-day-date" data-testid="day-label">
-            {formatDayLong(day)}
-          </div>
-          <div className="log-day-sub">{sub}</div>
-        </button>
+        <div className="log-day-label">
+          <button type="button" className="log-day-date-btn" onClick={() => setCalOpen((v) => !v)} aria-label="Pick a day" aria-expanded={calOpen}>
+            <div className="log-day-date" data-testid="day-label">
+              {formatDayComma(day)}
+            </div>
+          </button>
+          {mode === 'time-tracker' && dayEntries.length > 0 ? (
+            <button type="button" className="log-day-sub is-link" onClick={openSummary} aria-label="Open the day summary">
+              {sub}
+            </button>
+          ) : (
+            <div className="log-day-sub">{sub}</div>
+          )}
+        </div>
         {!isToday && (
           <button type="button" className="log-today-btn" onClick={() => goDay(todayKey)}>
             Today
           </button>
         )}
         <button type="button" className="log-icon-btn" aria-label="Next day with entries" disabled={!nextDay} onClick={() => goDay(nextDay)}>
-          <FontAwesomeIcon icon={faChevronRight} />
+          <IconChevronRight size={16} />
         </button>
       </div>
       )}
@@ -572,20 +589,10 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
       )}
       {calOpen && <Calendar selected={day} daysWithEntries={daySet} onPick={(d) => goDay(d)} onClose={() => setCalOpen(false)} />}
 
-      {mode === 'time-tracker' && summary.running && isToday && (
-        <div className="log-running" data-testid="now-running">
-          Now: <strong>{firstLine(summary.running.text)}</strong> · {formatDuration(now - summary.running.ts)}
-        </div>
-      )}
-      {mode === 'time-tracker' && task && !editing && (
+      {mode === 'time-tracker' && task && (
         <button type="button" className="log-continue-top" onClick={() => fill(firstLine(task.text))}>
-          <FontAwesomeIcon icon={faPlay} />
+          <IconPlayerPlay size={"1em"} />
           <span className="log-ellipsis">Continue: {firstLine(task.text)}</span>
-        </button>
-      )}
-      {mode === 'time-tracker' && dayEntries.length > 0 && (
-        <button type="button" className="log-summary-toggle" onClick={() => setView('summary')}>
-          Day summary and week &rsaquo;
         </button>
       )}
       {daily && <DailyValueSummary info={daily} />}
@@ -652,6 +659,7 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
       </div>
       )}
 
+      {(!isTally || editing) && (
       <Composer
         text={text}
         onText={setText}
@@ -659,23 +667,20 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
         chipLabel={chipText}
         panelOpen={panelOpen}
         onTogglePanel={togglePanel}
-        panel={panel}
+        panel={customTs === null ? panelFromTs(chipTs) : panel}
         panelError={panelError}
         onPanelField={onPanelField}
         onStep={onStep}
         editing={!!editing}
         onResetOrCancel={resetOrCancel}
         onSend={send}
-        quickChips={chips}
-        onChip={fill}
-        suggestions={suggestions}
-        onSuggest={fill}
         tallyCodes={undefined}
         onTally={logCode}
         showInput={inputVisible}
         onShowInput={() => setOtherOpen(true)}
         inputRef={inputRef}
       />
+      )}
       </>
       )}
     </div>

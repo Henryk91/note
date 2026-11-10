@@ -1,5 +1,5 @@
 import { useEffect, useRef, useSyncExternalStore } from 'react';
-import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import type { ReactNode } from 'react';
 import type { ItemMenuEntry } from '../../features/notes/edit/ItemMenu';
 
 /** What the page currently on screen wants in the app header (back label, two-line title, `...` menu, extra button). */
@@ -8,7 +8,7 @@ export type HeaderState = {
   title?: string;
   back?: { label: string; onClick: () => void } | null;
   menu?: ItemMenuEntry[];
-  action?: { icon: IconDefinition; ariaLabel: string; onClick: () => void } | null;
+  action?: { icon: ReactNode; ariaLabel: string; onClick: () => void } | null;
 };
 
 let state: HeaderState = {};

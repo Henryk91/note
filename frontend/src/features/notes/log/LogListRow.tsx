@@ -1,6 +1,5 @@
+import { IconClock } from '@tabler/icons-react';
 import React, { useMemo } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faClock } from '@fortawesome/free-solid-svg-icons';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../core/store';
 import { NoteItemType } from '../../../shared/utils/Helpers/types';
@@ -24,7 +23,7 @@ export const LogListRow: React.FC<LogListRowProps> = ({ logItem, items, onOpen }
     <div className="detailTitleBox dark-hover link-border">
       <button type="button" className="log-row-link" onClick={onOpen} aria-label={`Open log${last ? `, last entry ${firstLine(last.text)}` : ''}`} style={{ width: '100%', background: 'transparent', border: 0, color: 'white', margin: 0 }}>
         <span className={`log-row-clock ${theme}-border-thick`}>
-          <FontAwesomeIcon icon={faClock} />
+          <IconClock size={"1em"} />
         </span>
         <span className="log-row-text">
           <h3 className="white-color" style={{ margin: 0 }}>

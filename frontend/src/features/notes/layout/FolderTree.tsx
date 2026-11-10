@@ -1,7 +1,5 @@
+import { IconChevronDown, IconChevronRight, IconClock, IconFolder } from '@tabler/icons-react';
 import React from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronDown, faChevronRight, faClock } from '@fortawesome/free-solid-svg-icons';
-import { faFolder } from '@fortawesome/free-regular-svg-icons';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../core/store';
 import { useNotesWithChildren } from '../hooks/useNotesQueries';
@@ -26,6 +24,9 @@ type TreeProps = {
 
 type NodeProps = TreeProps & { id: string; label: string; depth: number; isLog?: boolean };
 
+/** Data order, with the Log folder last (as in the desktop mockup). */
+const orderFolders = (folders: NoteItemType[]) => [...folders.filter((f) => f.name !== 'Log'), ...folders.filter((f) => f.name === 'Log')];
+
 const renderChild = (f: NoteItemType, props: TreeProps, depth: number) => {
   const log = f.name === 'Log';
   return (
@@ -41,8 +42,8 @@ const TreeNode: React.FC<NodeProps> = (props) => {
   const { data } = useNotesWithChildren(id, expanded);
   const items: NoteItemType[] = data?.notes?.[id]?.dataLable ?? byId[id]?.dataLable ?? [];
   const folders = items.filter((i) => i.type === 'FOLDER');
-  const known = !!(data?.notes?.[id] || byId[id]);
-  const hasFolders = !known || folders.length > 0;
+  // The parent's response lists children of children, so a folder without an entry has no children.
+  const hasFolders = folders.length > 0;
   const disabled = disabledIds?.has(id);
 
   const [over, setOver] = React.useState(false);
@@ -95,15 +96,15 @@ const TreeNode: React.FC<NodeProps> = (props) => {
               onToggle(id);
             }}
           >
-            <FontAwesomeIcon icon={expanded ? faChevronDown : faChevronRight} />
+            {expanded ? <IconChevronDown size={"1em"} /> : <IconChevronRight size={"1em"} />}
           </button>
         )}
-        <FontAwesomeIcon icon={isLog ? faClock : faFolder} className="tree-icon" />
+        {isLog ? <IconClock size={"1em"} className="tree-icon" /> : <IconFolder size={"1em"} className="tree-icon" />}
         <span className="tree-label">{label}</span>
       </div>
       {expanded && folders.length > 0 && (
         <ul role="group" className="tree-list">
-          {folders.map((f) => renderChild(f, props, depth + 1))}
+          {orderFolders(folders).map((f) => renderChild(f, props, depth + 1))}
         </ul>
       )}
     </li>
@@ -114,7 +115,7 @@ const TopLevel: React.FC<TreeProps> = (props) => {
   const { data } = useNotesWithChildren(props.rootId, true);
   const byId = useSelector((state: RootState) => state.person.byId);
   const items: NoteItemType[] = data?.notes?.[props.rootId]?.dataLable ?? byId[props.rootId]?.dataLable ?? [];
-  return <>{items.filter((i) => i.type === 'FOLDER').map((f) => renderChild(f, props, 0))}</>;
+  return <>{orderFolders(items.filter((i) => i.type === 'FOLDER')).map((f) => renderChild(f, props, 0))}</>;
 };
 
 /** Collapsible folder tree, any depth. Used for the desktop sidebar and for the "Move to..." picker. */
