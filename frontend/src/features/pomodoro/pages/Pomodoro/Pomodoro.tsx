@@ -23,7 +23,7 @@ const Pomodoro: React.FC = () => {
 
   return (
     <div className="App">
-      <BackButton />
+      <BackButton toPath="/notes/main" />
       <h1>Pomodoro Clock</h1>
       <Changer set={updateTimes} breakTime={breakTime} runTime={runTime} />
       <Timer set={reset} run={runTime} breakTime={breakTime} />

@@ -46,6 +46,15 @@ export interface NoteV2Content {
   tag?: string;
 }
 
+export type LogMode = 'time-tracker' | 'tally' | 'daily-value' | 'journal';
+
+export interface LogSettings {
+  mode?: LogMode;
+  pinned?: boolean;
+  breakWords?: string[];
+  chips?: string[];
+}
+
 export interface NoteV2Attrs {
   id: string;
   userId: string;
@@ -53,6 +62,10 @@ export interface NoteV2Attrs {
   type: string;
   name?: string;
   content?: NoteV2Content;
+  settings?: LogSettings;
+  createdAt?: Date;
+  updatedAt?: Date;
+  deletedAt?: Date | null;
 }
 
 export type NoteItemMap = {
@@ -102,6 +115,7 @@ export interface NewV2NoteBody {
   type: string;
   content?: NoteV2Content;
   name?: string;
+  settings?: LogSettings;
 }
 
 export interface UpdateV2NoteBody {
@@ -109,11 +123,14 @@ export interface UpdateV2NoteBody {
   parentId?: string;
   content?: NoteV2Content;
   name?: string;
+  settings?: LogSettings;
+  deletedAt?: null;
 }
 
 export interface DeleteV2NoteBody {
   id: string;
   type?: string;
+  permanent?: boolean;
 }
 
 export interface TranslationScoreAttrs {

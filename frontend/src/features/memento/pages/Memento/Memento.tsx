@@ -66,7 +66,7 @@ const Memento: React.FC = () => {
 
   return (
     <div id="memento-wrapper">
-      <BackButton />
+      <BackButton toPath="/notes/main" />
       <div id="memento-main" className={`${theme}-border-color`}>
         <p id="title">MEMENTO MORI</p>
         <div id="life-box">

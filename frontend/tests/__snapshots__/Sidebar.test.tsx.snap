@@ -160,6 +160,20 @@ exports[`Sidebar matches snapshot 1`] = `
         </h3>
       </div>
     </a>
+    <br />
+    <h3>
+      Account
+    </h3>
+    <div
+      class="listNameButton dark-hover"
+      role="button"
+      tabindex="0"
+    >
+      <h3>
+         Log out 
+      </h3>
+    </div>
+    <br />
   </div>
 </DocumentFragment>
 `;

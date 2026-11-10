@@ -106,6 +106,18 @@ export class NoteController {
     const result = await noteService.deleteNoteV2(userId, req.body as DeleteV2NoteBody);
     res.json(result);
   });
+
+  getDeletedV2 = asyncHandler(async (req: Request, res: Response) => {
+    const { userId } = req.auth!;
+    const { notebook } = req.query as { notebook?: string };
+    res.json(await noteService.getDeleted(userId, notebook));
+  });
+
+  emptyDeletedV2 = asyncHandler(async (req: Request, res: Response) => {
+    const { userId } = req.auth!;
+    const { notebook, olderThanDays } = req.query as { notebook?: string; olderThanDays?: number };
+    res.json(await noteService.emptyDeleted(userId, notebook, olderThanDays));
+  });
 }
 
 export const noteController = new NoteController();

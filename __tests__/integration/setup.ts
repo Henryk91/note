@@ -148,7 +148,7 @@ export const resetDatabase = async () => {
     const NoteModel = require('../../backend/src/server/models/Notes').NoteModel;
     const NoteV2Model = require('../../backend/src/server/models/Notes').NoteV2Model;
     const TranslationScore = require('../../backend/src/server/models/TranslationScore').default;
-    const IncorrectTranslation = require('../../backend/src/server/models/incorrectTranslation').default;
+    const IncorrectTranslation = require('../../backend/src/server/models/IncorrectTranslation').default;
 
     await Promise.all([
       NoteModel.deleteMany({}),

@@ -24,17 +24,37 @@ export class NoteRepository {
     return NoteModel.findOneAndUpdate({ id, userId }, { $set: updates }, { new: true }).lean<NoteAttrs>().exec();
   }
 
-  async findNoteV2ById(userId: string, id: string): Promise<NoteV2Attrs | null> {
-    return NoteV2Model.findOne({ userId, id }).lean<NoteV2Attrs>().exec();
+  // Soft-deleted documents have `deletedAt` set; `deletedAt: null` also matches documents that lack the field.
+  async findNoteV2ById(
+    userId: string,
+    id: string,
+    options: { includeDeleted?: boolean } = {},
+  ): Promise<NoteV2Attrs | null> {
+    const filter = options.includeDeleted ? { userId, id } : { userId, id, deletedAt: null };
+    return NoteV2Model.findOne(filter).lean<NoteV2Attrs>().exec();
   }
 
   async findNotesV2ByParentId(userId: string, parentId: string): Promise<NoteV2Attrs[]> {
-    return NoteV2Model.find({ userId, parentId }).sort({ _id: 1 }).lean<NoteV2Attrs[]>().exec();
+    return NoteV2Model.find({ userId, parentId, deletedAt: null }).sort({ _id: 1 }).lean<NoteV2Attrs[]>().exec();
   }
 
   async findNotesV2ByParentIds(userId: string, parentIds: string[]): Promise<NoteV2Attrs[]> {
-    return NoteV2Model.find({ userId, parentId: { $in: parentIds } })
+    return NoteV2Model.find({ userId, parentId: { $in: parentIds }, deletedAt: null })
       .sort({ _id: 1 })
+      .lean<NoteV2Attrs[]>()
+      .exec();
+  }
+
+  /** Children of the given parents, deleted or not (used to walk a subtree). */
+  async findAllChildrenV2(userId: string, parentIds: string[]): Promise<NoteV2Attrs[]> {
+    return NoteV2Model.find({ userId, parentId: { $in: parentIds } })
+      .lean<NoteV2Attrs[]>()
+      .exec();
+  }
+
+  async findDeletedNotesV2(userId: string): Promise<NoteV2Attrs[]> {
+    return NoteV2Model.find({ userId, deletedAt: { $ne: null } })
+      .sort({ deletedAt: -1 })
       .lean<NoteV2Attrs[]>()
       .exec();
   }
@@ -48,16 +68,25 @@ export class NoteRepository {
     return NoteV2Model.findOneAndUpdate({ id, userId }, { $set: updates }, { new: true }).lean<NoteV2Attrs>().exec();
   }
 
+  /** Clears `deletedAt` (and keeps other fields). */
+  async restoreNotesV2(userId: string, ids: string[]): Promise<void> {
+    await NoteV2Model.updateMany({ userId, id: { $in: ids } }, { $unset: { deletedAt: 1 } }).exec();
+  }
+
+  async softDeleteNotesV2(userId: string, ids: string[], deletedAt: Date): Promise<void> {
+    await NoteV2Model.updateMany({ userId, id: { $in: ids }, deletedAt: null }, { $set: { deletedAt } }).exec();
+  }
+
+  async hardDeleteNotesV2(userId: string, ids: string[]): Promise<{ deletedCount?: number }> {
+    return NoteV2Model.deleteMany({ userId, id: { $in: ids } }).exec();
+  }
+
   async updateNotesV2ParentId(userId: string, oldParentId: string, newParentId: string): Promise<void> {
     await NoteV2Model.updateMany({ userId, parentId: oldParentId }, { $set: { parentId: newParentId } }).exec();
   }
 
-  async deleteNoteV2(userId: string, id: string): Promise<{ deletedCount?: number }> {
-    return NoteV2Model.deleteOne({ userId, id }).exec();
-  }
-
   async findNoteV2ByNameAndParent(userId: string, parentId: string, name: string): Promise<NoteV2Attrs | null> {
-    return NoteV2Model.findOne({ userId, parentId, name }).lean<NoteV2Attrs>().exec();
+    return NoteV2Model.findOne({ userId, parentId, name, deletedAt: null }).lean<NoteV2Attrs>().exec();
   }
 
   async getTranslationLevelsAggregate(
@@ -69,6 +98,7 @@ export class NoteRepository {
         $match: {
           userId,
           parentId,
+          deletedAt: null,
         },
       },
       {
@@ -76,6 +106,7 @@ export class NoteRepository {
           from: 'notes-v2',
           localField: 'id',
           foreignField: 'parentId',
+          pipeline: [{ $match: { deletedAt: null } }],
           as: 'children',
         },
       },

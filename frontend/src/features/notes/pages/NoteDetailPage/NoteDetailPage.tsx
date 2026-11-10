@@ -9,6 +9,7 @@ import { removeLastPage, setShowTag } from '../../../auth/store/personSlice';
 
 import { useNoteNames } from '../../hooks/useNotesQueries';
 import { useLocation } from 'react-router-dom';
+import { useFolderUrlSync } from '../../hooks/useFolderUrlSync';
 import NoteDetail from '../../components/NoteDetail/NoteDetail';
 
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -51,6 +52,8 @@ const NoteDetailPage: React.FC = () => {
   const location = useLocation();
   const isNoteNames = location.pathname === '/notes/note-names';
 
+  useFolderUrlSync();
+
   const [swiperInstance, setSwiperInstance] = useState<SwiperType | null>(null);
 
   // When pages change (new page added), slide to the last one
@@ -79,13 +82,12 @@ const NoteDetailPage: React.FC = () => {
   return (
     <div
       className="slide-in"
-      key={location.pathname}
       style={{
         position: 'fixed',
         top: 0,
         left: 0,
         width: '100vw',
-        height: '100vh',
+        height: 'var(--app-h)',
         overflow: 'hidden',
         zIndex: 200,
         pointerEvents: 'none',
@@ -97,9 +99,9 @@ const NoteDetailPage: React.FC = () => {
       <div
         id="multiple-pages"
         style={{
-          marginTop: '12vh',
+          marginTop: 'var(--header-h)',
           width: '100%',
-          height: 'calc(100% - 12vh)',
+          height: 'calc(100% - var(--header-h))',
           pointerEvents: 'auto',
         }}
       >

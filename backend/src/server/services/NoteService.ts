@@ -146,11 +146,20 @@ export class NoteService {
     const { id, parentId, type, content, name } = data;
     if (!id || !type) throw new Error('Missing required fields');
 
-    const existing = await this.repo.findNoteV2ById(userId, id);
+    const existing = await this.repo.findNoteV2ById(userId, id, { includeDeleted: true });
+    if (existing && existing.deletedAt) {
+      // Creating an id that was soft-deleted restores it (this is how "Undo" of a delete works).
+      return this.restoreNoteV2(userId, existing, {
+        ...(content !== undefined ? { content } : {}),
+        ...(name !== undefined ? { name } : {}),
+        ...(data.settings !== undefined ? { settings: data.settings } : {}),
+        ...(parentId ? { parentId } : {}),
+      });
+    }
     if (existing) return existing;
 
     if (parentId) {
-      const existingParent = await this.repo.findNoteV2ById(userId, parentId);
+      const existingParent = await this.repo.findNoteV2ById(userId, parentId, { includeDeleted: true });
       if (!existingParent) {
         await this.repo.createNoteV2({
           name: parentId,
@@ -170,6 +179,7 @@ export class NoteService {
       userId,
       name,
     };
+    if (data.settings !== undefined) newNoteData.settings = data.settings;
 
     if (type === 'LOG' && parentId) {
       logger.warn(
@@ -192,13 +202,18 @@ export class NoteService {
 
   async updateNoteV2(userId: string, data: UpdateV2NoteBody) {
     const { id } = data;
-    const doc = await this.repo.findNoteV2ById(userId, id);
+    const doc = await this.repo.findNoteV2ById(userId, id, { includeDeleted: true });
     if (!doc) throw new Error(`Error no note id: ${id}`);
 
     const updates: Partial<NoteV2Attrs> = {};
     if (data.parentId !== undefined) updates.parentId = data.parentId;
     if (data.content !== undefined) updates.content = data.content;
     if (data.name !== undefined) updates.name = data.name;
+    if (data.settings !== undefined) updates.settings = data.settings;
+
+    if (data.deletedAt === null && doc.deletedAt) {
+      return this.restoreNoteV2(userId, doc, updates);
+    }
 
     const savedDoc = await this.repo.updateNoteV2(id, userId, updates);
 
@@ -210,28 +225,114 @@ export class NoteService {
     return savedDoc!;
   }
 
+  /** Ids of `rootId` and every descendant, deleted or not. */
+  private async collectSubtreeIds(userId: string, rootId: string): Promise<string[]> {
+    const seen = new Set<string>([rootId]);
+    let frontier = [rootId];
+    while (frontier.length) {
+      const batch = frontier;
+      // eslint-disable-next-line no-await-in-loop
+      const children = await this.repo.findAllChildrenV2(userId, batch);
+      const fresh = children.filter((child) => !seen.has(child.id));
+      fresh.forEach((child) => seen.add(child.id));
+      frontier = fresh.map((child) => child.id);
+    }
+    return [...seen];
+  }
+
+  /** Clears deletedAt on the doc and on every descendant that was deleted together with it. */
+  private async restoreNoteV2(userId: string, doc: NoteV2Attrs, updates: Partial<NoteV2Attrs>) {
+    const deletedAt = doc.deletedAt ? new Date(doc.deletedAt).getTime() : undefined;
+    const subtreeIds = await this.collectSubtreeIds(userId, doc.id);
+    const subtree = await Promise.all(
+      subtreeIds.map((sid) => this.repo.findNoteV2ById(userId, sid, { includeDeleted: true })),
+    );
+    const toRestore = subtree
+      .filter((d): d is NoteV2Attrs => !!d && !!d.deletedAt && new Date(d.deletedAt).getTime() === deletedAt)
+      .map((d) => d.id);
+    await this.repo.restoreNotesV2(userId, toRestore);
+    if (Object.keys(updates).length) await this.repo.updateNoteV2(doc.id, userId, updates);
+    return (await this.repo.findNoteV2ById(userId, doc.id))!;
+  }
+
   async deleteNoteV2(userId: string, data: DeleteV2NoteBody) {
-    const { id, type } = data;
+    const { id, permanent } = data;
 
-    if (type === 'FOLDER') {
-      const folderToEmpty = await this.repo.findNoteV2ById(userId, id);
-      if (folderToEmpty) {
-        await this.repo.updateNotesV2ParentId(userId, folderToEmpty.id, folderToEmpty.parentId);
-      }
+    const noteToDelete = await this.repo.findNoteV2ById(userId, id, { includeDeleted: !!permanent });
+    if (!noteToDelete) return { ok: true, deletedCount: 0 };
+
+    const subtreeIds = await this.collectSubtreeIds(userId, id);
+
+    if (permanent) {
+      const subtree = await Promise.all(
+        subtreeIds.map((sid) => this.repo.findNoteV2ById(userId, sid, { includeDeleted: true })),
+      );
+      const result = await this.repo.hardDeleteNotesV2(userId, subtreeIds);
+      await Promise.all(
+        subtree
+          .filter((d): d is NoteV2Attrs => !!d && !d.deletedAt)
+          .map((d) => this.syncDeleteV1NoteWithDoc(userId, d).catch((err) => logger.warn({ err }, 'V1 Sync Failed'))),
+      );
+      return { ok: true, deletedCount: result.deletedCount ?? 0 };
     }
 
-    const noteToDelete = await this.repo.findNoteV2ById(userId, id);
-    const result = await this.repo.deleteNoteV2(userId, id);
+    // Soft delete: the item and all of its descendants get the same timestamp so a restore brings them all back.
+    // (The legacy V1 mirror is left alone so that a restore does not need to re-sync it.)
+    const deletedAt = new Date();
+    await this.repo.softDeleteNotesV2(userId, subtreeIds, deletedAt);
+    return { ok: true, deletedCount: subtreeIds.length, deletedAt };
+  }
 
-    if (noteToDelete) {
-      try {
-        await this.syncDeleteV1NoteWithDoc(userId, noteToDelete);
-      } catch (err) {
-        logger.warn({ err }, 'V1 Sync Failed');
+  private async getNotebookId(userId: string, doc: NoteV2Attrs, cache: Map<string, NoteV2Attrs | null>) {
+    let current: NoteV2Attrs | null = doc;
+    const guard = new Set<string>();
+    while (current && current.parentId && !guard.has(current.id)) {
+      guard.add(current.id);
+      const { parentId }: { parentId: string } = current;
+      if (!cache.has(parentId)) {
+        // eslint-disable-next-line no-await-in-loop
+        cache.set(parentId, await this.repo.findNoteV2ById(userId, parentId, { includeDeleted: true }));
       }
+      const parent: NoteV2Attrs | null = cache.get(parentId) ?? null;
+      if (!parent) return parentId;
+      current = parent;
     }
+    return current?.id ?? doc.id;
+  }
 
-    return result;
+  /** Items in "Recently Deleted": only the top-most item of each deletion (descendants come back with it). */
+  async getDeleted(userId: string, notebook?: string) {
+    const deleted = await this.repo.findDeletedNotesV2(userId);
+    const byId = new Map(deleted.map((d) => [d.id, d]));
+    const roots = deleted.filter((d) => {
+      const parent = byId.get(d.parentId);
+      return !(parent && new Date(parent.deletedAt!).getTime() === new Date(d.deletedAt!).getTime());
+    });
+    if (!notebook) return roots;
+    const cache = new Map<string, NoteV2Attrs | null>();
+    const result: NoteV2Attrs[] = [];
+    await Promise.all(
+      roots.map(async (d) => {
+        if ((await this.getNotebookId(userId, d, cache)) === notebook) result.push(d);
+      }),
+    );
+    return roots.filter((d) => result.includes(d));
+  }
+
+  /** Permanently removes soft-deleted items ("Empty Recently Deleted", or items older than N days). */
+  async emptyDeleted(userId: string, notebook?: string, olderThanDays?: number) {
+    let roots = await this.getDeleted(userId, notebook);
+    if (olderThanDays !== undefined) {
+      const cutoff = Date.now() - olderThanDays * 24 * 60 * 60 * 1000;
+      roots = roots.filter((d) => new Date(d.deletedAt!).getTime() <= cutoff);
+    }
+    const deletedCount = await roots.reduce(async (accPromise, root) => {
+      const acc = await accPromise;
+      const ids = await this.collectSubtreeIds(userId, root.id);
+      const res = await this.repo.hardDeleteNotesV2(userId, ids);
+      return acc + (res.deletedCount ?? 0);
+    }, Promise.resolve(0));
+    return { ok: true, deletedCount };
   }
 
   private async getOrCreateParentLogFolderId(userId: string, parentId: string, note: NoteV2Attrs): Promise<string> {

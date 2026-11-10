@@ -7,6 +7,21 @@
 @import url('./features/notes/components/NoteItem/style.css');
 @import url('./features/notes/components/EditNoteCheck/style.css');
 
+/* One source of truth for the fixed header; everything below it starts at --header-h. */
+:root {
+  --header-h: 64px;
+  --app-h: 100vh;
+}
+@supports (height: 100dvh) {
+  :root {
+    --app-h: 100dvh;
+  }
+}
+
+.app-main {
+  padding-top: var(--header-h);
+}
+
 header {
   padding-bottom: 1px;
   position: fixed;
@@ -16,7 +31,8 @@ header {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  height: 12vh;
+  height: var(--header-h);
+  box-sizing: border-box;
   z-index: 100;
 }
 
@@ -140,7 +156,7 @@ h2 {
 .backButton {
   position: fixed;
   font-size: 30px;
-  top: 2vh;
+  top: calc((var(--header-h) - 44px) / 2);
   left: 2.5vw;
   min-width: 30px;
   color: white;
@@ -190,7 +206,7 @@ h2 {
 
 #menuButton {
   position: absolute;
-  top: 2vh;
+  top: calc((var(--header-h) - 44px) / 2);
   right: 4vw;
   font-size: 30px;
   color: #ffa500;

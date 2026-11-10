@@ -2,15 +2,11 @@ import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { faTrashAlt } from '@fortawesome/free-regular-svg-icons';
-import { marked } from 'marked';
+import { getMarkdownText } from '../../../../shared/utils/markdown';
 import { NoteItemType, NoteContent } from '../../../../shared/utils/Helpers/types';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../core/store';
 import { useNoteItemLogic } from '../../hooks/useNoteItemLogic';
-
-marked.setOptions({
-  breaks: true,
-});
 
 type NoteItemProps = {
   item: NoteItemType;
@@ -38,10 +34,7 @@ type DisplayItemBoxProps = {
   onEdit: () => void;
 };
 
-export const getMarkdownText = (input: string) => {
-  const rawMarkup = marked(input);
-  return { __html: rawMarkup };
-};
+export { getMarkdownText };
 
 export const EditItemBox: React.FC<EditItemBoxProps> = ({
   item,

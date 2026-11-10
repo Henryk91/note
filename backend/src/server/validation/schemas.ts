@@ -4,6 +4,15 @@ import { z } from 'zod';
 // Note Schemas
 // ============================================
 
+export const LogSettingsSchema = z
+  .object({
+    mode: z.enum(['time-tracker', 'tally', 'daily-value', 'journal']).optional(),
+    pinned: z.boolean().optional(),
+    breakWords: z.array(z.string().max(100)).max(50).optional(),
+    chips: z.array(z.string().max(300)).max(50).optional(),
+  })
+  .strict();
+
 export const CreateV2NoteSchema = z.object({
   id: z.string().min(1, 'ID is required'),
   parentId: z.string().min(1, 'Parent ID is required'),
@@ -18,6 +27,7 @@ export const CreateV2NoteSchema = z.object({
       tag: z.string().optional(),
     })
     .optional(),
+  settings: LogSettingsSchema.optional(),
 });
 
 export const UpdateV2NoteSchema = z.object({
@@ -31,11 +41,30 @@ export const UpdateV2NoteSchema = z.object({
       tag: z.string().optional(),
     })
     .optional(),
+  settings: LogSettingsSchema.optional(),
+  // Restore: send deletedAt: null.
+  deletedAt: z.null().optional(),
 });
 
 export const DeleteV2NoteSchema = z.object({
   id: z.string().min(1, 'ID is required'),
   type: z.enum(['NOTE', 'FOLDER', 'LOG']).optional(),
+  // Hard delete (used for "Empty Recently Deleted").
+  permanent: z.boolean().optional(),
+});
+
+export const DeletedQuerySchema = z.object({
+  notebook: z.string().min(1).optional(),
+});
+
+export const EmptyDeletedQuerySchema = z.object({
+  notebook: z.string().min(1).optional(),
+  olderThanDays: z.coerce.number().int().min(0).optional(),
+});
+
+export const SearchQuerySchema = z.object({
+  q: z.string().trim().min(1, 'Query is required').max(200),
+  limit: z.coerce.number().int().min(1).max(100).optional(),
 });
 
 export const NotePersonUpdateSchema = z.object({
@@ -108,6 +137,7 @@ export const IncorrectQuerySchema = z.object({
 
 // Inferred Types
 export type CreateV2NoteBody = z.infer<typeof CreateV2NoteSchema>;
+export type SearchQuery = z.infer<typeof SearchQuerySchema>;
 export type UpdateV2NoteBody = z.infer<typeof UpdateV2NoteSchema>;
 export type DeleteV2NoteBody = z.infer<typeof DeleteV2NoteSchema>;
 export type UpdateNoteBody = z.infer<typeof UpdateNoteBodySchema>;

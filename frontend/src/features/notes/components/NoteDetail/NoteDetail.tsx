@@ -39,7 +39,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
   const className = !isLastPage ? 'first-note-detail-item' : '';
 
   if (index === 0 && personToRender?.dataLable) {
-    personToRender.dataLable = [...personToRender?.dataLable].sort((a: any, b: any) => a.name.localeCompare(b.name));
+    personToRender.dataLable = [...personToRender?.dataLable].sort((a: any, b: any) => (a.name || '').localeCompare(b.name || ''));
   }
 
   return (

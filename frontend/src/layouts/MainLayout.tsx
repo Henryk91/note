@@ -32,7 +32,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, setFilterNote 
           </Link>
         </nav>
       </header>
-      {children}
+      <main className="app-main">{children}</main>
     </>
   );
 };

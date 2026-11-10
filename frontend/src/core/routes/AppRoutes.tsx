@@ -30,17 +30,7 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({
                   <Route exact path="/all" render={(props: any) => <Home {...props} />} />
                   <Route
                     exact
-                    path="/index.html"
-                    component={NoteDetailPage}
-                  />
-                  <Route
-                    exact
-                    path="/"
-                    component={NoteDetailPage}
-                  />
-                  <Route
-                    exact
-                    path="/notes/:id"
+                    path={['/', '/index.html', '/notes/:id', '/f/:folderId', '/n/:noteId']}
                     component={NoteDetailPage}
                   />
                   <Route exact path="/new-note" component={NewNote} />

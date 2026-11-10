@@ -6,6 +6,7 @@ import { THEMES } from '../../utils/Helpers/const';
 import { RootState } from '../../../core/store';
 import { useNoteNames } from '../../../features/notes/hooks/useNotesQueries';
 import { useNotesLogic } from '../../../features/notes/hooks/useNotesLogic';
+import { logoutUser } from '../../utils/Helpers/requests';
 
 export type SidebarProps = {};
 
@@ -74,6 +75,18 @@ export const Sidebar: React.FC<SidebarProps> = ({}) => {
       <br />
       <h3>Themes</h3>
       <NoteThemesList names={THEMES} onSelect={setSelectedTheme} />
+      <br />
+      <h3>Account</h3>
+      <div
+        className="listNameButton dark-hover"
+        role="button"
+        tabIndex={0}
+        onClick={() => logoutUser(() => window.location.reload())}
+        onKeyDown={(e) => e.key === 'Enter' && logoutUser(() => window.location.reload())}
+      >
+        <h3> Log out </h3>
+      </div>
+      <br />
     </div>
   );
 };
