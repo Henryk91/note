@@ -107,6 +107,12 @@ export class NoteController {
     res.json(result);
   });
 
+  searchV2 = asyncHandler(async (req: Request, res: Response) => {
+    const { userId } = req.auth!;
+    const { q, limit } = req.query as unknown as { q: string; limit?: number };
+    res.json(await noteService.search(userId, q, limit));
+  });
+
   getPathV2 = asyncHandler(async (req: Request, res: Response) => {
     const { userId } = req.auth!;
     const { id } = req.query as { id: string };

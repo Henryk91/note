@@ -27,6 +27,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, setFilterNote 
             style={{ textDecoration: 'none' }}
             className={`dark-hover ${themeBack}`}
             id="menuButton"
+            aria-label="Menu"
+            title="Menu"
             to={isNoteNames ? '/notes/main' : '/notes/note-names'}
           >
             <FontAwesomeIcon icon={faBars} />

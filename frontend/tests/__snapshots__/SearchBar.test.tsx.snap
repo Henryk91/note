@@ -14,7 +14,10 @@ exports[`SearchBar matches snapshot 1`] = `
         class="center-text"
       />
       <div
+        aria-label="Search"
         class="search-clear"
+        role="button"
+        tabindex="0"
       >
         <svg
           aria-hidden="true"

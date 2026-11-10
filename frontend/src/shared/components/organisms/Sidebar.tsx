@@ -24,7 +24,10 @@ const NoteNamesList: React.FC<NoteNamesListProps> = () => {
   const { noteDetailSet } = useNotesLogic();
 
   // Add 'All' and 'None' options as in useNotesLogic
-  const allNames = noteNames ? [...noteNames, 'All', 'None'] : [];
+  // Site Track holds automated visit logs: it is listed last, apart from the personal notebooks.
+  const allNames = noteNames
+    ? [...noteNames.filter((n) => n !== 'Site Track'), 'All', 'None', ...noteNames.filter((n) => n === 'Site Track')]
+    : [];
 
   return (
     <>

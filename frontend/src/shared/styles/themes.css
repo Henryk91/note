@@ -6,7 +6,8 @@
 :root[data-theme='dark'] {
   --accent: #0090c8;
   --accent-text: #3ab0e2;
-  --on-accent: #ffffff;
+  /* white on #0090c8 is only 3.6:1; dark text reaches 5.3:1 (WCAG AA) */
+  --on-accent: #03121c;
   --bg: #061f2f;
   --surface: #0c2b3f;
   --surface-2: #12364f;

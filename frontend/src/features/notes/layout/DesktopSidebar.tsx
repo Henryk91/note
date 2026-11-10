@@ -35,7 +35,7 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = (props) => {
     <nav className="desk-sidebar" aria-label="Notebooks and folders">
       <div className="side-section">
         <div className="side-title">Notebooks</div>
-        {(names ?? []).map((name) => (
+        {(names ?? []).filter((n) => n !== 'Site Track').map((name) => (
           <button
             type="button"
             key={name}
@@ -47,6 +47,18 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = (props) => {
           </button>
         ))}
       </div>
+      {(names ?? []).includes('Site Track') && (
+        <div className="side-section">
+          <div className="side-title">Automated</div>
+          <button
+            type="button"
+            className={`side-item ${notebook === 'Site Track' ? 'is-selected' : ''}`}
+            onClick={() => onSelectNotebook('Site Track')}
+          >
+            Site Track
+          </button>
+        </div>
+      )}
       {mine.length > 0 && (
         <div className="side-section">
           <div className="side-title">Pinned logs</div>

@@ -31,6 +31,10 @@ const noteV2Schema = new Schema<NoteV2Attrs>(
   { timestamps: true },
 );
 
+noteV2Schema.index({ userId: 1, deletedAt: 1 });
+// Full-text search over names and note / log text.
+noteV2Schema.index({ name: 'text', 'content.data': 'text' });
+
 export const NoteModel: Model<NoteAttrs> = mongoose.model<NoteAttrs>('Notes', noteSchema, 'notes');
 
 export const NoteV2Model: Model<NoteV2Attrs> = mongoose.model<NoteV2Attrs>('NoteV2', noteV2Schema, 'notes-v2');

@@ -204,6 +204,37 @@ describe('Move and path', () => {
   });
 });
 
+describe('Search', () => {
+  it('finds text in notes and log entries with a path label, scoped to the user, excluding deleted', async () => {
+    await require('../../backend/src/server/models/Notes').NoteV2Model.init();
+    await create({ id: 'K::FOLDER::Track', parentId: 'K', type: 'FOLDER', name: 'Track' });
+    await create({ id: 'K::FOLDER::Track::Log', parentId: 'K::FOLDER::Track', type: 'FOLDER', name: 'Log' });
+    await create({ id: 'K::FOLDER::Track::Log::LOG::1', parentId: 'K::FOLDER::Track::Log', type: 'LOG', content: { data: 'DEV-244 Migrate database', date: '2026-11-10T09:00:00+01:00' } });
+    await create({ id: 'K::NOTE::1', parentId: 'K', type: 'NOTE', content: { data: 'Remember the migration plan' } });
+    await create({ id: 'K::NOTE::2', parentId: 'K', type: 'NOTE', content: { data: 'migrate secret deleted' } });
+    await agent.delete('/api/note-v2').send({ id: 'K::NOTE::2', type: 'NOTE' });
+
+    const res = await agent.get('/api/search').query({ q: 'migrate' });
+    expect(res.status).to.equal(200);
+    const ids = res.body.map((r: any) => r.id);
+    expect(ids).to.include('K::FOLDER::Track::Log::LOG::1');
+    expect(ids).to.not.include('K::NOTE::2');
+    const hit = res.body.find((r: any) => r.id === 'K::FOLDER::Track::Log::LOG::1');
+    expect(hit.label).to.contain('Track');
+    expect(hit.date).to.equal('2026-11-10T09:00:00+01:00');
+    expect(hit.snippet).to.contain('Migrate');
+
+    const partial = await agent.get('/api/search').query({ q: 'DEV-24' });
+    expect(partial.body.map((r: any) => r.id)).to.include('K::FOLDER::Track::Log::LOG::1');
+
+    await agent.post('/api/register').send({ firstName: 'O', lastName: 'U', email: 'o2@example.com', password: 'Password123!' });
+    await agent.post('/api/login').send({ email: 'o2@example.com', password: 'Password123!' });
+    const other = await agent.get('/api/search').query({ q: 'migrate' });
+    expect(other.body).to.have.length(0);
+    expect((await agent.get('/api/search').query({ q: '' })).status).to.equal(400);
+  });
+});
+
 describe('SPA routing', () => {
   it('serves index.html for deep links instead of redirecting', async () => {
     for (const p of ['/f/abc', '/n/abc', '/notes/main']) {

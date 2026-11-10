@@ -86,6 +86,20 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
   const dayEntries = useMemo(() => grouped.byDay[day] ?? [], [grouped, day]);
   const daySet = useMemo(() => new Set(grouped.days), [grouped.days]);
 
+  // A search hit on a log entry opens that entry's day.
+  useEffect(() => {
+    try {
+      const goto = sessionStorage.getItem(`log-goto:${logId}`);
+      if (goto) {
+        sessionStorage.removeItem(`log-goto:${logId}`);
+        const ts = Date.parse(goto);
+        if (!Number.isNaN(ts)) setDay(dayKeyOf(ts));
+      }
+    } catch {
+      /* storage unavailable */
+    }
+  }, [logId]);
+
   // Text handed over by the quick-log sheet (a chip tapped there): fill the box and focus it.
   useEffect(() => {
     try {

@@ -570,3 +570,59 @@
   font-weight: 600;
   text-align: center;
 }
+
+/* ---- search results, a11y, badges --------------------------------------------------------------------- */
+.search-results {
+  position: fixed;
+  top: var(--header-h);
+  left: 0;
+  right: 0;
+  max-height: 70vh;
+  overflow-y: auto;
+  z-index: 2500;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+.search-hit {
+  display: block;
+  width: 100%;
+  margin: 0 !important;
+  padding: 10px 16px !important;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--text) !important;
+  text-align: left !important;
+  font-size: 14px !important;
+}
+.search-hit:hover,
+.search-hit:focus-visible {
+  background: var(--surface-2) !important;
+}
+.search-hit-path {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+.search-hit-snippet {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.search-empty {
+  padding: 16px;
+  color: var(--muted);
+}
+.listCountBox {
+  overflow: hidden;
+}
+.list-count-folder-number {
+  max-width: 100%;
+}
+:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 1px;
+}

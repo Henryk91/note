@@ -66,6 +66,25 @@ export class NoteRepository {
       .exec();
   }
 
+  /** Text index first; if it finds nothing (partial words), a case-insensitive substring match. */
+  async searchNotesV2(userId: string, q: string, limit: number): Promise<NoteV2Attrs[]> {
+    let text: NoteV2Attrs[] = [];
+    try {
+      text = await NoteV2Model.find({ userId, deletedAt: null, $text: { $search: q } })
+        .limit(limit)
+        .lean<NoteV2Attrs[]>()
+        .exec();
+    } catch {
+      // The text index may not be built yet; the substring match below still works.
+    }
+    if (text.length) return text;
+    const rx = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    return NoteV2Model.find({ userId, deletedAt: null, $or: [{ name: rx }, { 'content.data': rx }] })
+      .limit(limit)
+      .lean<NoteV2Attrs[]>()
+      .exec();
+  }
+
   async createNoteV2(data: NoteV2Attrs): Promise<NoteV2Attrs> {
     const note = await NoteV2Model.create(data);
     return note.toObject();
