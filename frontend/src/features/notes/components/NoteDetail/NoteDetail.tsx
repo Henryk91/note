@@ -6,6 +6,9 @@ import { useLocation } from 'react-router-dom';
 import { AddItemForm, EditNameForm } from './forms';
 import { Note } from '../../../../shared/utils/Helpers/types';
 import { useNoteNavigation } from '../../hooks/useNoteNavigation';
+import { LogScreen } from '../../log/LogScreen';
+import { isLogId } from '../../log/useLogData';
+import { PinnedLogs } from '../../log/PinnedLogs';
 import { useNoteOperations } from '../../hooks/useNoteOperations';
 
 type NoteDetailProps = {
@@ -21,13 +24,16 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
   const person = byId?.[pageLink?.params.id] || null;
 
   // 1. Navigation Hook
-  const { openPage, saveShowTag, showHideBox } = useNoteNavigation({ person, isLastPage });
+  const { openPage, saveShowTag, showHideBox, handleLinkClick } = useNoteNavigation({ person, isLastPage });
 
   // 2. Operations Hook
   const { addLabel, submitNameChange, submitNewItem, cancelAddItemEdit, updateNoteItem, continueLog } =
     useNoteOperations({ person, openPage });
 
   const location = useLocation();
+
+  // A log is not a list of items: it gets its own screen (quick entry box, day navigation, timeline).
+  if (isLogId(pageLink?.params.id)) return <LogScreen logId={pageLink.params.id} />;
 
   const isNoteNames = location.pathname === '/notes/note-names';
   const personToRender = isNoteNames ? null : ({ ...person } as Note);
@@ -60,6 +66,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
         {showAddItem && isLastPage && (
           <AddItemForm addLabel={addLabel} onSubmit={submitNewItem} onCancel={cancelAddItemEdit} />
         )}
+        {index === 0 && <PinnedLogs notebook={personToRender.id} />}
         <NoteDetailTags
           person={personToRender}
           isLastPage={isLastPage}
@@ -68,6 +75,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
             saveShowTag,
             continueLog,
             updateNoteItem,
+            openFolder: (item) => handleLinkClick(item, person),
           }}
         />
         <br />

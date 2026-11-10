@@ -59,6 +59,13 @@ export class NoteRepository {
       .exec();
   }
 
+  async findPinnedLogsV2(userId: string): Promise<NoteV2Attrs[]> {
+    return NoteV2Model.find({ userId, type: 'FOLDER', 'settings.pinned': true, deletedAt: null })
+      .sort({ _id: 1 })
+      .lean<NoteV2Attrs[]>()
+      .exec();
+  }
+
   async createNoteV2(data: NoteV2Attrs): Promise<NoteV2Attrs> {
     const note = await NoteV2Model.create(data);
     return note.toObject();

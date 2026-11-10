@@ -1,12 +1,14 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowDown, faArrowUp, faPen, faPlus, faWifi } from '@fortawesome/free-solid-svg-icons';
+import { faArrowDown, faArrowUp, faClock, faPen, faPlus, faWifi } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { RootState } from '../../../core/store';
 import { setEditName, setShowAddItem } from '../../../features/auth/store/personSlice';
 import { useOnlineStatus } from '../../../shared/hooks/useOnlineStatus';
 import { scrollActiveSlideToTop } from '../../../shared/utils/Helpers/utils';
+import { isLogId } from '../log/useLogData';
+import { QUICK_LOG_EVENT } from '../log/QuickLogSheet';
 
 export type ScrollButtonsProps = {};
 
@@ -29,6 +31,9 @@ export const ScrollButtons: React.FC<ScrollButtonsProps> = ({}) => {
     dispatch(setEditName(!editName));
   };
 
+  // The log screen has its own pinned entry box at the bottom; floating buttons would cover it.
+  if (isLogId(pages[pages.length - 1]?.params.id)) return null;
+
   return (
     <div className="detail-scroll">
       {!isOnline && (
@@ -36,6 +41,14 @@ export const ScrollButtons: React.FC<ScrollButtonsProps> = ({}) => {
           <FontAwesomeIcon icon={faWifi} size="lg" />
         </div>
       )}
+      <button
+        className={`detailUpButton ${themeHover} ${themeBack}`}
+        onClick={() => window.dispatchEvent(new Event(QUICK_LOG_EVENT))}
+        aria-label="Quick log"
+        title="Quick log"
+      >
+        <FontAwesomeIcon icon={faClock} />
+      </button>
       <button className={`editButtons1 detailUpButton ${themeHover} ${themeBack}`} onClick={editNameClick}>
         <FontAwesomeIcon icon={faPen} />
       </button>

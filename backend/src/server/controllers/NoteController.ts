@@ -107,6 +107,11 @@ export class NoteController {
     res.json(result);
   });
 
+  getPinnedLogsV2 = asyncHandler(async (req: Request, res: Response) => {
+    const { userId } = req.auth!;
+    res.json(await noteService.getPinnedLogs(userId));
+  });
+
   getDeletedV2 = asyncHandler(async (req: Request, res: Response) => {
     const { userId } = req.auth!;
     const { notebook } = req.query as { notebook?: string };

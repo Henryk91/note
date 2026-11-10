@@ -165,6 +165,23 @@ describe('Log settings', () => {
   });
 });
 
+describe('Pinned logs', () => {
+  it('lists pinned log folders with a parent path label, excluding unpinned and deleted ones', async () => {
+    await create({ id: 'K::FOLDER::Track', parentId: 'K', type: 'FOLDER', name: 'Track' });
+    await create({ id: 'K::FOLDER::Track::Log', parentId: 'K::FOLDER::Track', type: 'FOLDER', name: 'Log', settings: { pinned: true, mode: 'time-tracker' } });
+    await create({ id: 'K::Log', parentId: 'K', type: 'FOLDER', name: 'Log', settings: { pinned: false } });
+    await create({ id: 'K::FOLDER::Gone::Log', parentId: 'K', type: 'FOLDER', name: 'Log', settings: { pinned: true } });
+    await agent.delete('/api/note-v2').send({ id: 'K::FOLDER::Gone::Log', type: 'FOLDER' });
+
+    const res = await agent.get('/api/note-v2/pinned-logs');
+    expect(res.status).to.equal(200);
+    expect(res.body).to.have.length(1);
+    expect(res.body[0].id).to.equal('K::FOLDER::Track::Log');
+    expect(res.body[0].label).to.equal('K / Track');
+    expect(res.body[0].settings.mode).to.equal('time-tracker');
+  });
+});
+
 describe('SPA routing', () => {
   it('serves index.html for deep links instead of redirecting', async () => {
     for (const p of ['/f/abc', '/n/abc', '/notes/main']) {

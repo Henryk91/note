@@ -16,6 +16,10 @@ const AppContent: React.FC = () => {
   const { loadingData, setFilterNote } = useNotesLogic();
 
   useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme.toLowerCase());
+  }, [theme]);
+
+  useEffect(() => {
     const menuBtn = document.getElementById('menuButton');
     if (menuBtn) {
       if (!loadingData) {

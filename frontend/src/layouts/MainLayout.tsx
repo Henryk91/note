@@ -5,6 +5,7 @@ import { faBars } from '@fortawesome/free-solid-svg-icons';
 import SearchBar from '../features/notes/components/SearchBar/SearchBar';
 import { useSelector } from 'react-redux';
 import { RootState } from '../core/store';
+import { QuickLogSheet } from '../features/notes/log/QuickLogSheet';
 
 type MainLayoutProps = {
   children: React.ReactNode;
@@ -33,6 +34,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, setFilterNote 
         </nav>
       </header>
       <main className="app-main">{children}</main>
+      <QuickLogSheet enabled />
     </>
   );
 };

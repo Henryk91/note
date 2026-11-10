@@ -24,6 +24,7 @@ router.get(
   validateQuery(V2ParentQuerySchema),
   noteController.getV2ContentWithChildren,
 );
+router.get('/note-v2/pinned-logs', isAuthenticated, noteController.getPinnedLogsV2);
 router.get('/note-v2/deleted', isAuthenticated, validateQuery(DeletedQuerySchema), noteController.getDeletedV2);
 router.delete(
   '/note-v2/deleted',

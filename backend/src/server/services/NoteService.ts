@@ -283,6 +283,21 @@ export class NoteService {
     return { ok: true, deletedCount: subtreeIds.length, deletedAt };
   }
 
+  /** Pinned logs with a label made from the parent path ("Koorvi / Track"), for the quick-log sheet. */
+  async getPinnedLogs(userId: string) {
+    const pinned = await this.repo.findPinnedLogsV2(userId);
+    const cache = new Map<string, NoteV2Attrs | null>();
+    return Promise.all(
+      pinned.map(async (doc) => {
+        const notebook = await this.getNotebookId(userId, doc, cache);
+        const parent = doc.parentId ? await this.repo.findNoteV2ById(userId, doc.parentId) : null;
+        const parentName = parent?.name || doc.parentId;
+        const label = doc.parentId === notebook || !parent ? notebook : `${notebook} / ${parentName}`;
+        return { id: doc.id, parentId: doc.parentId, name: doc.name, settings: doc.settings, label, notebook };
+      }),
+    );
+  }
+
   private async getNotebookId(userId: string, doc: NoteV2Attrs, cache: Map<string, NoteV2Attrs | null>) {
     let current: NoteV2Attrs | null = doc;
     const guard = new Set<string>();

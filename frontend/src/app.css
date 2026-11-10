@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css?family=Open+Sans');
 
+@import url('./shared/styles/themes.css');
+@import url('./features/notes/log/log.css');
 @import url('./features/notes/components/SearchBar/style.css');
 @import url('./features/notes/pages/Home/style.css');
 @import url('./features/notes/components/NoteDetail/style.css');
@@ -402,4 +404,9 @@ h2 {
 
 .flex {
   display: flex;
+}
+
+/* The page carousel must never be scrolled by focus() / scrollIntoView(): that pushed the log title out of view. */
+#multiple-pages .swiper {
+  overflow: clip;
 }

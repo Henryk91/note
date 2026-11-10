@@ -10,6 +10,7 @@ import { removeLastPage, setShowTag } from '../../../auth/store/personSlice';
 import { useNoteNames } from '../../hooks/useNotesQueries';
 import { useLocation } from 'react-router-dom';
 import { useFolderUrlSync } from '../../hooks/useFolderUrlSync';
+import { isLogId } from '../../log/useLogData';
 import NoteDetail from '../../components/NoteDetail/NoteDetail';
 
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -17,7 +18,7 @@ import { Swiper as SwiperType } from 'swiper';
 import 'swiper/css';
 
 // Wrapper component to ensure new slides start at top
-const PreservedScrollSlide: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const PreservedScrollSlide: React.FC<{ children: React.ReactNode; isLog?: boolean }> = ({ children, isLog }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -30,7 +31,7 @@ const PreservedScrollSlide: React.FC<{ children: React.ReactNode }> = ({ childre
   return (
     <div
       ref={scrollRef}
-      className="multiple-pages1 scrollable-content"
+      className={`multiple-pages1 scrollable-content${isLog ? ' log-slide' : ''}`}
       style={{
         height: '100%',
         overflowY: 'auto',
@@ -116,7 +117,7 @@ const NoteDetailPage: React.FC = () => {
             {[...pages]?.map((page, index) => {
               return (
                 <SwiperSlide key={`page-${index}`} style={{ height: '100%' }}>
-                  <PreservedScrollSlide>
+                  <PreservedScrollSlide isLog={isLogId(page.params.id)}>
                     <NoteDetail index={index} />
                   </PreservedScrollSlide>
                 </SwiperSlide>

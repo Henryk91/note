@@ -1,11 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import NoteItem from '../NoteItem/NoteItem';
 import { FolderList } from './forms';
-import { Note } from '../../../../shared/utils/Helpers/types';
+import { Note, NoteItemType } from '../../../../shared/utils/Helpers/types';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../core/store';
-import { CompleteLogContent } from './CompleteLogContent';
-import { useNoteDateLogic } from '../../hooks/useNoteDateLogic';
+import { LogListRow } from '../../log/LogListRow';
 
 interface NoteDetailTagsProps {
   person: Note;
@@ -15,32 +14,18 @@ interface NoteDetailTagsProps {
     saveShowTag: (tag: string) => void;
     continueLog: (payload: any) => void;
     updateNoteItem: (payload: any) => void;
+    openFolder: (item: NoteItemType) => void;
   };
 }
 
 const NoteDetailTags: React.FC<NoteDetailTagsProps> = ({ person, isLastPage, actions }) => {
-  const { byId, searchTerm } = useSelector((state: RootState) => state.person);
+  const byId = useSelector((state: RootState) => state.person.byId);
   const persons = byId;
 
-  const { showHideBox, saveShowTag, continueLog, updateNoteItem } = actions;
-
-  const { displayDate, showLogDaysBunch, totalLogCount, logDayMap, setDate, changeDate, dateBackForward, showLogDays } =
-    useNoteDateLogic({ person, persons, searchTerm, saveShowTag });
+  const { showHideBox, saveShowTag, updateNoteItem, openFolder } = actions;
 
   // State to track which item is being edited (to hide others)
   const [editingId, setEditingId] = useState<string | null>(null);
-
-  const calculatedContinueData = useMemo(() => {
-    if (!logDayMap || !displayDate) return null;
-    let selDate = `${new Date(displayDate as any)}`;
-    selDate = selDate.substring(0, 15).trim();
-    let selDates = logDayMap[selDate];
-    if (selDates && selDates.length > 0) {
-      selDates = selDates.slice(selDates.length - 2);
-      return selDates[0]?.content?.data;
-    }
-    return null;
-  }, [logDayMap, displayDate]);
 
   return (
     <div className={'detailedBox'}>
@@ -49,7 +34,7 @@ const NoteDetailTags: React.FC<NoteDetailTagsProps> = ({ person, isLastPage, act
         const isNote = noteItem.type === 'NOTE';
         const isLogDirectory = noteItem.name === 'Log';
         const prop = (noteItem as any).heading ?? noteItem.name ?? noteItem?.content?.data ?? 'Unknown';
-        const contentCount = isLogDirectory ? totalLogCount : persons?.[noteItem.id]?.dataLable?.length;
+        const contentCount = persons?.[noteItem.id]?.dataLable?.length;
 
         // Determine if this item should be hidden (when another item is being edited)
         const isHidden = editingId !== null && editingId !== noteItem.id;
@@ -60,34 +45,19 @@ const NoteDetailTags: React.FC<NoteDetailTagsProps> = ({ person, isLastPage, act
             key={(noteItem.id || prop) + i}
             style={isHidden ? { display: 'none' } : {}}
           >
-            {isLink && (
-              <>
-                <FolderList
-                  linkBorder={'link-border'}
-                  prop={prop}
-                  contentCount={contentCount}
-                  onShowHide={() => showHideBox(prop)}
-                  onShowLogDays={() => showLogDays(prop)}
-                  onShowLogTag={(tag) => saveShowTag(tag)}
-                  onChangeDate={changeDate}
-                />
-                <CompleteLogContent
-                  contentCount={contentCount}
-                  continueData={calculatedContinueData}
-                  onDateBackForward={(e, dir) => dateBackForward(e, dir)}
-                  onContinueLog={(payload) => continueLog(payload)}
-                  noteItem={noteItem}
-                  logDayMap={logDayMap}
-                  showLogDaysBunch={showLogDaysBunch}
-                  displayDate={displayDate}
-                  isLastPage={isLastPage}
-                  actions={{
-                    setDate,
-                    updateNoteItem,
-                    continueLog,
-                  }}
-                />
-              </>
+            {isLink && isLogDirectory && (
+              <LogListRow logItem={noteItem} items={persons?.[noteItem.id]?.dataLable} onOpen={() => openFolder(noteItem)} />
+            )}
+            {isLink && !isLogDirectory && (
+              <FolderList
+                linkBorder={'link-border'}
+                prop={prop}
+                contentCount={contentCount}
+                onShowHide={() => showHideBox(prop)}
+                onShowLogDays={() => undefined}
+                onShowLogTag={(tag) => saveShowTag(tag)}
+                onChangeDate={() => undefined}
+              />
             )}
             {isNote && (
               <NoteItem

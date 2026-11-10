@@ -192,6 +192,16 @@ const main = async () => {
     await logEntry(notesLog, `C${30 + (i % 9)}`, stamp(at(days[i], 6, 45), i < 10));
   }
 
+  // A big log (about 2,150 daily entries, like the real Notes / Log) to check open time and scrolling.
+  const archive = await folder('Henry', 'Archive');
+  const archiveLog = await folder(archive, 'Log', { settings: { mode: 'daily-value' } });
+  for (let i = 0; i < 2150; i += 1) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    // eslint-disable-next-line no-await-in-loop
+    await logEntry(archiveLog, `C${20 + ((i * 7) % 40)}`, stamp(at(d, 6, 40 + (i % 15)), i > 400));
+  }
+
   // Train log: a 20+ line Markdown workout entry
   await logEntry(trainLog, WORKOUT, stamp(at(days[days.length - 3], 17, 30), false));
   await logEntry(trainLog, 'Easy run 5km', stamp(at(days[days.length - 1], 6, 15), false));

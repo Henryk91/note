@@ -1,0 +1,65 @@
+/*
+ * The five themes as CSS variables. New components use these; the old `.dark-back` style classes keep working.
+ * App.tsx sets `data-theme` on <html> from the Redux theme value.
+ */
+:root,
+:root[data-theme='dark'] {
+  --accent: #0090c8;
+  --accent-text: #3ab0e2;
+  --on-accent: #ffffff;
+  --bg: #061f2f;
+  --surface: #0c2b3f;
+  --surface-2: #12364f;
+  --line: #1e4058;
+  --text: #e8f1f6;
+  --muted: #9fb6c4;
+  --danger: #ff8a80;
+}
+:root[data-theme='ocean'] {
+  --accent: #38cdb8;
+  --accent-text: #38cdb8;
+  --on-accent: #10211f;
+  --bg: #35373d;
+  --surface: #3f4148;
+  --surface-2: #4a4c54;
+  --line: #5a5c65;
+  --text: #f0f2f4;
+  --muted: #b9bcc4;
+  --danger: #ff8a80;
+}
+:root[data-theme='green'] {
+  --accent: #39cb7d;
+  --accent-text: #5ee09a;
+  --on-accent: #06231a;
+  --bg: #103762;
+  --surface: #17467a;
+  --surface-2: #1e548f;
+  --line: #2c63a0;
+  --text: #eaf2fa;
+  --muted: #a9c2dc;
+  --danger: #ff9a90;
+}
+:root[data-theme='night'] {
+  --accent: #27343b;
+  --accent-text: #3ab0e2;
+  --on-accent: #ffffff;
+  --bg: #061f2f;
+  --surface: #0c2b3f;
+  --surface-2: #12364f;
+  --line: #1e4058;
+  --text: #e8f1f6;
+  --muted: #9fb6c4;
+  --danger: #ff8a80;
+}
+:root[data-theme='red'] {
+  --accent: #d00000;
+  --accent-text: #ff6b6b;
+  --on-accent: #ffffff;
+  --bg: #030303;
+  --surface: #151515;
+  --surface-2: #202020;
+  --line: #333333;
+  --text: #f2f2f2;
+  --muted: #a8a8a8;
+  --danger: #ff8a80;
+}
