@@ -73,6 +73,12 @@ export const Sidebar: React.FC<SidebarProps> = ({}) => {
         </div>
       </Link>
       <br />
+      <Link key="recently-deleted" style={{ textDecoration: 'none' }} to="/recently-deleted" title="Recently Deleted">
+        <div className="listNameButton">
+          <h3> Recently Deleted </h3>
+        </div>
+      </Link>
+      <br />
       <h3>Themes</h3>
       <NoteThemesList names={THEMES} onSelect={setSelectedTheme} />
       <br />

@@ -92,6 +92,20 @@ exports[`Sidebar matches snapshot 1`] = `
       </div>
     </a>
     <br />
+    <a
+      href="/recently-deleted"
+      style="text-decoration: none;"
+      title="Recently Deleted"
+    >
+      <div
+        class="listNameButton"
+      >
+        <h3>
+           Recently Deleted 
+        </h3>
+      </div>
+    </a>
+    <br />
     <h3>
       Themes
     </h3>

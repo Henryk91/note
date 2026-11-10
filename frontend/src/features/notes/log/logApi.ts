@@ -49,13 +49,16 @@ const watchQueued = (ids: string[]) => {
   }, 3000);
 };
 
+export const markPendingId = markPending;
+export const clearPendingId = clearPending;
+
 export const usePendingEntries = () => useSyncExternalStore(subscribe, getSnapshot);
 
 // ---- cache helpers ----------------------------------------------------------------------------------
 
 type CacheShape = { notes: Record<string, { id: string; heading?: string; dataLable: NoteItemType[] }> } | undefined;
 
-const patchLog = (qc: QueryClient, logId: string, fn: (items: NoteItemType[]) => NoteItemType[]) => {
+export const patchLog = (qc: QueryClient, logId: string, fn: (items: NoteItemType[]) => NoteItemType[]) => {
   qc.setQueryData(notesKeys.withChildren(logId), (old: CacheShape) => {
     const current = old?.notes?.[logId];
     const items = current?.dataLable ?? [];
@@ -63,14 +66,14 @@ const patchLog = (qc: QueryClient, logId: string, fn: (items: NoteItemType[]) =>
       ...(old ?? {}),
       notes: {
         ...(old?.notes ?? {}),
-        [logId]: { id: logId, heading: current?.heading ?? 'Log', ...current, dataLable: fn(items) },
+        [logId]: { id: logId, heading: current?.heading ?? '', ...current, dataLable: fn(items) },
       },
     };
   });
 };
 
-const newId = (logId: string) =>
-  `${logId}::${ItemType.LOG}::${Date.now()}${Math.floor(Math.random() * 1000)
+export const newItemId = (parentId: string, type: ItemType) =>
+  `${parentId}::${type}::${Date.now()}${Math.floor(Math.random() * 1000)
     .toString()
     .padStart(3, '0')}`;
 
@@ -93,6 +96,8 @@ const track = (id: string, result: { queued: boolean }) => {
   }
 };
 
+export const trackQueued = track;
+
 /**
  * Create / edit / delete log entries with an optimistic update. Writes go through the offline queue
  * (`sendOrQueueJSON`): a network error or being offline queues them, an HTTP error rolls the change back.
@@ -103,7 +108,7 @@ export const useLogMutations = (logId: string): LogMutations => {
   const create = useCallback(
     async (text: string, ts: number) => {
       const item = {
-        id: newId(logId),
+        id: newItemId(logId, ItemType.LOG),
         parentId: logId,
         type: ItemType.LOG,
         content: { data: text, date: toIsoWithOffset(ts) },

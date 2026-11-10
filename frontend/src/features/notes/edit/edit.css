@@ -1,0 +1,179 @@
+/* Notes: always-editable blocks, item menus, swipe rows. Colours come from the theme variables. */
+.note-block {
+  position: relative;
+  text-align: left;
+  padding: 8px 34px 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+.note-block-view {
+  cursor: text;
+  overflow-wrap: anywhere;
+  min-height: 24px;
+}
+.note-block-view > :first-child {
+  margin-top: 0;
+}
+.note-block-view > :last-child {
+  margin-bottom: 0;
+}
+.note-block-view a {
+  color: var(--accent-text);
+}
+.note-block-empty {
+  color: var(--muted);
+}
+.note-block-area {
+  display: block;
+  width: 100% !important;
+  box-sizing: border-box;
+  margin: 0 !important;
+  padding: 8px !important;
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 8px !important;
+  font: inherit;
+  font-size: 16px !important;
+  line-height: 1.45;
+  resize: none;
+  text-align: left !important;
+  overflow: hidden;
+}
+.note-block-new {
+  min-height: 44px;
+  background: transparent !important;
+  border-style: dashed !important;
+}
+.note-block-side {
+  position: absolute;
+  top: 6px;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+}
+.item-menu {
+  position: relative;
+  display: inline-block;
+}
+.item-menu-btn {
+  margin: 0 !important;
+  padding: 4px 8px !important;
+  background: transparent !important;
+  color: var(--muted) !important;
+  border: 0;
+  font-size: 15px !important;
+  cursor: pointer;
+}
+.item-menu-list {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 60;
+  min-width: 150px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 4px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+.item-menu-list button {
+  display: block;
+  width: 100%;
+  margin: 0 !important;
+  padding: 8px 10px !important;
+  text-align: left !important;
+  background: transparent !important;
+  color: var(--text) !important;
+  border-radius: 6px !important;
+  font-size: 14px !important;
+}
+.item-menu-list button:hover {
+  background: var(--surface) !important;
+}
+.item-menu-list button.danger {
+  color: var(--danger) !important;
+}
+.swipe-row {
+  position: relative;
+  overflow: hidden;
+}
+.swipe-row-content {
+  position: relative;
+  background: var(--bg);
+  transition: transform 0.15s ease-out;
+}
+.swipe-row-delete {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 88px;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  background: #c62828 !important;
+  color: #fff !important;
+  font-size: 15px !important;
+  text-align: center !important;
+}
+.save-indicator {
+  font-size: 12px;
+  color: var(--muted);
+  min-height: 16px;
+  display: inline-block;
+}
+.save-indicator[data-status='offline'] {
+  color: var(--danger);
+}
+.doc-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.doc-title-row .item-menu-btn {
+  font-size: 20px !important;
+  color: var(--text) !important;
+}
+.deleted-page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 12px 16px 80px;
+  text-align: left;
+  color: var(--text);
+}
+.deleted-page h1 {
+  text-align: center;
+}
+.deleted-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.deleted-row .deleted-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.deleted-row small {
+  display: block;
+  color: var(--muted);
+}
+.deleted-row button,
+.deleted-page .deleted-empty-btn {
+  margin: 0 !important;
+  padding: 6px 12px !important;
+  border-radius: 14px !important;
+  background: var(--surface) !important;
+  color: var(--accent-text) !important;
+  font-size: 14px !important;
+  flex: none;
+}
+.deleted-page .deleted-empty-btn {
+  color: var(--danger) !important;
+  display: block;
+  margin: 14px auto 0 !important;
+}

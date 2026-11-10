@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css?family=Open+Sans');
 
 @import url('./shared/styles/themes.css');
+@import url('./features/notes/edit/edit.css');
 @import url('./features/notes/log/log.css');
 @import url('./features/notes/components/SearchBar/style.css');
 @import url('./features/notes/pages/Home/style.css');

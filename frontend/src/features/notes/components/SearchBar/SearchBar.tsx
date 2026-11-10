@@ -48,13 +48,6 @@ const SearchBar: React.FC<SearchBarProps> = ({ set }) => {
     setState((prev) => ({ ...prev, editName: !prev.editName }));
   };
 
-  const editNameClick = () => {
-    toggleEditName();
-    setTimeout(() => {
-      document.getElementById('userNameBox')?.focus();
-    }, 100);
-  };
-
   const clearSearch = () => {
     set({
       filteredNotes: notes,
@@ -86,7 +79,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ set }) => {
   return (
     <header className={themeBack}>
       {state.showSearch === false && state.editName === false && (
-        <div className={themeBack} id="userNameBox" aria-label="User Name" onClick={editNameClick}>
+        <div className={themeBack} id="userNameBox" aria-label="User Name">
           <div className="center-text">{selectedNoteName}</div>
           <div className="search-clear" onClick={(e) => toggleSearch(e)}>
             <FontAwesomeIcon icon={faSearch} />

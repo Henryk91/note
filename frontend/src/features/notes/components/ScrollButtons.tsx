@@ -1,10 +1,10 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowDown, faArrowUp, faClock, faPen, faPlus, faWifi } from '@fortawesome/free-solid-svg-icons';
+import { faArrowDown, faArrowUp, faClock, faPlus, faWifi } from '@fortawesome/free-solid-svg-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { RootState } from '../../../core/store';
-import { setEditName, setShowAddItem } from '../../../features/auth/store/personSlice';
+import { setShowAddItem } from '../../../features/auth/store/personSlice';
 import { useOnlineStatus } from '../../../shared/hooks/useOnlineStatus';
 import { scrollActiveSlideToTop } from '../../../shared/utils/Helpers/utils';
 import { isLogId } from '../log/useLogData';
@@ -16,7 +16,7 @@ export const ScrollButtons: React.FC<ScrollButtonsProps> = ({}) => {
   const isOnline = useOnlineStatus();
   const dispatch = useDispatch();
   const theme = useSelector((state: RootState) => state.theme.themeLower);
-  const { showAddItem, editName, pages } = useSelector((state: RootState) => state.person);
+  const { showAddItem, pages } = useSelector((state: RootState) => state.person);
   const showUpdateButton = pages.length > 1;
   const themeBack = `${theme}-back`;
   const themeHover = `${theme}-hover`;
@@ -24,11 +24,6 @@ export const ScrollButtons: React.FC<ScrollButtonsProps> = ({}) => {
   const addButtonClicked = () => {
     dispatch(setShowAddItem(!showAddItem));
     if (!showAddItem) scrollActiveSlideToTop();
-  };
-
-  const editNameClick = () => {
-    scrollActiveSlideToTop();
-    dispatch(setEditName(!editName));
   };
 
   // The log screen has its own pinned entry box at the bottom; floating buttons would cover it.
@@ -48,9 +43,6 @@ export const ScrollButtons: React.FC<ScrollButtonsProps> = ({}) => {
         title="Quick log"
       >
         <FontAwesomeIcon icon={faClock} />
-      </button>
-      <button className={`editButtons1 detailUpButton ${themeHover} ${themeBack}`} onClick={editNameClick}>
-        <FontAwesomeIcon icon={faPen} />
       </button>
       <div className={`detailUpButton ${themeHover} ${themeBack}`} onClick={scrollActiveSlideToTop}>
         <FontAwesomeIcon icon={faArrowUp} size="lg" />

@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
-import NoteItem from '../NoteItem/NoteItem';
+import React from 'react';
+import { NoteBlock, TrailingBlock } from '../../edit/NoteBlock';
+import { SwipeRow } from '../../edit/SwipeRow';
+import { useItemMutations } from '../../edit/itemMutations';
+import { useDeleteWithUndo } from '../../edit/useDeleteWithUndo';
 import { FolderList } from './forms';
 import { Note, NoteItemType } from '../../../../shared/utils/Helpers/types';
 import { useSelector } from 'react-redux';
@@ -22,10 +25,10 @@ const NoteDetailTags: React.FC<NoteDetailTagsProps> = ({ person, isLastPage, act
   const byId = useSelector((state: RootState) => state.person.byId);
   const persons = byId;
 
-  const { showHideBox, saveShowTag, updateNoteItem, openFolder } = actions;
+  const { showHideBox, saveShowTag, openFolder } = actions;
 
-  // State to track which item is being edited (to hide others)
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const mutations = useItemMutations(person.id);
+  const deleteWithUndo = useDeleteWithUndo(mutations);
 
   return (
     <div className={'detailedBox'}>
@@ -36,43 +39,31 @@ const NoteDetailTags: React.FC<NoteDetailTagsProps> = ({ person, isLastPage, act
         const prop = (noteItem as any).heading ?? noteItem.name ?? noteItem?.content?.data ?? 'Unknown';
         const contentCount = persons?.[noteItem.id]?.dataLable?.length;
 
-        // Determine if this item should be hidden (when another item is being edited)
-        const isHidden = editingId !== null && editingId !== noteItem.id;
-
         return (
-          <div
-            className={`detailedBox ${isHidden ? 'hidden-noteItemBox' : ''}`}
-            key={(noteItem.id || prop) + i}
-            style={isHidden ? { display: 'none' } : {}}
-          >
+          <div className="detailedBox" key={(noteItem.id || prop) + i}>
             {isLink && isLogDirectory && (
-              <LogListRow logItem={noteItem} items={persons?.[noteItem.id]?.dataLable} onOpen={() => openFolder(noteItem)} />
+              <SwipeRow onDelete={() => deleteWithUndo(noteItem, 'Log deleted')}>
+                <LogListRow logItem={noteItem} items={persons?.[noteItem.id]?.dataLable} onOpen={() => openFolder(noteItem)} />
+              </SwipeRow>
             )}
             {isLink && !isLogDirectory && (
-              <FolderList
-                linkBorder={'link-border'}
-                prop={prop}
-                contentCount={contentCount}
-                onShowHide={() => showHideBox(prop)}
-                onShowLogDays={() => undefined}
-                onShowLogTag={(tag) => saveShowTag(tag)}
-                onChangeDate={() => undefined}
-              />
+              <SwipeRow onDelete={() => deleteWithUndo(noteItem, 'Folder deleted')}>
+                <FolderList
+                  linkBorder={'link-border'}
+                  prop={prop}
+                  contentCount={contentCount}
+                  onShowHide={() => showHideBox(prop)}
+                  onShowLogDays={() => undefined}
+                  onShowLogTag={(tag) => saveShowTag(tag)}
+                  onChangeDate={() => undefined}
+                />
+              </SwipeRow>
             )}
-            {isNote && (
-              <NoteItem
-                item={noteItem}
-                show={isLastPage}
-                set={updateNoteItem}
-                type={prop}
-                index={i}
-                onEditStart={() => setEditingId(noteItem.id)}
-                onEditEnd={() => setEditingId(null)}
-              />
-            )}
+            {isNote && <NoteBlock item={noteItem} mutations={mutations} onDelete={deleteWithUndo} />}
           </div>
         );
       })}
+      {isLastPage && <TrailingBlock key={person.id} folderId={person.id} mutations={mutations} />}
     </div>
   );
 };

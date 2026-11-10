@@ -1,0 +1,51 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEllipsisH } from '@fortawesome/free-solid-svg-icons';
+
+export type ItemMenuEntry = { label: string; onSelect: () => void; danger?: boolean };
+
+/** A `...` button with a small menu. Destructive entries are separate rows, never next to a Save button. */
+export const ItemMenu: React.FC<{ label: string; items: ItemMenuEntry[] }> = ({ label, items }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const close = (e: MouseEvent) => {
+      if (!ref.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const esc = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    document.addEventListener('mousedown', close);
+    document.addEventListener('keydown', esc);
+    return () => {
+      document.removeEventListener('mousedown', close);
+      document.removeEventListener('keydown', esc);
+    };
+  }, [open]);
+
+  return (
+    <span ref={ref} className="item-menu">
+      <button type="button" className="item-menu-btn" aria-label={label} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+        <FontAwesomeIcon icon={faEllipsisH} />
+      </button>
+      {open && (
+        <div className="item-menu-list" role="menu">
+          {items.map((it) => (
+            <button
+              type="button"
+              role="menuitem"
+              key={it.label}
+              className={it.danger ? 'danger' : ''}
+              onClick={() => {
+                setOpen(false);
+                it.onSelect();
+              }}
+            >
+              {it.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </span>
+  );
+};
