@@ -626,3 +626,608 @@
   outline: 2px solid var(--accent-text);
   outline-offset: 1px;
 }
+
+/* ---- app header (docs/mockups/desktop.html, phone-screens.html) -------------------------------------- */
+header.app-header {
+  background: var(--bar) !important;
+  color: #fff;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  text-align: left;
+}
+header.app-header.is-wide {
+  justify-content: flex-start;
+}
+header.app-header button,
+header.app-header a {
+  color: #fff;
+  background: transparent;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+  text-decoration: none;
+}
+header.app-header #menuButton {
+  position: static;
+  font-size: 20px;
+  color: #fff;
+  padding: 6px;
+  border-radius: 6px !important;
+  display: inline-flex;
+  align-items: center;
+}
+header.app-header .hd-name {
+  font-weight: 600;
+}
+header.app-header .hd-sub {
+  opacity: 0.9;
+}
+header.app-header .hd-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 240px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  padding: 6px 10px;
+  text-align: left;
+  position: relative;
+}
+header.app-header .hd-search.is-open input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  color: #fff;
+  font-size: 14px;
+  margin: 0;
+  width: auto;
+  text-align: left;
+}
+header.app-header .hd-search.is-open input::placeholder {
+  color: rgba(255, 255, 255, 0.8);
+}
+header.app-header .hd-log {
+  background: #fff;
+  color: var(--bar);
+  border-radius: 12px;
+  padding: 4px 12px;
+  font-weight: 600;
+}
+header.app-header.is-phone .hd-search.is-open {
+  flex: 1;
+  width: auto;
+}
+header.app-header .hd-title {
+  text-align: center;
+  flex: 1;
+  min-width: 0;
+}
+header.app-header .hd-kicker {
+  font-size: 11px;
+  opacity: 0.9;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+header.app-header .hd-main {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+header.app-header .hd-back {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 30vw;
+}
+header.app-header .hd-back-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+header.app-header .hd-right {
+  display: flex;
+  align-items: center;
+  min-width: 24px;
+  justify-content: flex-end;
+}
+header.app-header .item-menu-btn {
+  color: #fff !important;
+  font-size: 18px !important;
+}
+header.app-header .item-menu-list button {
+  color: var(--text) !important;
+}
+
+/* ---- desktop three panes, tuned to docs/mockups/desktop.html -------------------------------------------- */
+.desk {
+  font-size: 13px;
+  line-height: 1.45;
+  background: var(--bg);
+}
+.desk .desk-sidebar {
+  background: var(--bg);
+  padding: 8px;
+  border-right: 0;
+}
+.desk .desk-resizer {
+  width: 1px;
+  background: var(--line);
+  opacity: 1;
+  position: relative;
+}
+.desk .desk-resizer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -3px;
+  right: -3px;
+  cursor: col-resize;
+}
+.desk .side-section {
+  padding: 0;
+}
+.desk .side-title {
+  font-size: 11px;
+  color: var(--muted);
+  padding: 10px 8px 4px;
+  letter-spacing: 0.05em;
+}
+.desk .side-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px !important;
+  font-size: 13px !important;
+  border-radius: 6px !important;
+}
+.desk .side-item.is-selected {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+}
+.desk .side-icon {
+  color: var(--text);
+  width: 14px;
+}
+.desk .side-icon.is-accent {
+  color: var(--accent-text);
+}
+.desk .side-item:hover,
+.desk .tree-row:hover {
+  background: var(--surface) !important;
+}
+.desk .tree-row {
+  padding: 5px 8px;
+  font-size: 13px;
+  gap: 6px;
+}
+.desk .tree-row.is-selected {
+  background: var(--surface);
+  color: var(--text);
+}
+.desk .tree-row.is-selected .tree-icon {
+  color: var(--accent-text);
+}
+.desk .tree-chev {
+  color: var(--text) !important;
+}
+.desk .list-pane {
+  border-right: 0;
+}
+.desk .list-pane-head {
+  padding: 10px 12px;
+  justify-content: space-between;
+  color: var(--muted);
+  gap: 8px;
+}
+.desk .list-pane-path {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.desk .list-pane-count {
+  padding: 0;
+  font-size: 13px;
+}
+.desk .list-new {
+  width: 24px;
+  height: 24px;
+  border-radius: 12px !important;
+  font-size: 16px !important;
+  line-height: 1;
+}
+.desk .list-pane-items {
+  padding: 0;
+}
+.desk .list-card {
+  padding: 10px 12px;
+  border-radius: 0;
+  border-bottom: 1px solid var(--line);
+  box-shadow: none;
+}
+.desk .list-card.is-selected {
+  background: var(--surface);
+  box-shadow: none;
+}
+.desk .list-card:hover {
+  background: var(--surface) !important;
+}
+.desk .list-card-title {
+  font-weight: 600;
+}
+.desk .list-card-sub {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.desk .desk-editor {
+  padding: 16px 28px;
+  position: relative;
+}
+.desk .doc-pane {
+  max-width: none;
+  margin: 0;
+  min-height: 100%;
+  position: relative;
+  padding-bottom: 40px;
+}
+.doc-pane-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.doc-pane-top > span:first-child {
+  flex: 1;
+}
+.doc-pane-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.doc-pane-hint {
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  color: var(--muted);
+  pointer-events: none;
+}
+.desk .note-block {
+  border-bottom: 0;
+  padding: 0;
+}
+.desk .note-block-view {
+  font-size: 14px;
+  min-height: 60px;
+}
+.doc-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.desk .note-block-area {
+  font-size: 14px !important;
+  min-height: 200px;
+}
+
+/* ---- phone screens, tuned to docs/mockups/phone-screens.html -------------------------------------------- */
+.phone-h1 {
+  font-size: 26px;
+  font-weight: 500;
+  margin: 10px 0 8px;
+  text-align: left;
+  color: var(--text);
+}
+.cap {
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: left;
+  margin: 12px 0 6px;
+}
+.phone-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin: 0 0 12px !important;
+  padding: 8px 10px !important;
+  background: var(--surface) !important;
+  color: var(--muted) !important;
+  border-radius: 12px !important;
+  font-size: 14px !important;
+  text-align: left !important;
+}
+.pin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.pin-card {
+  background: var(--surface) !important;
+  border-radius: 12px !important;
+  padding: 9px !important;
+  margin: 0 !important;
+  text-align: left !important;
+  color: var(--text) !important;
+  min-width: 0;
+}
+.pin-card-title {
+  color: var(--accent-text);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pin-card-value {
+  font-size: 17px;
+  font-weight: 500;
+}
+.pin-card-sub {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.card-list {
+  background: var(--surface);
+  border-radius: 12px;
+  overflow: hidden;
+  text-align: left;
+}
+.card-list .swipe-row-content {
+  background: var(--surface);
+}
+.card-list .swipe-row + .swipe-row {
+  border-top: 1px solid var(--line);
+}
+.folder-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  min-height: 40px;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 14px;
+}
+.folder-row-icon {
+  color: var(--accent-text);
+}
+.folder-row-name {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.folder-row-count,
+.folder-row-chev {
+  color: var(--muted);
+}
+.phone-body {
+  text-align: left;
+}
+.phone-body .note-block {
+  padding-right: 34px;
+}
+.note-detail-item .detailedBox,
+.phone-body {
+  width: auto;
+}
+.slide-in .note-detail-item {
+  padding: 0 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.bottom-toolbar {
+  justify-content: space-between;
+  padding: 8px 12px calc(14px + env(safe-area-inset-bottom, 0px));
+  height: auto;
+  background: var(--bg);
+}
+.bottom-toolbar .bt-log {
+  background: var(--accent) !important;
+  color: var(--on-accent) !important;
+  border-radius: 18px !important;
+  padding: 7px 14px !important;
+  font-weight: 500;
+  margin: 0 !important;
+  font-size: 14px !important;
+}
+.bottom-toolbar .bt-count {
+  flex: 0 1 auto;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+.bottom-toolbar .bt-edit {
+  background: transparent !important;
+  color: var(--accent-text) !important;
+  font-size: 22px !important;
+  margin: 0 !important;
+  padding: 0 4px !important;
+}
+
+/* The old mobile rule `span::before { content: '\A' }` (app.css) puts a line break before every span: switch it off in the redesigned screens. */
+:is(.app-header, .phone-body, .folder-row, .pin-card, .bottom-toolbar, .log-screen, .note-block, .card-list, .log-sheet, .desk, .deleted-page) span::before {
+  content: normal !important;
+  white-space: normal !important;
+}
+#personHead.phone-h1 {
+  text-align: left;
+  margin: 10px 0 8px;
+}
+#personContainer {
+  text-align: left;
+}
+
+/* ---- work summary and tally screens (docs/mockups/phone-screens.html) ------------------------------------ */
+.summary-screen,
+.tally-view {
+  padding: 10px 12px;
+  text-align: left;
+  color: var(--text);
+  overflow-y: auto;
+  flex: 1;
+}
+.summary-date {
+  font-size: 22px;
+  font-weight: 500;
+}
+.summary-tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 10px 0;
+}
+.tally-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.summary-tile {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 9px;
+}
+.summary-tile > div {
+  font-size: 12px;
+  color: var(--muted);
+}
+.summary-tile strong {
+  font-size: 20px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.summary-tile.is-center {
+  text-align: center;
+  padding: 8px;
+}
+.summary-tile.is-center > div {
+  font-size: 11px;
+}
+.summary-tile.is-center strong {
+  font-size: 18px;
+}
+.summary-task-line > span:last-child {
+  white-space: nowrap;
+  flex: none;
+}
+.summary-task-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+}
+.summary-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--accent);
+  margin: 3px 0 8px;
+}
+.summary-bar.is-muted {
+  background: var(--muted);
+}
+.summary-week {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 100px;
+}
+.summary-week-col {
+  flex: 1;
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.summary-week-bar {
+  background: var(--accent);
+  border-radius: 4px;
+}
+.summary-week-bar.is-warn {
+  background: #e0a030;
+}
+.summary-warning {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 8px 10px;
+  margin-top: 10px;
+  font-size: 12px;
+}
+.summary-warning svg {
+  color: #e0a030;
+}
+.tally-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 12px 0;
+}
+.tally-buttons button {
+  height: 76px;
+  border: 0;
+  border-radius: 14px !important;
+  font-size: 26px !important;
+  font-weight: 500;
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  margin: 0 !important;
+  text-align: center !important;
+  cursor: pointer;
+}
+.tally-buttons button.is-primary {
+  background: var(--accent) !important;
+  color: var(--on-accent) !important;
+}
+.tally-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 56px;
+}
+.tally-bars div {
+  flex: 1;
+  border-radius: 3px;
+  background: var(--accent);
+}
+.tally-bars div.is-today {
+  background: var(--accent-text);
+}
+.tally-row {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+}
+.tally-row.is-editing {
+  background: var(--surface);
+}
+.tally-time {
+  width: 48px;
+  color: var(--muted);
+}

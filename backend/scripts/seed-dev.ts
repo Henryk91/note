@@ -124,9 +124,11 @@ Next time add 2.5kg to squat.
 Stretch 10 min.`;
 
 const MD_NOTES = [
-  '## Core routine\n\n1. Plank 60s\n2. Dead bug x 10\n3. **Bird dog** x 10\n\nSee [guide](https://example.com/core).',
-  '#### Courses\n\n- Algorithms (week 3)\n- *Distributed systems*\n- `git rebase -i` cheat sheet\n\n```\nnpm run dev\n```',
-  'Single line break test\nsecond line\nthird line',
+  'Human Flag\n\n1. Grip straight arm side plank both sides\n2. Grip straight arm side plank lifting leg\n3. Flag bounce\n4. Flag bounce with closed legs\n5. Flag negatives\n6. Flag raises\n\n[youtube.com/watch?v=bG0h7bSfxQI](https://www.youtube.com/watch?v=bG0h7bSfxQI)',
+  'L sit\n\nStretches, standing forward folds, hip openers.\n\n- Hold 3 x 15s\n- Add weight later',
+  'General core\n\nWindshield wipers, straight arm plank, **dead bug** x 10.\n\nSee [guide](https://example.com/core).',
+  'Shoulder progression\n\nWarm up, high side plank raises, pike push ups.\n\n```\nnpm run dev\n```',
+  'Courses\n\n- Algorithms (week 3)\n- *Distributed systems*\n- `git rebase -i` cheat sheet',
 ];
 
 const main = async () => {
@@ -169,6 +171,17 @@ const main = async () => {
   const brk = await folder('Henry', 'Break');
   const train = await folder('Henry', 'Train');
   const core = await folder(train, 'Core');
+  const arms = await folder(train, 'Arms');
+  await note(arms, 'Pull ups\n\n3 x 8, strict');
+  for (const name of ['Bookmarks', 'Climbing', 'Life so far']) {
+    // eslint-disable-next-line no-await-in-loop
+    const f = await folder('Henry', name);
+    for (let i = 1; i <= 3; i += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      await note(f, `${name} note ${i}\n\nSome text for ${name.toLowerCase()} number ${i}.`);
+    }
+  }
+  await post({ id: 'Rapitag::FOLDER::Work', parentId: 'Rapitag', type: 'FOLDER', name: 'Work' });
   const trainLog = await folder(train, 'Log', { settings: { mode: 'journal' } });
   const dev = await folder('Henry', 'Dev Code');
   const deep = await folder(dev, 'Snippets');
@@ -211,7 +224,7 @@ const main = async () => {
     // eslint-disable-next-line no-await-in-loop
     const pf = await folder(brk, p);
     // eslint-disable-next-line no-await-in-loop
-    const lf = await folder(pf, 'Log', { settings: { mode: 'tally' } });
+    const lf = await folder(pf, 'Log', { settings: p === 'Break P5' ? { mode: 'tally', pinned: true } : { mode: 'tally' } });
     const codes = ['P', 'V', 'P v2'];
     for (let i = 0; i < days.length; i += 1) {
       const n = 1 + ((i * 3) % 6);
@@ -247,6 +260,7 @@ const main = async () => {
       [16, 30, ticketA],
       [17, 15, 'Stop'],
     ];
+    if (i === days.length - 3) plan.splice(3, plan.length - 3, [9, 30, 'Break'], [16, 40, 'Stop']); // a Break that ran until Stop
     if (i === 5) plan.splice(3, 0, [8, 15, 'Meeting:\nBlack Belt of the Month']);
     if (i === 12) plan.splice(4, 0, [9, 0, 'Code review notes:\n- API naming\n- missing tests\n- check [PR 118](https://example.com/pr/118)']);
     for (const [h, m, text] of plan) {

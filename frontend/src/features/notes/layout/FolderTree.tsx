@@ -1,6 +1,7 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronDown, faChevronRight, faClock, faFolder } from '@fortawesome/free-solid-svg-icons';
+import { faChevronDown, faChevronRight, faClock } from '@fortawesome/free-solid-svg-icons';
+import { faFolder } from '@fortawesome/free-regular-svg-icons';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../core/store';
 import { useNotesWithChildren } from '../hooks/useNotesQueries';
@@ -11,6 +12,8 @@ export const DRAG_TYPE = 'application/x-note-item';
 type TreeProps = {
   rootId: string;
   rootLabel: string;
+  /** Show the notebook itself as the first row (the "Move to..." picker does; the sidebar does not). */
+  showRoot?: boolean;
   selectedId?: string | null;
   expandedIds: Set<string>;
   onToggle: (id: string) => void;
@@ -23,6 +26,13 @@ type TreeProps = {
 
 type NodeProps = TreeProps & { id: string; label: string; depth: number; isLog?: boolean };
 
+const renderChild = (f: NoteItemType, props: TreeProps, depth: number) => {
+  const log = f.name === 'Log';
+  return (
+    <TreeNode key={f.id} {...props} id={f.id} label={log ? 'Log' : f.name || f.heading || f.id} depth={depth} isLog={log} />
+  );
+};
+
 const TreeNode: React.FC<NodeProps> = (props) => {
   const { id, label, depth, isLog, selectedId, expandedIds, onToggle, onSelect, onDropItem, disabledIds } = props;
   const expanded = expandedIds.has(id);
@@ -34,7 +44,6 @@ const TreeNode: React.FC<NodeProps> = (props) => {
   const known = !!(data?.notes?.[id] || byId[id]);
   const hasFolders = !known || folders.length > 0;
   const disabled = disabledIds?.has(id);
-  const count = byId[id]?.dataLable?.length;
 
   const [over, setOver] = React.useState(false);
 
@@ -91,32 +100,26 @@ const TreeNode: React.FC<NodeProps> = (props) => {
         )}
         <FontAwesomeIcon icon={isLog ? faClock : faFolder} className="tree-icon" />
         <span className="tree-label">{label}</span>
-        {count !== undefined && count > 0 && <span className="tree-count">{count}</span>}
       </div>
       {expanded && folders.length > 0 && (
         <ul role="group" className="tree-list">
-          {folders.map((f) => {
-            const log = f.name === 'Log';
-            return (
-              <TreeNode
-                key={f.id}
-                {...props}
-                id={f.id}
-                label={log ? 'Log' : f.name || f.heading || f.id}
-                depth={depth + 1}
-                isLog={log}
-              />
-            );
-          })}
+          {folders.map((f) => renderChild(f, props, depth + 1))}
         </ul>
       )}
     </li>
   );
 };
 
+const TopLevel: React.FC<TreeProps> = (props) => {
+  const { data } = useNotesWithChildren(props.rootId, true);
+  const byId = useSelector((state: RootState) => state.person.byId);
+  const items: NoteItemType[] = data?.notes?.[props.rootId]?.dataLable ?? byId[props.rootId]?.dataLable ?? [];
+  return <>{items.filter((i) => i.type === 'FOLDER').map((f) => renderChild(f, props, 0))}</>;
+};
+
 /** Collapsible folder tree, any depth. Used for the desktop sidebar and for the "Move to..." picker. */
 export const FolderTree: React.FC<TreeProps> = (props) => (
   <ul role="tree" className="tree-list tree-root" aria-label="Folders">
-    <TreeNode {...props} id={props.rootId} label={props.rootLabel} depth={0} />
+    {props.showRoot ? <TreeNode {...props} id={props.rootId} label={props.rootLabel} depth={0} /> : <TopLevel {...props} />}
   </ul>
 );

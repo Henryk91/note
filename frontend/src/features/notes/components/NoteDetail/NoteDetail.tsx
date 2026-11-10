@@ -1,11 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import NoteDetailTags from './NoteDetailTags';
 import { useSelector } from 'react-redux';
 import { removeLastPage, setEditName, setSelectedNoteName, setShowTag } from '../../../auth/store/personSlice';
 import { ItemMenu, ItemMenuEntry } from '../../edit/ItemMenu';
-import { SaveIndicator } from '../../edit/SaveIndicator';
 import { useNotesWithChildren } from '../../hooks/useNotesQueries';
 import { useItemMutations } from '../../edit/itemMutations';
 import { useDeleteWithUndo } from '../../edit/useDeleteWithUndo';
@@ -17,7 +16,11 @@ import { useNoteNavigation } from '../../hooks/useNoteNavigation';
 import { LogScreen } from '../../log/LogScreen';
 import { isLogId } from '../../log/useLogData';
 import { MoveToSheet } from '../../layout/MoveToSheet';
-import { PinnedLogs } from '../../log/PinnedLogs';
+import { PinnedCards } from '../../layout/PinnedCards';
+import { FOCUS_SEARCH_EVENT } from '../../layout/events';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSearch } from '@fortawesome/free-solid-svg-icons';
+import { useHeader } from '../../../../shared/header/headerStore';
 import { useNoteOperations } from '../../hooks/useNoteOperations';
 
 type NoteDetailProps = {
@@ -55,38 +58,30 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
   const parentMutations = useItemMutations(parentId || pageLink?.params.id || '');
   const deleteWithUndo = useDeleteWithUndo(parentMutations);
 
-  // Large title that collapses into a small sticky title once it scrolls out of view (iOS style).
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const [collapsed, setCollapsed] = useState(false);
   const [moving, setMoving] = useState(false);
-  useEffect(() => {
-    const el = titleRef.current;
-    if (!el || typeof IntersectionObserver === 'undefined') return undefined;
-    const root = el.closest('.scrollable-content');
-    const io = new IntersectionObserver(([entry]) => setCollapsed(!entry.isIntersecting), { root: root as Element | null, threshold: 0 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, [pageLink?.params.id, editName]);
 
-  // A log is not a list of items: it gets its own screen (quick entry box, day navigation, timeline).
-  if (isLogId(pageLink?.params.id)) return <LogScreen logId={pageLink.params.id} />;
-
-  const isNoteNames = location.pathname === '/notes/note-names';
-  const titleMenu: ItemMenuEntry[] = [];
-  if (folderItem) {
-    titleMenu.push({ label: 'Rename', onSelect: () => dispatch(setEditName(true)) });
-    titleMenu.push({ label: 'Move to...', onSelect: () => setMoving(true) });
-    titleMenu.push({
+  // The header shows the back label, the two-line title and this page's `...` menu (docs/mockups/phone-screens.html).
+  const isLog = isLogId(pageLink?.params.id);
+  const notebookName = useSelector((state: RootState) => state.person.selectedNoteName) ?? '';
+  const parentName =
+    index > 1
+      ? (byId?.[pages[index - 2]?.params.id]?.dataLable?.find((d) => d.id === parentId)?.name ?? byId?.[parentId]?.heading ?? '')
+      : notebookName;
+  const headerMenu: ItemMenuEntry[] = [];
+  if (folderItem && index > 0) {
+    headerMenu.push({ label: 'Rename', onSelect: () => dispatch(setEditName(true)) });
+    headerMenu.push({ label: 'Move to...', onSelect: () => setMoving(true) });
+    headerMenu.push({
       label: 'Delete folder',
-      danger: true,
       onSelect: () => {
         deleteWithUndo(folderItem as any, 'Folder deleted');
         dispatch(setShowTag(null));
         dispatch(removeLastPage());
       },
+      danger: true,
     });
   } else {
-    titleMenu.push({
+    headerMenu.push({
       label: 'Open or create notebook...',
       onSelect: () => {
         // eslint-disable-next-line no-alert
@@ -95,8 +90,21 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
       },
     });
   }
-  titleMenu.push({ label: 'Recently deleted', onSelect: () => history.push('/recently-deleted') });
+  headerMenu.push({ label: 'Recently deleted', onSelect: () => history.push('/recently-deleted') });
+  useHeader(
+    {
+      kicker: index === 0 ? 'NOTEBOOK' : notebookName,
+      title: index === 0 ? notebookName : person?.heading || '',
+      back: index > 0 ? { label: parentName || 'Back', onClick: () => window.dispatchEvent(new Event('page-back')) } : null,
+      menu: headerMenu,
+    },
+    isLastPage && !isLog,
+  );
 
+  // A log is not a list of items: it gets its own screen (quick entry box, day navigation, timeline).
+  if (isLog) return <LogScreen logId={pageLink.params.id} />;
+
+  const isNoteNames = location.pathname === '/notes/note-names';
   const personToRender = isNoteNames ? null : ({ ...person } as Note);
 
   if (!personToRender) return null;
@@ -112,27 +120,29 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
   return (
     <div className={`slide-in ${heading === 'Log' && 'logDetailPadding' }`}>
       <div id={!isLastPage ? 'isFirstPage' : ''} className={`${className} note-detail-item`} key={personToRender?.id}>
-        {collapsed && isLastPage && !editName && <div className="sticky-title">{heading}</div>}
         {editName ? (
           <div>
             <EditNameForm heading={person?.heading ?? ''} onSubmit={submitNameChange} />
           </div>
         ) : (
           <div id="personContainer" className="page-content-top1">
-            <div className="doc-title-row">
-              <h1 id="personHead" className="nameBox" ref={titleRef}>
-                {heading || '<NAME NOT SET>'}
-              </h1>
-              {isLastPage && <ItemMenu label="Folder options" items={titleMenu} />}
-            </div>
-            {isLastPage && <SaveIndicator />}
+            <h1 id="personHead" className="phone-h1">
+              {heading || '<NAME NOT SET>'}
+            </h1>
           </div>
+        )}
+        {index === 0 && (
+          <>
+            <button type="button" className="phone-search" onClick={() => window.dispatchEvent(new Event(FOCUS_SEARCH_EVENT))}>
+              <FontAwesomeIcon icon={faSearch} /> Search all notes and logs
+            </button>
+            <PinnedCards />
+          </>
         )}
 
         {showAddItem && isLastPage && (
           <AddItemForm addLabel={addLabel} onSubmit={submitNewItem} onCancel={cancelAddItemEdit} />
         )}
-        {index === 0 && <PinnedLogs notebook={personToRender.id} />}
         <NoteDetailTags
           person={personToRender}
           isLastPage={isLastPage}

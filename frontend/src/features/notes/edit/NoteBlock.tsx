@@ -9,6 +9,25 @@ import { ItemMenu } from './ItemMenu';
 
 export const AUTOSAVE_MS = 500;
 
+/** A note's title is its first non-empty line without Markdown heading marks; the body is the rest. */
+const firstIndex = (text: string) => text.split('\n').findIndex((l) => l.trim() !== '');
+export const noteTitle = (text: string): string => {
+  const lines = text.split('\n');
+  const i = firstIndex(text);
+  return i < 0 ? '' : lines[i].replace(/^#+\s*/, '').trim();
+};
+export const noteBody = (text: string): string => {
+  const lines = text.split('\n');
+  const i = firstIndex(text);
+  return i < 0 ? '' : lines.slice(i + 1).join('\n').replace(/^\n+/, '');
+};
+/** One-line preview: the first line of the body (Markdown marks removed). */
+export const notePreview = (text: string): string =>
+  noteBody(text)
+    .split('\n')
+    .map((l) => l.replace(/^[#>*\-\d.\s]+/, '').replace(/[*_`]/g, '').trim())
+    .find(Boolean) ?? '';
+
 const draftKey = (id: string) => `note-draft:${id}`;
 const readDraft = (id: string): string | null => {
   try {
@@ -28,6 +47,11 @@ const writeDraft = (id: string, value: string | null) => {
 
 type NoteBlockProps = {
   item: NoteItemType;
+  /** Wide editor: the first line is the note's title. */
+  asDocument?: boolean;
+  /** Changing this number puts the block into edit mode ("type anywhere to edit"). */
+  editToken?: number;
+  hideMenu?: boolean;
   mutations: ItemMutations;
   onDelete: (item: NoteItemType, label?: string) => void;
 };
@@ -37,7 +61,7 @@ type NoteBlockProps = {
  * textarea in the same spot. There is no Save button: the text is saved ~500 ms after typing stops, on blur, and
  * when the block goes away (navigating mid-edit). An unsaved draft also survives a refresh.
  */
-export const NoteBlock: React.FC<NoteBlockProps> = ({ item, mutations, onDelete }) => {
+export const NoteBlock: React.FC<NoteBlockProps> = ({ item, mutations, onDelete, asDocument, editToken, hideMenu }) => {
   const stored = item.content?.data ?? '';
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(stored);
@@ -74,6 +98,10 @@ export const NoteBlock: React.FC<NoteBlockProps> = ({ item, mutations, onDelete 
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (editToken) setEditing(true);
+  }, [editToken]);
 
   // Show what the server / cache says while not editing.
   useEffect(() => {
@@ -147,15 +175,20 @@ export const NoteBlock: React.FC<NoteBlockProps> = ({ item, mutations, onDelete 
         />
       ) : (
         // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-        <div
-          className="note-block-view white-color"
-          onClick={onDisplayClick}
-          // Sanitised Markdown: marked with breaks, then DOMPurify.
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={text.trim() ? getMarkdownText(text) : { __html: '<span class="note-block-empty">Empty note</span>' }}
-        />
+        <div className="note-block-view white-color" onClick={onDisplayClick}>
+          {asDocument && text.trim() && <div className="doc-title">{noteTitle(text)}</div>}
+          <div
+            // Sanitised Markdown: marked with breaks, then DOMPurify.
+            // eslint-disable-next-line react/no-danger
+            dangerouslySetInnerHTML={
+              text.trim()
+                ? getMarkdownText(asDocument ? noteBody(text) : text)
+                : { __html: '<span class="note-block-empty">Empty note</span>' }
+            }
+          />
+        </div>
       )}
-      <div className="note-block-side">
+      {!hideMenu && <div className="note-block-side">
         {pending && <FontAwesomeIcon icon={faClock} title="Waiting to sync" aria-label="Waiting to sync" />}
         <ItemMenu
           label="Note actions"
@@ -164,7 +197,7 @@ export const NoteBlock: React.FC<NoteBlockProps> = ({ item, mutations, onDelete 
             { label: 'Delete', danger: true, onSelect: () => onDelete(item, 'Note deleted') },
           ]}
         />
-      </div>
+      </div>}
     </div>
   );
 };

@@ -1,3 +1,5 @@
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../core/store';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -8,7 +10,12 @@ import { useLogMutations, usePendingEntries } from './logApi';
 import { Calendar } from './Calendar';
 import { Composer } from './Composer';
 import { LogRow } from './LogRow';
-import { DailyValueSummary, TallySummary, WorkSummary } from './Summaries';
+import { DailyValueSummary } from './Summaries';
+import { SummaryScreen, summaryCopyText } from './SummaryScreen';
+import { TallyView } from './TallyView';
+import { useHeader } from '../../../shared/header/headerStore';
+import { useBreakpoint } from '../layout/useBreakpoint';
+import { ItemMenuEntry } from '../edit/ItemMenu';
 import {
   adjacentDay,
   dailyValueInfo,
@@ -59,7 +66,12 @@ const writeDraft = (logId: string, draft: StoredDraft | null) => {
 };
 
 export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
-  const { entries, grouped, settings, mode, label, loaded, saveSettings, refetch } = useLogData(logId);
+  const { entries, grouped, settings, mode, label, notebook, parentName, loaded, saveSettings, refetch } = useLogData(logId);
+  const bp = useBreakpoint();
+  const phone = bp === 'mobile';
+  const [view, setView] = useState<'log' | 'summary'>('log');
+  const pagesState = useSelector((st: RootState) => st.person.pages);
+  const byIdState = useSelector((st: RootState) => st.person.byId);
   const mutations = useLogMutations(logId);
   const pendingIds = usePendingEntries();
 
@@ -429,6 +441,42 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
     void saveSettings({ ...settings, breakWords: words });
   };
 
+  // ---- header (phone): back label, two-line title and this log's `...` menu ----------------------------
+  const nameAt = (i: number): string =>
+    i <= 0 ? notebook : (byIdState[pagesState[i - 1]?.params.id]?.dataLable?.find((d) => d.id === pagesState[i]?.params.id)?.name ?? '');
+  const lastIdx = pagesState.length - 1;
+  const grandName = lastIdx >= 2 ? nameAt(lastIdx - 2) : notebook;
+  const logMenu: ItemMenuEntry[] = [
+    ...(Object.keys(MODE_LABELS) as LogMode[]).map((m) => ({
+      label: `${settings.mode === m ? '● ' : '○ '}${MODE_LABELS[m]}`,
+      onSelect: () => changeMode(m),
+    })),
+    { label: 'Automatic mode', onSelect: () => changeMode(undefined) },
+    { label: settings.pinned ? 'Unpin from quick log' : 'Pin to quick log', onSelect: togglePinned },
+    { label: 'Break words...', onSelect: editBreakWords },
+  ];
+  const isTally = mode === 'tally';
+  useHeader(
+    view === 'summary'
+      ? {
+          kicker: ' ',
+          title: 'Summary',
+          back: { label: 'Log', onClick: () => setView('log') },
+          action: {
+            label: 'Copy',
+            ariaLabel: 'Copy summary',
+            onClick: () => void navigator.clipboard?.writeText(summaryCopyText(day, grouped.byDay, now, breakWords)),
+          },
+        }
+      : {
+          kicker: isTally ? notebook : label,
+          title: isTally ? parentName : 'Log',
+          back: { label: (isTally ? grandName : parentName) || 'Back', onClick: () => window.dispatchEvent(new Event('page-back')) },
+          menu: logMenu,
+        },
+    phone,
+  );
+
   const isToday = day === todayKey;
   const draftEntry = draft ? entries.find((e) => e.id === draft.id) : undefined;
   const showDraftBanner = !!draft && !editing && loaded;
@@ -442,6 +490,7 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
 
   return (
     <div className="log-screen swiper-no-swiping">
+      {!phone && (
       <div className="log-title">
         <div>
           <div className="log-path">{label}</div>
@@ -473,7 +522,25 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
           )}
         </div>
       </div>
+      )}
 
+      {view === 'summary' ? (
+        <>
+          {!phone && (
+            <div className="log-title">
+              <button type="button" className="log-today-btn" onClick={() => setView('log')}>
+                &lsaquo; Log
+              </button>
+              <button type="button" className="log-today-btn" onClick={() => void navigator.clipboard?.writeText(summaryCopyText(day, grouped.byDay, now, breakWords))}>
+                Copy
+              </button>
+            </div>
+          )}
+          <SummaryScreen day={day} byDay={grouped.byDay} nowTs={now} breakWords={breakWords} />
+        </>
+      ) : (
+      <>
+      {isTally ? null : (
       <div className="log-daynav">
         <button type="button" className="log-icon-btn" aria-label="Previous day with entries" disabled={!prevDay} onClick={() => goDay(prevDay)}>
           <FontAwesomeIcon icon={faChevronLeft} />
@@ -493,6 +560,7 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
           <FontAwesomeIcon icon={faChevronRight} />
         </button>
       </div>
+      )}
       {editing && editing.day !== day && (
         <div className="log-banner" role="status">
           <span>Editing an entry from {formatDayLong(editing.day)}</span>
@@ -514,8 +582,11 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
           <span className="log-ellipsis">Continue: {firstLine(task.text)}</span>
         </button>
       )}
-      {mode === 'time-tracker' && dayEntries.length > 0 && <WorkSummary day={day} summary={summary} week={week} onPickDay={goDay} />}
-      {tally && <TallySummary stats={tally} />}
+      {mode === 'time-tracker' && dayEntries.length > 0 && (
+        <button type="button" className="log-summary-toggle" onClick={() => setView('summary')}>
+          Day summary and week &rsaquo;
+        </button>
+      )}
       {daily && <DailyValueSummary info={daily} />}
 
       {showDraftBanner && (
@@ -547,6 +618,9 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
         </div>
       )}
 
+      {isTally ? (
+        <TallyView entries={entries} codes={codes} nowTs={now} editingId={editing?.id} onCode={logCode} onEdit={beginEdit} />
+      ) : (
       <div className="log-timeline" ref={timelineRef} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} data-testid="timeline">
         {!loaded && <div className="log-empty">Loading...</div>}
         {loaded && dayEntries.length === 0 && (
@@ -575,6 +649,7 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
           />
         ))}
       </div>
+      )}
 
       <Composer
         text={text}
@@ -594,12 +669,14 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
         onChip={fill}
         suggestions={suggestions}
         onSuggest={fill}
-        tallyCodes={codes}
+        tallyCodes={undefined}
         onTally={logCode}
         showInput={inputVisible}
         onShowInput={() => setOtherOpen(true)}
         inputRef={inputRef}
       />
+      </>
+      )}
     </div>
   );
 };

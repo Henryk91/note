@@ -29,26 +29,9 @@ const AppContent: React.FC = () => {
       }
     }
 
-    if (theme === 'Green') {
-      document.body.style.backgroundColor = '#103762';
-      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#103762');
-    }
-    if (theme === 'Red') {
-      document.body.style.backgroundColor = '#030303';
-      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#d00000');
-    }
-    if (theme === 'Ocean') {
-      document.body.style.backgroundColor = '#35373D';
-      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#38cdb8');
-    }
-    if (theme === 'Dark') {
-      document.body.style.backgroundColor = '#061f2f';
-      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#0090c8');
-    }
-    if (theme === 'Night') {
-      document.body.style.backgroundColor = '#061f2f';
-      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#27343b');
-    }
+    // Page colours come from the theme variables (shared/styles/themes.css); only the browser chrome colour is set here.
+    const bars: Record<string, string> = { Dark: '#0079ae', Ocean: '#35373d', Green: '#103762', Night: '#27343b', Red: '#bb3b00' };
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', bars[theme] ?? '#0079ae');
   }, [loadingData, theme]);
 
   return <AppRoutes setFilterNote={setFilterNote} />;

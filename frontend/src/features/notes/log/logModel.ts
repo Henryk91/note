@@ -198,7 +198,8 @@ export const entryDuration = (dayEntries: LogEntry[], index: number, nowTs: numb
   const entry = dayEntries[index];
   const next = dayEntries[index + 1];
   if (next) return next.ts - entry.ts;
-  if (dayKeyOf(nowTs) === entry.day && nowTs >= entry.ts) return nowTs - entry.ts;
+  // A Stop at the end of today does not keep running.
+  if (dayKeyOf(nowTs) === entry.day && nowTs >= entry.ts && !isStopText(entry.text)) return nowTs - entry.ts;
   return null;
 };
 
@@ -379,4 +380,124 @@ export const detectMode = (entries: LogEntry[]): LogMode => {
   if (multiDay <= 0.1 && medianLen <= 16 && days.length >= 3) return 'daily-value';
   if (avgPerDay >= 6 && medianLen <= 40) return 'time-tracker';
   return 'journal';
+};
+
+// ---- pinned card (notebook home) ---------------------------------------------------------------------
+
+export type PinnedStats = { value: string; sub: string };
+
+/** The two lines of a pinned-log card, e.g. `4h 31m` / `DEV-313 running` or `2 today` / `Last P at 11:15`. */
+export const pinnedStats = (entries: LogEntry[], mode: LogMode, nowTs: number, words?: string[]): PinnedStats => {
+  const today = dayKeyOf(nowTs);
+  const todays = entries.filter((e) => e.day === today);
+  if (mode === 'time-tracker') {
+    if (!todays.length) return { value: '-', sub: 'No entries today' };
+    const s = summarizeDay(todays, nowTs, words);
+    return { value: formatDuration(s.workedMs), sub: s.running ? `${taskKey(s.running.text)} running` : s.stopTs !== null ? 'Stopped' : 'Not running' };
+  }
+  if (mode === 'tally') {
+    const last = todays[todays.length - 1];
+    return { value: `${todays.length} today`, sub: last ? `Last ${last.text.trim()} at ${formatTime(last.ts)}` : 'Nothing yet today' };
+  }
+  if (mode === 'daily-value') {
+    const last = todays[todays.length - 1];
+    return { value: last ? last.text.trim() : '-', sub: last ? 'Logged today' : 'Not logged yet' };
+  }
+  const last = entries[entries.length - 1];
+  return { value: `${todays.length} today`, sub: last ? firstLine(last.text) : 'No entries' };
+};
+
+// ---- summary screen (docs/mockups/phone-screens.html, mockup 2) --------------------------------------
+
+export type TaskRow = { label: string; ms: number; muted: boolean };
+
+/** Rows of "By task": tickets with their latest title, and all non-ticket entries together ("Start, Standup"). */
+export const taskRows = (dayEntries: LogEntry[], nowTs: number, words?: string[]): TaskRow[] => {
+  const tickets = new Map<string, { title: string; ms: number }>();
+  const others = new Map<string, number>();
+  dayEntries.forEach((e, i) => {
+    if (isNoWork(e.text, words)) return;
+    const ms = entryDuration(dayEntries, i, nowTs);
+    if (ms === null) return;
+    const line = firstLine(e.text);
+    const m = line.match(TICKET);
+    if (m) {
+      const cur = tickets.get(m[0]);
+      tickets.set(m[0], { title: line, ms: (cur?.ms ?? 0) + ms });
+    } else {
+      const name = line.replace(/:$/, '');
+      others.set(name, (others.get(name) ?? 0) + ms);
+    }
+  });
+  const rows: TaskRow[] = [...tickets.values()].map((t) => ({ label: t.title, ms: t.ms, muted: false }));
+  rows.sort((a, b) => b.ms - a.ms);
+  if (others.size) {
+    const names = [...others.keys()];
+    rows.push({
+      label: names.length > 3 ? `${names.slice(0, 3).join(', ')} +${names.length - 3}` : names.join(', '),
+      ms: [...others.values()].reduce((a, b) => a + b, 0),
+      muted: true,
+    });
+  }
+  return rows;
+};
+
+/** Total time of Break / Pause / Lunch rows of a day. */
+export const breaksMs = (dayEntries: LogEntry[], nowTs: number, words?: string[]): number =>
+  dayEntries.reduce((sum, e, i) => (isBreakText(e.text, words) ? sum + (entryDuration(dayEntries, i, nowTs) ?? 0) : sum), 0);
+
+/** Recent days that have entries (up to `max`, oldest first) with their worked time: "This week and last". */
+export const recentDayBars = (
+  byDay: Record<string, LogEntry[]>,
+  selected: string,
+  nowTs: number,
+  words?: string[],
+  max = 8,
+): Array<{ day: string; workedMs: number }> => {
+  const days = Object.keys(byDay)
+    .filter((d) => d <= selected && d >= addDaysToKey(selected, -13))
+    .sort()
+    .slice(-max);
+  return days.map((day) => ({ day, workedMs: summarizeDay(byDay[day], nowTs, words).workedMs }));
+};
+
+/** A Break that ran for hours (until the Stop of the day): probably a missing entry. */
+export const findLongBreak = (
+  byDay: Record<string, LogEntry[]>,
+  selected: string,
+  nowTs: number,
+  words?: string[],
+  thresholdMs = 3 * 60 * MINUTE,
+): { day: string; ms: number; untilStop: boolean } | null => {
+  const days = Object.keys(byDay)
+    .filter((d) => d <= selected && d >= addDaysToKey(selected, -13))
+    .sort()
+    .reverse();
+  for (const day of days) {
+    const list = byDay[day];
+    for (let i = 0; i < list.length; i += 1) {
+      if (!isBreakText(list[i].text, words)) continue; // eslint-disable-line no-continue
+      const ms = entryDuration(list, i, nowTs);
+      if (ms !== null && ms >= thresholdMs && !(day === dayKeyOf(nowTs) && i === list.length - 1)) {
+        return { day, ms, untilStop: !!list[i + 1] && isStopText(list[i + 1].text) };
+      }
+    }
+  }
+  return null;
+};
+
+/** Average gap between consecutive entries of the last 14 days ("Usual gap" of a tally log). */
+export const usualGapMs = (entries: LogEntry[], nowTs: number): number | null => {
+  const from = nowTs - 14 * 24 * 60 * MINUTE;
+  const recent = entries.filter((e) => e.ts >= from && e.ts <= nowTs);
+  let sum = 0;
+  let n = 0;
+  for (let i = 1; i < recent.length; i += 1) {
+    const gap = recent[i].ts - recent[i - 1].ts;
+    if (gap < 24 * 60 * MINUTE) {
+      sum += gap;
+      n += 1;
+    }
+  }
+  return n ? sum / n : null;
 };

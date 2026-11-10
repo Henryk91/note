@@ -333,7 +333,9 @@ export class NoteService {
         const notebook = await this.getNotebookId(userId, doc, cache);
         const parent = doc.parentId ? await this.repo.findNoteV2ById(userId, doc.parentId) : null;
         const parentName = parent?.name || doc.parentId;
-        const label = doc.parentId === notebook || !parent ? notebook : `${notebook} / ${parentName}`;
+        const root = await this.repo.findNoteV2ById(userId, notebook, { includeDeleted: true });
+        const notebookName = root?.name || notebook;
+        const label = doc.parentId === notebook || !parent ? notebookName : `${notebookName} / ${parentName}`;
         return { id: doc.id, parentId: doc.parentId, name: doc.name, settings: doc.settings, label, notebook };
       }),
     );

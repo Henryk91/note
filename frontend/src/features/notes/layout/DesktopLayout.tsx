@@ -4,7 +4,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { RootState } from '../../../core/store';
 import { setSelectedNoteName } from '../../auth/store/personSlice';
 import { useNotesWithChildren } from '../hooks/useNotesQueries';
-import { buildFolderChain, folderIdFromPath, pathForFolder } from '../hooks/useFolderUrlSync';
+import { folderIdFromPath, pathForFolder } from '../hooks/useFolderUrlSync';
 import { useItemMutations } from '../edit/itemMutations';
 import { useDeleteWithUndo } from '../edit/useDeleteWithUndo';
 import { NoteItemType, ItemType } from '../../../shared/utils/Helpers/types';
@@ -12,12 +12,13 @@ import { isLogId } from '../log/useLogData';
 import { DesktopSidebar } from './DesktopSidebar';
 import { ListPane } from './ListPane';
 import { DocumentPane } from './DocumentPane';
+import { LogScreen } from '../log/LogScreen';
 import { MoveToSheet } from './MoveToSheet';
 import { Breakpoint } from './useBreakpoint';
 import { FOCUS_SEARCH_EVENT, NEW_NOTE_EVENT } from './events';
 
 const WIDTHS_KEY = 'desk-widths';
-const DEFAULT_WIDTHS = { sidebar: 250, list: 320 };
+const DEFAULT_WIDTHS = { sidebar: 220, list: 300 };
 
 const readWidths = () => {
   try {
@@ -75,23 +76,24 @@ export const DesktopLayout: React.FC<{ breakpoint: Exclude<Breakpoint, 'mobile'>
 
   const notebook = pages[0]?.params.id || selectedNoteName || '';
   const folderId = pages[pages.length - 1]?.params.id || notebook;
-  const parentOfFolder = pages.length > 1 ? pages[pages.length - 2].params.id : '';
-
-  const rawSelected = pathname.startsWith('/n/') ? folderIdFromPath(pathname) : null;
-  const selectedChain = rawSelected ? buildFolderChain(rawSelected) : [];
-  const selectedId =
-    selectedChain.length > 1 && selectedChain[selectedChain.length - 2] === folderId ? selectedChain[selectedChain.length - 1] : null;
-  const activeId = selectedId ?? folderId;
-  const activeParent = selectedId ? folderId : parentOfFolder;
 
   const { data } = useNotesWithChildren(folderId, !!folderId);
   const items: NoteItemType[] = data?.notes?.[folderId]?.dataLable ?? byId[folderId]?.dataLable ?? [];
-  const folderTitle = byId[parentOfFolder]?.dataLable?.find((d) => d.id === folderId)?.name || (folderId === notebook ? notebook : folderId.split('::').pop() || '');
+  const notes = items.filter((i) => i.type === 'NOTE');
+  const folderIsLog = isLogId(folderId);
+
+  // `/n/:id` selects a note of the open folder; otherwise the first note is shown (like the mockup).
+  const rawSelected = pathname.startsWith('/n/') ? folderIdFromPath(pathname) : null;
+  const selectedId = notes.find((n) => n.id === rawSelected)?.id ?? notes[0]?.id ?? null;
+  const selectedNote = notes.find((n) => n.id === selectedId);
+
+  // Path shown above the list and the editor: "Train / Core".
+  const nameOf = (id: string, parent: string) =>
+    byId[parent]?.dataLable?.find((d) => d.id === id)?.name || (id === notebook ? notebook : id.split('::').pop() || '');
+  const pathText = pages.length <= 1 ? notebook : pages.slice(1).map((p, i) => nameOf(p.params.id, pages[i].params.id)).join(' / ');
 
   const folderMutations = useItemMutations(folderId);
-  const activeParentMutations = useItemMutations(activeParent || folderId);
   const deleteInFolder = useDeleteWithUndo(folderMutations);
-  const deleteInParent = useDeleteWithUndo(activeParentMutations);
 
   // ---- tree expansion: everything on the path to the open folder is open -----------------------------
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set(pages.map((p) => p.params.id)));
@@ -132,29 +134,23 @@ export const DesktopLayout: React.FC<{ breakpoint: Exclude<Breakpoint, 'mobile'>
   };
 
   // ---- creating, deleting, moving ---------------------------------------------------------------------
+  const [editToken, setEditToken] = useState(0);
   const newNote = useCallback(async () => {
-    if (!folderId) return;
-    const id = `${folderId}::${ItemType.FOLDER}::${Date.now()}`;
-    await folderMutations.create(ItemType.FOLDER, '', id, { name: 'New note', heading: 'New note' } as Partial<NoteItemType>);
+    if (!folderId || isLogId(folderId)) return;
+    const id = `${folderId}::${ItemType.NOTE}::${Date.now()}`;
+    await folderMutations.create(ItemType.NOTE, 'New note', id);
     history.push(`/n/${encodeURIComponent(id)}`);
-    setTimeout(() => window.dispatchEvent(new Event(NEW_NOTE_EVENT)), 150);
+    setTimeout(() => setEditToken((t) => t + 1), 200);
   }, [folderId, folderMutations, history]);
 
   const [moving, setMoving] = useState<NoteItemType | null>(null);
   const doMove = (item: NoteItemType, target: string) => {
-    const mutations = item.parentId === folderId ? folderMutations : activeParentMutations;
-    void mutations.move(item, target);
-    if (item.id === selectedId) goFolder(folderId);
-    if (item.id === folderId) goFolder(parentOfFolder || notebook);
-  };
-
-  const removeCard = (item: NoteItemType) => {
-    deleteInFolder(item, 'Deleted');
+    void folderMutations.move(item, target);
     if (item.id === selectedId) goFolder(folderId);
   };
-  const removeActive = (item: NoteItemType) => {
-    deleteInParent(item, 'Folder deleted');
-    goFolder(selectedId ? folderId : parentOfFolder || notebook);
+  const removeNote = (item: NoteItemType, label = 'Note deleted') => {
+    deleteInFolder(item, label);
+    if (item.id === selectedId) goFolder(folderId);
   };
 
   // ---- keyboard shortcuts ----------------------------------------------------------------------------
@@ -194,6 +190,7 @@ export const DesktopLayout: React.FC<{ breakpoint: Exclude<Breakpoint, 'mobile'>
   const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v));
   const [drawer, setDrawer] = useState(false);
   const showSidebar = breakpoint === 'desktop';
+  const showList = !folderIsLog;
 
   const sidebar = (
     <DesktopSidebar
@@ -217,15 +214,14 @@ export const DesktopLayout: React.FC<{ breakpoint: Exclude<Breakpoint, 'mobile'>
     />
   );
 
-  const gridCols = useMemo(
-    () => (showSidebar ? `${widths.sidebar}px 6px ${widths.list}px 6px minmax(0, 1fr)` : `${widths.list}px 6px minmax(0, 1fr)`),
-    [showSidebar, widths],
-  );
-
-  const activeIsNotebook = activeId === notebook;
+  const cols = [
+    ...(showSidebar ? [`${widths.sidebar}px`, '1px'] : []),
+    ...(showList ? [`${widths.list}px`, '1px'] : []),
+    'minmax(0, 1fr)',
+  ].join(' ');
 
   return (
-    <div className="desk" data-testid="desk" data-layout={breakpoint} style={{ gridTemplateColumns: gridCols }}>
+    <div className="desk" data-testid="desk" data-layout={breakpoint} style={{ gridTemplateColumns: cols }}>
       {showSidebar && (
         <>
           {sidebar}
@@ -236,42 +232,44 @@ export const DesktopLayout: React.FC<{ breakpoint: Exclude<Breakpoint, 'mobile'>
           />
         </>
       )}
-      <ListPane
-        title={folderTitle}
-        items={items}
-        selectedId={selectedId}
-        onSelect={select}
-        onOpen={goFolder}
-        onMove={setMoving}
-        onDelete={removeCard}
-        onNew={() => void newNote()}
-        headerExtra={
-          !showSidebar ? (
-            <button type="button" className="list-new" aria-label="Show folders" aria-expanded={drawer} onClick={() => setDrawer((v) => !v)}>
-              &#9776;
-            </button>
-          ) : null
-        }
-      />
-      <Resizer
-        label="Resize list"
-        onDrag={(dx) => setWidths((w) => ({ ...w, list: clamp(w.list + dx, 220, 560) }))}
-        onEnd={persistWidths}
-      />
+      {showList && (
+        <>
+          <ListPane
+            path={pathText}
+            notes={notes}
+            selectedId={selectedId}
+            onSelect={select}
+            onMove={setMoving}
+            onDelete={removeNote}
+            onNew={() => void newNote()}
+            headerExtra={
+              !showSidebar ? (
+                <button type="button" className="list-new" aria-label="Show folders" aria-expanded={drawer} onClick={() => setDrawer((v) => !v)}>
+                  &#9776;
+                </button>
+              ) : null
+            }
+          />
+          <Resizer
+            label="Resize list"
+            onDrag={(dx) => setWidths((w) => ({ ...w, list: clamp(w.list + dx, 220, 560) }))}
+            onEnd={persistWidths}
+          />
+        </>
+      )}
       <main className="desk-editor" aria-label="Editor">
-        {activeId && (
+        {folderIsLog ? (
+          <LogScreen logId={folderId} />
+        ) : (
           <DocumentPane
-            key={activeId}
-            folderId={activeId}
-            parentId={activeParent}
-            parentMutations={activeParentMutations}
-            isNotebook={activeIsNotebook}
-            onOpenFolder={(item) => goFolder(item.id)}
-            onDeleteSelf={removeActive}
-            onMoveSelf={setMoving}
+            note={selectedNote}
+            path={pathText}
+            mutations={folderMutations}
+            editToken={editToken}
+            onDelete={removeNote}
+            onMove={setMoving}
           />
         )}
-        {isLogId(activeId) && null}
       </main>
       {!showSidebar && drawer && (
         // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions

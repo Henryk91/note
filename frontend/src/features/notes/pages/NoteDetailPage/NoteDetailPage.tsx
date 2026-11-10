@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Sidebar } from '../../../../shared/components/organisms/Sidebar';
 import { BottomToolbar } from '../../layout/BottomToolbar';
-import { BackButton } from '../../../../shared/components/atoms/BackButton';
 
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../../../core/store';
@@ -78,6 +77,12 @@ const NoteDetailPage: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    const back = () => handleBack();
+    window.addEventListener('page-back', back);
+    return () => window.removeEventListener('page-back', back);
+  });
+
   if (isNoteNames) return <Sidebar />;
 
   // Wide screens: sidebar + list + editor instead of the stacked pages.
@@ -97,9 +102,6 @@ const NoteDetailPage: React.FC = () => {
         pointerEvents: 'none',
       }}
     >
-      <div style={{ pointerEvents: 'auto' }}>
-        <BackButton onCustomBack={handleBack} />
-      </div>
       <div
         id="multiple-pages"
         style={{

@@ -79,9 +79,8 @@ export const useFolderUrlSync = ({ selectionMode = false }: SyncOptions = {}) =>
 
     const folderId = folderIdFromPath(pathname);
     if (folderId) {
-      const full = buildFolderChain(folderId);
-      const isSelection = selectionMode && pathname.startsWith('/n/') && full.length > 1;
-      const chain = isSelection ? full.slice(0, -1) : full;
+      // `/n/:id` is a note: its folder is open and the note is selected. Ids of items resolve to their folder.
+      const chain = buildFolderChain(folderId);
       const targetId = chain[chain.length - 1];
 
       if (targetId === lastId) return;
@@ -91,21 +90,31 @@ export const useFolderUrlSync = ({ selectionMode = false }: SyncOptions = {}) =>
         dispatch(setPages(pages.slice(0, existing + 1)));
         return;
       }
-      if (chain[0] !== selectedNoteName) dispatch(setSelectedNoteName(chain[0]));
-      dispatch(setPages(chain.map(page)));
-      // Items can be moved, so the id alone may not be the real path: ask the server once and correct the stack.
+      // Ids may carry an old notebook prefix (renamed notebooks, moved items), so the id alone is not the path.
+      // The prefix chain is only used straight away when it starts in the notebook that is already open;
+      // the server's real path (parentId chain) always decides.
+      if (chain[0] === selectedNoteName) dispatch(setPages(chain.map(page)));
+      else pendingTarget.current = '__awaiting-path__'; // hold the URL until the server says where this folder is
       void apiFetch(`/api/note-v2/path?id=${encodeURIComponent(folderId)}`)
         .then((r) => (r.ok ? r.json() : []))
         .then((path: Array<{ id: string; type: string }>) => {
-          if (!Array.isArray(path) || path.length === 0 || window.location.pathname !== pathname) return;
+          if (!Array.isArray(path) || path.length === 0 || window.location.pathname !== pathname) {
+            if (pendingTarget.current === '__awaiting-path__') pendingTarget.current = null;
+            return;
+          }
           const folders = path.filter((p) => p.type === 'FOLDER');
-          const ids = (isSelection ? folders.filter((p) => p.id !== folderId) : folders).map((p) => p.id);
-          if (ids.length === 0 || ids.join('|') === chain.join('|')) return;
+          const ids = folders.map((p) => p.id);
+          if (ids.length === 0) {
+            if (pendingTarget.current === '__awaiting-path__') pendingTarget.current = null;
+            return;
+          }
           pendingTarget.current = ids[ids.length - 1];
-          if (ids[0] !== chain[0]) dispatch(setSelectedNoteName(ids[0]));
+          if (ids[0] !== selectedNoteName) dispatch(setSelectedNoteName(ids[0]));
           dispatch(setPages(ids.map(page)));
         })
-        .catch(() => undefined);
+        .catch(() => {
+          if (pendingTarget.current === '__awaiting-path__') pendingTarget.current = null;
+        });
       return;
     }
 
@@ -124,10 +133,10 @@ export const useFolderUrlSync = ({ selectionMode = false }: SyncOptions = {}) =>
       if (pendingTarget.current === lastId) pendingTarget.current = null;
       return;
     }
-    if (selectionMode && pathname.startsWith('/n/')) {
+    if (pathname.startsWith('/n/')) {
       const sel = folderIdFromPath(pathname);
       const chain = sel ? buildFolderChain(sel) : [];
-      if (chain.length > 1 && chain[chain.length - 2] === lastId) return; // the folder of the selected item is open
+      if (chain.length > 0 && chain[chain.length - 1] === lastId) return; // the note's folder is open
     }
     const desired = pages.length > 1 && lastId ? pathForFolder(lastId) : '/notes/main';
     if (desired === pathname || (desired === '/notes/main' && pathname === '/')) return;

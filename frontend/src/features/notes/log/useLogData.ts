@@ -1,5 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../core/store';
 import { useNotesWithChildren, notesKeys } from '../hooks/useNotesQueries';
 import { buildFolderChain } from '../hooks/useFolderUrlSync';
 import { sendOrQueueJSON } from '../../../offlineQueue/queue';
@@ -15,7 +17,13 @@ export const isLogId = (id: string | undefined | null) => !!id && /::Log$/.test(
 export const useLogData = (logId: string) => {
   const qc = useQueryClient();
   const chain = useMemo(() => buildFolderChain(logId), [logId]);
-  const parentId = chain.length > 1 ? chain[chain.length - 2] : '';
+  const pages = useSelector((state: RootState) => state.person.pages);
+  const selectedName = useSelector((state: RootState) => state.person.selectedNoteName) ?? '';
+  // The real parent is the previous page of the stack (ids can carry an old notebook prefix); the id is the fallback.
+  const last = pages[pages.length - 1]?.params.id === logId;
+  const parentId = last && pages.length > 1 ? pages[pages.length - 2].params.id : chain.length > 1 ? chain[chain.length - 2] : '';
+  const rootId = last && pages.length > 0 ? pages[0].params.id : chain[0];
+  const { data: rootData } = useNotesWithChildren(rootId, !!rootId);
 
   const { data, isLoading, refetch } = useNotesWithChildren(logId, true);
   const { data: parentData } = useNotesWithChildren(parentId || undefined, !!parentId);
@@ -31,7 +39,7 @@ export const useLogData = (logId: string) => {
   const settings: LogSettings = folderDoc?.settings ?? {};
   const mode: LogMode = settings.mode ?? detectMode(entries);
 
-  const notebook = chain[0];
+  const notebook = rootData?.notes?.[rootId]?.heading || (rootId === pages[0]?.params.id ? selectedName : '') || rootId;
   const parentName = parentNotes?.heading || (parentId ? parentId.split('::').pop() : '');
   const label = !parentId || parentId === notebook ? notebook : `${notebook} / ${parentName}`;
 
@@ -55,5 +63,5 @@ export const useLogData = (logId: string) => {
     [qc, parentId, logId],
   );
 
-  return { entries, grouped, settings, mode, label, parentId, isLoading, saveSettings, loaded: !!items, refetch };
+  return { entries, grouped, settings, mode, label, parentId, notebook, parentName, isLoading, saveSettings, loaded: !!items, refetch };
 };

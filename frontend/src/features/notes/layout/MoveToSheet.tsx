@@ -32,6 +32,7 @@ export const MoveToSheet: React.FC<MoveToSheetProps> = ({ item, notebook, initia
         <FolderTree
           rootId={notebook}
           rootLabel={notebook}
+          showRoot
           expandedIds={expanded}
           onToggle={toggle}
           onSelect={(id) => {

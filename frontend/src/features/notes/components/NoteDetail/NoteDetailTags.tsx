@@ -3,11 +3,10 @@ import { NoteBlock, TrailingBlock } from '../../edit/NoteBlock';
 import { SwipeRow } from '../../edit/SwipeRow';
 import { useItemMutations } from '../../edit/itemMutations';
 import { useDeleteWithUndo } from '../../edit/useDeleteWithUndo';
-import { FolderList } from './forms';
 import { Note, NoteItemType } from '../../../../shared/utils/Helpers/types';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../../core/store';
-import { LogListRow } from '../../log/LogListRow';
+import { FolderRow } from '../../layout/FolderRow';
 
 interface NoteDetailTagsProps {
   person: Note;
@@ -27,44 +26,41 @@ const NoteDetailTags: React.FC<NoteDetailTagsProps> = ({ person, isLastPage, hid
   const byId = useSelector((state: RootState) => state.person.byId);
   const persons = byId;
 
-  const { showHideBox, saveShowTag, openFolder } = actions;
+  const { openFolder } = actions;
 
   const mutations = useItemMutations(person.id);
   const deleteWithUndo = useDeleteWithUndo(mutations);
 
-  return (
-    <div className={'detailedBox'}>
-      {person?.dataLable?.filter((item) => !(hideFolders && item.type === 'FOLDER')).map((noteItem, i) => {
-        const isLink = noteItem.type === 'FOLDER';
-        const isNote = noteItem.type === 'NOTE';
-        const isLogDirectory = noteItem.name === 'Log';
-        const prop = (noteItem as any).heading ?? noteItem.name ?? noteItem?.content?.data ?? 'Unknown';
-        const contentCount = persons?.[noteItem.id]?.dataLable?.length;
+  const all = person?.dataLable ?? [];
+  const folders = hideFolders ? [] : all.filter((i) => i.type === 'FOLDER');
+  const notes = all.filter((i) => i.type === 'NOTE');
 
-        return (
-          <div className="detailedBox" key={(noteItem.id || prop) + i}>
-            {isLink && isLogDirectory && (
-              <SwipeRow onDelete={() => deleteWithUndo(noteItem, 'Log deleted')}>
-                <LogListRow logItem={noteItem} items={persons?.[noteItem.id]?.dataLable} onOpen={() => openFolder(noteItem)} />
-              </SwipeRow>
-            )}
-            {isLink && !isLogDirectory && (
-              <SwipeRow onDelete={() => deleteWithUndo(noteItem, 'Folder deleted')}>
-                <FolderList
-                  linkBorder={'link-border'}
-                  prop={prop}
-                  contentCount={contentCount}
-                  onShowHide={() => showHideBox(prop)}
-                  onShowLogDays={() => undefined}
-                  onShowLogTag={(tag) => saveShowTag(tag)}
-                  onChangeDate={() => undefined}
-                />
-              </SwipeRow>
-            )}
-            {isNote && <NoteBlock item={noteItem} mutations={mutations} onDelete={deleteWithUndo} />}
+  return (
+    <div className="phone-body">
+      {folders.length > 0 && (
+        <>
+          <div className="cap">Folders</div>
+          <div className="card-list" data-testid="folder-list">
+            {folders.map((f) => {
+              const isLog = f.name === 'Log';
+              return (
+                <SwipeRow key={f.id} onDelete={() => deleteWithUndo(f, isLog ? 'Log deleted' : 'Folder deleted')}>
+                  <FolderRow
+                    name={isLog ? 'Log' : ((f as any).heading ?? f.name ?? 'Unknown')}
+                    isLog={isLog}
+                    count={persons?.[f.id]?.dataLable?.length}
+                    onOpen={() => openFolder(f)}
+                  />
+                </SwipeRow>
+              );
+            })}
           </div>
-        );
-      })}
+        </>
+      )}
+      {notes.length > 0 && <div className="cap">Notes</div>}
+      {notes.map((n) => (
+        <NoteBlock key={n.id} item={n} mutations={mutations} onDelete={deleteWithUndo} />
+      ))}
       {isLastPage && <TrailingBlock key={person.id} folderId={person.id} mutations={mutations} />}
     </div>
   );

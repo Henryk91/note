@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faClock, faEdit, faWifi } from '@fortawesome/free-solid-svg-icons';
+import { faBolt, faEdit, faWifi } from '@fortawesome/free-solid-svg-icons';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../core/store';
 import { useOnlineStatus } from '../../../shared/hooks/useOnlineStatus';
@@ -23,7 +23,7 @@ export const BottomToolbar: React.FC = () => {
 
   if (!folderId || isLogId(folderId)) return null;
 
-  const count = byId[folderId]?.dataLable?.length ?? 0;
+  const folderCount = (byId[folderId]?.dataLable ?? []).filter((i) => i.type === 'FOLDER').length;
 
   const newNote = () => {
     setMenu(false);
@@ -44,15 +44,15 @@ export const BottomToolbar: React.FC = () => {
 
   return (
     <div className="bottom-toolbar" role="toolbar" aria-label="Actions">
+      <button type="button" className="bt-log" onClick={() => window.dispatchEvent(new Event(QUICK_LOG_EVENT))}>
+        <FontAwesomeIcon icon={faBolt} /> Log
+      </button>
       <span className="bt-count" data-testid="item-count">
-        {count} {count === 1 ? 'item' : 'items'}
+        {folderCount} {folderCount === 1 ? 'folder' : 'folders'}
         {!isOnline && <FontAwesomeIcon icon={faWifi} style={{ marginLeft: 8, color: 'var(--danger)' }} title="Offline" />}
       </span>
-      <button type="button" className="bt-btn" onClick={() => window.dispatchEvent(new Event(QUICK_LOG_EVENT))}>
-        <FontAwesomeIcon icon={faClock} /> Log
-      </button>
       <span className="bt-compose">
-        <button type="button" className="bt-btn bt-primary" aria-label="Compose" aria-expanded={menu} onClick={() => setMenu((v) => !v)}>
+        <button type="button" className="bt-edit" aria-label="Compose" aria-expanded={menu} onClick={() => setMenu((v) => !v)}>
           <FontAwesomeIcon icon={faEdit} />
         </button>
         {menu && (
