@@ -21,6 +21,24 @@
   font-family: inherit;
 }
 
+/* The document fills its pane, so a tap anywhere in it lands on the note (NoteEditor `editAtEnd`). */
+.note-doc {
+  display: flex;
+  flex-direction: column;
+  cursor: text;
+}
+.note-doc > div:has(> .ProseMirror) {
+  flex: 1;
+}
+.desk .doc-pane:has(> .note-doc) {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+.note-doc.is-desktop {
+  flex: 1;
+}
+
 /* ---- phone ---- */
 .note-doc.is-phone {
   flex: 1;

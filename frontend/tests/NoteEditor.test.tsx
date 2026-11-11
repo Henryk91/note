@@ -1,6 +1,6 @@
 jest.mock('marked', () => jest.requireActual('../node_modules/marked/lib/marked.umd.js'));
 import React from 'react';
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { NoteEditor, formatListDate, formatNoteWhen, sortNotesNewestFirst } from '../src/features/notes/editor/NoteEditor';
 import { phoneNoteTarget } from '../src/features/notes/editor/NoteScreen';
 import { folderCountLabel } from '../src/features/notes/layout/BottomToolbar';
@@ -84,6 +84,26 @@ describe('NoteEditor (WYSIWYG, Markdown-backed)', () => {
     expect(created).toHaveBeenCalledWith((m.create.mock.calls[0] as any)[2]);
     unmount();
     // nothing else written for the untouched part
+    expect(m.updateText).not.toHaveBeenCalled();
+  });
+
+  test('a click in blank space of the note (not on a line) starts editing at the end, without saving', async () => {
+    jest.useRealTimers(); // TipTap focuses in requestAnimationFrame
+    const m = mutations();
+    render(<NoteEditor item={note('Test\n\nNote')} folderId="f" mutations={m as any} variant="phone" />);
+    const ed = await editorOf();
+    const doc = screen.getByTestId('note-doc');
+    const pm = doc.querySelector('.ProseMirror');
+    expect(document.activeElement).not.toBe(pm);
+    await act(async () => {
+      fireEvent.click(doc);
+      await new Promise((r) => setTimeout(r, 50)); // TipTap focuses on the next frame
+    });
+    expect(document.activeElement).toBe(pm);
+    expect(ed.state.selection.from).toBe(ed.state.doc.content.size - 1);
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 700));
+    });
     expect(m.updateText).not.toHaveBeenCalled();
   });
 

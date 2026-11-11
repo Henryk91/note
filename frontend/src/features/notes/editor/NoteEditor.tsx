@@ -147,8 +147,16 @@ export const NoteEditor = React.forwardRef<NoteEditorHandle, Props>(
       flush,
     }));
 
+    // Tapping blank space in the note (below the last line, the margins) starts editing at the end, like Apple Notes.
+    const editAtEnd = (e: React.MouseEvent<HTMLDivElement>) => {
+      const ed = editorRef.current;
+      if (!ed || (e.target as HTMLElement).closest('.ProseMirror')) return;
+      ed.commands.focus('end');
+    };
+
     return (
-      <div className={`note-doc is-${variant}`} data-testid="note-doc">
+      // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+      <div className={`note-doc is-${variant}`} data-testid="note-doc" onClick={editAtEnd}>
         {when && <div className="note-when">{when}</div>}
         <EditorContent editor={editor} />
       </div>
