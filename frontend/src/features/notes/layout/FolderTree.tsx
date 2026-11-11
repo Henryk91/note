@@ -20,6 +20,8 @@ type TreeProps = {
   onDropItem?: (item: NoteItemType, targetId: string) => void;
   /** Ids that cannot be picked (the item being moved and everything below it). */
   disabledIds?: Set<string>;
+  /** Log folders cannot be picked (nothing is moved into a log). */
+  disableLogs?: boolean;
 };
 
 type NodeProps = TreeProps & { id: string; label: string; depth: number; isLog?: boolean };
@@ -35,7 +37,7 @@ const renderChild = (f: NoteItemType, props: TreeProps, depth: number) => {
 };
 
 const TreeNode: React.FC<NodeProps> = (props) => {
-  const { id, label, depth, isLog, selectedId, expandedIds, onToggle, onSelect, onDropItem, disabledIds } = props;
+  const { id, label, depth, isLog, selectedId, expandedIds, onToggle, onSelect, onDropItem, disabledIds, disableLogs } = props;
   const expanded = expandedIds.has(id);
   const byId = useSelector((state: RootState) => state.person.byId);
   // Children are loaded when the node is open (the top level is always loaded by the app itself).
@@ -44,7 +46,7 @@ const TreeNode: React.FC<NodeProps> = (props) => {
   const folders = items.filter((i) => i.type === 'FOLDER');
   // The parent's response lists children of children, so a folder without an entry has no children.
   const hasFolders = folders.length > 0;
-  const disabled = disabledIds?.has(id);
+  const disabled = disabledIds?.has(id) || (disableLogs && isLog);
 
   const [over, setOver] = React.useState(false);
 

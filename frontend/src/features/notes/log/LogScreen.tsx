@@ -44,7 +44,9 @@ import { ScrollJump } from '../../../shared/components/ScrollJump';
 import { suggestEntries } from './suggest';
 import { useItemMutations } from '../edit/itemMutations';
 import { useDeleteWithUndo } from '../edit/useDeleteWithUndo';
-import { pathForFolder } from '../hooks/useFolderUrlSync';
+import { buildFolderChain, pathForFolder } from '../hooks/useFolderUrlSync';
+import { MoveToSheet } from '../layout/MoveToSheet';
+import { apiFetch } from '../../../shared/utils/Helpers/apiFetch';
 
 const MODE_LABELS: Record<LogMode, string> = {
   'time-tracker': 'Time tracker',
@@ -478,6 +480,40 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
     void saveSettings({ mode: next });
     setMenuOpen(false);
   };
+  // Move this log to another folder (same picker as folders). A folder has at most one log, so a folder that already
+  // has one is refused with a message instead of ending up with two.
+  const [movingLog, setMovingLog] = useState(false);
+  const moveLogTo = async (target: string) => {
+    if (!logItem || target === parentId) return;
+    let targetItems: Array<{ id: string; type?: string; name?: string }> | undefined = byIdState[target]?.dataLable as any;
+    if (!targetItems) {
+      try {
+        const res = await apiFetch(`/api/note-v2/with-children?parentId=${encodeURIComponent(target)}`);
+        const j = res.ok ? await res.json() : {};
+        targetItems = (Object.values(j)[0] as any)?.dataLable ?? [];
+      } catch {
+        targetItems = [];
+      }
+    }
+    if ((targetItems ?? []).some((i) => i.type === 'FOLDER' && i.name === 'Log' && i.id !== logItem.id)) {
+      toast.error('That folder already has a log. A folder can only have one.');
+      return;
+    }
+    await parentMutations.move(logItem, target);
+    if (phone) window.dispatchEvent(new Event('page-back'));
+    else history.push(pathForFolder(parentId));
+  };
+  const moveSheet =
+    movingLog && logItem ? (
+      <MoveToSheet
+        item={{ ...logItem, name: 'Log' }}
+        notebook={pagesState[0]?.params.id ?? notebook}
+        initiallyOpen={[...pagesState.map((pg) => pg.params.id), ...buildFolderChain(parentId || logId)]}
+        onPick={(t) => void moveLogTo(t)}
+        onClose={() => setMovingLog(false)}
+      />
+    ) : null;
+
   // Delete this whole log, after asking (soft delete with Undo; also in Recently Deleted), then back to its folder.
   const deleteLog = async () => {
     setMenuOpen(false);
@@ -525,6 +561,7 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
     { label: 'Automatic mode', onSelect: () => changeMode(undefined) },
     { label: settings.pinned ? 'Unpin from quick log' : 'Pin to quick log', onSelect: togglePinned },
     { label: 'Break words...', onSelect: editBreakWords },
+    ...(logItem ? [{ label: 'Move to...', onSelect: () => setMovingLog(true) }] : []),
     ...(logItem ? [{ label: 'Delete log...', onSelect: () => void deleteLog(), danger: true }] : []),
   ];
   const isTally = mode === 'tally';
@@ -586,6 +623,11 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
               Break words...
             </button>
             {logItem && (
+              <button type="button" role="menuitem" onClick={() => { setMenuOpen(false); setMovingLog(true); }}>
+                Move to...
+              </button>
+            )}
+            {logItem && (
               <button type="button" role="menuitem" className="danger" onClick={() => void deleteLog()}>
                 Delete log...
               </button>
@@ -598,6 +640,7 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
     if (view === 'summary') {
       return (
         <div className="log-screen is-desktop">
+          {moveSheet}
           <DesktopLogHeader kicker={kicker} title="Summary" menu={
             <>
               <button type="button" className="dl-btn2" onClick={() => closeSummary()}>
@@ -616,6 +659,7 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
     }
     return (
       <div className="log-screen is-desktop">
+        {moveSheet}
         <DesktopLogHeader
           kicker={kicker}
           title={isTally ? parentName : 'Log'}
@@ -721,6 +765,7 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
 
   return (
     <div className="log-screen swiper-no-swiping">
+      {moveSheet}
       {!phone && (
       <div className="log-title">
         <div>
@@ -749,6 +794,11 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
               <button type="button" role="menuitem" onClick={editBreakWords}>
                 Break words...
               </button>
+              {logItem && (
+                <button type="button" role="menuitem" onClick={() => { setMenuOpen(false); setMovingLog(true); }}>
+                  Move to...
+                </button>
+              )}
               {logItem && (
                 <button type="button" role="menuitem" className="danger" onClick={() => void deleteLog()}>
                   Delete log...

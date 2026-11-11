@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { FolderTree } from './FolderTree';
 import { NoteItemType } from '../../../shared/utils/Helpers/types';
 
@@ -23,7 +24,8 @@ export const MoveToSheet: React.FC<MoveToSheetProps> = ({ item, notebook, initia
   // A folder cannot be moved into itself or below itself.
   const disabled = new Set<string>([item.id]);
 
-  return (
+  // Rendered on <body>: inside the phone page stack (a transformed carousel) a fixed overlay would be clipped.
+  return createPortal(
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div className="log-sheet-backdrop" onClick={onClose}>
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
@@ -40,6 +42,7 @@ export const MoveToSheet: React.FC<MoveToSheetProps> = ({ item, notebook, initia
             onClose();
           }}
           disabledIds={disabled}
+          disableLogs
         />
         <div style={{ textAlign: 'right', marginTop: 8 }}>
           <button type="button" onClick={onClose} style={{ color: 'var(--muted)', background: 'transparent', border: 0 }}>
@@ -47,6 +50,7 @@ export const MoveToSheet: React.FC<MoveToSheetProps> = ({ item, notebook, initia
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
