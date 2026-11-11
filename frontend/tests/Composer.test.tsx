@@ -101,4 +101,14 @@ describe('Composer', () => {
     box.blur();
     expect(fireEvent.mouseDown(send)).toBe(true); // box not focused: normal behaviour
   });
+
+  test('while editing an entry the panel offers Delete next to Cancel edit (not when adding)', () => {
+    const p = props({ panelOpen: true, editing: true, onDeleteEditing: jest.fn() });
+    const { rerender } = render(<Composer {...(p as any)} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    expect(p.onDeleteEditing).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('button', { name: 'Cancel edit' })).toBeInTheDocument();
+    rerender(<Composer {...(props({ panelOpen: true, editing: false, onDeleteEditing: jest.fn() }) as any)} />);
+    expect(screen.queryByRole('button', { name: 'Delete' })).toBeNull();
+  });
 });

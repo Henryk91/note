@@ -17,6 +17,8 @@ type ComposerProps = {
   onStep: (unit: Unit, direction: 1 | -1) => void;
   editing: boolean;
   onResetOrCancel: () => void;
+  /** While editing an entry: delete it (asks first). */
+  onDeleteEditing?: () => void;
   onSend: () => void;
   quickChips?: string[];
   onChip?: (text: string) => void;
@@ -88,6 +90,7 @@ export const Composer: React.FC<ComposerProps> = (props) => {
     onStep,
     editing,
     onResetOrCancel,
+    onDeleteEditing,
     onSend,
     quickChips,
     onChip,
@@ -142,9 +145,16 @@ export const Composer: React.FC<ComposerProps> = (props) => {
         <div className="log-panel" data-testid="time-panel">
           <div className="log-panel-head">
             <span>{editing ? 'Editing entry' : 'Entry date and time'}</span>
-            <button type="button" onClick={onResetOrCancel}>
-              {editing ? 'Cancel edit' : 'Reset to now'}
-            </button>
+            <span className="log-panel-actions">
+              {editing && onDeleteEditing && (
+                <button type="button" className="log-panel-delete" onClick={onDeleteEditing}>
+                  Delete
+                </button>
+              )}
+              <button type="button" onClick={onResetOrCancel}>
+                {editing ? 'Cancel edit' : 'Reset to now'}
+              </button>
+            </span>
           </div>
           <div className="log-panel-fields">
             <label style={{ flex: 1.3 }}>

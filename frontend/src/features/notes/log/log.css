@@ -651,3 +651,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* While editing an entry: "Delete" (red) next to "Cancel edit". */
+.log-panel-actions {
+  display: inline-flex;
+  gap: 14px;
+  align-items: center;
+}
+.log-panel-head button.log-panel-delete {
+  color: var(--danger, #ff8a80) !important;
+}

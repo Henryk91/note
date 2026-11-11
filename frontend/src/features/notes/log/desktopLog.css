@@ -484,3 +484,7 @@
 .desk .list-pane.dl-days {
   border-right: 1px solid var(--line);
 }
+.log-screen.is-desktop .dl-delete {
+  margin-left: 4px;
+  color: var(--danger, #ff8a80);
+}

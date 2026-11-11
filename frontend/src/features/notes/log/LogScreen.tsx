@@ -39,11 +39,8 @@ import {
   weekTotals,
 } from './logModel';
 import { chipLabel, defaultTsForDay, PanelValue, panelFromTs, parsePanel, stepTs } from './entryTime';
-import { askText } from '../../../shared/components/dialog/AppDialog';
+import { askConfirm, askText } from '../../../shared/components/dialog/AppDialog';
 import { ScrollJump } from '../../../shared/components/ScrollJump';
-import { useItemMutations } from '../edit/itemMutations';
-import { useDeleteWithUndo } from '../edit/useDeleteWithUndo';
-import { pathForFolder } from '../hooks/useFolderUrlSync';
 
 const MODE_LABELS: Record<LogMode, string> = {
   'time-tracker': 'Time tracker',
@@ -74,9 +71,7 @@ const writeDraft = (logId: string, draft: StoredDraft | null) => {
 };
 
 export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
-  const { entries, grouped, settings, mode, label, notebook, parentName, parentId, loaded, saveSettings, refetch, logItem } = useLogData(logId);
-  const parentMutations = useItemMutations(parentId);
-  const deleteWithUndo = useDeleteWithUndo(parentMutations);
+  const { entries, grouped, settings, mode, label, notebook, parentName, loaded, saveSettings, refetch } = useLogData(logId);
   const bp = useBreakpoint();
   const phone = bp === 'mobile';
   const history = useHistory();
@@ -335,6 +330,17 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
     }
   };
 
+  // Every way of deleting an entry (row menu, Delete key, the Delete button while editing) asks first.
+  const confirmDelete = async (entry: LogEntry) => {
+    const ok = await askConfirm({
+      title: 'Delete this entry?',
+      message: firstLine(entry.text) || undefined,
+      confirmLabel: 'Delete',
+      danger: true,
+    });
+    if (ok) onDelete(entry);
+  };
+
   const onDelete = (entry: LogEntry) => {
     if (editing?.id === entry.id) finishEdit();
     void mutations.remove(entry);
@@ -474,15 +480,6 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
     void saveSettings({ mode: next });
     setMenuOpen(false);
   };
-  // Delete this log (soft delete with Undo, like folders; it is also in Recently Deleted) and go back to its folder.
-  const deleteLog = () => {
-    setMenuOpen(false);
-    if (!logItem) return;
-    deleteWithUndo(logItem, 'Log deleted');
-    if (phone) window.dispatchEvent(new Event('page-back'));
-    else history.push(pathForFolder(parentId));
-  };
-
   const togglePinned = () => {
     void saveSettings({ pinned: !settings.pinned });
     setMenuOpen(false);
@@ -514,7 +511,6 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
     { label: 'Automatic mode', onSelect: () => changeMode(undefined) },
     { label: settings.pinned ? 'Unpin from quick log' : 'Pin to quick log', onSelect: togglePinned },
     { label: 'Break words...', onSelect: editBreakWords },
-    ...(logItem ? [{ label: 'Delete log', onSelect: deleteLog, danger: true }] : []),
   ];
   const isTally = mode === 'tally';
   useHeader(
@@ -574,11 +570,6 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
             <button type="button" role="menuitem" onClick={editBreakWords}>
               Break words...
             </button>
-            {logItem && (
-              <button type="button" role="menuitem" className="danger" onClick={deleteLog}>
-                Delete log
-              </button>
-            )}
           </div>
         )}
       </div>
@@ -683,7 +674,7 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
               setCustomTs(null);
               fill(e.text);
             }}
-            onDelete={onDelete}
+            onDelete={(e) => void confirmDelete(e)}
           />
         )}
         {(!isTally || editing) && (
@@ -697,6 +688,7 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
             onStep={onStep}
             editing={!!editing}
             onResetOrCancel={resetOrCancel}
+            onDeleteEditing={editing ? () => void confirmDelete(editing) : undefined}
             onSend={send}
             inputRef={inputRef}
           />
@@ -735,11 +727,6 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
               <button type="button" role="menuitem" onClick={editBreakWords}>
                 Break words...
               </button>
-              {logItem && (
-                <button type="button" role="menuitem" className="danger" onClick={deleteLog}>
-                  Delete log
-                </button>
-              )}
             </div>
           )}
         </div>
@@ -865,7 +852,7 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
               setCustomTs(null);
               fill(e.text);
             }}
-            onDelete={onDelete}
+            onDelete={(e) => void confirmDelete(e)}
           />
         ))}
         <ScrollJump count={dayEntries.length} />
@@ -886,6 +873,7 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
         onStep={onStep}
         editing={!!editing}
         onResetOrCancel={resetOrCancel}
+            onDeleteEditing={editing ? () => void confirmDelete(editing) : undefined}
         onSend={send}
         tallyCodes={undefined}
         onTally={logCode}

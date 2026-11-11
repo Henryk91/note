@@ -279,9 +279,11 @@ export const DesktopEntryBar: React.FC<{
   onStep: (u: Unit, d: 1 | -1) => void;
   editing: boolean;
   onResetOrCancel: () => void;
+  /** While editing an entry: delete it (asks first). */
+  onDeleteEditing?: () => void;
   onSend: () => void;
   inputRef: React.RefObject<HTMLTextAreaElement>;
-}> = ({ text, onText, placeholder, panel, panelError, onPanelField, onStep, editing, onResetOrCancel, onSend, inputRef }) => {
+}> = ({ text, onText, placeholder, panel, panelError, onPanelField, onStep, editing, onResetOrCancel, onDeleteEditing, onSend, inputRef }) => {
   useLayoutEffect(() => {
     const el = inputRef.current;
     if (!el) return;
@@ -321,6 +323,11 @@ export const DesktopEntryBar: React.FC<{
         <button type="button" className="dl-lk dl-reset" onClick={onResetOrCancel}>
           {editing ? 'Cancel edit' : 'Reset to now'}
         </button>
+        {editing && onDeleteEditing && (
+          <button type="button" className="dl-lk dl-delete" onClick={onDeleteEditing}>
+            Delete
+          </button>
+        )}
         {panelError && (
           <span className="dl-err" role="alert">
             {panelError}
