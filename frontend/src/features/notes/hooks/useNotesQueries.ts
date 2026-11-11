@@ -1,3 +1,4 @@
+import { rememberLogFolders } from '../log/logIds';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { notesApi, NotesResponse } from '../api/notesApi';
 import { Note } from '../../../shared/utils/Helpers/types';
@@ -77,6 +78,9 @@ export function useNotesWithChildren(parentId?: string, enabled: boolean = true)
     retry: retryUnlessClientError(2),
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
+
+  // Logs are folders named "Log" whatever their id: remember them before anything decides how to show a page.
+  rememberLogFolders(query.data?.notes);
 
   useEffect(() => {
     if (query.data?.notes) {

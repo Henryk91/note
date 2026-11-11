@@ -18,7 +18,7 @@ export const mergeSettings = (current: LogSettings | undefined, patch: Partial<L
   return next;
 };
 
-export const isLogId = (id: string | undefined | null) => !!id && /::Log$/.test(id);
+export { isLogId, rememberLogFolders } from './logIds';
 
 /**
  * Loads one log (the whole log, once, then cached) and the log folder's own document, which holds `settings`.
