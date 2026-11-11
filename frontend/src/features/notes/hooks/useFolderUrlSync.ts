@@ -65,7 +65,11 @@ export const useFolderUrlSync = ({ selectionMode = false }: SyncOptions = {}) =>
   const dispatch = useDispatch();
   const history = useHistory();
   const { pathname } = useLocation();
-  const { pages, selectedNoteName, authToken } = useSelector((state: RootState) => state.person);
+  const { pages, selectedNoteName, authToken, byId } = useSelector((state: RootState) => state.person);
+  // `/n/<item>` whose item is listed in the folder already open: that is its folder, whatever its id says. Ids keep
+  // the folder an item was created in, so a moved note's id points at its old folder.
+  const listedInOpenFolder = (itemId: string | null) =>
+    !!itemId && !!byId?.[pages[pages.length - 1]?.params.id]?.dataLable?.some((d) => d.id === itemId);
   const pendingTarget = useRef<string | null>(null);
   const firstRun = useRef(true);
 
@@ -82,6 +86,7 @@ export const useFolderUrlSync = ({ selectionMode = false }: SyncOptions = {}) =>
     const folderId = folderIdFromPath(pathname);
     if (folderId) {
       // `/n/:id` is a note: its folder is open and the note is selected. Ids of items resolve to their folder.
+      if (pathname.startsWith('/n/') && listedInOpenFolder(folderId)) return;
       const chain = buildFolderChain(folderId);
       const targetId = chain[chain.length - 1];
 
@@ -142,6 +147,7 @@ export const useFolderUrlSync = ({ selectionMode = false }: SyncOptions = {}) =>
       const sel = folderIdFromPath(pathname);
       const chain = sel ? buildFolderChain(sel) : [];
       if (chain.length > 0 && chain[chain.length - 1] === lastId) return; // the note's folder is open
+      if (listedInOpenFolder(sel)) return; // a moved note, listed in the open folder
     }
     const desired = pages.length > 1 && lastId ? pathForFolder(lastId) : '/notes/main';
     if (desired === pathname || (desired === '/notes/main' && pathname === '/')) return;
