@@ -22,7 +22,16 @@ export const SOURCE_ATTRS = ['raw', 'tail', 'idx', 'prefix', 'absent', 'hasNl', 
 // ---- inline: marked tokens -> PM nodes ---------------------------------------------------------------
 
 const addMark = (nodes: PMNode[], mark: PMMark): PMNode[] =>
-  nodes.map((n) => (n.type === 'text' ? { ...n, marks: [...(n.marks ?? []), mark] } : n));
+  nodes.map((n) => (n.type === 'text' || n.type === 'inlineRaw' ? { ...n, marks: [...(n.marks ?? []), mark] } : n));
+
+/**
+ * Inline source the editor does not model as text (images, a link around an image, inline HTML such as
+ * `<del>...</del>`): one atom that is shown rendered (marked + DOMPurify, as the old app did) and written back as is.
+ */
+const inlineRaw = (md: string): PMNode => ({ type: 'inlineRaw', attrs: { md } });
+
+const OPEN_TAG = /^<([A-Za-z][A-Za-z0-9-]*)(\s[^>]*)?>$/;
+const VOID_TAGS = new Set(['br', 'img', 'hr', 'wbr', 'input', 'source', 'col', 'area', 'embed', 'meta', 'link', 'track', 'param', 'base']);
 
 /**
  * The backend's xss() input filter stores every `<` / `>` as `&lt;` / `&gt;` (and marked hands out `\<` as `&lt;`).
@@ -54,7 +63,24 @@ const verbatim = (raw: string): PMNode[] => textNodes(raw, [{ type: 'verbatim' }
 
 const inline = (tokens: Token[] | undefined): PMNode[] => {
   const out: PMNode[] = [];
-  (tokens ?? []).forEach((t) => {
+  const list = tokens ?? [];
+  for (let i = 0; i < list.length; i += 1) {
+    const t = list[i];
+    // An inline HTML element (`<del>text</del>`): its opening tag, content and closing tag become one atom.
+    if (t.type === 'html') {
+      const open = t.raw.match(OPEN_TAG);
+      const tag = open?.[1]?.toLowerCase();
+      if (tag && !VOID_TAGS.has(tag) && !t.raw.endsWith('/>')) {
+        const close = list.findIndex((k, j) => j > i && k.type === 'html' && new RegExp(`^</${tag}\\s*>$`, 'i').test(k.raw));
+        if (close > i) {
+          out.push(inlineRaw(list.slice(i, close + 1).map((k) => k.raw).join('')));
+          i = close;
+          continue;
+        }
+      }
+      out.push(inlineRaw(t.raw));
+      continue;
+    }
     switch (t.type) {
       case 'text':
         // A `text` token can hold nested inline tokens (e.g. in tight list items); otherwise it is a leaf.
@@ -79,17 +105,24 @@ const inline = (tokens: Token[] | undefined): PMNode[] => {
       case 'codespan':
         out.push(...textNodes((t as Tokens.Codespan).text, [{ type: 'code' }]));
         break;
+      case 'image':
+        out.push(inlineRaw(t.raw));
+        break;
       case 'link': {
         const l = t as Tokens.Link;
+        if (l.tokens?.some((k) => k.type === 'image' || k.type === 'html')) {
+          out.push(inlineRaw(t.raw)); // a linked image: rendered as one piece
+          break;
+        }
         const kind = t.raw.startsWith('<') ? 'angle' : t.raw.startsWith('[') ? 'inline' : 'bare';
         out.push(...addMark(inline(l.tokens), { type: 'link', attrs: { href: l.href, title: l.title ?? null, kind } }));
         break;
       }
       default:
-        // html, image and anything else: kept as literal text and written back exactly as it was.
+        // Anything else: kept as literal text and written back exactly as it was.
         out.push(...verbatim(t.raw));
     }
-  });
+  }
   return out;
 };
 
@@ -303,7 +336,7 @@ export const inlineToMarkdown = (nodes: PMNode[] = []): string => {
       out += '\n';
       return;
     }
-    if (n.type !== 'text') return;
+    if (n.type !== 'text' && n.type !== 'inlineRaw') return;
     const marks = [...(n.marks ?? [])]
       .filter((m) => m.type !== 'code' && m.type !== 'verbatim')
       .sort((a, b) => MARK_ORDER.indexOf(a.type) - MARK_ORDER.indexOf(b.type));
@@ -314,6 +347,10 @@ export const inlineToMarkdown = (nodes: PMNode[] = []): string => {
       out += openMark(m);
       active.push(m);
     });
+    if (n.type === 'inlineRaw') {
+      out += n.attrs?.md ?? '';
+      return;
+    }
     const text = n.text ?? '';
     const isCode = n.marks?.some((m) => m.type === 'code');
     const isVerbatim = n.marks?.some((m) => m.type === 'verbatim');

@@ -329,3 +329,61 @@ header.app-header .hd-done {
   from { transform: translateX(-100%); }
   to { transform: translateX(0); }
 }
+
+/* Blocks the editor does not model (task lists, tables, raw HTML): rendered as before, Markdown source while editing. */
+.note-raw .note-raw-src {
+  display: none;
+}
+.note-raw.is-editing .note-raw-src,
+.note-raw.is-blank .note-raw-src {
+  display: block;
+  white-space: pre-wrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.92em;
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.note-raw.is-editing .note-raw-preview,
+.note-raw.is-blank .note-raw-preview {
+  display: none;
+}
+.note-raw-preview {
+  cursor: text;
+}
+.note-raw-preview > :first-child {
+  margin-top: 0;
+}
+.note-raw-preview > :last-child {
+  margin-bottom: 0;
+}
+.note-raw-preview ul:has(input[type='checkbox']) {
+  list-style: none;
+  padding-left: 4px;
+}
+.note-raw-preview table {
+  border-collapse: collapse;
+  margin: 4px 0;
+}
+.note-raw-preview th,
+.note-raw-preview td {
+  border: 1px solid var(--line);
+  padding: 4px 8px;
+}
+.note-raw-preview img,
+.note-inline-raw img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  vertical-align: middle;
+}
+.note-inline-raw {
+  display: inline;
+}
+.note-inline-raw.ProseMirror-selectednode {
+  outline: 2px solid var(--accent);
+  border-radius: 4px;
+}
+.note-doc .note-raw .note-raw-preview {
+  white-space: normal;
+}

@@ -16,3 +16,9 @@ export const renderMarkdownHtml = (input: string): string => {
 };
 
 export const getMarkdownText = (input: string) => ({ __html: renderMarkdownHtml(input) });
+
+/** One line of inline Markdown (an image, a linked image, inline HTML) rendered and sanitised, as notes render it. */
+export const renderInlineMarkdownHtml = (input: string): string => {
+  const raw = marked.parseInline(input ?? '', { async: false, breaks: true }) as string;
+  return DOMPurify.sanitize(raw);
+};
