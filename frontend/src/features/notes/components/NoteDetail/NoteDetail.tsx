@@ -21,8 +21,10 @@ import { PinnedCards } from '../../layout/PinnedCards';
 import { useHeader } from '../../../../shared/header/headerStore';
 import { useNoteOperations } from '../../hooks/useNoteOperations';
 import { NoteScreen, phoneNoteTarget } from '../../editor/NoteScreen';
-import { ItemType } from '../../../../shared/utils/Helpers/types';
 import { askText } from '../../../../shared/components/dialog/AppDialog';
+import { pathForFolder } from '../../hooks/useFolderUrlSync';
+import { askAndCreateFolder, logMenuLabel, openOrCreateLog } from '../../edit/folderActions';
+import { ScrollJump } from '../../../../shared/components/ScrollJump';
 
 type NoteDetailProps = {
   index?: number;
@@ -101,12 +103,11 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
       },
     });
   }
+  headerMenu.push({ label: 'New folder', onSelect: () => void askAndCreateFolder(folderMutations) });
+  // New log (or Open log when this folder already has one): creates `<folder>::Log` and opens it.
   headerMenu.push({
-    label: 'New folder',
-    onSelect: async () => {
-      const name = await askText({ title: 'New folder', label: 'Folder name', placeholder: 'e.g. Work', confirmLabel: 'Create' });
-      if (name) void folderMutations.create(ItemType.FOLDER, '', undefined, { name, heading: name } as any);
-    },
+    label: logMenuLabel(person?.dataLable),
+    onSelect: () => void openOrCreateLog(pageLink?.params.id || '', person?.dataLable, folderMutations, (id) => history.push(pathForFolder(id))),
   });
   headerMenu.push({ label: 'Recently deleted', onSelect: () => history.push('/recently-deleted') });
   useHeader(
@@ -178,6 +179,13 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
           }}
         />
         <br />
+        {isLastPage && (
+          <ScrollJump
+            count={personToRender?.dataLable?.length ?? 0}
+            bottom="calc(var(--toolbar-h, 57px) + 12px)"
+            fixedScroller={() => document.querySelector<HTMLElement>('.swiper-slide-active .scrollable-content')}
+          />
+        )}
       </div>
       {moving && folderItem && (
         <MoveToSheet

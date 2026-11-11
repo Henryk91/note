@@ -93,6 +93,8 @@ export const useItemMutations = (folderId: string): ItemMutations => {
         if (!res.queued && res.response?.id) {
           patchLog(qc, folderId, (items) => items.map((i) => (i.id === itemId ? { ...i, ...res.response } : i)));
         }
+        // A new folder or log also belongs in the folder lists, which read the parent's cached with-children data.
+        if (type === ItemType.FOLDER) void qc.invalidateQueries({ queryKey: [...notesKeys.all, 'with-children'] });
       } catch (err) {
         clearPendingId(itemId);
         endSave({ failed: true });

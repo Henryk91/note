@@ -1,9 +1,10 @@
 import { IconPlus } from '@tabler/icons-react';
 import React, { useEffect } from 'react';
 import { NoteItemType } from '../../../shared/utils/Helpers/types';
-import { ItemMenu } from '../edit/ItemMenu';
+import { ItemMenu, ItemMenuEntry } from '../edit/ItemMenu';
 import { noteTitle, notePreview } from '../edit/NoteBlock';
 import { DRAG_TYPE } from './FolderTree';
+import { ScrollJump } from '../../../shared/components/ScrollJump';
 
 type ListPaneProps = {
   path: string;
@@ -14,12 +15,14 @@ type ListPaneProps = {
   onDelete: (item: NoteItemType) => void;
   onNew: () => void;
   headerExtra?: React.ReactNode;
+  /** Folder actions (New folder, New log) in a `...` menu after the + button. */
+  folderMenu?: ItemMenuEntry[];
   /** A new note that is not created yet: shown selected at the top of the list. */
   draft?: boolean;
 };
 
 /** The notes of the open folder (docs/mockups/desktop.html): bold title, one-line preview, "N notes". */
-export const ListPane: React.FC<ListPaneProps> = ({ path, notes, selectedId, onSelect, onMove, onDelete, onNew, headerExtra, draft }) => {
+export const ListPane: React.FC<ListPaneProps> = ({ path, notes, selectedId, onSelect, onMove, onDelete, onNew, headerExtra, folderMenu, draft }) => {
   // Up / down move through the list.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -47,6 +50,7 @@ export const ListPane: React.FC<ListPaneProps> = ({ path, notes, selectedId, onS
         <button type="button" className="list-new" aria-label="New note" title="New note" onClick={onNew}>
           <IconPlus size={16} />
         </button>
+        {folderMenu && folderMenu.length > 0 && <ItemMenu label="Folder options" items={folderMenu} />}
       </div>
       <div className="list-pane-items" role="listbox" aria-label="Notes in this folder">
         {notes.length === 0 && <div className="list-empty">No notes in this folder yet. Use + to write one.</div>}
@@ -91,6 +95,7 @@ export const ListPane: React.FC<ListPaneProps> = ({ path, notes, selectedId, onS
             </div>
           );
         })}
+        <ScrollJump count={notes.length} />
       </div>
     </div>
   );

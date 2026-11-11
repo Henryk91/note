@@ -7,6 +7,7 @@ import { setSelectedNoteName } from '../../auth/store/personSlice';
 import { useNotesWithChildren } from '../hooks/useNotesQueries';
 import { folderIdFromPath, pathForFolder } from '../hooks/useFolderUrlSync';
 import { useItemMutations } from '../edit/itemMutations';
+import { askAndCreateFolder, logMenuLabel, openOrCreateLog } from '../edit/folderActions';
 import { useDeleteWithUndo } from '../edit/useDeleteWithUndo';
 import { NoteItemType, ItemType } from '../../../shared/utils/Helpers/types';
 import { useLogData, isLogId } from '../log/useLogData';
@@ -272,6 +273,10 @@ export const DesktopLayout: React.FC<{ breakpoint: Exclude<Breakpoint, 'mobile'>
             onDelete={removeNote}
             onNew={newNote}
             draft={draftActive && !draft?.id}
+            folderMenu={[
+              { label: 'New folder', onSelect: () => void askAndCreateFolder(folderMutations) },
+              { label: logMenuLabel(items), onSelect: () => void openOrCreateLog(folderId, items, folderMutations, (id) => history.push(pathForFolder(id))) },
+            ]}
             headerExtra={
               !showSidebar ? (
                 <button type="button" className="list-new" aria-label="Show folders" aria-expanded={drawer} onClick={() => setDrawer((v) => !v)}>
