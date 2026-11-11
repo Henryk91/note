@@ -1733,3 +1733,15 @@ header.app-header.is-wide {
   height: 48.8px;
   box-sizing: border-box;
 }
+
+/* Hover on rows and cards (seen with a mouse, e.g. the installed Mac app at phone size): a slightly lighter surface
+   of the current theme, instead of the old app's global orange-red `button:hover` (app.css). */
+button.folder-row:hover,
+button.note-row:hover,
+button.search-hit:hover,
+button.pin-card:hover {
+  background: var(--surface-2) !important;
+}
+button.phone-search-clear:hover {
+  background: transparent !important;
+}
