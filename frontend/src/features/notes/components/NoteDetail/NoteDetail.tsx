@@ -151,15 +151,10 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
   return (
     <div className={`slide-in ${heading === 'Log' && 'logDetailPadding' }`}>
       <div id={!isLastPage ? 'isFirstPage' : ''} className={`${className} note-detail-item`} key={personToRender?.id}>
-        {editName ? (
+        {/* The folder name is already the header title, so the page has no h1; renaming still shows the form here. */}
+        {editName && (
           <div>
             <EditNameForm heading={person?.heading ?? ''} onSubmit={submitNameChange} />
-          </div>
-        ) : (
-          <div id="personContainer" className="page-content-top1">
-            <h1 id="personHead" className="phone-h1">
-              {heading || '<NAME NOT SET>'}
-            </h1>
           </div>
         )}
         {index === 0 && (

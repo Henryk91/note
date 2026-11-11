@@ -1056,7 +1056,8 @@ header.app-header .item-menu-list button {
   width: auto;
 }
 .slide-in .note-detail-item {
-  padding: 0 12px;
+  /* No page h1 (the header already names the folder): the content starts 12 px under the header. */
+  padding: 12px 12px 0;
   width: 100%;
   box-sizing: border-box;
 }
