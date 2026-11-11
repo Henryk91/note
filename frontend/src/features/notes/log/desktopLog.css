@@ -488,3 +488,10 @@
   margin-left: 4px;
   color: var(--danger, #ff8a80);
 }
+/* The whole row opens the entry for editing. */
+.log-screen.is-desktop .dl-row {
+  cursor: pointer;
+}
+.log-screen.is-desktop .dl-row .dl-txt {
+  cursor: text;
+}

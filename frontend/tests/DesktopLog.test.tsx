@@ -1,6 +1,6 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { DaysColumn, DesktopEntryBar, PICK_LOG_DAY_EVENT, setSelectedLogDay } from '../src/features/notes/log/DesktopLog';
+import { DaysColumn, DesktopEntryBar, DesktopLogTable, PICK_LOG_DAY_EVENT, setSelectedLogDay } from '../src/features/notes/log/DesktopLog';
 import { buildEntries, groupByDay } from '../src/features/notes/log/logModel';
 
 const items = [
@@ -84,5 +84,28 @@ describe('desktop log: entry bar (always visible)', () => {
     expect(screen.getByText('Cancel edit')).toBeTruthy();
     expect(screen.getByRole('alert').textContent).toBe('Time must be HH:MM (24 h)');
     expect((screen.getByRole('button', { name: /Save/ }) as HTMLButtonElement).disabled).toBe(true);
+  });
+});
+
+describe('desktop log rows', () => {
+  const { byDay } = groupByDay(buildEntries(items));
+  const day = Object.keys(byDay)[0];
+  const entries = byDay[day];
+  const handlers = () => ({ onEdit: jest.fn(), onContinue: jest.fn(), onCopy: jest.fn(), onLogAgain: jest.fn(), onDelete: jest.fn() });
+
+  test('a click anywhere on a row (time, text, duration, blank space) edits that entry; the ... button does not', () => {
+    const h = handlers();
+    render(
+      <DesktopLogTable dayEntries={entries} pendingIds={new Set()} empty={null} listRef={React.createRef<HTMLDivElement>()} nowTs={new Date('2026-11-10T14:30:00').getTime()} expandByDefault={false} showContinue={false} {...h} />,
+    );
+    const row = screen.getAllByTestId('log-row')[0];
+    fireEvent.click(row.querySelector('.dl-tm')!);
+    fireEvent.click(row.querySelector('.dl-txt')!);
+    fireEvent.click(row.querySelector('.dl-dur')!);
+    fireEvent.click(row);
+    expect(h.onEdit).toHaveBeenCalledTimes(4);
+    fireEvent.click(row.querySelector('.dl-act')!);
+    expect(h.onEdit).toHaveBeenCalledTimes(4);
+    expect(screen.getByRole('menu')).toBeTruthy();
   });
 });

@@ -139,9 +139,11 @@ const DesktopRow: React.FC<{
   const duration = entryDuration(dayEntries, index, nowTs);
   const running = !dayEntries[index + 1] && dayKeyOf(nowTs) === entry.day;
   const prevTask = isBreak && showContinue ? taskBefore(dayEntries, index, breakWords) : null;
-  const onText = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('a')) return;
-    if (window.getSelection()?.toString()) return;
+  // A click anywhere on the row edits the entry (not on its buttons or links, and not while selecting its text).
+  const onRowClick = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('a, button, [role=menu]')) return;
+    const sel = window.getSelection();
+    if (sel && !sel.isCollapsed && sel.toString() && ref.current?.contains(sel.anchorNode)) return;
     onEdit(entry);
   };
   return (
@@ -150,6 +152,7 @@ const DesktopRow: React.FC<{
       className={`dl-row ${isBreak ? 'is-break' : ''} ${isEditing ? 'is-editing' : ''} ${menuOpen ? 'is-menu' : ''}`}
       data-testid="log-row"
       tabIndex={0}
+      onClick={onRowClick}
       onKeyDown={(e) => {
         if (e.target !== e.currentTarget) return;
         if (e.key === 'Delete' || e.key === 'Backspace') {
@@ -166,10 +169,8 @@ const DesktopRow: React.FC<{
         {pending && <IconClock size={12} className="dl-pending" aria-label="Waiting to sync" />}
       </button>
       <div className="dl-entry">
-        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
         <div
           className={`dl-txt ${long && !expanded ? 'is-clamped' : ''}`}
-          onClick={onText}
           // Sanitised Markdown, same renderer and options as notes (marked + breaks, then DOMPurify).
           // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: getMarkdownText(entry.text).__html.trim() }}
