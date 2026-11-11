@@ -1,4 +1,6 @@
 import { IconArrowUp, IconCheck, IconChevronDown, IconChevronUp, IconClock } from '@tabler/icons-react';
+import { Suggestion } from './suggest';
+import { SuggestList, useSuggestKeys } from './SuggestList';
 import React, { useEffect, useRef } from 'react';
 import { PanelValue } from './entryTime';
 
@@ -22,7 +24,8 @@ type ComposerProps = {
   onSend: () => void;
   quickChips?: string[];
   onChip?: (text: string) => void;
-  suggestions?: string[];
+  /** Earlier entries matching what is typed (shown above the box). */
+  suggestions?: Suggestion[];
   onSuggest?: (text: string) => void;
   tallyCodes?: string[];
   onTally?: (code: string) => void;
@@ -111,7 +114,10 @@ export const Composer: React.FC<ComposerProps> = (props) => {
     el.style.height = `${Math.min(el.scrollHeight, 132)}px`;
   }, [text, showInput, inputRef]);
 
+  const suggest = useSuggestKeys(suggestions ?? [], text, (t) => onSuggest?.(t));
+
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (suggest.onKeyDown(e)) return;
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
       onSend();
@@ -209,7 +215,11 @@ export const Composer: React.FC<ComposerProps> = (props) => {
         </button>
         {showInput ? (
           <div className="log-input-row">
+            {suggest.open && (
+              <SuggestList items={suggestions ?? []} active={suggest.active} onHover={suggest.setActive} onPick={suggest.pick} />
+            )}
             <textarea
+              {...suggest.inputProps}
               ref={inputRef}
               rows={1}
               value={text}

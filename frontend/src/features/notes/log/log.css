@@ -660,3 +660,55 @@
 .log-panel-head button.log-panel-delete {
   color: var(--danger, #ff8a80) !important;
 }
+
+/* Suggestions while typing an entry: a list just above the box (the box sits at the bottom of the screen). */
+.log-input-row,
+.dl-crow-2 {
+  position: relative;
+}
+.log-suggest {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% + 6px);
+  z-index: 40;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  text-align: left;
+}
+.log-suggest li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--text);
+}
+.log-suggest li.is-active,
+.log-suggest li:hover {
+  background: var(--surface-2);
+}
+.log-suggest-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.log-suggest-text b {
+  font-weight: 600;
+  color: var(--accent-text);
+}
+.log-suggest-meta {
+  flex: none;
+  font-size: 12px;
+  color: var(--muted);
+}

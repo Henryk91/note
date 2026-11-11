@@ -41,6 +41,7 @@ import {
 import { chipLabel, defaultTsForDay, PanelValue, panelFromTs, parsePanel, stepTs } from './entryTime';
 import { askConfirm, askText } from '../../../shared/components/dialog/AppDialog';
 import { ScrollJump } from '../../../shared/components/ScrollJump';
+import { suggestEntries } from './suggest';
 
 const MODE_LABELS: Record<LogMode, string> = {
   'time-tracker': 'Time tracker',
@@ -452,21 +453,11 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
     return [...DEFAULT_CHIPS, ...recentTickets(entries, 4, breakWords)];
   }, [mode, settings.chips, entries, breakWords]);
 
-  const suggestions = useMemo(() => {
-    const q = text.trim().toLowerCase();
-    if (mode !== 'time-tracker' || editing || q.length < 2 || text.includes('\n')) return [];
-    const seen = new Set<string>();
-    const out: string[] = [];
-    for (let i = entries.length - 1; i >= 0 && out.length < 4; i -= 1) {
-      const line = firstLine(entries[i].text);
-      const key = line.toLowerCase();
-      if (line && key.startsWith(q) && key !== q && !seen.has(key)) {
-        seen.add(key);
-        out.push(line);
-      }
-    }
-    return out;
-  }, [mode, editing, text, entries]);
+  // Suggestions while typing a new entry: earlier entries of this log (not while editing, not for tally codes).
+  const suggestions = useMemo(
+    () => (editing || mode === 'tally' ? [] : suggestEntries(entries, text, 5, now)),
+    [mode, editing, text, entries, now],
+  );
 
   // Daily value: the box starts with yesterday's value so an unchanged value is one tap.
   useEffect(() => {
@@ -688,8 +679,10 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
             onStep={onStep}
             editing={!!editing}
             onResetOrCancel={resetOrCancel}
-            onDeleteEditing={editing ? () => void confirmDelete(editing) : undefined}
-            onSend={send}
+        onDeleteEditing={editing ? () => void confirmDelete(editing) : undefined}
+            suggestions={suggestions}
+        onSuggest={setText}
+        onSend={send}
             inputRef={inputRef}
           />
         )}
@@ -873,7 +866,9 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
         onStep={onStep}
         editing={!!editing}
         onResetOrCancel={resetOrCancel}
-            onDeleteEditing={editing ? () => void confirmDelete(editing) : undefined}
+        onDeleteEditing={editing ? () => void confirmDelete(editing) : undefined}
+        suggestions={suggestions}
+        onSuggest={setText}
         onSend={send}
         tallyCodes={undefined}
         onTally={logCode}

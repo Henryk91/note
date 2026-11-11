@@ -11,6 +11,8 @@ import {
 } from '@tabler/icons-react';
 import React, { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useDismiss } from '../edit/useDismiss';
+import { Suggestion } from './suggest';
+import { SuggestList, useSuggestKeys } from './SuggestList';
 import { getMarkdownText } from '../../../shared/utils/markdown';
 import { PanelValue } from './entryTime';
 import {
@@ -281,9 +283,12 @@ export const DesktopEntryBar: React.FC<{
   onResetOrCancel: () => void;
   /** While editing an entry: delete it (asks first). */
   onDeleteEditing?: () => void;
+  suggestions?: Suggestion[];
+  onSuggest?: (text: string) => void;
   onSend: () => void;
   inputRef: React.RefObject<HTMLTextAreaElement>;
-}> = ({ text, onText, placeholder, panel, panelError, onPanelField, onStep, editing, onResetOrCancel, onDeleteEditing, onSend, inputRef }) => {
+}> = ({ text, onText, placeholder, panel, panelError, onPanelField, onStep, editing, onResetOrCancel, onDeleteEditing, suggestions, onSuggest, onSend, inputRef }) => {
+  const suggest = useSuggestKeys(suggestions ?? [], text, (t) => onSuggest?.(t));
   useLayoutEffect(() => {
     const el = inputRef.current;
     if (!el) return;
@@ -335,7 +340,9 @@ export const DesktopEntryBar: React.FC<{
         )}
       </div>
       <div className="dl-crow dl-crow-2">
+        {suggest.open && <SuggestList items={suggestions ?? []} active={suggest.active} onHover={suggest.setActive} onPick={suggest.pick} />}
         <textarea
+          {...suggest.inputProps}
           ref={inputRef}
           className="dl-ta"
           rows={1}
@@ -344,6 +351,7 @@ export const DesktopEntryBar: React.FC<{
           value={text}
           onChange={(e) => onText(e.target.value)}
           onKeyDown={(e) => {
+            if (suggest.onKeyDown(e)) return;
             if (e.key === 'Enter' && (!e.shiftKey || e.metaKey || e.ctrlKey)) {
               e.preventDefault();
               onSend();
