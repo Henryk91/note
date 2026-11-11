@@ -1,5 +1,5 @@
 import { IconBolt, IconChevronLeft, IconMenu2, IconSearch, IconX } from '@tabler/icons-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '../core/store';
@@ -9,6 +9,8 @@ import { QUICK_LOG_EVENT } from '../features/notes/log/QuickLogSheet';
 import { SearchResults } from '../features/notes/components/SearchBar/SearchResults';
 import { ItemMenu } from '../features/notes/edit/ItemMenu';
 import { useHeaderState } from '../shared/header/headerStore';
+import { useDismiss } from '../features/notes/edit/useDismiss';
+import { MenuPopover } from '../shared/components/organisms/Sidebar';
 
 const isMac = typeof navigator !== 'undefined' && /Mac/i.test(navigator.platform || '');
 const MOD = isMac ? '⌘' : 'Ctrl+';
@@ -39,6 +41,10 @@ export const AppHeader: React.FC = () => {
     setQuery('');
   };
   const menuTo = pathname === '/notes/note-names' ? '/notes/main' : '/notes/note-names';
+  // Desktop: the hamburger opens the menu as a popover (menu-login.html 3).
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLSpanElement>(null);
+  useDismiss(menuOpen, menuRef, () => setMenuOpen(false));
   const wide = bp !== 'mobile';
   // One-line titles (Summary) use a compact bar, like the mockups: 40 px instead of 54 px.
   const compact = !wide && header.kicker !== undefined && header.kicker.trim() === '';
@@ -68,9 +74,20 @@ export const AppHeader: React.FC = () => {
   if (wide) {
     return (
       <header className="app-header is-wide">
-        <Link id="menuButton" to={menuTo} className="hd-icon" aria-label="Menu" title="Menu">
-          <IconMenu2 size={20} />
-        </Link>
+        <span className="hd-menu-wrap" ref={menuRef}>
+          <button
+            id="menuButton"
+            type="button"
+            className={`hd-icon hd-menu ${menuOpen ? 'is-open' : ''}`}
+            aria-label="Menu"
+            title="Menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            <IconMenu2 size={20} />
+          </button>
+          {menuOpen && <MenuPopover onClose={() => setMenuOpen(false)} />}
+        </span>
         <span className="hd-name">{notebook}</span>
         <span className="hd-sub">notebook</span>
         <span style={{ flex: 1 }} />
@@ -94,7 +111,11 @@ export const AppHeader: React.FC = () => {
 
   return (
     <header className="app-header is-phone">
-      {header.back ? (
+      {header.close ? (
+        <button type="button" className="hd-icon hd-close" aria-label="Close menu" onClick={() => header.close?.()}>
+          <IconX size={20} />
+        </button>
+      ) : header.back ? (
         <button type="button" className="hd-back" onClick={header.back.onClick} aria-label={`Back to ${header.back.label}`}>
           <IconChevronLeft size={"1em"} /> <span className="hd-back-label">{header.back.label}</span>
         </button>
@@ -105,6 +126,10 @@ export const AppHeader: React.FC = () => {
       )}
       {header.layout === 'note' ? (
         <span className="hd-title" />
+      ) : header.layout === 'menu' ? (
+        <div className="hd-title">
+          <div className="hd-main">{header.title}</div>
+        </div>
       ) : (
         <div className="hd-title">
           {!compact && <div className="hd-kicker">{header.kicker ?? 'NOTEBOOK'}</div>}

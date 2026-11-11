@@ -10,8 +10,10 @@ export type HeaderState = {
   menu?: ItemMenuEntry[];
   action?: { icon: ReactNode; ariaLabel: string; onClick: () => void } | null;
   /** Note screen (notes-phone.html 2): back label only, no title; "Done" replaces the `...` menu while typing. */
-  layout?: 'note';
+  layout?: 'note' | 'menu';
   done?: (() => void) | null;
+  /** Menu page (menu-login.html 1): an "×" replaces the hamburger / back button. */
+  close?: (() => void) | null;
 };
 
 let state: HeaderState = {};
@@ -35,7 +37,7 @@ export const useHeaderState = (): HeaderState =>
 export const useHeader = (next: HeaderState, enabled = true) => {
   const ref = useRef(next);
   ref.current = next;
-  const key = JSON.stringify([next.kicker, next.title, next.back?.label, next.menu?.map((m) => m.label), next.action?.ariaLabel, next.layout, !!next.done]);
+  const key = JSON.stringify([next.kicker, next.title, next.back?.label, next.menu?.map((m) => m.label), next.action?.ariaLabel, next.layout, !!next.done, !!next.close]);
   useEffect(() => {
     if (!enabled) return undefined;
     // Handlers go through the ref so they never act on stale props.
@@ -48,6 +50,7 @@ export const useHeader = (next: HeaderState, enabled = true) => {
       action: n.action ? { ...n.action, onClick: () => ref.current.action?.onClick() } : null,
       layout: n.layout,
       done: n.done ? () => ref.current.done?.() : null,
+      close: n.close ? () => ref.current.close?.() : null,
     };
     setHeader(mine);
     // Only clear the header if it is still ours: a page that unmounts must not wipe the header of the page in front.

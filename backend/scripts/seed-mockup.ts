@@ -58,7 +58,8 @@ const main = async () => {
   await mongoose.connection.collection('notes-v2').deleteMany({ userId });
 
   // ---- notebooks
-  for (const nb of ['Henry', 'Koorvi', 'Rapitag']) add({ id: nb, parentId: '', type: 'FOLDER', name: nb });
+  // menu-login.html lists Henry, Rapitag, Koorvi (and Site Track) for the notes account.
+  for (const nb of NOTES ? ['Henry', 'Rapitag', 'Koorvi', 'Site Track'] : ['Henry', 'Koorvi', 'Rapitag']) add({ id: nb, parentId: '', type: 'FOLDER', name: nb });
   if (NOTES) {
     // notes-phone.html 1: "Life so far" with 3 notes changed today 14:30, yesterday and on 5 Nov.
     const lsf = 'Henry::FOLDER::Life-so-far';

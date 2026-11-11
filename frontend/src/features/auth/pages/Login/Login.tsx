@@ -1,33 +1,37 @@
 import React, { useState } from 'react';
+import { IconNotes } from '@tabler/icons-react';
+import { useDispatch } from 'react-redux';
 import { loginRequest, createAccount } from '../../../../shared/utils/Helpers/requests';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '../../../../core/store';
 import { setAuthToken } from '../../store/personSlice';
-import { toastNotifications } from '../../../../shared/utils/toast';
+import './login.css';
+
+/**
+ * Login and sign up (docs/mockups/menu-login.html 2 and 4): app icon, "Notes", labelled 40 px fields, a full-width
+ * button and the error under the fields. Phone: centred on the page; desktop: a 360 px card centred on the page.
+ */
+const field = (form: HTMLFormElement, name: string) => ((form.elements.namedItem(name) as HTMLInputElement | null)?.value ?? '').trim();
 
 const Login: React.FC = () => {
   const dispatch = useDispatch();
-  const theme = useSelector((state: RootState) => state.theme.themeLower);
   const [signUp, setSignUp] = useState(false);
-  const themeBack = `${theme}-back`;
-  const themeHover = `${theme}-hover`;
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   const saveLogin = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget;
-    const password = (form.password as HTMLInputElement).value.trim();
-    const email = (form.email as HTMLInputElement).value.trim();
-
-    const user = { email, password };
-    loginRequest(user, (res) => {
-      if (res?.id) {
-        dispatch(setAuthToken(res.id));
-        window.location.href = '/notes/main';
-      } else if (res?.user?.id) {
-        dispatch(setAuthToken(res?.user?.id));
+    const password = field(form, 'password');
+    const email = field(form, 'email');
+    setBusy(true);
+    setError(null);
+    loginRequest({ email, password }, (res) => {
+      setBusy(false);
+      const id = res?.id ?? res?.user?.id;
+      if (id) {
+        dispatch(setAuthToken(id));
         window.location.href = '/notes/main';
       } else {
-        toastNotifications.error('Login failed. Please check your credentials.');
+        setError("That email and password don't match.");
       }
     });
   };
@@ -35,93 +39,106 @@ const Login: React.FC = () => {
   const createAccountHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget;
-    const password = (form.password as HTMLInputElement).value.trim();
-    const password2 = (form.password2 as HTMLInputElement).value.trim();
-
+    const password = field(form, 'password');
+    const password2 = field(form, 'password2');
     if (password !== password2) {
-      toastNotifications.error("Passwords don't match");
+      setError("Passwords don't match.");
       return;
     }
-
-    const firstName = (form.firstName as HTMLInputElement).value.trim();
-    const lastName = (form.lastName as HTMLInputElement).value.trim();
-    const email = (form.email as HTMLInputElement).value.trim();
-
     const user = {
-      email,
-      firstName,
-      lastName,
+      email: field(form, 'email'),
+      firstName: field(form, 'firstName'),
+      lastName: field(form, 'lastName'),
       password,
       tempPass: [''],
       permId: '',
     };
+    setBusy(true);
+    setError(null);
     createAccount(user, (res) => {
-      if (res.id) {
+      setBusy(false);
+      if (res?.id) {
         dispatch(setAuthToken(res.id));
         window.location.reload();
+      } else {
+        setError(res?.error || res?.message || 'Could not create the account.');
       }
     });
   };
 
+  const switchMode = () => {
+    setSignUp((v) => !v);
+    setError(null);
+  };
+
   return (
-    <div>
-      {signUp ? (
-        <div>
-          <form onSubmit={createAccountHandler}>
-            <br />
-            <input className={themeBack} name="firstName" type="text" placeholder="First Name" required />
-            <br />
-            <input className={themeBack} name="lastName" type="text" placeholder="Last Name" required />
-            <br />
-            <input className={themeBack} name="email" type="email" placeholder="Email" required />
-            <br />
-            <input className={themeBack} name="password" type="password" placeholder="Password" required />
-            <br />
-            <input className={themeBack} name="password2" type="password" placeholder="Password" required />
-            <br />
-            <button className={`${themeBack} ${themeHover}`} type="submit">
-              Submit
+    <div className="login-page">
+      <div className="login-card">
+        <div className="login-brand">
+          <div className="login-icon">
+            <IconNotes size={28} />
+          </div>
+          <div className="login-title">Notes</div>
+          <div className="login-sub">{signUp ? 'Create your account' : 'Log in to your notebooks'}</div>
+        </div>
+        {signUp ? (
+          <form onSubmit={createAccountHandler} noValidate={false}>
+            <label className="login-fld">
+              First name
+              <input className="login-in" name="firstName" type="text" required autoComplete="given-name" />
+            </label>
+            <label className="login-fld">
+              Last name
+              <input className="login-in" name="lastName" type="text" required autoComplete="family-name" />
+            </label>
+            <label className="login-fld">
+              Email
+              <input className="login-in" name="email" type="email" required autoComplete="username" />
+            </label>
+            <label className="login-fld">
+              Password
+              <input className="login-in" name="password" type="password" required autoComplete="new-password" />
+            </label>
+            <label className="login-fld">
+              Repeat password
+              <input className="login-in" name="password2" type="password" required autoComplete="new-password" />
+            </label>
+            {error && (
+              <div className="login-err" role="alert">
+                {error}
+              </div>
+            )}
+            <button className="login-pri" type="submit" disabled={busy}>
+              Create account
             </button>
           </form>
-          <br />
-          <button className={`${themeBack} ${themeHover}`} onClick={() => setSignUp(false)}>
-            {' '}
-            Login{' '}
-          </button>
-        </div>
-      ) : (
-        <div>
+        ) : (
           <form onSubmit={saveLogin}>
-            <br />
-            <input
-              className={themeBack}
-              name="email"
-              type="email"
-              placeholder="Email"
-              required
-              autoComplete="username"
-            />
-            <br />
-            <input
-              className={themeBack}
-              name="password"
-              type="password"
-              placeholder="Password"
-              required
-              autoComplete="current-password"
-            />
-            <br />
-            <button className={`${themeBack} ${themeHover}`} type="submit">
-              Submit
+            <label className="login-fld">
+              Email
+              <input className="login-in" name="email" type="email" required autoComplete="username" />
+            </label>
+            <label className="login-fld">
+              Password
+              <input className="login-in" name="password" type="password" required autoComplete="current-password" />
+            </label>
+            {error && (
+              <div className="login-err" role="alert">
+                {error}
+              </div>
+            )}
+            <button className="login-pri" type="submit" disabled={busy}>
+              Log in
             </button>
           </form>
-          <br />
-          <button className={`${themeBack} ${themeHover}`} onClick={() => setSignUp(true)}>
-            {' '}
-            Sign Up{' '}
+        )}
+        <div className="login-alt">
+          {signUp ? 'Have an account? ' : 'No account? '}
+          <button className="login-lk" type="button" onClick={switchMode}>
+            {signUp ? 'Log in' : 'Create one'}
           </button>
         </div>
-      )}
+      </div>
     </div>
   );
 };
