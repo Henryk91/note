@@ -15,7 +15,7 @@ import { SummaryScreen, summaryCopyText } from './SummaryScreen';
 import { TallyView } from './TallyView';
 import { DesktopDayBar, DesktopEntryBar, DesktopLogHeader, DesktopLogTable, PICK_LOG_DAY_EVENT, setSelectedLogDay } from './DesktopLog';
 import { useDismiss } from '../edit/useDismiss';
-import { isFrontPage, useHeader } from '../../../shared/header/headerStore';
+import { isFrontPage, useFrontIndex, useHeader } from '../../../shared/header/headerStore';
 import { useBreakpoint } from '../layout/useBreakpoint';
 import { ItemMenuEntry } from '../edit/ItemMenu';
 import {
@@ -80,6 +80,7 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
   const openSummary = () => history.push(`${location.pathname}?view=summary`);
   const closeSummary = () => history.replace(location.pathname);
   const pagesState = useSelector((st: RootState) => st.person.pages);
+  const front = useFrontIndex(pagesState.length);
   const byIdState = useSelector((st: RootState) => st.person.byId);
   const mutations = useLogMutations(logId);
   const pendingIds = usePendingEntries();
@@ -519,7 +520,7 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
           back: { label: (isTally ? grandName : parentName) || 'Back', onClick: () => window.dispatchEvent(new Event('page-back')) },
           menu: logMenu,
         },
-    phone && isFrontPage(pagesState, logId),
+    phone && isFrontPage(pagesState, logId, front),
   );
 
   const isToday = day === todayKey;

@@ -18,7 +18,7 @@ import { LogScreen } from '../../log/LogScreen';
 import { isLogId } from '../../log/useLogData';
 import { MoveToSheet } from '../../layout/MoveToSheet';
 import { PinnedCards } from '../../layout/PinnedCards';
-import { useHeader } from '../../../../shared/header/headerStore';
+import { useFrontIndex, useHeader } from '../../../../shared/header/headerStore';
 import { useNoteOperations } from '../../hooks/useNoteOperations';
 import { NoteScreen, phoneNoteTarget } from '../../editor/NoteScreen';
 import { askText } from '../../../../shared/components/dialog/AppDialog';
@@ -33,6 +33,8 @@ type NoteDetailProps = {
 const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
   const { showAddItem, editName, pages, byId, showTag } = useSelector((state: RootState) => state.person);
   const isLastPage = index === pages.length - 1;
+  // Owns the header while it is in front, including while the stack slides back to it.
+  const isHeaderPage = index === useFrontIndex(pages.length);
 
   // Resolve person
   const pageLink = pages[index];
@@ -117,7 +119,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
       back: index > 0 ? { label: parentName || 'Back', onClick: () => window.dispatchEvent(new Event('page-back')) } : null,
       menu: headerMenu,
     },
-    isLastPage && !isLog && !noteTarget,
+    isHeaderPage && !isLog && !noteTarget,
   );
 
   // A log is not a list of items: it gets its own screen (quick entry box, day navigation, timeline).

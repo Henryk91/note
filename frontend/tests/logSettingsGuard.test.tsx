@@ -1,5 +1,5 @@
 import { act, renderHook } from '@testing-library/react';
-import { isFrontPage, setHeader, useHeader, useHeaderState } from '../src/shared/header/headerStore';
+import { frontIndex, isFrontPage, setBackTarget, setHeader, useFrontIndex, useHeader, useHeaderState } from '../src/shared/header/headerStore';
 import { mergeSettings } from '../src/features/notes/log/useLogData';
 
 // ui-review N1: Break P5's stored `settings.mode` changed from "tally" to "time-tracker" without anyone picking it.
@@ -51,6 +51,36 @@ describe('log settings: a log mode only changes when the user picks one for that
     const old = renderHook(() => useHeader({ title: 'Break P5' }, true));
     renderHook(() => useHeader({ title: 'Log' }, true));
     old.unmount();
+    expect(state.result.current.title).toBe('Log');
+  });
+});
+
+describe('phone stack: the header follows the page being slid back to', () => {
+  test('frontIndex is the back target while sliding back, else the last page', () => {
+    expect(frontIndex(3, null)).toBe(2);
+    expect(frontIndex(3, 1)).toBe(1);
+    expect(frontIndex(3, 0)).toBe(0);
+    // A target that is not behind the last page (slide forward, or a stale target after a push) is ignored.
+    expect(frontIndex(3, 2)).toBe(2);
+    expect(frontIndex(2, 5)).toBe(1);
+    expect(isFrontPage([{ params: { id: 'A' } }, { params: { id: 'B' } }], 'A', frontIndex(2, 0))).toBe(true);
+  });
+
+  test('the page slid back to takes the header as soon as the slide starts, before the stack is trimmed', () => {
+    setHeader({});
+    setBackTarget(null);
+    const state = renderHook(() => useHeaderState());
+    const page = (index: number, title: string) =>
+      renderHook(() => {
+        const front = useFrontIndex(2);
+        useHeader({ title }, index === front);
+      });
+    page(0, 'Archive');
+    page(1, 'Log');
+    expect(state.result.current.title).toBe('Log');
+    act(() => setBackTarget(0));
+    expect(state.result.current.title).toBe('Archive');
+    act(() => setBackTarget(null));
     expect(state.result.current.title).toBe('Log');
   });
 });

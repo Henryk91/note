@@ -65,5 +65,36 @@ export const useHeader = (next: HeaderState, enabled = true) => {
  * Pages further back stay mounted in the carousel; if they could re-register (e.g. when their data arrives), the header's
  * `...` menu would act on a page that is not on screen (ui-review N1: a log's mode was changed from another log's screen).
  */
-export const isFrontPage = (pages: { params: { id: string } }[], id: string): boolean =>
-  pages.length > 0 && pages[pages.length - 1]?.params.id === id;
+export const isFrontPage = (pages: { params: { id: string } }[], id: string, front = pages.length - 1): boolean =>
+  pages.length > 0 && pages[front]?.params.id === id;
+
+/*
+ * Going back in the phone stack: the stack is only trimmed once the slide has finished moving, but the header must
+ * follow the page the stack is moving to as soon as the slide starts (otherwise the old title stays up for the whole
+ * transition). `backTarget` is the page index being slid back to, or null when no back move is under way.
+ */
+let backTarget: number | null = null;
+const backListeners = new Set<() => void>();
+
+export const setBackTarget = (index: number | null) => {
+  if (backTarget === index) return;
+  backTarget = index;
+  backListeners.forEach((l) => l());
+};
+
+/** Index of the page that owns the header: the page being slid back to, else the last page of the stack. */
+export const frontIndex = (pagesLength: number, target: number | null = backTarget): number =>
+  target !== null && target >= 0 && target < pagesLength - 1 ? target : pagesLength - 1;
+
+const subscribeBack = (l: () => void) => {
+  backListeners.add(l);
+  return () => {
+    backListeners.delete(l);
+  };
+};
+
+export const useFrontIndex = (pagesLength: number): number =>
+  frontIndex(
+    pagesLength,
+    useSyncExternalStore(subscribeBack, () => backTarget),
+  );

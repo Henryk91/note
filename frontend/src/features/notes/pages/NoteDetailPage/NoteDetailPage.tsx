@@ -13,6 +13,7 @@ import { DesktopLayout } from '../../layout/DesktopLayout';
 import { useFolderUrlSync } from '../../hooks/useFolderUrlSync';
 import { isLogId } from '../../log/useLogData';
 import NoteDetail from '../../components/NoteDetail/NoteDetail';
+import { setBackTarget } from '../../../../shared/header/headerStore';
 
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Swiper as SwiperType } from 'swiper';
@@ -62,6 +63,7 @@ const NoteDetailPage: React.FC = () => {
 
   // When pages change (new page added), slide to the last one
   useEffect(() => {
+    setBackTarget(null);
     if (swiperInstance && pages.length > 0) {
       swiperInstance.slideTo(pages.length - 1);
     }
@@ -117,6 +119,8 @@ const NoteDetailPage: React.FC = () => {
             spaceBetween={0}
             slidesPerView={1}
             onSwiper={(swiper) => setSwiperInstance(swiper)}
+            // The header follows the page being slid back to straight away, not when the slide has landed.
+            onSlideChange={(swiper) => setBackTarget(swiper.activeIndex < pages.length - 1 ? swiper.activeIndex : null)}
             onSlideChangeTransitionEnd={(swiper) => {
               if (swiper.activeIndex < pages.length - 1) {
                 dispatch(setShowTag(null));
