@@ -42,6 +42,9 @@ import { chipLabel, defaultTsForDay, PanelValue, panelFromTs, parsePanel, stepTs
 import { askConfirm, askText } from '../../../shared/components/dialog/AppDialog';
 import { ScrollJump } from '../../../shared/components/ScrollJump';
 import { suggestEntries } from './suggest';
+import { useItemMutations } from '../edit/itemMutations';
+import { useDeleteWithUndo } from '../edit/useDeleteWithUndo';
+import { pathForFolder } from '../hooks/useFolderUrlSync';
 
 const MODE_LABELS: Record<LogMode, string> = {
   'time-tracker': 'Time tracker',
@@ -72,7 +75,9 @@ const writeDraft = (logId: string, draft: StoredDraft | null) => {
 };
 
 export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
-  const { entries, grouped, settings, mode, label, notebook, parentName, loaded, saveSettings, refetch } = useLogData(logId);
+  const { entries, grouped, settings, mode, label, notebook, parentName, parentId, loaded, saveSettings, refetch, logItem } = useLogData(logId);
+  const parentMutations = useItemMutations(parentId);
+  const deleteWithUndo = useDeleteWithUndo(parentMutations);
   const bp = useBreakpoint();
   const phone = bp === 'mobile';
   const history = useHistory();
@@ -473,6 +478,22 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
     void saveSettings({ mode: next });
     setMenuOpen(false);
   };
+  // Delete this whole log, after asking (soft delete with Undo; also in Recently Deleted), then back to its folder.
+  const deleteLog = async () => {
+    setMenuOpen(false);
+    if (!logItem) return;
+    const ok = await askConfirm({
+      title: 'Delete this log?',
+      message: `${entries.length === 1 ? 'Its 1 entry is' : `All ${entries.length} entries in it are`} deleted with it. You can undo this or restore it from Recently Deleted.`,
+      confirmLabel: 'Delete log',
+      danger: true,
+    });
+    if (!ok) return;
+    deleteWithUndo(logItem, 'Log deleted');
+    if (phone) window.dispatchEvent(new Event('page-back'));
+    else history.push(pathForFolder(parentId));
+  };
+
   const togglePinned = () => {
     void saveSettings({ pinned: !settings.pinned });
     setMenuOpen(false);
@@ -504,6 +525,7 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
     { label: 'Automatic mode', onSelect: () => changeMode(undefined) },
     { label: settings.pinned ? 'Unpin from quick log' : 'Pin to quick log', onSelect: togglePinned },
     { label: 'Break words...', onSelect: editBreakWords },
+    ...(logItem ? [{ label: 'Delete log...', onSelect: () => void deleteLog(), danger: true }] : []),
   ];
   const isTally = mode === 'tally';
   useHeader(
@@ -563,6 +585,11 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
             <button type="button" role="menuitem" onClick={editBreakWords}>
               Break words...
             </button>
+            {logItem && (
+              <button type="button" role="menuitem" className="danger" onClick={() => void deleteLog()}>
+                Delete log...
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -722,6 +749,11 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
               <button type="button" role="menuitem" onClick={editBreakWords}>
                 Break words...
               </button>
+              {logItem && (
+                <button type="button" role="menuitem" className="danger" onClick={() => void deleteLog()}>
+                  Delete log...
+                </button>
+              )}
             </div>
           )}
         </div>

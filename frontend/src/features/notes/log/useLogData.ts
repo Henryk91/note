@@ -83,5 +83,5 @@ export const useLogData = (logId: string) => {
     [qc, parentId, logId],
   );
 
-  return { entries, grouped, settings, mode, label, parentId, notebook, parentName, isLoading, saveSettings, loaded: !!items, refetch };
+  return { entries, grouped, settings, mode, label, parentId, notebook, parentName, isLoading, saveSettings, loaded: !!items, refetch, logItem: folderDoc };
 };
