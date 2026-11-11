@@ -1,0 +1,252 @@
+/*
+ * The note document (docs/mockups/notes-phone.html `.doc`, desktop.html editor). Reading and editing use the same DOM
+ * and the same styles: focusing the editor changes nothing but the caret.
+ */
+.note-doc {
+  color: var(--text);
+  caret-color: var(--accent-text);
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+.note-doc .ProseMirror {
+  outline: none;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+.note-doc .ProseMirror:focus,
+.note-doc .ProseMirror:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.note-doc .ProseMirror * {
+  font-family: inherit;
+}
+
+/* ---- phone ---- */
+.note-doc.is-phone {
+  flex: 1;
+  overflow: auto;
+  box-sizing: border-box;
+  padding: 6px 16px 16px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.note-doc .note-when {
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+  padding: 8px 0 4px;
+  line-height: 1.5;
+}
+.note-doc.is-phone h1.note-title {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 4px 0 10px;
+  color: var(--text);
+  text-align: left;
+}
+.note-doc.is-phone p {
+  margin: 0 0 10px;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  text-align: left;
+}
+.note-doc.is-phone ol,
+.note-doc.is-phone ul {
+  margin: 0 0 10px;
+  padding-left: 22px;
+}
+.note-doc.is-phone li {
+  margin: 2px 0;
+}
+.note-doc li > p {
+  margin: 0 !important;
+}
+
+/* ---- desktop (desktop.html: 14px / 1.45, title 22px / 600, numbered lines flush left) ---- */
+.note-doc.is-desktop {
+  font-size: 14px;
+  line-height: 1.45;
+}
+.note-doc.is-desktop h1.note-title {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.45;
+  margin: 0 0 10px;
+  color: var(--text);
+  text-align: left;
+}
+.note-doc.is-desktop p {
+  margin: 0 0 10px;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  text-align: left;
+}
+.note-doc.is-desktop ol,
+.note-doc.is-desktop ul {
+  margin: 0 0 10px;
+  padding-left: 0;
+  list-style-position: inside;
+}
+.note-doc.is-desktop li {
+  margin: 0;
+}
+.note-doc.is-desktop li > p {
+  display: inline;
+}
+
+/* ---- shared content ---- */
+.note-doc h2,
+.note-doc h3,
+.note-doc h4,
+.note-doc h5,
+.note-doc h6 {
+  margin: 0 0 10px;
+  line-height: 1.3;
+  font-weight: 600;
+  color: var(--text);
+  text-align: left;
+}
+.note-doc h2 {
+  font-size: 1.25em;
+}
+.note-doc h3 {
+  font-size: 1.12em;
+}
+.note-doc h4,
+.note-doc h5,
+.note-doc h6 {
+  font-size: 1em;
+}
+.note-doc a {
+  color: var(--accent-text);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.note-doc strong {
+  font-weight: 600;
+}
+.note-doc code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
+  background: var(--surface);
+  border-radius: 4px;
+  padding: 0 3px;
+}
+.note-doc pre {
+  margin: 0 0 10px;
+  padding: 8px 10px;
+  background: var(--surface);
+  border-radius: 8px;
+  overflow-x: auto;
+}
+.note-doc pre code {
+  background: none;
+  padding: 0;
+}
+.note-doc blockquote {
+  margin: 0 0 10px;
+  padding-left: 10px;
+  border-left: 3px solid var(--line);
+  color: var(--muted);
+}
+.note-doc hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 10px 0;
+}
+.note-doc .note-raw {
+  margin: 0 0 10px;
+  white-space: pre-wrap;
+}
+
+/* Placeholders: "Title" and "Start writing" in the muted colour (empty nodes only). */
+.note-doc .is-empty[data-placeholder]::before {
+  content: attr(data-placeholder);
+  color: var(--muted);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* ---- phone folder: list of notes (notes-phone.html 1) ---- */
+.note-list .note-row {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left !important;
+  padding: 9px 12px !important;
+  margin: 0 !important;
+  border: 0;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--text) !important;
+  font: inherit;
+  font-size: 14px !important;
+  line-height: 1.4;
+  cursor: pointer;
+}
+/* The rows' dividers come from the card's swipe rows (1 px, none under the last). */
+.phone-body > .cap:first-child {
+  margin-top: 0;
+}
+/* Folder pages: the compose button is a 44 x 44 target (notes-phone.html `.cmp`); the home keeps the bare icon. */
+.bottom-toolbar.is-folder .bt-edit {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 !important;
+}
+.note-row-title {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.note-row-meta {
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.note-row-meta b {
+  font-weight: 400;
+  color: var(--text);
+  margin-right: 6px;
+}
+
+/* ---- phone note screen (notes-phone.html 2 / 3) ---- */
+.note-screen {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - var(--header-h, 55px));
+  background: var(--bg);
+}
+.note-missing {
+  padding: 24px 16px;
+  color: var(--muted);
+}
+header.app-header .hd-done {
+  font: inherit;
+  font-size: 14px !important;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #fff !important;
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0;
+}
+
+/* desktop.html draws numbered lines as plain text ("1. Grip..."): the number is inline text, not a marker box. */
+.note-doc.is-desktop ol {
+  list-style: none;
+}
+.note-doc.is-desktop ol > li::before {
+  content: counter(list-item) '. ';
+}

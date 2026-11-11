@@ -1498,7 +1498,14 @@ header.app-header.is-phone .hd-title {
 }
 
 .desk .list-new {
-  margin: -3px 0 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  color: #fff !important;
+}
+.desk .list-new svg {
+  display: block;
 }
 
 /* Desktop header: 13 px, search box 240 + 2 x 10 px padding, 5 px vertical padding (desktop.html). */
@@ -1607,4 +1614,10 @@ header.app-header .hd-search.is-open button {
 .item-menu-list.is-up {
   top: auto;
   bottom: 100%;
+}
+
+/* desktop.html: the header is 48.8 px (10 px padding around the 26.85 px Log pill + line). */
+header.app-header.is-wide {
+  height: 48.8px;
+  box-sizing: border-box;
 }

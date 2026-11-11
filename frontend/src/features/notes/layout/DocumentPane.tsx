@@ -1,26 +1,37 @@
 import { IconCheck } from '@tabler/icons-react';
-import React, { useState } from 'react';
-import { NoteBlock } from '../edit/NoteBlock';
-import { ItemMenu } from '../edit/ItemMenu';
+import React, { useEffect, useRef } from 'react';
+import { NoteEditor, NoteEditorHandle } from '../editor/NoteEditor';
 import { ItemMutations, useSaveStatus } from '../edit/itemMutations';
 import { NoteItemType } from '../../../shared/utils/Helpers/types';
 
 type DocumentPaneProps = {
   note?: NoteItemType;
+  /** A new note that is not created yet (created on its first keystroke). */
+  draft?: boolean;
+  /** Stable editor identity: a draft keeps its editor (and caret) when it gets its id. */
+  editorKey?: string;
+  folderId: string;
+  onCreated?: (id: string) => void;
   path: string;
   mutations: ItemMutations;
   editToken: number;
-  onDelete: (item: NoteItemType, label?: string) => void;
-  onMove: (item: NoteItemType) => void;
+  onDelete?: (item: NoteItemType, label?: string) => void;
+  onMove?: (item: NoteItemType) => void;
 };
 
 const STATUS = { idle: 'Saved', saving: 'Saving...', saved: 'Saved', offline: 'Offline, will sync' } as const;
 
-/** The editor (docs/mockups/desktop.html): path and "Saved" on top, the note with its title, always editable. */
-export const DocumentPane: React.FC<DocumentPaneProps> = ({ note, path, mutations, editToken, onDelete, onMove }) => {
+/**
+ * The editor (docs/mockups/desktop.html): path and "Saved" on top, the note with its title, always editable.
+ * Copy / Move / Delete live in the list card's `...` menu, as in the mockup.
+ */
+export const DocumentPane: React.FC<DocumentPaneProps> = ({ note, draft, editorKey, folderId, onCreated, path, mutations, editToken }) => {
   const status = useSaveStatus();
-  const [localToken, setLocalToken] = useState(0);
-  if (!note) {
+  const editor = useRef<NoteEditorHandle>(null);
+  useEffect(() => {
+    if (editToken) editor.current?.focusTitle();
+  }, [editToken]);
+  if (!note && !draft) {
     return (
       <div className="doc-pane">
         <div className="doc-pane-top">
@@ -31,25 +42,23 @@ export const DocumentPane: React.FC<DocumentPaneProps> = ({ note, path, mutation
     );
   }
   return (
-    // "Type anywhere to edit": a click on the empty part of the pane starts editing.
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-    <div className="doc-pane" onClick={(e) => e.target === e.currentTarget && setLocalToken((t) => t + 1)}>
+    <div className="doc-pane">
       <div className="doc-pane-top">
         <span>{path}</span>
         <span className="doc-pane-status" role="status" aria-live="polite">
           <IconCheck size={"1em"} /> {STATUS[status]}
         </span>
-        <ItemMenu
-          label="Note options"
-          items={[
-            { label: 'Copy', onSelect: () => void navigator.clipboard?.writeText(note.content?.data ?? '') },
-            { label: 'Move to...', onSelect: () => onMove(note) },
-            { label: 'Delete', danger: true, onSelect: () => onDelete(note, 'Note deleted') },
-          ]}
-        />
       </div>
-      <NoteBlock key={note.id} item={note} asDocument hideMenu mutations={mutations} onDelete={onDelete} editToken={editToken + localToken} />
-      <div className="doc-pane-hint">Type anywhere to edit. Delete lives in the ... menu.</div>
+      <NoteEditor
+        key={editorKey ?? note?.id ?? 'draft'}
+        ref={editor}
+        item={note}
+        folderId={folderId}
+        mutations={mutations}
+        variant="desktop"
+        autoFocusTitle={!!draft}
+        onCreated={onCreated}
+      />
     </div>
   );
 };

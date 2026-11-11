@@ -135,14 +135,18 @@ export const DesktopLayout: React.FC<{ breakpoint: Exclude<Breakpoint, 'mobile'>
   };
 
   // ---- creating, deleting, moving ---------------------------------------------------------------------
-  const [editToken, setEditToken] = useState(0);
-  const newNote = useCallback(async () => {
+  const [editToken] = useState(0);
+  // "+": a new note at the top of the list, selected, cursor in the title. It is only created on the first keystroke;
+  // leaving it untouched discards it. The editor keeps its identity (`draftKey`) when the note gets its id.
+  const [draft, setDraft] = useState<{ key: string; folderId: string; id: string | null } | null>(null);
+  const newNote = useCallback(() => {
     if (!folderId || isLogId(folderId)) return;
-    const id = `${folderId}::${ItemType.NOTE}::${Date.now()}`;
-    await folderMutations.create(ItemType.NOTE, 'New note', id);
-    history.push(`/n/${encodeURIComponent(id)}`);
-    setTimeout(() => setEditToken((t) => t + 1), 200);
-  }, [folderId, folderMutations, history]);
+    setDraft({ key: `draft-${Date.now()}`, folderId, id: null });
+  }, [folderId]);
+  const draftActive = !!draft && draft.folderId === folderId && (!draft.id || draft.id === rawSelected);
+  useEffect(() => {
+    if (draft && !draftActive) setDraft(null);
+  }, [draft, draftActive]);
 
   const [moving, setMoving] = useState<NoteItemType | null>(null);
   const doMove = (item: NoteItemType, target: string) => {
@@ -239,10 +243,14 @@ export const DesktopLayout: React.FC<{ breakpoint: Exclude<Breakpoint, 'mobile'>
             path={pathText}
             notes={notes}
             selectedId={selectedId}
-            onSelect={select}
+            onSelect={(id) => {
+              setDraft(null);
+              select(id);
+            }}
             onMove={setMoving}
             onDelete={removeNote}
-            onNew={() => void newNote()}
+            onNew={newNote}
+            draft={draftActive && !draft?.id}
             headerExtra={
               !showSidebar ? (
                 <button type="button" className="list-new" aria-label="Show folders" aria-expanded={drawer} onClick={() => setDrawer((v) => !v)}>
@@ -263,7 +271,16 @@ export const DesktopLayout: React.FC<{ breakpoint: Exclude<Breakpoint, 'mobile'>
           <LogScreen logId={folderId} />
         ) : (
           <DocumentPane
-            note={selectedNote}
+            note={draftActive ? (draft?.id ? notes.find((n) => n.id === draft.id) : undefined) : selectedNote}
+            draft={draftActive && !draft?.id}
+            editorKey={draftActive ? draft?.key : selectedNote?.id}
+            folderId={folderId}
+            onCreated={(id) => {
+              setDraft((d) => (d ? { ...d, id } : d));
+              const target = `/n/${encodeURIComponent(id)}`;
+              if (pathname.startsWith('/n/')) history.replace(target);
+              else history.push(target);
+            }}
             path={pathText}
             mutations={folderMutations}
             editToken={editToken}

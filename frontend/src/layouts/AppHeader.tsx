@@ -103,18 +103,26 @@ export const AppHeader: React.FC = () => {
           <IconMenu2 size={20} />
         </Link>
       )}
-      <div className="hd-title">
-        {!compact && <div className="hd-kicker">{header.kicker ?? 'NOTEBOOK'}</div>}
-        <div className="hd-main">{header.title ?? notebook}</div>
-      </div>
+      {header.layout === 'note' ? (
+        <span className="hd-title" />
+      ) : (
+        <div className="hd-title">
+          {!compact && <div className="hd-kicker">{header.kicker ?? 'NOTEBOOK'}</div>}
+          <div className="hd-main">{header.title ?? notebook}</div>
+        </div>
+      )}
       <div className="hd-right">
         {header.action && (
           <button type="button" className="hd-icon" aria-label={header.action.ariaLabel} onClick={header.action.onClick}>
             {header.action.icon}
           </button>
         )}
-        {header.menu && header.menu.length > 0 ? (
-          <ItemMenu label="Page options" items={header.menu} />
+        {header.done ? (
+          <button type="button" className="hd-done" onMouseDown={(e) => e.preventDefault()} onClick={() => header.done?.()}>
+            Done
+          </button>
+        ) : header.menu && header.menu.length > 0 ? (
+          <ItemMenu label={header.layout === 'note' ? 'Note options' : 'Page options'} items={header.menu} />
         ) : (
           <span style={{ width: 20 }} />
         )}

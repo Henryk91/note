@@ -1,5 +1,7 @@
 import React from 'react';
-import { NoteBlock, TrailingBlock } from '../../edit/NoteBlock';
+import { useHistory } from 'react-router-dom';
+import { noteTitle, notePreview } from '../../edit/NoteBlock';
+import { formatListDate, noteTimestamp, sortNotesNewestFirst } from '../../editor/NoteEditor';
 import { SwipeRow } from '../../edit/SwipeRow';
 import { useItemMutations } from '../../edit/itemMutations';
 import { useDeleteWithUndo } from '../../edit/useDeleteWithUndo';
@@ -13,7 +15,7 @@ interface NoteDetailTagsProps {
   isLastPage: boolean;
   /** Wide layouts show folders and logs in the list pane, so the editor only shows the note's own blocks. */
   hideFolders?: boolean;
-  /** The notebook home (first page) has no empty "Add a note" box, like the home mockup. */
+  /** The notebook home (first page). */
   isRoot?: boolean;
   actions: {
     showHideBox: (prop: string) => void;
@@ -24,6 +26,7 @@ interface NoteDetailTagsProps {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const NoteDetailTags: React.FC<NoteDetailTagsProps> = ({ person, isLastPage, hideFolders = false, isRoot = false, actions }) => {
   const byId = useSelector((state: RootState) => state.person.byId);
   const persons = byId;
@@ -35,7 +38,9 @@ const NoteDetailTags: React.FC<NoteDetailTagsProps> = ({ person, isLastPage, hid
 
   const all = person?.dataLable ?? [];
   const folders = hideFolders ? [] : all.filter((i) => i.type === 'FOLDER');
-  const notes = all.filter((i) => i.type === 'NOTE');
+  const notes = sortNotesNewestFirst(all.filter((i) => i.type === 'NOTE'));
+  const history = useHistory();
+  const openNote = (n: NoteItemType) => history.push(`/n/${encodeURIComponent(n.id)}`, { fromList: true });
 
   return (
     <div className="phone-body">
@@ -60,10 +65,25 @@ const NoteDetailTags: React.FC<NoteDetailTagsProps> = ({ person, isLastPage, hid
         </>
       )}
       {notes.length > 0 && <div className="cap">Notes</div>}
-      {notes.map((n) => (
-        <NoteBlock key={n.id} item={n} mutations={mutations} onDelete={deleteWithUndo} />
-      ))}
-      {isLastPage && !isRoot && <TrailingBlock key={person.id} folderId={person.id} mutations={mutations} />}
+      {notes.length > 0 && (
+        <div className="card-list note-list" data-testid="note-list">
+          {notes.map((n) => {
+            const text = n.content?.data ?? '';
+            const when = formatListDate(noteTimestamp(n));
+            return (
+              <SwipeRow key={n.id} onDelete={() => deleteWithUndo(n, 'Note deleted')}>
+                <button type="button" className="note-row" onClick={() => openNote(n)}>
+                  <div className="note-row-title">{noteTitle(text) || 'New note'}</div>
+                  <div className="note-row-meta">
+                    {when && <b>{when}</b>}
+                    {notePreview(text)}
+                  </div>
+                </button>
+              </SwipeRow>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

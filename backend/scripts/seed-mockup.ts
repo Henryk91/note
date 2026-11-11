@@ -13,6 +13,7 @@ const MONGODB_URI = process.env.MONGODB_URI || '';
 const API_URL = (process.env.SEED_API_URL || 'http://localhost:8080').replace(/\/$/, '');
 const EMAIL = process.env.MOCK_EMAIL || 'mock@example.test';
 const DESKTOP = EMAIL === 'mockdesk@example.test'; // the desktop mockup shows a smaller Henry notebook
+const NOTES = EMAIL === 'mocknotes@example.test'; // notes-phone.html: a folder of 3 notes and the open "Welcome note"
 const PASSWORD = 'MockPassword123!';
 const host = (MONGODB_URI.match(/^mongodb:\/\/(?:[^@/]*@)?([^/?:,]+)/i) || [])[1]?.toLowerCase();
 if (!MONGODB_URI || (host !== 'localhost' && host !== '127.0.0.1')) {
@@ -58,6 +59,31 @@ const main = async () => {
 
   // ---- notebooks
   for (const nb of ['Henry', 'Koorvi', 'Rapitag']) add({ id: nb, parentId: '', type: 'FOLDER', name: nb });
+  if (NOTES) {
+    // notes-phone.html 1: "Life so far" with 3 notes changed today 14:30, yesterday and on 5 Nov.
+    const lsf = 'Henry::FOLDER::Life-so-far';
+    folder(lsf, 'Henry', 'Life so far');
+    const at = (d: Date) => ({ createdAt: d, updatedAt: d });
+    const dated = (parentId: string, data: string, d: Date) => {
+      note(parentId, data);
+      Object.assign(docs[docs.length - 1], at(d));
+    };
+    dated(lsf, 'Life so far note 1\n\nSome text for life so far number 1.', new Date(2026, 10, 5, 9, 12));
+    dated(lsf, 'Life so far note 2\n\nSome text for life so far number 2.', new Date(2026, 10, 9, 18, 3));
+    dated(lsf, 'Life so far note 3\n\nSome text for life so far number 3.', new Date(2026, 10, 10, 14, 30));
+    // notes-phone.html 2: the open "Welcome note" (its own folder, also called "Life so far").
+    const lsf2 = 'Henry::FOLDER::Life-so-far-2';
+    folder(lsf2, 'Henry', 'Life so far');
+    dated(
+      lsf2,
+      'Welcome note\n\nWelcome note with **bold** and a list:\n\n1. one\n2. two\n\nLinks stay clickable: [youtube.com/watch?v=bG0h7bSfxQI](https://www.youtube.com/watch?v=bG0h7bSfxQI)',
+      new Date(2026, 10, 10, 14, 30),
+    );
+    await mongoose.connection.collection('notes-v2').insertMany(docs);
+    console.log(`Mockup seed done: ${docs.length} documents for ${EMAIL}.`);
+    await mongoose.disconnect();
+    return;
+  }
   // Henry: folder counts of the home mockup (children per folder)
   const counts: Record<string, number> = { Bookmarks: 18, Climbing: 3, 'Dev Code': 22, 'Life so far': 28 };
   for (const [name, c] of Object.entries(DESKTOP ? { Bookmarks: 2 } : counts)) {

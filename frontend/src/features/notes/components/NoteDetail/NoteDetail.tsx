@@ -21,6 +21,8 @@ import { PinnedCards } from '../../layout/PinnedCards';
 import { FOCUS_SEARCH_EVENT } from '../../layout/events';
 import { useHeader } from '../../../../shared/header/headerStore';
 import { useNoteOperations } from '../../hooks/useNoteOperations';
+import { NoteScreen, phoneNoteTarget } from '../../editor/NoteScreen';
+import { ItemType } from '../../../../shared/utils/Helpers/types';
 
 type NoteDetailProps = {
   index?: number;
@@ -55,12 +57,15 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
         ({ id: person.id, parentId, type: 'FOLDER', name: person.heading, heading: person.heading } as any)
       : undefined;
   const parentMutations = useItemMutations(parentId || pageLink?.params.id || '');
+  const folderMutations = useItemMutations(pageLink?.params.id || '');
   const deleteWithUndo = useDeleteWithUndo(parentMutations);
 
   const [moving, setMoving] = useState(false);
 
   // The header shows the back label, the two-line title and this page's `...` menu (docs/mockups/phone-screens.html).
   const isLog = isLogId(pageLink?.params.id);
+  // Phone: `/n/<note>` shows that note full screen on top of its folder page (notes-phone.html 2 / 3).
+  const noteTarget = isLastPage && !isLog ? phoneNoteTarget(location.pathname, location.search, pageLink?.params.id ?? '') : null;
   const notebookName = useSelector((state: RootState) => state.person.selectedNoteName) ?? '';
   const parentName =
     index > 1
@@ -89,6 +94,14 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
       },
     });
   }
+  headerMenu.push({
+    label: 'New folder',
+    onSelect: () => {
+      // eslint-disable-next-line no-alert
+      const name = window.prompt('Folder name');
+      if (name && name.trim()) void folderMutations.create(ItemType.FOLDER, '', undefined, { name: name.trim(), heading: name.trim() } as any);
+    },
+  });
   headerMenu.push({ label: 'Recently deleted', onSelect: () => history.push('/recently-deleted') });
   useHeader(
     {
@@ -97,11 +110,22 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
       back: index > 0 ? { label: parentName || 'Back', onClick: () => window.dispatchEvent(new Event('page-back')) } : null,
       menu: headerMenu,
     },
-    isLastPage && !isLog,
+    isLastPage && !isLog && !noteTarget,
   );
 
   // A log is not a list of items: it gets its own screen (quick entry box, day navigation, timeline).
   if (isLog) return <LogScreen logId={pageLink.params.id} />;
+  if (noteTarget) {
+    return (
+      <NoteScreen
+        key={pageLink.params.id}
+        folderId={pageLink.params.id}
+        noteId={noteTarget}
+        folderName={index === 0 ? notebookName : person?.heading || ''}
+        enabled
+      />
+    );
+  }
 
   const isNoteNames = location.pathname === '/notes/note-names';
   const personToRender = isNoteNames ? null : ({ ...person } as Note);
