@@ -4,6 +4,7 @@ import { RootState } from './core/store';
 import { useOfflineSync } from './shared/hooks/useOfflineSync';
 import { useNotesLogic } from './features/notes/hooks/useNotesLogic';
 import { AppRoutes } from './core/routes/AppRoutes';
+import { THEME_BARS } from './shared/utils/Helpers/storage';
 
 /**
  * AppContent - Inner component that uses hooks requiring QueryClient
@@ -30,8 +31,7 @@ const AppContent: React.FC = () => {
     }
 
     // Page colours come from the theme variables (shared/styles/themes.css); only the browser chrome colour is set here.
-    const bars: Record<string, string> = { Dark: '#0079ae', Ocean: '#35373d', Green: '#103762', Night: '#27343b', Red: '#bb3b00', Monokai: '#1e1f1c' };
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', bars[theme] ?? '#0079ae');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_BARS[theme] ?? THEME_BARS.Dark);
   }, [loadingData, theme]);
 
   return <AppRoutes setFilterNote={setFilterNote} />;

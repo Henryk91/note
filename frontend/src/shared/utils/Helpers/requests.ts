@@ -1,3 +1,4 @@
+import { clearStorageKeepTheme } from './storage';
 import { sendOrQueueJSON } from '../../../offlineQueue/queue';
 
 type Callback<T = any> = (data: T) => void;
@@ -12,7 +13,7 @@ export function logoutUser(next: Callback) {
   })
     .then((res) => res?.json())
     .then((data) => {
-      localStorage.clear();
+      clearStorageKeepTheme();
       sessionStorage.clear();
       next(data);
     })

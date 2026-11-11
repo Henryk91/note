@@ -29,6 +29,7 @@ const createList = (notes: Note[] | null, theme: string) => {
 };
 
 import { useNotesWithChildren } from '../../hooks/useNotesQueries';
+import { clearStorageKeepTheme } from '../../../../shared/utils/Helpers/storage';
 
 const Home: React.FC = () => {
   const selectedNoteName = useSelector((state: RootState) => state.person.selectedNoteName);
@@ -75,7 +76,7 @@ const Home: React.FC = () => {
   const themeHover = `${theme}-hover`;
 
   const logOut = () => {
-    localStorage.clear();
+    clearStorageKeepTheme();
     sessionStorage.clear();
     window.location.reload();
   };

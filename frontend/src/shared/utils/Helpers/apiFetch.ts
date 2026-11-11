@@ -1,3 +1,5 @@
+import { clearStorageKeepTheme } from './storage';
+
 async function refreshToken(): Promise<Response> {
   const res = await fetch('/api/refresh', {
     method: 'POST',
@@ -8,7 +10,7 @@ async function refreshToken(): Promise<Response> {
   });
 
   if (res.status === 401) {
-    localStorage.clear();
+    clearStorageKeepTheme();
     window.location.reload();
   }
   return res;
