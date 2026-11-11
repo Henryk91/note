@@ -1,0 +1,79 @@
+/*
+ * The themes as CSS variables, with the exact palettes of docs/mockups/phone-screens.html
+ * (--bg, --surface, --line, --accent, --on-accent, --accent-text, --bar = header colour).
+ * App.tsx sets `data-theme` on <html> from the Redux theme value.
+ */
+:root,
+:root[data-theme='dark'] {
+  --bg: #061f2f;
+  --surface: #0c2b3f;
+  --line: #1e4058;
+  --accent: #0079ae;
+  --on-accent: #ffffff;
+  --accent-text: #3ab0e2;
+  --bar: #0079ae;
+  --text: #e8f1f6;
+  --muted: #9fb6c4;
+  --danger: #ff8a80;
+  --surface-2: #12364f;
+}
+:root[data-theme='ocean'] {
+  --bg: #1e2024;
+  --surface: #2a2d33;
+  --line: #41454d;
+  --accent: #38cdb8;
+  --on-accent: #0b1f1c;
+  --accent-text: #38cdb8;
+  --bar: #35373d;
+}
+:root[data-theme='green'] {
+  --bg: #0b2440;
+  --surface: #103762;
+  --line: #24527f;
+  --accent: #39cb7d;
+  --on-accent: #06210f;
+  --accent-text: #4fd68d;
+  --bar: #103762;
+}
+:root[data-theme='night'] {
+  --bg: #061f2f;
+  --surface: #0e2a3b;
+  --line: #2e4250;
+  --accent: #0079ae;
+  --on-accent: #ffffff;
+  --accent-text: #3ab0e2;
+  --bar: #27343b;
+}
+:root[data-theme='red'] {
+  --bg: #030303;
+  --surface: #151515;
+  --line: #2a2a2a;
+  --accent: #bb3b00;
+  --on-accent: #ffffff;
+  --accent-text: #ff7a3d;
+  --bar: #bb3b00;
+}
+/* Monokai (Sublime Text): editor #272822, line highlight #3E3D32, selection #49483E, text #F8F8F2,
+   green #A6E22E (accent), cyan #66D9EF (links, times), pink #F92672 (danger), darker tab-bar header. */
+:root[data-theme='monokai'] {
+  --bg: #272822;
+  --surface: #3e3d32;
+  --line: #49483e;
+  --accent: #a6e22e;
+  --on-accent: #272822;
+  --accent-text: #66d9ef;
+  --bar: #1e1f1c;
+  --text: #f8f8f2;
+  --muted: #a59f85;
+  --danger: #f92672;
+}
+:root[data-theme='ocean'],
+:root[data-theme='green'],
+:root[data-theme='monokai'],
+:root[data-theme='night'],
+:root[data-theme='red'] {
+  --surface-2: color-mix(in srgb, var(--surface), white 7%);
+}
+body {
+  background-color: var(--bg) !important;
+}

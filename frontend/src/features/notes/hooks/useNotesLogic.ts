@@ -2,7 +2,6 @@ import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../core/store';
 import { useNotesWithChildren, useNoteNames } from './useNotesQueries';
-import { useOnlineStatus } from '../../../shared/hooks/useOnlineStatus';
 import { useRedirectLogic } from './useRedirectLogic';
 import { useNotesActions } from './useNotesActions';
 import { setSelectedNoteName, setSearchTerm, setInitialLoadComplete } from '../../auth/store/personSlice';
@@ -25,9 +24,6 @@ export const useNotesLogic = () => {
   const initialLoadComplete = useSelector((state: RootState) => state.person.initialLoadComplete); // From Redux
 
   const isLastPage = Array.isArray(pages) && pages.length > 0 ? pages[pages.length - 1] : undefined;
-
-  // 3. Local State
-  const isOnline = useOnlineStatus();
 
   // 4. Data Fetching (TanStack Query)
   const activeParentId = isLastPage?.params.id || selectedNoteName;
@@ -85,22 +81,10 @@ export const useNotesLogic = () => {
     }
   }, [noteNamesData, isLoggedIn, selectedNoteName, dispatch, initialLoadComplete]);
 
-  // Refetch when coming back online
-  useEffect(() => {
-    if (isOnline && initialLoadComplete) {
-      const timer = setTimeout(() => {
-        getLastPageData(true);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [isOnline, initialLoadComplete, getLastPageData]);
+  // No timer-based polling: TanStack Query refetches on window focus and on reconnect (see AppProviders).
 
-  // Refetch when last page changes
-  useEffect(() => {
-    if (isLastPage?.params.id && initialLoadComplete) {
-      getLastPageData(true);
-    }
-  }, [isLastPage?.params.id, initialLoadComplete, getLastPageData]);
+  // No forced refetch when the page changes: the cached folder is shown at once and TanStack Query revalidates it
+  // (stale time, window focus, reconnect). One request per folder open.
 
   // Handle root path redirects when data is ready
   useEffect(() => {

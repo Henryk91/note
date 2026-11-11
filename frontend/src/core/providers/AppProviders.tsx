@@ -7,6 +7,7 @@ import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persi
 import { Toaster } from 'react-hot-toast';
 import { store } from '../store';
 import { GenericErrorBoundary } from './ErrorBoundary/GenericErrorBoundary';
+import { retryUnlessClientError } from '../../shared/utils/Helpers/retryPolicy';
 
 export const AppProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [queryClient] = useState(
@@ -16,7 +17,7 @@ export const AppProviders: React.FC<{ children: React.ReactNode }> = ({ children
           queries: {
             staleTime: 30 * 1000, // 30 seconds
             gcTime: 24 * 60 * 60 * 1000, // 24 hours (formerly cacheTime)
-            retry: 1,
+            retry: retryUnlessClientError(1),
             refetchOnWindowFocus: true,
             refetchOnReconnect: true,
           },

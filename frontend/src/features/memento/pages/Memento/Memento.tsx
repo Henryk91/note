@@ -3,7 +3,6 @@ import './style.css';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { RootState } from '../../../../core/store';
-import { BackButton } from '../../../../shared/components/atoms/BackButton';
 
 type YearProps = {
   day: number;
@@ -66,7 +65,6 @@ const Memento: React.FC = () => {
 
   return (
     <div id="memento-wrapper">
-      <BackButton />
       <div id="memento-main" className={`${theme}-border-color`}>
         <p id="title">MEMENTO MORI</p>
         <div id="life-box">

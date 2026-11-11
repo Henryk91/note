@@ -8,6 +8,7 @@ const Home = lazy(() => import('../../features/notes/pages/Home/Home'));
 const NewNote = lazy(() => import('../../features/notes/pages/NewNote/NewNote'));
 const Login = lazy(() => import('../../features/auth/pages/Login/Login'));
 const Pomodoro = lazy(() => import('../../features/pomodoro/pages/Pomodoro/Pomodoro'));
+const RecentlyDeleted = lazy(() => import('../../features/notes/pages/RecentlyDeleted/RecentlyDeleted'));
 const Memento = lazy(() => import('../../features/memento/pages/Memento/Memento'));
 
 type AppRoutesProps = {
@@ -30,22 +31,13 @@ export const AppRoutes: React.FC<AppRoutesProps> = ({
                   <Route exact path="/all" render={(props: any) => <Home {...props} />} />
                   <Route
                     exact
-                    path="/index.html"
-                    component={NoteDetailPage}
-                  />
-                  <Route
-                    exact
-                    path="/"
-                    component={NoteDetailPage}
-                  />
-                  <Route
-                    exact
-                    path="/notes/:id"
+                    path={['/', '/index.html', '/notes/:id', '/f/:folderId', '/n/:noteId']}
                     component={NoteDetailPage}
                   />
                   <Route exact path="/new-note" component={NewNote} />
                   <Route exact path="/pomodoro" component={Pomodoro} />
                   <Route exact path="/memento" component={Memento} />
+                  <Route exact path="/recently-deleted" component={RecentlyDeleted} />
                 </Switch>
               </MainLayout>
             </ProtectedRoutes>

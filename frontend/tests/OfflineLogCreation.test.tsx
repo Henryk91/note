@@ -70,7 +70,6 @@ describe('Offline Log Creation', () => {
       () =>
         useNoteOperations({
           person: store.getState().person.byId[parentId] as any,
-          index: 1,
           openPage: jest.fn(),
         }),
       { wrapper: Wrapper },

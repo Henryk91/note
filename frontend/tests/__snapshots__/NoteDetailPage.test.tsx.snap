@@ -4,49 +4,142 @@ exports[`NoteDetailPage matches snapshot 1`] = `
 <DocumentFragment>
   <div
     class="slide-in"
+    style="position: fixed; top: 0px; left: 0px; width: 100vw; overflow: hidden; z-index: 200; pointer-events: none;"
   >
     <div
-      data-testid="back-button"
-    >
-      BackButton
-    </div>
-    <div
       id="multiple-pages"
+      style="width: 100%; pointer-events: auto;"
     >
       <div
-        class="multiple-pages1"
-        style="min-width: 1024px;"
+        data-testid="swiper"
       >
         <div
-          class="slide-in"
+          data-testid="swiper-slide"
         >
           <div
-            class=" note-detail-item"
-            id=""
+            class="multiple-pages1 scrollable-content"
+            style="height: 100%; box-sizing: border-box; overflow-y: auto;"
           >
             <div
-              class="page-content-top1"
-              id="personContainer"
+              class="slide-in false"
             >
-              <h1
-                class="nameBox"
-                id="personHead"
+              <div
+                class=" note-detail-item"
+                id=""
               >
-                &lt;NAME NOT SET&gt;
-              </h1>
+                <div
+                  class="phone-search-wrap"
+                >
+                  <label
+                    class="phone-search"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="tabler-icon tabler-icon-search "
+                      fill="none"
+                      height="1em"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"
+                      />
+                      <path
+                        d="M21 21l-6 -6"
+                      />
+                    </svg>
+                    <input
+                      aria-label="Search all notes and logs"
+                      autocomplete="off"
+                      class="swiper-no-swiping"
+                      enterkeyhint="search"
+                      id="phoneSearchBox"
+                      placeholder="Search all notes and logs"
+                      type="search"
+                      value=""
+                    />
+                  </label>
+                </div>
+                <div
+                  class="phone-body"
+                />
+                <br />
+              </div>
             </div>
-            <div
-              class="detailedBox"
-            />
-            <br />
           </div>
         </div>
       </div>
     </div>
     <div
-      data-testid="scroll-buttons"
+      style="pointer-events: auto;"
     >
-      ScrollButtons
+      <div
+        aria-label="Actions"
+        class="bottom-toolbar "
+        role="toolbar"
+      >
+        <button
+          class="bt-log"
+          type="button"
+        >
+          <svg
+            class="tabler-icon tabler-icon-bolt "
+            fill="none"
+            height="1em"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="1em"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11"
+            />
+          </svg>
+           Log
+        </button>
+        <span
+          class="bt-count"
+          data-testid="item-count"
+        >
+          0 folders
+        </span>
+        <button
+          aria-label="New note"
+          class="bt-edit"
+          type="button"
+        >
+          <svg
+            class="tabler-icon tabler-icon-edit "
+            fill="none"
+            height="22"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="22"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1"
+            />
+            <path
+              d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z"
+            />
+            <path
+              d="M16 5l3 3"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
   </div>
 </DocumentFragment>

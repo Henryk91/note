@@ -1,0 +1,36 @@
+/* Sticky, zero-height strip at the end of the scrolling content: the button stays at the bottom right of the
+   visible list while scrolling and takes no space in the layout. */
+.scroll-jump {
+  position: sticky;
+  height: 0;
+  display: flex;
+  justify-content: flex-end;
+  pointer-events: none;
+  z-index: 30;
+}
+.scroll-jump button.scroll-jump-btn {
+  position: absolute;
+  right: 4px;
+  bottom: 0;
+  width: 40px;
+  height: 40px;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line) !important;
+  border-radius: 20px !important;
+  background: var(--surface-2) !important;
+  color: var(--accent-text) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  pointer-events: auto;
+  cursor: pointer;
+}
+/* Fixed variant (phone folder pages): bottom right of the screen, above the bottom bar. */
+.scroll-jump.is-fixed {
+  position: fixed;
+  right: 12px;
+  left: auto;
+  z-index: 290;
+}

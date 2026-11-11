@@ -37,6 +37,17 @@ describe('Translation practice endpoints', () => {
       type: 'FOLDER',
     });
 
+    // full-translate-practice reads the v1 copy that the v2 -> v1 mirror writes when notes are saved through the API
+    // (createdBy = the practice folder, heading = level, tag = sub-level). Created directly here, the v2 docs above and
+    // below have no mirror, so the v1 copy is created as the mirror would.
+    await Note().create({
+      id: 'level-1',
+      userId: 'UUvFcBXO6Q',
+      createdBy: 'TranslationPractice',
+      heading: 'Level1',
+      dataLable: [{ tag: 'Intro', data: 'One. Two.' }],
+    });
+
     await NoteV2().create({
       id: 'sub-level-1',
       userId: 'UUvFcBXO6Q',

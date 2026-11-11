@@ -4,6 +4,7 @@ import { RootState } from './core/store';
 import { useOfflineSync } from './shared/hooks/useOfflineSync';
 import { useNotesLogic } from './features/notes/hooks/useNotesLogic';
 import { AppRoutes } from './core/routes/AppRoutes';
+import { THEME_BARS } from './shared/utils/Helpers/storage';
 
 /**
  * AppContent - Inner component that uses hooks requiring QueryClient
@@ -16,6 +17,10 @@ const AppContent: React.FC = () => {
   const { loadingData, setFilterNote } = useNotesLogic();
 
   useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme.toLowerCase());
+  }, [theme]);
+
+  useEffect(() => {
     const menuBtn = document.getElementById('menuButton');
     if (menuBtn) {
       if (!loadingData) {
@@ -25,26 +30,8 @@ const AppContent: React.FC = () => {
       }
     }
 
-    if (theme === 'Green') {
-      document.body.style.backgroundColor = '#103762';
-      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#103762');
-    }
-    if (theme === 'Red') {
-      document.body.style.backgroundColor = '#030303';
-      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#d00000');
-    }
-    if (theme === 'Ocean') {
-      document.body.style.backgroundColor = '#35373D';
-      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#38cdb8');
-    }
-    if (theme === 'Dark') {
-      document.body.style.backgroundColor = '#061f2f';
-      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#0090c8');
-    }
-    if (theme === 'Night') {
-      document.body.style.backgroundColor = '#061f2f';
-      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#27343b');
-    }
+    // Page colours come from the theme variables (shared/styles/themes.css); only the browser chrome colour is set here.
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_BARS[theme] ?? THEME_BARS.Dark);
   }, [loadingData, theme]);
 
   return <AppRoutes setFilterNote={setFilterNote} />;

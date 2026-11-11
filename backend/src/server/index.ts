@@ -79,7 +79,8 @@ app.use(
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 300,
+  // The integration suite shares one in-memory limiter across all files, so it is effectively disabled under test.
+  limit: process.env.NODE_ENV === 'test' ? 1_000_000 : config.rateLimitMax,
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -139,10 +140,13 @@ app.get('/sw.js', (_req, res) => {
   res.sendFile(path.join(frontendDist, 'sw.js'));
 });
 
+// SPA routing: only the landing page and /login redirect (when logged in). Every other non-API path gets index.html
+// so deep links such as /f/:folderId and /n/:noteId survive a refresh.
 app.get(/^\/(?!api).*/, (req, res) => {
-  const targetPath = req?.cookies?.access_token ? '/notes/main' : '/';
-  if (req.url !== targetPath) {
-    return res.redirect(targetPath);
+  const loggedIn = Boolean(req?.cookies?.access_token);
+  const pathname = req.path;
+  if (loggedIn && (pathname === '/' || pathname === '/login')) {
+    return res.redirect('/notes/main');
   }
   return res.sendFile(path.join(frontendDist, 'index.html'));
 });

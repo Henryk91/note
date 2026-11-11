@@ -41,20 +41,13 @@ export async function sendOrQueueJSON<TResponse = unknown>(
     return { queued: true };
   }
 
+  let res: Response;
   try {
-    const res = await apiFetch(url, {
+    res = await apiFetch(url, {
       method,
       headers,
       body: JSON.stringify(body),
     });
-
-    if (!res.ok) {
-      // HTTP error (but network okay) – do NOT queue, just throw
-      throw new Error(`HTTP ${res.status}`);
-    }
-
-    const json = (await res.json()) as TResponse;
-    return { queued: false, response: json };
   } catch (err) {
     // Network error: queue for later
     await enqueueRequest(request);
@@ -63,6 +56,14 @@ export async function sendOrQueueJSON<TResponse = unknown>(
       error: err instanceof Error ? err.message : String(err),
     };
   }
+
+  if (!res.ok) {
+    // HTTP error (but network okay) – do NOT queue, just throw
+    throw new Error(`HTTP ${res.status}`);
+  }
+
+  const json = (await res.json()) as TResponse;
+  return { queued: false, response: json };
 }
 
 /**

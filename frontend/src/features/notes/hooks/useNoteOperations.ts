@@ -128,20 +128,8 @@ export const useNoteOperations = ({ person, openPage }: UseNoteOperationsProps) 
           },
         });
       }
-
-      if (e.nativeEvent.submitter.value === 'delete' && currentNote) {
-        if (confirm('Are you sure you want to permanently delete this folder?')) {
-          deleteNoteMutation.mutate(currentNote as any, {
-            onSuccess: () => {
-              if (person) {
-                openPage({ personNext: { id: person.id }, parentId: person.id, hideNote: true });
-              }
-            },
-          });
-        }
-      }
     },
-    [dispatch, pages, persons, person, showTag, updateNoteMutation, deleteNoteMutation, openPage],
+    [dispatch, pages, persons, person, showTag, updateNoteMutation],
   );
 
   const submitNewItem = useCallback(

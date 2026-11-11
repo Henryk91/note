@@ -1,11 +1,34 @@
 @import url('https://fonts.googleapis.com/css?family=Open+Sans');
 
+@import url('./shared/styles/themes.css');
+@import url('./features/notes/log/log.css');
 @import url('./features/notes/components/SearchBar/style.css');
 @import url('./features/notes/pages/Home/style.css');
 @import url('./features/notes/components/NoteDetail/style.css');
 @import url('./features/notes/pages/NewNote/style.css');
 @import url('./features/notes/components/NoteItem/style.css');
 @import url('./features/notes/components/EditNoteCheck/style.css');
+@import url('./features/notes/edit/edit.css');
+
+/* One source of truth for the fixed header; everything below it starts at --header-h. */
+:root {
+  --header-h: 55px;
+  --app-h: 100vh;
+}
+@media (min-width: 768px) {
+  :root {
+    --header-h: 49px;
+  }
+}
+@supports (height: 100dvh) {
+  :root {
+    --app-h: 100dvh;
+  }
+}
+
+.app-main {
+  padding-top: var(--header-h);
+}
 
 header {
   padding-bottom: 1px;
@@ -16,15 +39,18 @@ header {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  height: 12vh;
+  height: var(--header-h);
+  box-sizing: border-box;
   z-index: 100;
 }
 
 body {
   background-color: #030303;
-  color: #7c7c80;
+  color: var(--text, #e8f1f6);
   text-align: center;
-  font-family: 'Open Sans', sans-serif;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
   margin: auto;
   overscroll-behavior-x: none;
 }
@@ -140,7 +166,7 @@ h2 {
 .backButton {
   position: fixed;
   font-size: 30px;
-  top: 2vh;
+  top: calc((var(--header-h) - 44px) / 2);
   left: 2.5vw;
   min-width: 30px;
   color: white;
@@ -190,7 +216,7 @@ h2 {
 
 #menuButton {
   position: absolute;
-  top: 2vh;
+  top: calc((var(--header-h) - 44px) / 2);
   right: 4vw;
   font-size: 30px;
   color: #ffa500;
@@ -313,6 +339,23 @@ h2 {
   border-color: rgba(0, 144, 200, 1) !important;
 }
 
+/* Monokai Theme */
+.monokai-back {
+  background: rgb(166, 226, 46);
+}
+.monokai-back-back {
+  background: rgb(39, 40, 34);
+}
+.monokai-border-thick {
+  border: 2px solid rgb(166, 226, 46);
+}
+.monokai-hover:hover {
+  background: rgba(166, 226, 46, 0.7);
+}
+.monokai-border-color {
+  border-color: rgba(166, 226, 46, 1) !important;
+}
+
 .rust-back {
   background: rgb(187, 59, 0);
 }
@@ -386,4 +429,27 @@ h2 {
 
 .flex {
   display: flex;
+}
+
+/* The page carousel must never be scrolled by focus() / scrollIntoView(): that pushed the log title out of view. */
+#multiple-pages .swiper {
+  overflow: clip;
+}
+
+/* G1: form controls inherit the page font (system-ui 14px / 1.4) in every redesigned screen. */
+.app-main button,
+.app-main input,
+.app-main textarea,
+.app-main select,
+header.app-header button,
+header.app-header input,
+.desk button,
+.desk input,
+.desk textarea,
+.bottom-toolbar button,
+.log-sheet button,
+.log-sheet input,
+.search-results button {
+  font-family: inherit;
+  line-height: inherit;
 }

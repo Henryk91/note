@@ -1,0 +1,146 @@
+/* In-app dialog (replaces window.prompt / confirm). Same type scale, radii and colours as the login card and menu. */
+.dlg-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  /* Upper part of the screen, so the phone keyboard never covers the field or the buttons. */
+  padding: 14vh 16px 16px;
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: left;
+}
+.dlg-card {
+  width: 100%;
+  max-width: 360px;
+  max-height: 72vh;
+  overflow-y: auto;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  padding: 18px 18px 16px;
+  box-sizing: border-box;
+}
+.dlg-card span::before {
+  content: normal !important;
+}
+.dlg-title {
+  margin: 0 0 12px;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text);
+}
+.dlg-msg {
+  margin: -4px 0 16px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.dlg-cap {
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 6px;
+}
+.dlg-choices {
+  background: var(--bg);
+  border-radius: 10px;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+.dlg-card button.dlg-choice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 40px;
+  margin: 0 !important;
+  padding: 0 12px !important;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.dlg-card button.dlg-choice:last-child {
+  border-bottom: 0;
+}
+.dlg-card button.dlg-choice svg {
+  color: var(--accent-text);
+  flex: none;
+}
+.dlg-card button.dlg-choice:hover {
+  background: var(--surface-2);
+}
+.dlg-fld {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0 0 16px;
+}
+.dlg-card input.dlg-in {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  height: 40px;
+  margin: 4px 0 0;
+  padding: 0 12px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--text);
+  font: inherit;
+  /* 16 px stops iOS Safari zooming into the field. */
+  font-size: 16px;
+  outline: none;
+  text-align: left;
+}
+.dlg-card input.dlg-in:focus {
+  border-color: var(--accent-text);
+}
+.dlg-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.dlg-card button.dlg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-width: 84px;
+  height: 38px;
+  margin: 0 !important;
+  padding: 0 14px !important;
+  border: 0;
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-weight: 500;
+  line-height: 1.4;
+  cursor: pointer;
+}
+.dlg-card button.dlg-btn.is-primary {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.dlg-card button.dlg-btn.is-danger {
+  background: var(--danger, #ff8a80);
+  color: #1a0000;
+}
+.dlg-card button.dlg-btn[disabled] {
+  opacity: 0.5;
+  cursor: default;
+}

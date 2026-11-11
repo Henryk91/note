@@ -37,7 +37,8 @@ describe('Note v1 endpoints', () => {
     expect(names.body).to.include('Tester');
 
     const updateOne = await agent.post('/api/update-one').send({
-      person: { id: 'note-1', heading: 'Updated', dataLable: [{ tag: 'intro', data: 'Updated' }] },
+      // update-one takes one item (`dataLable` is a single entry, as UpdateOneNoteBodySchema and the v2 -> v1 mirror use).
+      person: { id: 'note-1', heading: 'Updated', dataLable: { tag: 'intro', data: 'Updated' } },
     });
     expect(updateOne.status).to.equal(200);
     expect(updateOne.body.Ok).to.equal('success');

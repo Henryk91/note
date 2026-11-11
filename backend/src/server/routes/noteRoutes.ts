@@ -9,6 +9,10 @@ import {
   UpdateNoteBodySchema,
   UpdateOneNoteBodySchema,
   V2ParentQuerySchema,
+  DeletedQuerySchema,
+  EmptyDeletedQuerySchema,
+  PathQuerySchema,
+  SearchQuerySchema,
 } from '../validation/schemas';
 
 const router = Router();
@@ -21,6 +25,16 @@ router.get(
   isAuthenticated,
   validateQuery(V2ParentQuerySchema),
   noteController.getV2ContentWithChildren,
+);
+router.get('/search', isAuthenticated, validateQuery(SearchQuerySchema), noteController.searchV2);
+router.get('/note-v2/path', isAuthenticated, validateQuery(PathQuerySchema), noteController.getPathV2);
+router.get('/note-v2/pinned-logs', isAuthenticated, noteController.getPinnedLogsV2);
+router.get('/note-v2/deleted', isAuthenticated, validateQuery(DeletedQuerySchema), noteController.getDeletedV2);
+router.delete(
+  '/note-v2/deleted',
+  isAuthenticated,
+  validateQuery(EmptyDeletedQuerySchema),
+  noteController.emptyDeletedV2,
 );
 router.post('/note-v2/', isAuthenticated, validateBody(CreateV2NoteSchema), noteController.createV2);
 router.put('/note-v2/', isAuthenticated, validateBody(UpdateV2NoteSchema), noteController.updateV2);

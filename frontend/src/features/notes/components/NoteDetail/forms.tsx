@@ -1,6 +1,6 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faArrowRight, faCheck, faFolder, faTimes, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faArrowRight, faCheck, faFolder, faTimes } from '@fortawesome/free-solid-svg-icons';
 import EditNoteCheck from '../EditNoteCheck/EditNoteCheck';
 import { Note } from '../../../../shared/utils/Helpers/types';
 import { RootState } from '../../../../core/store';
@@ -52,9 +52,6 @@ export const EditNameForm: React.FC<EditNameFormProps> = ({ heading, onSubmit })
       <button className={`submit-button ${themeHover} ${themeBack}`} type="submit">
         {' '}
         <FontAwesomeIcon icon={faTimes} />
-      </button>
-      <button value="delete" className={`submit-button ${themeBack} ${themeHover}`} type="submit">
-        <FontAwesomeIcon icon={faTrashAlt} />
       </button>
       <br />
       <br />
@@ -150,10 +147,10 @@ export const FolderList: React.FC<FolderListProps> = ({
         <div id={`${dateCounterId}`} className={`listCountBox white-color ${themeBorder}`} onClick={onShowLogDays}>
           <span className="list-count-folder">
             <FontAwesomeIcon icon={faFolder} className="list-count-folder-icon" />
-            <span className="list-count-folder-number">{contentCount}</span>
           </span>
         </div>
         <h3 className={`${className} white-color`}>{prop || '<NAME NOT SET>'} </h3>
+        {contentCount > 0 && <span className="row-count">{contentCount}</span>}
         {propIsLog && contentCount > 0 && (
           <>
             <form className={`${className} dateSelector`} onSubmit={onChangeDate as any}>

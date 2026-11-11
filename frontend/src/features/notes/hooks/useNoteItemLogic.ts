@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { NoteItemType, NoteContent } from '../../../shared/utils/Helpers/types';
+import { askConfirm } from '../../../shared/components/dialog/AppDialog';
 
 type UseNoteItemLogicProps = {
   item: NoteItemType;
@@ -71,9 +72,9 @@ export const useNoteItemLogic = ({
   );
 
   const deleteItemHandler = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
+    async (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
-      if (confirm('Are you sure you want to permanently delete this?')) {
+      if (await askConfirm({ title: 'Delete permanently?', message: 'This cannot be undone.', confirmLabel: 'Delete', danger: true })) {
         setItem(null);
         set({
           oldItem: item,

@@ -1,0 +1,1735 @@
+/* Notes: always-editable blocks, item menus, swipe rows. Colours come from the theme variables. */
+.note-block {
+  position: relative;
+  text-align: left;
+  padding: 8px 34px 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+.note-block-view {
+  cursor: text;
+  overflow-wrap: anywhere;
+  min-height: 24px;
+}
+.note-block-view > :first-child {
+  margin-top: 0;
+}
+.note-block-view > :last-child {
+  margin-bottom: 0;
+}
+.note-block-view a {
+  color: var(--accent-text);
+}
+.note-block-empty {
+  color: var(--muted);
+}
+.note-block-area {
+  display: block;
+  width: 100% !important;
+  box-sizing: border-box;
+  margin: 0 !important;
+  padding: 8px !important;
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 8px !important;
+  font: inherit;
+  font-size: 16px !important;
+  line-height: 1.45;
+  resize: none;
+  text-align: left !important;
+  overflow: hidden;
+}
+.note-block-new {
+  min-height: 44px;
+  background: transparent !important;
+  border-style: dashed !important;
+}
+.note-block-side {
+  position: absolute;
+  top: 6px;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+}
+.item-menu {
+  position: relative;
+  display: inline-block;
+}
+.item-menu-btn {
+  margin: 0 !important;
+  padding: 4px 8px !important;
+  background: transparent !important;
+  color: var(--muted) !important;
+  border: 0;
+  font-size: 15px !important;
+  cursor: pointer;
+}
+.item-menu-list {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 60;
+  min-width: 150px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 4px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+.item-menu-list button {
+  display: block;
+  width: 100%;
+  margin: 0 !important;
+  padding: 8px 10px !important;
+  text-align: left !important;
+  background: transparent !important;
+  color: var(--text) !important;
+  border-radius: 6px !important;
+  font-size: 14px !important;
+}
+.item-menu-list button:hover {
+  background: var(--surface) !important;
+}
+.item-menu-list button.danger {
+  color: var(--danger) !important;
+}
+.swipe-row {
+  position: relative;
+  overflow: hidden;
+}
+.swipe-row-content {
+  position: relative;
+  background: var(--bg);
+  transition: transform 0.15s ease-out;
+}
+.swipe-row-delete {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 88px;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  background: #c62828 !important;
+  color: #fff !important;
+  font-size: 15px !important;
+  text-align: center !important;
+}
+.save-indicator {
+  font-size: 12px;
+  color: var(--muted);
+  min-height: 16px;
+  display: inline-block;
+}
+.save-indicator[data-status='offline'] {
+  color: var(--danger);
+}
+.doc-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.doc-title-row .item-menu-btn {
+  font-size: 20px !important;
+  color: var(--text) !important;
+}
+.deleted-page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 12px 16px 80px;
+  text-align: left;
+  color: var(--text);
+}
+.deleted-page h1 {
+  text-align: center;
+}
+.deleted-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.deleted-row .deleted-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.deleted-row small {
+  display: block;
+  color: var(--muted);
+}
+.deleted-row button,
+.deleted-page .deleted-empty-btn {
+  margin: 0 !important;
+  padding: 6px 12px !important;
+  border-radius: 14px !important;
+  background: var(--surface) !important;
+  color: var(--accent-text) !important;
+  font-size: 14px !important;
+  flex: none;
+}
+.deleted-page .deleted-empty-btn {
+  color: var(--danger) !important;
+  display: block;
+  margin: 14px auto 0 !important;
+}
+
+/* ---- wide layouts: sidebar + list + editor ------------------------------------------------------------ */
+.desk {
+  position: fixed;
+  top: var(--header-h);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 200;
+  display: grid;
+  background: var(--bg);
+  color: var(--text);
+  text-align: left;
+  overflow: hidden;
+}
+.desk-sidebar,
+.list-pane,
+.desk-editor {
+  min-width: 0;
+  height: 100%;
+  overflow-y: auto;
+}
+.desk-sidebar {
+  background: var(--surface);
+  padding: 8px 0 24px;
+  border-right: 1px solid var(--line);
+}
+.desk-resizer {
+  cursor: col-resize;
+  background: var(--line);
+  width: 6px;
+  opacity: 0.35;
+}
+.desk-resizer:hover,
+.desk-resizer:focus-visible {
+  opacity: 1;
+  background: var(--accent-text);
+  outline: none;
+}
+.desk .item-menu-btn,
+.desk button {
+  font-size: inherit;
+}
+.side-section {
+  padding: 4px 6px 10px;
+}
+.side-title {
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 4px 8px;
+}
+.side-item,
+.side-theme {
+  display: block;
+  width: 100%;
+  margin: 0 !important;
+  padding: 6px 8px !important;
+  border: 0;
+  border-radius: 6px !important;
+  background: transparent !important;
+  color: var(--text) !important;
+  text-align: left !important;
+  font-size: 14px !important;
+  text-decoration: none;
+  cursor: pointer;
+}
+.side-item:hover,
+.side-theme:hover,
+.tree-row:hover,
+.list-card:hover {
+  background: var(--surface-2) !important;
+}
+.side-item.is-selected,
+.side-theme.is-selected {
+  background: var(--accent) !important;
+  color: var(--on-accent) !important;
+}
+.side-themes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px 0;
+}
+.side-theme {
+  width: auto;
+  font-size: 12px !important;
+  background: var(--bg) !important;
+}
+.tree-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.tree-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text);
+}
+.tree-row.is-selected {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.tree-row.is-selected .tree-count {
+  color: var(--on-accent);
+}
+.tree-row.is-drop {
+  outline: 2px dashed var(--accent-text);
+}
+.tree-row.is-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.tree-chev {
+  width: 16px;
+  flex: none;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: var(--muted) !important;
+  font-size: 11px !important;
+  text-align: center !important;
+}
+.tree-icon {
+  color: var(--accent-text);
+  flex: none;
+}
+.tree-row.is-selected .tree-icon {
+  color: var(--on-accent);
+}
+.tree-label {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tree-count {
+  color: var(--muted);
+  font-size: 12px;
+}
+.list-pane {
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+}
+.list-pane-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px 0;
+}
+.list-pane-head h2 {
+  flex: 1;
+  margin: 0;
+  font-size: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.list-new {
+  width: 32px;
+  height: 32px;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 16px !important;
+  background: var(--accent) !important;
+  color: var(--on-accent) !important;
+  font-size: 18px !important;
+  text-align: center !important;
+}
+.list-pane-count {
+  padding: 2px 12px 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.list-pane-items {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 6px 24px;
+}
+.list-empty {
+  color: var(--muted);
+  padding: 24px 10px;
+  font-size: 14px;
+}
+.list-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--line);
+}
+.list-card.is-selected {
+  background: var(--surface-2);
+  box-shadow: inset 3px 0 0 var(--accent-text);
+}
+.list-card-icon {
+  color: var(--accent-text);
+  flex: none;
+}
+.list-card-body {
+  flex: 1;
+  min-width: 0;
+}
+.list-card-title {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.list-card-sub {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.list-card-preview {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.list-card-count {
+  color: var(--muted);
+  font-size: 13px;
+  flex: none;
+}
+.desk-editor {
+  padding: 0 24px 80px;
+}
+.doc-pane {
+  max-width: 760px;
+  margin: 0 auto;
+}
+.doc-pane-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 0 6px;
+}
+.doc-pane-head h1 {
+  margin: 0;
+  flex: 1;
+  font-size: 26px;
+  text-align: left;
+}
+.doc-rename {
+  flex: 1;
+  margin: 0 !important;
+  font-size: 24px !important;
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 8px !important;
+  padding: 4px 8px !important;
+  text-align: left !important;
+  width: auto !important;
+}
+.desk .detailedBox {
+  width: auto;
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: 0;
+}
+.desk-drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 10;
+}
+.desk-drawer {
+  width: 280px;
+  max-width: 85vw;
+  height: 100%;
+  background: var(--surface);
+  overflow-y: auto;
+}
+.desk-drawer .desk-sidebar {
+  height: auto;
+  border: 0;
+}
+.move-sheet .tree-row {
+  color: var(--text);
+}
+
+@media (min-width: 768px) {
+  #menuButton {
+    right: 16px;
+  }
+  nav.bigScreen {
+    margin-left: 0;
+    width: auto;
+  }
+}
+
+/* ---- phone layout: bottom toolbar, back label, counts, collapsing title --------------------------------- */
+:root {
+  --toolbar-h: 57px;
+}
+.row-count {
+  margin-left: auto;
+  padding: 0 8px 0 10px;
+  color: var(--muted);
+  font-size: 15px;
+  align-self: center;
+  flex: none;
+}
+.bottom-toolbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 300;
+  height: calc(var(--toolbar-h) + env(safe-area-inset-bottom, 0px));
+  padding: 0 12px env(safe-area-inset-bottom, 0px);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 13px;
+  pointer-events: auto;
+}
+.bt-count {
+  flex: 1;
+  text-align: left;
+}
+.bt-btn {
+  margin: 0 !important;
+  padding: 8px 14px !important;
+  border-radius: 18px !important;
+  background: var(--surface-2) !important;
+  color: var(--accent-text) !important;
+  font-size: 14px !important;
+  text-align: center !important;
+}
+.bt-btn.bt-primary {
+  background: var(--accent) !important;
+  color: var(--on-accent) !important;
+  width: 44px;
+  height: 36px;
+}
+.bt-compose {
+  position: relative;
+}
+.bt-menu {
+  bottom: 46px;
+  top: auto;
+}
+.back-label {
+  font-size: 14px;
+  margin-left: 6px;
+  max-width: 56px;
+  display: inline-block;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.backButton {
+  display: flex;
+  align-items: center;
+}
+@media (max-width: 767px) {
+  #userNameBox {
+    width: calc(100vw - 200px);
+  }
+}
+.sticky-title {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  margin: 0 -5vw;
+  padding: 8px 5vw;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* ---- search results, a11y, badges --------------------------------------------------------------------- */
+.search-results {
+  position: fixed;
+  top: var(--header-h);
+  left: 0;
+  right: 0;
+  max-height: 70vh;
+  overflow-y: auto;
+  z-index: 2500;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+.search-hit {
+  display: block;
+  width: 100%;
+  margin: 0 !important;
+  padding: 10px 16px !important;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--text) !important;
+  text-align: left !important;
+  font-size: 14px !important;
+}
+.search-hit:hover,
+.search-hit:focus-visible {
+  background: var(--surface-2) !important;
+}
+.search-hit-path {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+.search-hit-snippet {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.search-empty {
+  padding: 16px;
+  color: var(--muted);
+}
+.listCountBox {
+  overflow: hidden;
+}
+.list-count-folder-number {
+  max-width: 100%;
+}
+:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 1px;
+}
+
+/* ---- app header (docs/mockups/desktop.html, phone-screens.html) -------------------------------------- */
+header.app-header {
+  background: var(--bar) !important;
+  color: #fff;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  text-align: left;
+}
+header.app-header.is-wide {
+  justify-content: flex-start;
+}
+header.app-header button,
+header.app-header a {
+  color: #fff;
+  background: transparent;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+  text-decoration: none;
+}
+header.app-header #menuButton {
+  position: static;
+  font-size: 20px;
+  color: #fff;
+  padding: 6px;
+  border-radius: 6px !important;
+  display: inline-flex;
+  align-items: center;
+}
+header.app-header .hd-name {
+  font-weight: 600;
+}
+header.app-header .hd-sub {
+  opacity: 0.9;
+}
+header.app-header .hd-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 240px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  padding: 6px 10px;
+  text-align: left;
+  position: relative;
+}
+header.app-header .hd-search.is-open input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  color: #fff;
+  font-size: 14px;
+  margin: 0;
+  width: auto;
+  text-align: left;
+}
+header.app-header .hd-search.is-open input::placeholder {
+  color: rgba(255, 255, 255, 0.8);
+}
+header.app-header .hd-log {
+  background: #fff;
+  color: var(--bar);
+  border-radius: 12px;
+  padding: 4px 12px;
+  font-weight: 600;
+}
+header.app-header.is-phone .hd-search.is-open {
+  flex: 1;
+  width: auto;
+}
+header.app-header .hd-title {
+  text-align: center;
+  flex: 1;
+  min-width: 0;
+}
+header.app-header .hd-kicker {
+  font-size: 11px;
+  opacity: 0.9;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+header.app-header .hd-main {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+header.app-header .hd-back {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 30vw;
+}
+header.app-header .hd-back-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+header.app-header .hd-right {
+  display: flex;
+  align-items: center;
+  min-width: 24px;
+  justify-content: flex-end;
+}
+header.app-header .item-menu-btn {
+  color: #fff !important;
+  font-size: 18px !important;
+}
+header.app-header .item-menu-list button {
+  color: var(--text) !important;
+}
+
+/* ---- desktop three panes, tuned to docs/mockups/desktop.html -------------------------------------------- */
+.desk {
+  font-size: 13px;
+  line-height: 1.45;
+  background: var(--bg);
+}
+.desk .desk-sidebar {
+  background: var(--bg);
+  padding: 8px;
+  border-right: 0;
+}
+.desk .desk-resizer {
+  width: 1px;
+  background: var(--line);
+  opacity: 1;
+  position: relative;
+}
+.desk .desk-resizer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -3px;
+  right: -3px;
+  cursor: col-resize;
+}
+.desk .side-section {
+  padding: 0;
+}
+.desk .side-title {
+  font-size: 11px;
+  color: var(--muted);
+  padding: 10px 8px 4px;
+  letter-spacing: 0.05em;
+}
+/* "Notebooks" title doubles as the collapse toggle; looks like the other titles, chevron on the right. */
+.desk button.side-title.side-title-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  font-family: inherit;
+  font-weight: inherit;
+  text-transform: uppercase;
+  line-height: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.desk button.side-title.side-title-toggle:hover {
+  color: var(--text);
+}
+.desk .side-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px !important;
+  font-size: 13px !important;
+  border-radius: 6px !important;
+}
+.desk .side-item.is-selected {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+}
+.desk .side-icon {
+  color: var(--text);
+  width: 14px;
+}
+.desk .side-icon.is-accent {
+  color: var(--accent-text);
+}
+.desk .side-item:hover,
+.desk .tree-row:hover {
+  background: var(--surface) !important;
+}
+.desk .tree-row {
+  padding: 5px 8px;
+  font-size: 13px;
+  gap: 6px;
+}
+.desk .tree-row.is-selected {
+  background: var(--surface);
+  color: var(--text);
+}
+.desk .tree-row.is-selected .tree-icon {
+  color: var(--accent-text);
+}
+.desk .tree-chev {
+  color: var(--text) !important;
+}
+.desk .list-pane {
+  border-right: 0;
+}
+.desk .list-pane-head {
+  padding: 10px 12px;
+  justify-content: space-between;
+  color: var(--muted);
+  gap: 8px;
+}
+.desk .list-pane-path {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.desk .list-pane-count {
+  padding: 0;
+  font-size: 13px;
+}
+.desk .list-new {
+  width: 24px;
+  height: 24px;
+  border-radius: 12px !important;
+  font-size: 16px !important;
+  line-height: 1;
+}
+.desk .list-pane-items {
+  padding: 0;
+}
+.desk .list-card {
+  padding: 10px 12px;
+  border-radius: 0;
+  border-bottom: 1px solid var(--line);
+  box-shadow: none;
+}
+.desk .list-card.is-selected {
+  background: var(--surface);
+  box-shadow: none;
+}
+.desk .list-card:hover {
+  background: var(--surface) !important;
+}
+.desk .list-card-title {
+  font-weight: 600;
+}
+.desk .list-card-sub {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.desk .desk-editor {
+  padding: 16px 28px;
+  position: relative;
+}
+.desk .doc-pane {
+  max-width: none;
+  margin: 0;
+  min-height: 100%;
+  position: relative;
+  padding-bottom: 40px;
+}
+.doc-pane-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.doc-pane-top > span:first-child {
+  flex: 1;
+}
+.doc-pane-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.doc-pane-hint {
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  color: var(--muted);
+  pointer-events: none;
+}
+.desk .note-block {
+  border-bottom: 0;
+  padding: 0;
+}
+.desk .note-block-view {
+  font-size: 14px;
+  min-height: 60px;
+}
+.doc-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.desk .note-block-area {
+  font-size: 14px !important;
+  min-height: 200px;
+}
+
+/* ---- phone screens, tuned to docs/mockups/phone-screens.html -------------------------------------------- */
+.phone-h1 {
+  font-size: 26px;
+  font-weight: 500;
+  margin: 10px 0 8px;
+  text-align: left;
+  color: var(--text);
+}
+.cap {
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: left;
+  margin: 12px 0 6px;
+}
+.phone-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin: 0 0 12px !important;
+  padding: 8px 10px !important;
+  background: var(--surface) !important;
+  color: var(--muted) !important;
+  border-radius: 12px !important;
+  font-size: 14px !important;
+  text-align: left !important;
+}
+/* Phone page search: the field itself is the input (same look as before), results drop down under it. */
+.phone-search-wrap {
+  position: relative;
+  z-index: 20;
+}
+label.phone-search {
+  box-sizing: border-box;
+  cursor: text;
+}
+.phone-search input {
+  flex: 1;
+  min-width: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--text) !important;
+  font: inherit;
+  /* 16 px keeps iOS Safari from zooming into the field; the line box stays the old 14 px button's height. */
+  font-size: 16px !important;
+  line-height: 19.6px;
+  height: 19.6px;
+  outline: none;
+  box-shadow: none !important;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.phone-search input::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+.phone-search input::-webkit-search-cancel-button {
+  display: none;
+}
+.phone-search button.phone-search-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 19.6px;
+  height: 19.6px;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--muted) !important;
+}
+.search-results span::before {
+  content: normal !important;
+  white-space: normal !important;
+}
+.search-results.is-inline {
+  position: absolute;
+  top: calc(100% - 6px);
+  left: 0;
+  right: 0;
+  max-height: 60vh;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+.pin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.pin-card {
+  background: var(--surface) !important;
+  border-radius: 12px !important;
+  padding: 9px !important;
+  margin: 0 !important;
+  text-align: left !important;
+  color: var(--text) !important;
+  min-width: 0;
+}
+.pin-card-title {
+  color: var(--accent-text);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pin-card-value {
+  font-size: 17px;
+  font-weight: 500;
+}
+.pin-card-sub {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.card-list {
+  background: var(--surface);
+  border-radius: 12px;
+  overflow: hidden;
+  text-align: left;
+}
+.card-list .swipe-row-content {
+  background: var(--surface);
+}
+.card-list .swipe-row + .swipe-row {
+  border-top: 1px solid var(--line);
+}
+.folder-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  min-height: 40px;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 14px;
+}
+.folder-row-icon {
+  color: var(--accent-text);
+}
+.folder-row-name {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.folder-row-count,
+.folder-row-chev {
+  color: var(--muted);
+}
+.phone-body {
+  text-align: left;
+}
+.phone-body .note-block {
+  padding-right: 34px;
+}
+.note-detail-item .detailedBox,
+.phone-body {
+  width: auto;
+}
+.slide-in .note-detail-item {
+  /* No page h1 (the header already names the folder): the content starts 12 px under the header. */
+  padding: 12px 12px 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+.bottom-toolbar {
+  justify-content: space-between;
+  padding: 8px 12px calc(14px + env(safe-area-inset-bottom, 0px));
+  height: auto;
+  background: var(--bg);
+}
+.bottom-toolbar .bt-log {
+  background: var(--accent) !important;
+  color: var(--on-accent) !important;
+  border-radius: 18px !important;
+  padding: 7px 14px !important;
+  font-weight: 500;
+  margin: 0 !important;
+  font-size: 14px !important;
+}
+.bottom-toolbar .bt-count {
+  flex: 0 1 auto;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+.bottom-toolbar .bt-edit {
+  background: transparent !important;
+  color: var(--accent-text) !important;
+  font-size: 22px !important;
+  margin: 0 !important;
+  padding: 0 4px !important;
+}
+
+/* The old mobile rule `span::before { content: '\A' }` (app.css) puts a line break before every span: switch it off in the redesigned screens. */
+:is(.app-header, .phone-body, .folder-row, .pin-card, .bottom-toolbar, .log-screen, .note-block, .card-list, .log-sheet, .desk, .deleted-page) span::before {
+  content: normal !important;
+  white-space: normal !important;
+}
+#personHead.phone-h1 {
+  text-align: left;
+  margin: 10px 0 8px;
+}
+#personContainer {
+  text-align: left;
+}
+
+/* ---- work summary and tally screens (docs/mockups/phone-screens.html) ------------------------------------ */
+.summary-screen,
+.tally-view {
+  padding: 10px 12px;
+  text-align: left;
+  color: var(--text);
+  overflow-y: auto;
+  flex: 1;
+}
+.summary-date {
+  font-size: 22px;
+  font-weight: 500;
+}
+.summary-tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 10px 0;
+}
+.tally-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.summary-tile {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 9px;
+}
+.summary-tile > div {
+  font-size: 12px;
+  color: var(--muted);
+}
+.summary-tile strong {
+  font-size: 20px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.summary-tile.is-center {
+  text-align: center;
+  padding: 8px;
+}
+.summary-tile.is-center > div {
+  font-size: 11px;
+}
+.summary-tile.is-center strong {
+  font-size: 18px;
+}
+.summary-task-line > span:last-child {
+  white-space: nowrap;
+  flex: none;
+}
+.summary-task-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+}
+.summary-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--accent);
+  margin: 3px 0 8px;
+}
+.summary-bar.is-muted {
+  background: var(--muted);
+}
+.summary-week {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 100px;
+}
+.summary-week-col {
+  flex: 1;
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.summary-week-bar {
+  background: var(--accent);
+  border-radius: 4px;
+}
+.summary-week-bar.is-warn {
+  background: #e0a030;
+}
+.summary-warning {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 8px 10px;
+  margin-top: 10px;
+  font-size: 12px;
+}
+.summary-warning svg {
+  color: #e0a030;
+}
+.tally-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 12px 0;
+}
+.tally-buttons button {
+  height: 76px;
+  border: 0;
+  border-radius: 14px !important;
+  font-size: 26px !important;
+  font-weight: 500;
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  margin: 0 !important;
+  text-align: center !important;
+  cursor: pointer;
+}
+.tally-buttons button.is-primary {
+  background: var(--accent) !important;
+  color: var(--on-accent) !important;
+}
+.tally-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 56px;
+}
+.tally-bars div {
+  flex: 1;
+  border-radius: 3px;
+  background: var(--accent);
+}
+.tally-bars div.is-today {
+  background: var(--accent-text);
+}
+.tally-row {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+}
+.tally-row.is-editing {
+  background: var(--surface);
+}
+.tally-time {
+  width: 48px;
+  color: var(--muted);
+}
+
+/* The mockups use the system UI font at 14 px / 1.4; the redesigned screens follow them. */
+body,
+.app-main,
+header.app-header,
+.desk,
+.bottom-toolbar,
+.log-sheet,
+.search-results {
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+.app-main,
+header.app-header,
+.bottom-toolbar {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Header heights measured from the mockups: 54 px on the phone, 49 px wide. */
+:root {
+  --header-h: 54px;
+}
+@media (min-width: 768px) {
+  :root {
+    --header-h: 49px;
+  }
+}
+header.app-header.is-phone {
+  padding: 0 12px;
+}
+
+.tally-view .cap {
+  margin: 12px 0 4px;
+}
+header.app-header .hd-back {
+  font-size: 14px;
+}
+
+header.app-header.is-phone .hd-title {
+  line-height: 1.4;
+}
+
+/* Desktop: list rows have no visible menu until hovered (mockup), notes render lists flush left like the mockup text. */
+.desk .list-card .item-menu {
+  opacity: 0;
+}
+.desk .list-card:hover .item-menu,
+.desk .list-card:focus-within .item-menu {
+  opacity: 1;
+}
+.desk .note-block-view ol,
+.desk .note-block-view ul {
+  list-style-position: inside;
+  padding-left: 0;
+  margin: 0;
+}
+.desk .note-block-view p {
+  margin: 0 0 10px;
+  font-size: inherit;
+}
+
+/* ---- ui-review fixes: values read from docs/mockups/*.html ------------------------------------------------ */
+.pin-card {
+  font-size: 14px !important;
+}
+.log-screen .log-daynav {
+  padding: 10px 12px 6px;
+}
+.log-screen .log-day-date {
+  font-size: 14px;
+  font-weight: 500;
+}
+.log-screen .log-day-date-btn {
+  display: block;
+  width: 100%;
+}
+.log-screen .log-day-sub {
+  display: block;
+  width: 100%;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+.log-screen .log-day-sub.is-link {
+  cursor: pointer;
+}
+.log-row .log-time {
+  width: 42px;
+  padding: 0 !important;
+}
+.log-screen .log-continue-chip {
+  max-width: 118px;
+}
+.log-screen .log-input-row textarea {
+  font-size: 14px !important;
+  line-height: 1.4;
+  padding: 9px 10px;
+}
+.log-screen .log-input-row textarea::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+.log-screen .log-input-row textarea:focus,
+.log-screen .log-input-row textarea:focus-visible {
+  outline: none;
+}
+.log-composer {
+  padding: 8px 12px 14px;
+}
+.log-panel-head {
+  font-weight: 500;
+}
+.log-panel-fields label {
+  margin: 0;
+}
+.log-panel-fields label:first-child {
+  flex: 1.3;
+}
+.log-panel-fields label:last-child {
+  flex: 1;
+}
+.log-panel-fields input {
+  font-size: 14px !important;
+  line-height: 1.4;
+}
+.log-stepper button {
+  width: 26px;
+  height: 30px;
+}
+.tally-buttons button {
+  font-weight: 500;
+}
+.tally-buttons button.is-long {
+  font-size: 20px !important;
+}
+.desk {
+  overflow: clip;
+}
+.desk .doc-title,
+.desk .note-block-view.white-color {
+  color: var(--text);
+}
+/* Row actions: hover only, wide screens only (phone: long press). */
+.log-row .log-menu-btn {
+  display: none;
+}
+@media (min-width: 768px) and (hover: hover) {
+  .log-row .log-menu-btn {
+    display: inline-block;
+  }
+}
+.folder-row {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  margin: 0;
+  text-align: left;
+  font-size: 14px;
+}
+
+/* Folder card: every row but the last has a 1px divider (rows are 41 px, the last 40 px, as in the mockup). */
+.card-list .swipe-row + .swipe-row {
+  border-top: 0;
+}
+.card-list .swipe-row {
+  border-bottom: 1px solid var(--line);
+}
+.card-list .swipe-row:last-child {
+  border-bottom: 0;
+}
+.folder-row-chev {
+  width: 14px;
+  height: 14px;
+}
+.bottom-toolbar .bt-edit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0 !important;
+  line-height: 1;
+}
+
+/* Header icons: 20 px, at 12 px from the edges (mockup `.hd`). */
+header.app-header.is-phone #menuButton {
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  justify-content: center;
+}
+header.app-header.is-phone .hd-right {
+  min-width: 20px;
+}
+header.app-header .item-menu-btn {
+  padding: 0 !important;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+header.app-header .item-menu {
+  display: flex;
+}
+
+/* All buttons on the log screen use the base line-height 1.4 (ui-review R1). */
+.log-screen button {
+  line-height: 1.4;
+}
+.log-screen .log-icon-btn svg {
+  display: block;
+}
+.app-main .log-screen button,
+.app-main .log-screen .log-time {
+  line-height: 1.4;
+}
+
+.app-main .log-screen .log-day-sub {
+  line-height: 1.4;
+}
+
+.log-screen .log-continue-top svg {
+  flex: none;
+}
+.app-main .log-screen .log-day-date-btn {
+  line-height: 1.4;
+}
+
+/* The mockup header is `justify-content: space-between` with natural-width items: the title sits between them. */
+header.app-header.is-phone {
+  justify-content: space-between;
+}
+header.app-header.is-phone .hd-title {
+  flex: 0 1 auto;
+  max-width: 62%;
+}
+/* Phone header: three columns with equal sides, so the title stays centred whatever the back label's width. */
+header.app-header.is-phone.is-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  column-gap: 8px;
+}
+header.app-header.is-phone.is-bar > :first-child {
+  justify-self: start;
+  max-width: 100%;
+}
+header.app-header.is-phone.is-bar .hd-title {
+  justify-self: stretch;
+  width: auto;
+  /* 62 % of the header, not of the grid column (that squeezed the title to the column's left side). */
+  max-width: calc((100vw - 24px) * 0.62);
+  text-align: center;
+}
+header.app-header.is-phone.is-bar .hd-right {
+  justify-self: end;
+}
+/* Bottom bar: same three-column grid, so the count is centred on the screen (Log is wider than compose). */
+.bottom-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+.bottom-toolbar > .bt-log {
+  justify-self: start;
+}
+.bottom-toolbar > .bt-edit {
+  justify-self: end;
+}
+
+.summary-screen .summary-cap-1 {
+  margin: 4px 0 6px;
+}
+.summary-screen .summary-cap-2 {
+  margin: 10px 0 6px;
+}
+.summary-week {
+  height: 90px;
+}
+
+.tally-tiles .summary-tile:first-child strong {
+  font-size: 20px;
+}
+
+.tally-view .tally-day + .tally-day .cap {
+  margin-top: 10px;
+}
+
+.doc-pane-top .item-menu-btn {
+  height: 19px;
+  padding: 0 4px !important;
+  line-height: 1;
+}
+.desk .note-block-view ol,
+.desk .note-block-view ul {
+  margin: 0 0 10px;
+}
+
+.desk .list-new {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  color: #fff !important;
+}
+.desk .list-new svg {
+  display: block;
+}
+
+/* Desktop header: 13 px, search box 240 + 2 x 10 px padding, 5 px vertical padding (desktop.html). */
+header.app-header.is-wide {
+  font-size: 13px;
+  line-height: 1.45;
+}
+header.app-header .hd-search {
+  box-sizing: content-box;
+  width: 240px;
+  padding: 5px 10px;
+  line-height: 1.45;
+  font-size: 13px;
+}
+header.app-header .hd-log {
+  padding: 4px 12px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.doc-pane-top .item-menu-btn {
+  margin: -3px 0;
+  height: 24px;
+}
+.doc-pane-top .item-menu-btn svg {
+  width: 16px;
+  height: 16px;
+}
+.doc-pane-top .item-menu {
+  display: flex;
+  align-items: center;
+  height: 19px;
+}
+.doc-pane-top .item-menu-btn {
+  margin: 0;
+  height: 19px;
+}
+.desk .desk-editor {
+  position: relative;
+}
+.desk .doc-pane {
+  position: static;
+  min-height: 0;
+  padding-bottom: 0;
+}
+.doc-pane-hint {
+  position: absolute;
+  left: 28px;
+  bottom: 14px;
+}
+
+/* Date / time fields are 14 px (height 35.6), not the label's 12 px (ui-review R2). */
+.log-screen .log-panel-fields input {
+  font-size: 14px !important;
+  line-height: 1.4;
+}
+
+/* The header (and its menus) sits above the page container (z 200) and the bottom toolbar (300), below sheets (2000). */
+header.app-header {
+  z-index: 400;
+}
+
+/* Header search box (open): same text size as the "Search" pill (13px wide, 14px phone), left aligned, no legacy input styles. */
+header.app-header .hd-search.is-open input {
+  font: inherit !important;
+  font-size: inherit !important;
+  text-align: left !important;
+  margin: 0 !important;
+  width: auto !important;
+  flex: 1;
+  min-width: 0;
+  color: #fff !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+}
+header.app-header.is-wide .hd-search.is-open {
+  font-size: 13px;
+}
+header.app-header.is-phone .hd-search.is-open {
+  font-size: 14px;
+}
+header.app-header .hd-search.is-open {
+  height: 1.45em;
+  align-items: center;
+}
+header.app-header .hd-search.is-open button {
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+/* Weights are 400 / 500 only on the phone screens (README); the menu page and Recently Deleted follow. */
+.deleted-page h1 {
+  font-size: 26px;
+  font-weight: 500;
+}
+.menu-page h3,
+.menu-page .page-content-top1 {
+  font-size: 14px;
+  font-weight: 500;
+}
+.menu-page .listNameButton h3 {
+  font-weight: 400;
+}
+
+.item-menu-list.is-up {
+  top: auto;
+  bottom: 100%;
+}
+
+/* desktop.html: the header is 48.8 px (10 px padding around the 26.85 px Log pill + line). */
+header.app-header.is-wide {
+  height: 48.8px;
+  box-sizing: border-box;
+}
