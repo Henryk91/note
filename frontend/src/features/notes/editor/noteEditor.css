@@ -8,6 +8,8 @@
   font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 .note-doc .ProseMirror {
+  /* Parents of the phone note screen centre their text; the document never is. */
+  text-align: left;
   outline: none;
   white-space: pre-wrap;
   word-wrap: break-word;
@@ -163,6 +165,20 @@
 .note-doc pre code {
   background: none;
   padding: 0;
+}
+/* Code stays monospace and left-aligned, whitespace kept, as the old Markdown view showed it (the generic
+   `.ProseMirror * { font-family: inherit }` above and the legacy centred text must not reach it). */
+.note-doc .ProseMirror pre,
+.note-doc .ProseMirror pre *,
+.note-doc .ProseMirror code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.note-doc .ProseMirror pre {
+  text-align: left;
+  white-space: pre;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text);
 }
 .note-doc blockquote {
   margin: 0 0 10px;
