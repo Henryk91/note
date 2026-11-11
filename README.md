@@ -88,7 +88,7 @@ A full-stack personal notes and productivity app built with **React**, **Node.js
    # Optional - Server
    NODE_ENV=development
    PORT=8080
-   RATE_LIMIT_MAX=300            # requests per 15 minutes per IP
+   RATE_LIMIT_MAX=1000           # requests per 15 minutes per IP
 
    # Optional - Authentication
    ACCESS_EXPIRES=15m
@@ -282,7 +282,7 @@ All routes are under `/api`.
 
 - **Helmet**: security headers including CSP
 - **CORS**: configurable origin allowlist with subdomain support
-- **Rate Limiting**: 300 requests per 15 minutes per IP by default (`RATE_LIMIT_MAX`)
+- **Rate Limiting**: 1000 requests per 15 minutes per IP by default (`RATE_LIMIT_MAX`)
 - **Input Sanitising**: XSS escaping of body, query and params, and MongoDB injection prevention
 - **Output Sanitising**: rendered Markdown goes through DOMPurify
 - **HPP**: HTTP parameter pollution protection

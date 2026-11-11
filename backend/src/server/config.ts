@@ -16,7 +16,7 @@ const EnvSchema = z.object({
   REFRESH_EXPIRES: z.string().default('30d'),
   MAX_SESSIONS: z.coerce.number().int().positive().default(3),
   /** API requests per IP per 15 minutes. Raise it only for local development and automated UI checks. */
-  RATE_LIMIT_MAX: z.coerce.number().int().positive().default(300),
+  RATE_LIMIT_MAX: z.coerce.number().int().positive().default(1000),
   CORS_ALLOWED_ORIGINS: z.string().optional(),
   COOKIE_SECURE: z.string().optional(),
   MONGODB_URI: z.string().optional(),
