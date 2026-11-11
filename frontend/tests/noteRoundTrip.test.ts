@@ -30,6 +30,9 @@ const EXTRA = [
   '- list first\n- second',
   '```\ncode first\n```',
   'Escapes \\* and \\_ and a_b_c and <not html',
+  // Stored through the backend's xss() filter: < and > arrive as &lt; / &gt;.
+  'Markdown Code\n\n```\n# H1\n&gt; blockquote\nif (a &lt; b &amp;&amp; c &gt; d) {}\n```\n\n    &lt;h1&gt; Hello, world!&lt;/h1&gt;\n\n---',
+  'Quotes\n\n&gt; quoted after the filter\n&gt; second line\n\nx -&gt; y and `a &gt; b` inline',
 ];
 
 const load = (md: string) => {
@@ -51,6 +54,35 @@ describe('note editor Markdown round trip', () => {
       editor.destroy();
     },
   );
+
+  test('text stored with &lt; / &gt; (backend xss filter) shows the characters: code, inline code, text, quote markers', () => {
+    const { editor } = load(EXTRA[EXTRA.length - 2]);
+    const pre = editor.state.doc.child(1);
+    expect(pre.type.name).toBe('codeBlock');
+    expect(pre.textContent).toBe('# H1\n> blockquote\nif (a < b && c > d) {}');
+    const raw = editor.state.doc.child(2);
+    expect(raw.textContent).toContain('<h1> Hello, world!</h1>');
+    editor.destroy();
+    const q = load(EXTRA[EXTRA.length - 1]).editor;
+    expect(q.state.doc.child(1).type.name).toBe('blockquote');
+    // the two quoted lines are joined by a hard break (breaks: true), which has no text
+    expect(q.state.doc.child(1).textContent).toBe('quoted after the filtersecond line');
+    expect(q.state.doc.child(2).textContent).toBe('x -> y and a > b inline');
+    q.destroy();
+  });
+
+  test('editing a code block stored with &gt; saves the real characters', () => {
+    const md = 'Code\n\n```\na &gt; b\n```';
+    const { editor, baseline } = load(md);
+    let end = 0;
+    editor.state.doc.forEach((node, offset, index) => {
+      if (index === 1) end = offset + node.nodeSize - 1;
+    });
+    editor.commands.setTextSelection(end);
+    editor.commands.insertContent(' c');
+    expect(docToMarkdown(editor.getJSON() as any, baseline)).toBe('Code\n\n```\na > b c\n```');
+    editor.destroy();
+  });
 
   test('an edit changes only the edited block; the rest keeps its exact source', () => {
     const md = 'Human Flag\n1. Grip straight arm\n2. Flag bounce\n\n[youtube.com/watch?v=bG0h7bSfxQI](https://www.youtube.com/watch?v=bG0h7bSfxQI)';

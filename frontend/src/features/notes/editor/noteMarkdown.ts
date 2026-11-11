@@ -24,16 +24,33 @@ export const SOURCE_ATTRS = ['raw', 'tail', 'idx', 'prefix', 'absent', 'hasNl', 
 const addMark = (nodes: PMNode[], mark: PMMark): PMNode[] =>
   nodes.map((n) => (n.type === 'text' ? { ...n, marks: [...(n.marks ?? []), mark] } : n));
 
-const textNodes = (text: string, marks?: PMMark[]): PMNode[] => {
+/**
+ * The backend's xss() input filter stores every `<` / `>` as `&lt;` / `&gt;` (and marked hands out `\<` as `&lt;`).
+ * The old app rendered notes as HTML, where these show as the characters; the editor shows text, so they are decoded
+ * for display. Only text is decoded (never re-read as HTML) and each block keeps its stored source, so an unchanged
+ * note is still written back byte for byte.
+ */
+export const decodeEntities = (s: string): string =>
+  s.indexOf('&') < 0
+    ? s
+    : s
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#0*39;|&#x0*27;|&apos;/gi, "'")
+        .replace(/&amp;/g, '&');
+
+const textNodes = (text: string, marks?: PMMark[], decode = true): PMNode[] => {
   const out: PMNode[] = [];
-  text.split('\n').forEach((part, i) => {
+  (decode ? decodeEntities(text) : text).split('\n').forEach((part, i) => {
     if (i > 0) out.push({ type: 'hardBreak' });
     if (part) out.push({ type: 'text', text: part, ...(marks?.length ? { marks } : {}) });
   });
   return out;
 };
 
-const verbatim = (raw: string): PMNode[] => textNodes(raw, [{ type: 'verbatim' }]);
+// Verbatim inline source is written back as it is, so it is shown as stored.
+const verbatim = (raw: string): PMNode[] => textNodes(raw, [{ type: 'verbatim' }], false);
 
 const inline = (tokens: Token[] | undefined): PMNode[] => {
   const out: PMNode[] = [];
@@ -83,9 +100,17 @@ const stripNl = (s: string) => s.replace(/\n+$/, '');
 
 const listMarker = (raw: string) => raw.match(/^\s*([-*+]|\d+[.)])/)?.[1] ?? '-';
 
+/** `&gt; quote` (a blockquote whose `>` was escaped on save): the paragraph's source with the markers decoded. */
+const ESCAPED_QUOTE = /^ {0,3}&gt;/;
+const unescapeQuoteMarkers = (raw: string) => raw.replace(/^( {0,3})((?:&gt; ?)+)/gm, (_m, ind: string, marks: string) => ind + marks.replace(/&gt;/g, '>'));
+
 const blockFromToken = (t: Token): PMNode | null => {
   switch (t.type) {
     case 'paragraph':
+      if (ESCAPED_QUOTE.test(t.raw)) {
+        const quote = marked.lexer(unescapeQuoteMarkers(t.raw), LEX_OPTIONS).find((k) => k.type === 'blockquote');
+        if (quote) return blockFromToken(quote);
+      }
       return { type: 'paragraph', content: inline((t as Tokens.Paragraph).tokens) };
     case 'text': // top-level text (rare)
       return { type: 'paragraph', content: inline((t as Tokens.Text).tokens ?? [{ type: 'text', raw: t.raw, text: (t as Tokens.Text).text } as Token]) };
@@ -98,7 +123,8 @@ const blockFromToken = (t: Token): PMNode | null => {
       const c = t as Tokens.Code;
       const fence = t.raw.match(/^ {0,3}(`{3,}|~{3,})/)?.[1] ?? null;
       if (!fence) break; // indented code: keep as raw text
-      return { type: 'codeBlock', attrs: { language: c.lang || null, fence }, content: c.text ? [{ type: 'text', text: c.text }] : [] };
+      const code = decodeEntities(c.text);
+      return { type: 'codeBlock', attrs: { language: c.lang || null, fence }, content: code ? [{ type: 'text', text: code }] : [] };
     }
     case 'list': {
       const l = t as Tokens.List;
@@ -127,7 +153,7 @@ const blockFromToken = (t: Token): PMNode | null => {
 };
 
 const rawBlock = (raw: string): PMNode => {
-  const text = stripNl(raw);
+  const text = decodeEntities(stripNl(raw));
   return { type: 'rawBlock', content: text ? [{ type: 'text', text }] : [] };
 };
 
