@@ -13,7 +13,7 @@ jest.mock('../src/features/notes/pages/NoteDetailPage/NoteDetailPage', () => () 
 
 describe('AppRoutes', () => {
   test('matches snapshot', () => {
-    const { asFragment } = renderWithProviders(<AppRoutes setFilterNote={jest.fn()} menuButton={jest.fn()} />);
+    const { asFragment } = renderWithProviders(<AppRoutes setFilterNote={jest.fn()} />);
     expect(asFragment()).toMatchSnapshot();
   });
 });

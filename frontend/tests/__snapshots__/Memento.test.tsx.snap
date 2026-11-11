@@ -6,11 +6,6 @@ exports[`Memento matches snapshot 1`] = `
     id="memento-wrapper"
   >
     <div
-      data-testid="back-button"
-    >
-      BackButton
-    </div>
-    <div
       class="dark-border-color"
       id="memento-main"
     >
@@ -19797,7 +19792,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="left tooltiptext"
@@ -19808,7 +19803,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="left tooltiptext"
@@ -19819,7 +19814,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="left tooltiptext"
@@ -19830,7 +19825,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="left tooltiptext"
@@ -19841,7 +19836,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="left tooltiptext"
@@ -19852,7 +19847,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="left tooltiptext"
@@ -19863,7 +19858,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="left tooltiptext"
@@ -19874,7 +19869,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="left tooltiptext"
@@ -19885,7 +19880,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="left tooltiptext"
@@ -19896,7 +19891,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="left tooltiptext"
@@ -19907,7 +19902,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="left tooltiptext"
@@ -19918,7 +19913,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="left tooltiptext"
@@ -19929,7 +19924,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -19940,7 +19935,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -19951,7 +19946,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -19962,7 +19957,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -19973,7 +19968,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -19984,7 +19979,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -19995,7 +19990,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -20006,7 +20001,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -20017,7 +20012,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -20028,7 +20023,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -20039,7 +20034,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -20050,7 +20045,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -20061,7 +20056,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -20072,7 +20067,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -20083,7 +20078,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -20094,7 +20089,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -20105,7 +20100,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -20116,7 +20111,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -20127,7 +20122,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -20138,7 +20133,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -20149,7 +20144,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -20160,7 +20155,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -20171,7 +20166,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -20182,7 +20177,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -20193,7 +20188,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -20204,7 +20199,7 @@ exports[`Memento matches snapshot 1`] = `
               </span>
             </span>
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="right tooltiptext"
@@ -20224,7 +20219,7 @@ exports[`Memento matches snapshot 1`] = `
             class="year"
           >
             <span
-              class="week-box tooltip"
+              class="week-box filled tooltip"
             >
               <span
                 class="left tooltiptext"

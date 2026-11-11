@@ -3,25 +3,52 @@
 exports[`NoteDetail matches snapshot 1`] = `
 <DocumentFragment>
   <div
-    class="slide-in"
+    class="slide-in false"
   >
     <div
       class=" note-detail-item"
       id=""
     >
       <div
-        class="page-content-top1"
-        id="personContainer"
+        class="phone-search-wrap"
       >
-        <h1
-          class="nameBox"
-          id="personHead"
+        <label
+          class="phone-search"
         >
-          main
-        </h1>
+          <svg
+            aria-hidden="true"
+            class="tabler-icon tabler-icon-search "
+            fill="none"
+            height="1em"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+            width="1em"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"
+            />
+            <path
+              d="M21 21l-6 -6"
+            />
+          </svg>
+          <input
+            aria-label="Search all notes and logs"
+            autocomplete="off"
+            class="swiper-no-swiping"
+            enterkeyhint="search"
+            id="phoneSearchBox"
+            placeholder="Search all notes and logs"
+            type="search"
+            value=""
+          />
+        </label>
       </div>
       <div
-        class="detailedBox"
+        class="phone-body"
       />
       <br />
     </div>

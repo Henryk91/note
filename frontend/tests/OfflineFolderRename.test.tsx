@@ -93,7 +93,6 @@ describe('Offline Folder Rename', () => {
       () =>
         useNoteOperations({
           person: store.getState().person.byId[folderId] as any,
-          index: 2,
           openPage: jest.fn(),
         }),
       { wrapper: Wrapper },

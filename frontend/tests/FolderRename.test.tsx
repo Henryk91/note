@@ -4,7 +4,8 @@ import { Provider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
-import { useNoteDetailLogic } from '../src/features/notes/hooks/useNoteDetailLogic';
+// useNoteDetailLogic was merged into useNoteOperations (commit 3a5ba97, "hook cleanup"); renaming lives there now.
+import { useNoteOperations } from '../src/features/notes/hooks/useNoteOperations';
 import { notesApi } from '../src/features/notes/api/notesApi';
 import personReducer from '../src/features/auth/store/personSlice';
 import themeReducer from '../src/core/store/themeSlice';
@@ -81,9 +82,9 @@ describe('Folder Rename Persistence', () => {
     // Use hook at index 2 (Child)
     const { result } = renderHook(
       () =>
-        useNoteDetailLogic({
-          index: 2,
-          isLastPage: true,
+        useNoteOperations({
+          person: childNote as any,
+          openPage: jest.fn(),
         }),
       { wrapper: Wrapper },
     );

@@ -87,7 +87,6 @@ describe('Offline Log Creation Nested', () => {
       () =>
         useNoteOperations({
           person: store.getState().person.byId[parentId] as any,
-          index: 1,
           openPage: jest.fn(),
         }),
       { wrapper: Wrapper },
