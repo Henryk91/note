@@ -8,11 +8,12 @@ import { folderIdFromPath, pathForFolder } from '../hooks/useFolderUrlSync';
 import { useItemMutations } from '../edit/itemMutations';
 import { useDeleteWithUndo } from '../edit/useDeleteWithUndo';
 import { NoteItemType, ItemType } from '../../../shared/utils/Helpers/types';
-import { isLogId } from '../log/useLogData';
+import { useLogData, isLogId } from '../log/useLogData';
 import { DesktopSidebar } from './DesktopSidebar';
 import { ListPane } from './ListPane';
 import { DocumentPane } from './DocumentPane';
 import { LogScreen } from '../log/LogScreen';
+import { DaysColumn, PICK_LOG_DAY_EVENT } from '../log/DesktopLog';
 import { MoveToSheet } from './MoveToSheet';
 import { Breakpoint } from './useBreakpoint';
 import { FOCUS_SEARCH_EVENT, NEW_NOTE_EVENT } from './events';
@@ -68,6 +69,24 @@ const Resizer: React.FC<{ label: string; onDrag: (dx: number) => void; onEnd: ()
  * >= 768 px: list + editor (the folder tree slides in from the left). >= 1100 px: sidebar + list + editor.
  * Selecting a folder in the tree, opening a card, or selecting a card is all URL driven (`/f/:id`, `/n/:id`).
  */
+/** Log pages: the days column (desktop-log / README) in the list pane's place: one row per day with entries. */
+const LogDaysColumn: React.FC<{ logId: string; path: string }> = ({ logId, path }) => {
+  const { grouped, mode, settings } = useLogData(logId);
+  const [now] = useState(() => Date.now());
+  return (
+    <DaysColumn
+      logId={logId}
+      path={path}
+      days={grouped.days}
+      byDay={grouped.byDay}
+      mode={mode}
+      nowTs={now}
+      breakWords={settings.breakWords}
+      onPickCalendar={() => window.dispatchEvent(new CustomEvent(PICK_LOG_DAY_EVENT, { detail: { logId, calendar: true } }))}
+    />
+  );
+};
+
 export const DesktopLayout: React.FC<{ breakpoint: Exclude<Breakpoint, 'mobile'> }> = ({ breakpoint }) => {
   const dispatch = useDispatch();
   const history = useHistory();
@@ -222,6 +241,7 @@ export const DesktopLayout: React.FC<{ breakpoint: Exclude<Breakpoint, 'mobile'>
   const cols = [
     ...(showSidebar ? [`${widths.sidebar}px`, '1px'] : []),
     ...(showList ? [`${widths.list}px`, '1px'] : []),
+    ...(folderIsLog ? ['300px'] : []),
     'minmax(0, 1fr)',
   ].join(' ');
 
@@ -266,7 +286,8 @@ export const DesktopLayout: React.FC<{ breakpoint: Exclude<Breakpoint, 'mobile'>
           />
         </>
       )}
-      <main className="desk-editor" aria-label="Editor">
+      {folderIsLog && <LogDaysColumn logId={folderId} path={pathText} />}
+      <main className={`desk-editor ${folderIsLog ? 'is-log' : ''}`} aria-label="Editor">
         {folderIsLog ? (
           <LogScreen logId={folderId} />
         ) : (

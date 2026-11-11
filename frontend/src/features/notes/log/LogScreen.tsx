@@ -13,6 +13,7 @@ import { LogRow } from './LogRow';
 import { DailyValueSummary } from './Summaries';
 import { SummaryScreen, summaryCopyText } from './SummaryScreen';
 import { TallyView } from './TallyView';
+import { DesktopDayBar, DesktopEntryBar, DesktopLogHeader, DesktopLogTable, PICK_LOG_DAY_EVENT, setSelectedLogDay } from './DesktopLog';
 import { useDismiss } from '../edit/useDismiss';
 import { isFrontPage, useHeader } from '../../../shared/header/headerStore';
 import { useBreakpoint } from '../layout/useBreakpoint';
@@ -101,6 +102,16 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
   const timelineRef = useRef<HTMLDivElement>(null);
   const prefilledDay = useRef<string | null>(null);
   const touchStart = useRef<{ x: number; y: number; t: number; selected: boolean } | null>(null);
+
+  // Desktop: the date / time fields are always visible in the entry bar (desktop-log.html), so the "panel" is always open.
+  const closePanel = () => setPanelOpen(!phone);
+  useEffect(() => {
+    if (!phone) {
+      setPanelOpen(true);
+      setPanel(panelFromTs(customTs ?? Date.now()));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phone]);
 
   const breakWords = settings.breakWords?.length ? settings.breakWords : DEFAULT_BREAK_WORDS;
   const dayEntries = useMemo(() => grouped.byDay[day] ?? [], [grouped, day]);
@@ -226,7 +237,7 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
   const finishEdit = useCallback(() => {
     writeDraft(logId, null);
     setEditing(null);
-    setPanelOpen(false);
+    closePanel();
     setPanelError(null);
     setText(aside?.text ?? '');
     setCustomTs(aside?.customTs ?? null);
@@ -280,7 +291,7 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
       setDay(dayKeyOf(ts));
       setText('');
       setCustomTs(null);
-      setPanelOpen(false);
+      closePanel();
       scrollToEnd();
     }
   };
@@ -291,7 +302,7 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
     void mutations.create(code, ts);
     setDay(dayKeyOf(ts));
     setCustomTs(null);
-    setPanelOpen(false);
+    closePanel();
     scrollToEnd();
   };
 
@@ -349,6 +360,22 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
     },
     [editing],
   );
+  // Desktop: the days column shows which day is open and opens a day (or the calendar) through an event.
+  useEffect(() => {
+    if (phone) return undefined;
+    setSelectedLogDay({ logId, day });
+    return () => setSelectedLogDay(null);
+  }, [phone, logId, day]);
+  useEffect(() => {
+    const onPick = (e: Event) => {
+      const d = (e as CustomEvent).detail as { logId: string; day?: string; calendar?: boolean };
+      if (d?.logId !== logId) return;
+      if (d.calendar) setCalOpen((v) => !v);
+      else if (d.day) goDay(d.day);
+    };
+    window.addEventListener(PICK_LOG_DAY_EVENT, onPick);
+    return () => window.removeEventListener(PICK_LOG_DAY_EVENT, onPick);
+  }, [logId, goDay]);
   const prevDay = adjacentDay(grouped.days, day, 'prev');
   const nextDay = adjacentDay(grouped.days, day, 'next');
 
@@ -498,6 +525,157 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
     if (mode === 'time-tracker') return `${isToday ? 'Today · ' : ''}Worked ${formatDuration(summary.workedMs)}`;
     return `${isToday ? 'Today · ' : ''}${dayEntries.length} ${dayEntries.length === 1 ? 'entry' : 'entries'}`;
   })();
+
+  // ---- desktop (docs/mockups/desktop-log.html): page header, day bar, table, entry bar always visible --------
+  if (!phone) {
+    const optionsMenu = (
+      <div style={{ position: 'relative' }} ref={titleMenuRef}>
+        <button type="button" className="dl-ibtn" aria-label="Log options" aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)}>
+          <IconDots size={16} />
+        </button>
+        {menuOpen && (
+          <div className="log-menu" role="menu" style={{ top: 40, right: 0 }}>
+            <div style={{ padding: '4px 10px', fontSize: 11, color: 'var(--muted)' }}>Mode: {MODE_LABELS[mode]}</div>
+            {(Object.keys(MODE_LABELS) as LogMode[]).map((m) => (
+              <button key={m} type="button" role="menuitemradio" aria-checked={settings.mode === m} onClick={() => changeMode(m)}>
+                {settings.mode === m ? '● ' : '○ '}
+                {MODE_LABELS[m]}
+              </button>
+            ))}
+            <button type="button" role="menuitem" onClick={() => changeMode(undefined)}>
+              Automatic
+            </button>
+            <button type="button" role="menuitem" onClick={togglePinned}>
+              {settings.pinned ? 'Unpin from quick log' : 'Pin to quick log'}
+            </button>
+            <button type="button" role="menuitem" onClick={editBreakWords}>
+              Break words...
+            </button>
+          </div>
+        )}
+      </div>
+    );
+    const kicker = label;
+    if (view === 'summary') {
+      return (
+        <div className="log-screen is-desktop">
+          <DesktopLogHeader kicker={kicker} title="Summary" menu={
+            <>
+              <button type="button" className="dl-btn2" onClick={() => closeSummary()}>
+                <IconChevronLeft size={16} /> Log
+              </button>
+              <button type="button" className="dl-btn2" onClick={() => void navigator.clipboard?.writeText(summaryCopyText(day, grouped.byDay, now, breakWords))}>
+                <IconCopy size={16} /> Copy
+              </button>
+            </>
+          } />
+          <div className="dl-list">
+            <SummaryScreen day={day} byDay={grouped.byDay} nowTs={now} breakWords={breakWords} />
+          </div>
+        </div>
+      );
+    }
+    return (
+      <div className="log-screen is-desktop">
+        <DesktopLogHeader
+          kicker={kicker}
+          title={isTally ? parentName : 'Log'}
+          onSummary={mode === 'time-tracker' ? openSummary : undefined}
+          menu={optionsMenu}
+        />
+        {!isTally && (
+          <DesktopDayBar
+            day={day}
+            sub={sub}
+            onPrev={prevDay ? () => goDay(prevDay) : null}
+            onNext={nextDay ? () => goDay(nextDay) : null}
+            onPickDay={() => setCalOpen((v) => !v)}
+            todayButton={!isToday && !nextDay ? () => goDay(todayKey) : null}
+            continueText={mode === 'time-tracker' && task ? firstLine(task.text) : null}
+            onContinue={() => task && fill(firstLine(task.text))}
+          />
+        )}
+        {calOpen && <Calendar selected={day} daysWithEntries={daySet} onPick={(d) => goDay(d)} onClose={() => setCalOpen(false)} />}
+        {editing && editing.day !== day && (
+          <div className="log-banner" role="status">
+            <span>Editing an entry from {formatDayLong(editing.day)}</span>
+            <button type="button" onClick={() => goDay(editing.day)}>
+              Go to it
+            </button>
+          </div>
+        )}
+        {daily && <DailyValueSummary info={daily} />}
+        {showDraftBanner && (
+          <div className="log-banner" role="status">
+            <span>You have an unsaved edit{draftEntry ? '' : ' (the entry no longer exists)'}.</span>
+            <span>
+              {draftEntry && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDay(draftEntry.day);
+                    beginEdit(draftEntry, { text: draft!.text, ts: draft!.ts });
+                    setDraft(null);
+                  }}
+                >
+                  Continue editing
+                </button>
+              )}{' '}
+              <button
+                type="button"
+                onClick={() => {
+                  writeDraft(logId, null);
+                  setDraft(null);
+                }}
+              >
+                Discard
+              </button>
+            </span>
+          </div>
+        )}
+        {isTally ? (
+          <div className="dl-list">
+            <TallyView entries={entries} codes={codes} nowTs={now} editingId={editing?.id} onCode={logCode} onEdit={beginEdit} />
+          </div>
+        ) : (
+          <DesktopLogTable
+            dayEntries={dayEntries}
+            nowTs={now}
+            breakWords={breakWords}
+            expandByDefault={mode === 'journal'}
+            editingId={editing?.id}
+            pendingIds={pendingIds}
+            showContinue={mode === 'time-tracker'}
+            empty={!loaded ? 'Loading...' : dayEntries.length === 0 ? (isToday ? 'No entries yet today.' : 'No entries on this day.') : null}
+            listRef={timelineRef}
+            onEdit={beginEdit}
+            onContinue={fill}
+            onCopy={onCopy}
+            onLogAgain={(e) => {
+              setCustomTs(null);
+              fill(e.text);
+            }}
+            onDelete={onDelete}
+          />
+        )}
+        {(!isTally || editing) && (
+          <DesktopEntryBar
+            text={text}
+            onText={setText}
+            placeholder={placeholder}
+            panel={customTs === null ? panelFromTs(chipTs) : panel}
+            panelError={panelError}
+            onPanelField={onPanelField}
+            onStep={onStep}
+            editing={!!editing}
+            onResetOrCancel={resetOrCancel}
+            onSend={send}
+            inputRef={inputRef}
+          />
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="log-screen swiper-no-swiping">

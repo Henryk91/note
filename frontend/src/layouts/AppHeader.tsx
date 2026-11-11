@@ -78,7 +78,7 @@ export const AppHeader: React.FC = () => {
           searchBox
         ) : (
           <button type="button" className="hd-search" onClick={() => setSearching(true)} aria-label="Search">
-            <IconSearch size={"1em"} /> Search&nbsp;&nbsp;{MOD}F
+            <IconSearch size={"1em"} /> <span className="hd-search-label">Search</span>&nbsp;&nbsp;<span className="hd-search-key">{MOD}F</span>
           </button>
         )}
         <button type="button" className="hd-log" onClick={() => window.dispatchEvent(new Event(QUICK_LOG_EVENT))}>
