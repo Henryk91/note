@@ -70,6 +70,8 @@ export const useFolderUrlSync = ({ selectionMode = false }: SyncOptions = {}) =>
   const firstRun = useRef(true);
 
   const lastId = pages[pages.length - 1]?.params.id;
+  const lastIdRef = useRef(lastId);
+  lastIdRef.current = lastId;
 
   // URL -> stack (first load on a folder URL, and browser Back / Forward).
   useEffect(() => {
@@ -108,7 +110,9 @@ export const useFolderUrlSync = ({ selectionMode = false }: SyncOptions = {}) =>
             if (pendingTarget.current === '__awaiting-path__') pendingTarget.current = null;
             return;
           }
-          pendingTarget.current = ids[ids.length - 1];
+          // When the stack already ends at this folder (the id chain was right), the stack -> URL effect does not run
+          // again, so nothing would clear the target; a stale target would then block the URL update of the next Back.
+          pendingTarget.current = ids[ids.length - 1] === lastIdRef.current ? null : ids[ids.length - 1];
           if (ids[0] !== selectedNoteName) dispatch(setSelectedNoteName(ids[0]));
           dispatch(setPages(ids.map(page)));
         })
