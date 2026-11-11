@@ -66,7 +66,18 @@ export const AppHeader: React.FC = () => {
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={(e) => e.key === 'Escape' && closeSearch()}
       />
-      <button type="button" aria-label="Close search" onClick={closeSearch}>
+      {/* × clears the text and keeps the box open (like the phone field); with nothing typed it closes the search. */}
+      <button
+        type="button"
+        aria-label={query ? 'Clear search' : 'Close search'}
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => {
+          if (query) {
+            setQuery('');
+            document.getElementById('searchBox')?.focus();
+          } else closeSearch();
+        }}
+      >
         <IconX size={"1em"} />
       </button>
       {query.trim() && <SearchResults query={query} onDone={closeSearch} />}
