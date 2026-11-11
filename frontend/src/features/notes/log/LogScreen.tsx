@@ -40,6 +40,7 @@ import {
 } from './logModel';
 import { chipLabel, defaultTsForDay, PanelValue, panelFromTs, parsePanel, stepTs } from './entryTime';
 import { askText } from '../../../shared/components/dialog/AppDialog';
+import { ScrollJump } from '../../../shared/components/ScrollJump';
 
 const MODE_LABELS: Record<LogMode, string> = {
   'time-tracker': 'Time tracker',
@@ -841,6 +842,7 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
             onDelete={onDelete}
           />
         ))}
+        <ScrollJump count={dayEntries.length} />
       </div>
       )}
 
