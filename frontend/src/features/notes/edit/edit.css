@@ -783,6 +783,26 @@ header.app-header .item-menu-list button {
   padding: 10px 8px 4px;
   letter-spacing: 0.05em;
 }
+/* "Notebooks" title doubles as the collapse toggle; looks like the other titles, chevron on the right. */
+.desk button.side-title.side-title-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  font-family: inherit;
+  font-weight: inherit;
+  text-transform: uppercase;
+  line-height: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.desk button.side-title.side-title-toggle:hover {
+  color: var(--text);
+}
 .desk .side-item {
   display: flex;
   align-items: center;

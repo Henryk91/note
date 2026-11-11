@@ -34,6 +34,16 @@ describe('login (menu-login.html 2 / 4)', () => {
     spy.mockRestore();
   });
 
+  test('the eye button shows and hides the password', () => {
+    renderWithProviders(<Login />);
+    const input = screen.getByLabelText('Password') as HTMLInputElement;
+    expect(input.type).toBe('password');
+    fireEvent.click(screen.getByRole('button', { name: 'Show password' }));
+    expect(input.type).toBe('text');
+    fireEvent.click(screen.getByRole('button', { name: 'Hide password' }));
+    expect(input.type).toBe('password');
+  });
+
   test('"Create one" switches to the sign-up form (feature kept)', () => {
     renderWithProviders(<Login />);
     fireEvent.click(screen.getByRole('button', { name: 'Create one' }));
@@ -46,7 +56,7 @@ describe('menu (menu-login.html 1 / 3)', () => {
   test('phone: Notebooks (Site Track last, after All / None), Apps, Theme with the current one checked, Log out', () => {
     renderWithProviders(<MenuContent withNotebooks />);
     const labels = [...document.querySelectorAll('.menu-nm')].map((n) => n.textContent);
-    expect(labels).toEqual(['Henry', 'Koorvi', 'All', 'None', 'Site Track', 'Memento', 'Pomodoro', 'Recently Deleted', 'Dark', 'Ocean', 'Green', 'Night', 'Red', 'Log out']);
+    expect(labels).toEqual(['Henry', 'Koorvi', 'All', 'None', 'Site Track', 'Notes', 'Memento', 'Pomodoro', 'Recently Deleted', 'Dark', 'Ocean', 'Green', 'Night', 'Red', 'Log out']);
     expect(screen.getAllByLabelText('Current theme')).toHaveLength(1);
   });
 
@@ -54,6 +64,18 @@ describe('menu (menu-login.html 1 / 3)', () => {
     renderWithProviders(<MenuContent withNotebooks={false} />);
     expect(screen.queryByText('Notebooks')).toBeNull();
     expect(screen.getByText('Apps')).toBeTruthy();
+    expect(screen.getByText('Notes')).toBeTruthy();
     expect(screen.getByText('Log out')).toBeTruthy();
+  });
+});
+
+describe('search scope', () => {
+  // eslint-disable-next-line global-require
+  const { searchScope } = require('../src/features/notes/components/SearchBar/SearchResults');
+  test('a real notebook limits the search; All / None / nothing search everywhere', () => {
+    expect(searchScope('Henry')).toBe('Henry');
+    expect(searchScope('All')).toBe('');
+    expect(searchScope('None')).toBe('');
+    expect(searchScope(null)).toBe('');
   });
 });

@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import NoteDetailTags from './NoteDetailTags';
 import { useSelector } from 'react-redux';
+import { searchScope } from '../SearchBar/SearchResults';
 import { removeLastPage, setEditName, setSelectedNoteName, setShowTag } from '../../../auth/store/personSlice';
 import { ItemMenu, ItemMenuEntry } from '../../edit/ItemMenu';
 import { useNotesWithChildren } from '../../hooks/useNotesQueries';
@@ -157,7 +158,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
         {index === 0 && (
           <>
             <button type="button" className="phone-search" onClick={() => window.dispatchEvent(new Event(FOCUS_SEARCH_EVENT))}>
-              <IconSearch size={"1em"} /> Search all notes and logs
+              <IconSearch size={"1em"} /> {searchScope(notebookName) ? `Search ${searchScope(notebookName)}` : 'Search all notes and logs'}
             </button>
             <PinnedCards />
           </>

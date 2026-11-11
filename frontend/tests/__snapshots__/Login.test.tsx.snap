@@ -68,13 +68,43 @@ exports[`Login matches snapshot 1`] = `
           class="login-fld"
         >
           Password
-          <input
-            autocomplete="current-password"
-            class="login-in"
-            name="password"
-            required=""
-            type="password"
-          />
+          <span
+            class="login-pw"
+          >
+            <input
+              autocomplete="current-password"
+              class="login-in"
+              name="password"
+              required=""
+              type="password"
+            />
+            <button
+              aria-label="Show password"
+              aria-pressed="false"
+              class="login-eye"
+              type="button"
+            >
+              <svg
+                class="tabler-icon tabler-icon-eye "
+                fill="none"
+                height="18"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="18"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"
+                />
+                <path
+                  d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6"
+                />
+              </svg>
+            </button>
+          </span>
         </label>
         <button
           class="login-pri"

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useHistory } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../../core/store';
 import { apiFetch } from '../../../../shared/utils/Helpers/apiFetch';
 import { pathForFolder } from '../../hooks/useFolderUrlSync';
 import { formatDayLong, dayKeyOf, parseLogDate } from '../../log/logModel';
@@ -10,9 +12,13 @@ type Hit = { id: string; type: 'FOLDER' | 'NOTE' | 'LOG'; parentId: string; name
 
 export const logGotoKey = (logId: string) => `log-goto:${logId}`;
 
-/** Global full-text search (notes, log entries, folder names) across all folders; each hit shows its path. */
+/** Notebooks that are not one tree ("All", "None"): search everything. */
+export const searchScope = (notebook: string | null | undefined) => (notebook && notebook !== 'All' && notebook !== 'None' ? notebook : '');
+
+/** Full-text search (notes, log entries, folder names) in the open notebook (all notebooks for All / None); each hit shows its path. */
 export const SearchResults: React.FC<{ query: string; onDone: () => void }> = ({ query, onDone }) => {
   const history = useHistory();
+  const scope = searchScope(useSelector((state: RootState) => state.person.selectedNoteName));
   const [debounced, setDebounced] = useState(query);
   useEffect(() => {
     const t = setTimeout(() => setDebounced(query.trim()), 300);
@@ -20,11 +26,12 @@ export const SearchResults: React.FC<{ query: string; onDone: () => void }> = ({
   }, [query]);
 
   const { data, isFetching } = useQuery<Hit[]>({
-    queryKey: ['notes', 'search', debounced],
+    queryKey: ['notes', 'search', debounced, scope],
     enabled: debounced.length > 0,
     staleTime: 30 * 1000,
     queryFn: async () => {
-      const res = await apiFetch(`/api/search?q=${encodeURIComponent(debounced)}&limit=30`);
+      const inNotebook = scope ? `&notebook=${encodeURIComponent(scope)}` : '';
+      const res = await apiFetch(`/api/search?q=${encodeURIComponent(debounced)}&limit=30${inNotebook}`);
       if (!res.ok) throw new Error(`Search failed: ${res.status}`);
       return res.json();
     },

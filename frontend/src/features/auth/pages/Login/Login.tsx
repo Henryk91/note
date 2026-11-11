@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { IconNotes } from '@tabler/icons-react';
+import { IconEye, IconEyeOff, IconNotes } from '@tabler/icons-react';
 import { useDispatch } from 'react-redux';
 import { loginRequest, createAccount } from '../../../../shared/utils/Helpers/requests';
 import { setAuthToken } from '../../store/personSlice';
@@ -10,6 +10,25 @@ import './login.css';
  * button and the error under the fields. Phone: centred on the page; desktop: a 360 px card centred on the page.
  */
 const field = (form: HTMLFormElement, name: string) => ((form.elements.namedItem(name) as HTMLInputElement | null)?.value ?? '').trim();
+
+/** Password input with a show / hide eye button inside the field. */
+const PasswordInput: React.FC<{ name: string; autoComplete: string }> = ({ name, autoComplete }) => {
+  const [shown, setShown] = useState(false);
+  return (
+    <span className="login-pw">
+      <input className="login-in" name={name} type={shown ? 'text' : 'password'} required autoComplete={autoComplete} />
+      <button
+        type="button"
+        className="login-eye"
+        aria-label={shown ? 'Hide password' : 'Show password'}
+        aria-pressed={shown}
+        onClick={() => setShown((v) => !v)}
+      >
+        {shown ? <IconEyeOff size={18} /> : <IconEye size={18} />}
+      </button>
+    </span>
+  );
+};
 
 const Login: React.FC = () => {
   const dispatch = useDispatch();
@@ -97,11 +116,11 @@ const Login: React.FC = () => {
             </label>
             <label className="login-fld">
               Password
-              <input className="login-in" name="password" type="password" required autoComplete="new-password" />
+              <PasswordInput name="password" autoComplete="new-password" />
             </label>
             <label className="login-fld">
               Repeat password
-              <input className="login-in" name="password2" type="password" required autoComplete="new-password" />
+              <PasswordInput name="password2" autoComplete="new-password" />
             </label>
             {error && (
               <div className="login-err" role="alert">
@@ -120,7 +139,7 @@ const Login: React.FC = () => {
             </label>
             <label className="login-fld">
               Password
-              <input className="login-in" name="password" type="password" required autoComplete="current-password" />
+              <PasswordInput name="password" autoComplete="current-password" />
             </label>
             {error && (
               <div className="login-err" role="alert">

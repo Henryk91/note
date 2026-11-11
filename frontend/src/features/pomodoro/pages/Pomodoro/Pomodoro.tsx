@@ -4,7 +4,6 @@ import './style.css';
 
 import Changer from './Changer';
 import Timer from './Timer';
-import { BackButton } from '../../../../shared/components/atoms/BackButton';
 
 const Pomodoro: React.FC = () => {
   const [runTime, setRunTime] = useState(25);
@@ -23,7 +22,6 @@ const Pomodoro: React.FC = () => {
 
   return (
     <div className="App">
-      <BackButton toPath="/notes/main" />
       <h1>Pomodoro Clock</h1>
       <Changer set={updateTimes} breakTime={breakTime} runTime={runTime} />
       <Timer set={reset} run={runTime} breakTime={breakTime} />

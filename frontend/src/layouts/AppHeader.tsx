@@ -6,7 +6,7 @@ import { RootState } from '../core/store';
 import { useBreakpoint } from '../features/notes/layout/useBreakpoint';
 import { FOCUS_SEARCH_EVENT } from '../features/notes/layout/events';
 import { QUICK_LOG_EVENT } from '../features/notes/log/QuickLogSheet';
-import { SearchResults } from '../features/notes/components/SearchBar/SearchResults';
+import { SearchResults, searchScope } from '../features/notes/components/SearchBar/SearchResults';
 import { ItemMenu } from '../features/notes/edit/ItemMenu';
 import { useHeaderState } from '../shared/header/headerStore';
 import { useDismiss } from '../features/notes/edit/useDismiss';
@@ -53,13 +53,15 @@ export const AppHeader: React.FC = () => {
     else document.documentElement.style.setProperty('--header-h', compact ? '39.6px' : '55px');
   }, [wide, compact]);
 
+  const scope = searchScope(notebook);
+  const searchLabel = scope ? `Search ${scope}` : 'Search all notes and logs';
   const searchBox = (
     <div className="hd-search is-open">
       <IconSearch size={"1em"} />
       <input
         id="searchBox"
-        aria-label="Search all notes and logs"
-        placeholder="Search all notes and logs"
+        aria-label={searchLabel}
+        placeholder={searchLabel}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={(e) => e.key === 'Escape' && closeSearch()}

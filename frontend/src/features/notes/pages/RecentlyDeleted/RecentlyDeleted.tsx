@@ -4,7 +4,6 @@ import { useHistory } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { RootState } from '../../../../core/store';
 import { apiFetch } from '../../../../shared/utils/Helpers/apiFetch';
-import { BackButton } from '../../../../shared/components/atoms/BackButton';
 import { notesKeys } from '../../hooks/useNotesQueries';
 import { formatApiError, toastNotifications } from '../../../../shared/utils/toast';
 
@@ -77,7 +76,6 @@ const RecentlyDeleted: React.FC = () => {
 
   return (
     <div className="deleted-page">
-      <BackButton toPath="/notes/main" />
       <h1>Recently Deleted</h1>
       <div style={{ textAlign: 'center', color: 'var(--muted)', fontSize: 13 }}>{notebook}</div>
       {isLoading && <p>Loading...</p>}

@@ -284,12 +284,17 @@ export class NoteService {
   }
 
   /** Search results: id, type, parent path label, date and a short snippet around the match. */
-  async search(userId: string, q: string, limit = 30) {
-    const docs = await this.repo.searchNotesV2(userId, q, limit);
+  /** Full-text search; with `notebook`, only items whose tree root is that notebook. */
+  async search(userId: string, q: string, limitArg?: number, notebook?: string) {
+    const limit = limitArg ?? 30;
+    // Scoped: fetch a wider set, then keep the first `limit` hits that belong to the notebook.
+    const docs = await this.repo.searchNotesV2(userId, q, notebook ? Math.max(limit * 10, 300) : limit);
     const needle = q.toLowerCase();
-    return Promise.all(
+    const hits = await Promise.all(
       docs.map(async (doc) => {
         const path = await this.getPath(userId, doc.parentId || doc.id);
+        const root = path[0];
+        const notebookId = root ? root.parentId || root.id : doc.parentId || doc.id;
         const label = path.map((p) => (p.name && p.name !== 'Log' ? p.name : p.name || p.id)).join(' / ');
         const text = doc.content?.data ?? doc.name ?? '';
         const at = Math.max(0, text.toLowerCase().indexOf(needle));
@@ -298,16 +303,23 @@ export class NoteService {
           .replace(/\s+/g, ' ')
           .trim();
         return {
-          id: doc.id,
-          type: doc.type,
-          parentId: doc.parentId,
-          name: doc.name,
-          label,
-          date: doc.content?.date ?? null,
-          snippet,
+          notebookId,
+          hit: {
+            id: doc.id,
+            type: doc.type,
+            parentId: doc.parentId,
+            name: doc.name,
+            label,
+            date: doc.content?.date ?? null,
+            snippet,
+          },
         };
       }),
     );
+    return hits
+      .filter((h) => !notebook || h.notebookId === notebook)
+      .slice(0, limit)
+      .map((h) => h.hit);
   }
 
   /** The real chain of ancestors (root first, the item last), following `parentId`. Survives moved items. */

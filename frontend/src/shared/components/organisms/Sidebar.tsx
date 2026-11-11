@@ -10,6 +10,7 @@ import {
   IconChevronRight,
   IconHourglass,
   IconLogout,
+  IconNotes,
   IconTrash,
   IconWorld,
 } from '@tabler/icons-react';
@@ -92,6 +93,7 @@ export const MenuContent: React.FC<{ withNotebooks: boolean; onDone?: () => void
       )}
       <div className="menu-cap">Apps</div>
       <div className="menu-card">
+        <Row icon={<IconNotes size={ICON} />} label="Notes" chevron onClick={() => go('/notes/main')} />
         <Row icon={<IconBrain size={ICON} />} label="Memento" chevron onClick={() => go('/memento')} />
         <Row icon={<IconHourglass size={ICON} />} label="Pomodoro" chevron onClick={() => go('/pomodoro')} />
         <Row icon={<IconTrash size={ICON} />} label="Recently Deleted" chevron onClick={() => go('/recently-deleted')} />

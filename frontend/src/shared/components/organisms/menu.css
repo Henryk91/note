@@ -96,15 +96,9 @@ button.menu-row.is-danger > svg {
 .menu-pop .menu-card {
   background: var(--bg);
 }
-/* The hamburger shows as a 28px tile while its popover is open (menu-login.html 3). */
+/* While its popover is open the hamburger keeps its size and only gets the tile background (menu-login.html 3). */
 header.app-header.is-wide .hd-menu.is-open {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px !important;
   background: rgba(0, 0, 0, 0.2) !important;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 /* The menu page starts right under the header (no legacy 15vh page offset, no legacy span line breaks). */
 .page-content-top:has(.menu-page) {

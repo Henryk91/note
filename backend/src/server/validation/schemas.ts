@@ -69,6 +69,8 @@ export const PathQuerySchema = z.object({
 export const SearchQuerySchema = z.object({
   q: z.string().trim().min(1, 'Query is required').max(200),
   limit: z.coerce.number().int().min(1).max(100).optional(),
+  /** Only search inside this notebook (the root id of its tree). */
+  notebook: z.string().trim().min(1).max(200).optional(),
 });
 
 export const NotePersonUpdateSchema = z.object({

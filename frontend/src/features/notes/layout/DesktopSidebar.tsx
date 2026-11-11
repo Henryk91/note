@@ -1,5 +1,5 @@
-import { IconBook, IconClock } from '@tabler/icons-react';
-import React from 'react';
+import { IconBook, IconChevronDown, IconChevronRight, IconClock } from '@tabler/icons-react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../core/store';
 import { useNoteNames } from '../hooks/useNotesQueries';
@@ -18,6 +18,15 @@ type DesktopSidebarProps = {
   onDropItem: (item: NoteItemType, targetId: string) => void;
 };
 
+const COLLAPSE_KEY = 'side-notebooks-collapsed';
+const readCollapsed = () => {
+  try {
+    return localStorage.getItem(COLLAPSE_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
+
 /** Left pane: notebooks, the nested folder tree of the current notebook, pinned logs, apps and account. */
 export const DesktopSidebar: React.FC<DesktopSidebarProps> = (props) => {
   const { notebook, folderId, expandedIds, onToggle, onSelectFolder, onSelectNotebook, onOpenLog, onDropItem } = props;
@@ -25,12 +34,27 @@ export const DesktopSidebar: React.FC<DesktopSidebarProps> = (props) => {
   const { data: names } = useNoteNames(!!authToken);
   const { data: pinned } = usePinnedLogs(!!authToken);
   const mine = pinned ?? [];
+  // Notebooks can be collapsed to just the open one (remembered per browser).
+  const [collapsed, setCollapsed] = useState(readCollapsed);
+  const toggleCollapsed = () =>
+    setCollapsed((v) => {
+      try {
+        localStorage.setItem(COLLAPSE_KEY, v ? '0' : '1');
+      } catch {
+        /* storage unavailable */
+      }
+      return !v;
+    });
+  const notebooks = (names ?? []).filter((n) => n !== 'Site Track' && (!collapsed || n === notebook));
 
   return (
     <nav className="desk-sidebar" aria-label="Notebooks and folders">
       <div className="side-section">
-        <div className="side-title">Notebooks</div>
-        {(names ?? []).filter((n) => n !== 'Site Track').map((name) => (
+        <button type="button" className="side-title side-title-toggle" aria-expanded={!collapsed} onClick={toggleCollapsed}>
+          Notebooks
+          {collapsed ? <IconChevronRight size={12} aria-hidden /> : <IconChevronDown size={12} aria-hidden />}
+        </button>
+        {notebooks.map((name) => (
           <button
             type="button"
             key={name}

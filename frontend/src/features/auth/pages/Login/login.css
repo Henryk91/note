@@ -67,6 +67,33 @@
 .login-page input.login-in:focus {
   border-color: var(--accent-text);
 }
+.login-pw {
+  position: relative;
+  display: block;
+}
+.login-page .login-pw input.login-in {
+  padding-right: 40px;
+}
+.login-page button.login-eye {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.login-page button.login-eye:hover {
+  color: var(--text);
+}
 .login-err {
   font-size: 12px;
   color: #ff8a80;

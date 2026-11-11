@@ -188,6 +188,58 @@ exports[`Sidebar matches snapshot 1`] = `
         type="button"
       >
         <svg
+          class="tabler-icon tabler-icon-notes "
+          fill="none"
+          height="17"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="17"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M5 3m0 2a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2z"
+          />
+          <path
+            d="M9 7l6 0"
+          />
+          <path
+            d="M9 11l6 0"
+          />
+          <path
+            d="M9 15l4 0"
+          />
+        </svg>
+        <span
+          class="menu-nm"
+        >
+          Notes
+        </span>
+        <svg
+          aria-hidden="true"
+          class="tabler-icon tabler-icon-chevron-right menu-chev"
+          fill="none"
+          height="14"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="14"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M9 6l6 6l-6 6"
+          />
+        </svg>
+      </button>
+      <button
+        class="menu-row "
+        type="button"
+      >
+        <svg
           class="tabler-icon tabler-icon-brain "
           fill="none"
           height="17"
