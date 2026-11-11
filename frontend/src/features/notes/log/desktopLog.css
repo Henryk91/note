@@ -502,3 +502,6 @@ body:has(.desk-editor.is-log) {
 body:has(.desk-editor.is-log) .desk-sidebar {
   line-height: 1.4;
 }
+.desk .list-pane.dl-days {
+  border-right: 1px solid var(--line);
+}
