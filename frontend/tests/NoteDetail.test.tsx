@@ -15,9 +15,6 @@ jest.mock('../src/features/notes/hooks/useNoteDateLogic', () => ({
   useNoteDateLogic: jest.fn(),
 }));
 
-jest.mock('../src/features/notes/components/NoteDetail/../NoteItem/NoteItem', () => () => (
-  <div data-testid="note-item">NoteItem</div>
-));
 jest.mock('../src/features/notes/components/NoteDetail/forms', () => ({
   FolderList: () => <div data-testid="folder-list">FolderList</div>,
   AddItemForm: () => <div data-testid="add-item-form">AddItemForm</div>,
