@@ -35,6 +35,9 @@ export const NoteScreen: React.FC<Props> = ({ folderId, noteId, folderName, enab
   const history = useHistory();
   const byId = useSelector((state: RootState) => state.person.byId);
   const isNew = noteId === 'new';
+  // A note started on this screen keeps its editor (and the cursor) when it gets its id, even before the folder's
+  // cached list contains it.
+  const [startedNew] = useState(isNew);
   const [createdId, setCreatedId] = useState<string | null>(null);
   const id = isNew ? createdId : noteId;
   const item: NoteItemType | undefined = id ? byId[folderId]?.dataLable?.find((d) => d.id === id) : undefined;
@@ -75,7 +78,7 @@ export const NoteScreen: React.FC<Props> = ({ folderId, noteId, folderName, enab
     enabled,
   );
 
-  if (!isNew && !item && !startItem) {
+  if (!startedNew && !item && !startItem) {
     // Still loading the folder (deep link / refresh): show the empty page, not an error.
     if (!byId[folderId]) return <div className="note-screen" />;
     return <div className="note-missing">This note is not here (deleted or moved).</div>;
