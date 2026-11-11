@@ -56,7 +56,7 @@ describe('menu (menu-login.html 1 / 3)', () => {
   test('phone: Notebooks (Site Track last, after All / None), Apps, Theme with the current one checked, Log out', () => {
     renderWithProviders(<MenuContent withNotebooks />);
     const labels = [...document.querySelectorAll('.menu-nm')].map((n) => n.textContent);
-    expect(labels).toEqual(['Henry', 'Koorvi', 'All', 'None', 'Site Track', 'Notes', 'Memento', 'Pomodoro', 'Recently Deleted', 'Dark', 'Ocean', 'Green', 'Night', 'Red', 'Log out']);
+    expect(labels).toEqual(['Henry', 'Koorvi', 'All', 'None', 'Site Track', 'Notes', 'Memento', 'Pomodoro', 'Recently Deleted', 'Dark', 'Ocean', 'Green', 'Night', 'Red', 'Monokai', 'Log out']);
     expect(screen.getAllByLabelText('Current theme')).toHaveLength(1);
   });
 

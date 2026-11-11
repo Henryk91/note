@@ -339,6 +339,23 @@ h2 {
   border-color: rgba(0, 144, 200, 1) !important;
 }
 
+/* Monokai Theme */
+.monokai-back {
+  background: rgb(166, 226, 46);
+}
+.monokai-back-back {
+  background: rgb(39, 40, 34);
+}
+.monokai-border-thick {
+  border: 2px solid rgb(166, 226, 46);
+}
+.monokai-hover:hover {
+  background: rgba(166, 226, 46, 0.7);
+}
+.monokai-border-color {
+  border-color: rgba(166, 226, 46, 1) !important;
+}
+
 .rust-back {
   background: rgb(187, 59, 0);
 }

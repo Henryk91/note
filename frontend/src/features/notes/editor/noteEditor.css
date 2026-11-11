@@ -192,10 +192,13 @@
 .phone-body > .cap:first-child {
   margin-top: 0;
 }
-/* Folder pages: the compose button is a 44 x 44 target (notes-phone.html `.cmp`); the home keeps the bare icon. */
+/* The compose button is a 44 x 44 target on every page, but the negative margins keep the bar the same height
+   as the home page's bare-icon bar (56.6 px), so the footer never changes size between pages. */
+.bottom-toolbar .bt-edit,
 .bottom-toolbar.is-folder .bt-edit {
   width: 44px;
   height: 44px;
+  margin: -11px -11px -11px 0 !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;

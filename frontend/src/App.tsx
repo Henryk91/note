@@ -30,7 +30,7 @@ const AppContent: React.FC = () => {
     }
 
     // Page colours come from the theme variables (shared/styles/themes.css); only the browser chrome colour is set here.
-    const bars: Record<string, string> = { Dark: '#0079ae', Ocean: '#35373d', Green: '#103762', Night: '#27343b', Red: '#bb3b00' };
+    const bars: Record<string, string> = { Dark: '#0079ae', Ocean: '#35373d', Green: '#103762', Night: '#27343b', Red: '#bb3b00', Monokai: '#1e1f1c' };
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', bars[theme] ?? '#0079ae');
   }, [loadingData, theme]);
 

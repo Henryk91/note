@@ -80,7 +80,7 @@ app.use(
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   // The integration suite shares one in-memory limiter across all files, so it is effectively disabled under test.
-  limit: process.env.NODE_ENV === 'test' ? 1_000_000 : 300,
+  limit: process.env.NODE_ENV === 'test' ? 1_000_000 : config.rateLimitMax,
   standardHeaders: true,
   legacyHeaders: false,
 });

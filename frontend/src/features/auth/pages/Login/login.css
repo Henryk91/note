@@ -32,6 +32,10 @@
   justify-content: center;
   color: #fff;
 }
+/* Monokai's accent is a light green: the icon uses the theme's dark on-accent colour. */
+:root[data-theme='monokai'] .login-icon {
+  color: var(--on-accent);
+}
 .login-title {
   font-size: 22px;
   font-weight: 600;
@@ -70,6 +74,10 @@
 .login-pw {
   position: relative;
   display: block;
+}
+/* The legacy mobile rule `span::before { content: '\A' }` (app.css) would add a line break above the field. */
+.login-page .login-pw::before {
+  content: normal !important;
 }
 .login-page .login-pw input.login-in {
   padding-right: 40px;

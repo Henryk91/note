@@ -6,6 +6,7 @@ import { RootState } from '../../../../core/store';
 import { apiFetch } from '../../../../shared/utils/Helpers/apiFetch';
 import { notesKeys } from '../../hooks/useNotesQueries';
 import { formatApiError, toastNotifications } from '../../../../shared/utils/toast';
+import { askConfirm } from '../../../../shared/components/dialog/AppDialog';
 
 type DeletedItem = {
   id: string;
@@ -69,9 +70,14 @@ const RecentlyDeleted: React.FC = () => {
     onError: (e) => toastNotifications.error(`Failed to empty: ${formatApiError(e)}`),
   });
 
-  const onEmpty = () => {
-    // eslint-disable-next-line no-alert
-    if (window.confirm('Permanently delete everything in Recently Deleted? This cannot be undone.')) empty.mutate();
+  const onEmpty = async () => {
+    const ok = await askConfirm({
+      title: 'Empty Recently Deleted?',
+      message: 'Everything in Recently Deleted is deleted permanently. This cannot be undone.',
+      confirmLabel: 'Delete all',
+      danger: true,
+    });
+    if (ok) empty.mutate();
   };
 
   return (

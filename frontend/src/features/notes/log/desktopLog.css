@@ -479,29 +479,8 @@
 }
 
 /* desktop-log.html header: exactly 48px, "Search" left and "⌘F" right in the search box, Log pill padding 3px 12px. */
-body:has(.desk-editor.is-log) header.app-header.is-wide {
-  height: 48px;
-}
-body:has(.desk-editor.is-log) header.app-header .hd-search:not(.is-open) {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-body:has(.desk-editor.is-log) header.app-header .hd-search-key {
-  margin-left: auto;
-  opacity: 0.8;
-}
-body:has(.desk-editor.is-log) header.app-header .hd-log {
-  padding-top: 3px !important;
-  padding-bottom: 3px !important;
-}
-body:has(.desk-editor.is-log) {
-  --header-h: 48px;
-}
-/* desktop-log.html's sidebar uses the page's 1.4 line-height (desktop.html: 1.45). */
-body:has(.desk-editor.is-log) .desk-sidebar {
-  line-height: 1.4;
-}
+/* The header and sidebar keep the same sizes on every desktop page (desktop.html values), so nothing jumps when
+   switching between a note folder and a log. */
 .desk .list-pane.dl-days {
   border-right: 1px solid var(--line);
 }

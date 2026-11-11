@@ -1488,6 +1488,37 @@ header.app-header.is-phone .hd-title {
   flex: 0 1 auto;
   max-width: 62%;
 }
+/* Phone header: three columns with equal sides, so the title stays centred whatever the back label's width. */
+header.app-header.is-phone.is-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  column-gap: 8px;
+}
+header.app-header.is-phone.is-bar > :first-child {
+  justify-self: start;
+  max-width: 100%;
+}
+header.app-header.is-phone.is-bar .hd-title {
+  justify-self: stretch;
+  width: auto;
+  /* 62 % of the header, not of the grid column (that squeezed the title to the column's left side). */
+  max-width: calc((100vw - 24px) * 0.62);
+  text-align: center;
+}
+header.app-header.is-phone.is-bar .hd-right {
+  justify-self: end;
+}
+/* Bottom bar: same three-column grid, so the count is centred on the screen (Log is wider than compose). */
+.bottom-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+.bottom-toolbar > .bt-log {
+  justify-self: start;
+}
+.bottom-toolbar > .bt-edit {
+  justify-self: end;
+}
 
 .summary-screen .summary-cap-1 {
   margin: 4px 0 6px;

@@ -24,13 +24,14 @@ import './menu.css';
 
 export type SidebarProps = {};
 
-/** Theme order and swatch colours of docs/mockups/menu-login.html. */
+/** Theme order and swatch colours of docs/mockups/menu-login.html, plus Monokai (added later, last). */
 const THEME_SWATCHES: Array<{ name: string; style: React.CSSProperties }> = [
   { name: 'Dark', style: { background: '#0079AE' } },
   { name: 'Ocean', style: { background: '#38CDB8' } },
   { name: 'Green', style: { background: '#39CB7D' } },
   { name: 'Night', style: { background: '#27343B', boxShadow: 'inset 0 0 0 1px #3AB0E2' } },
   { name: 'Red', style: { background: '#BB3B00' } },
+  { name: 'Monokai', style: { background: '#272822', boxShadow: 'inset 0 0 0 1px #A6E22E' } },
 ];
 
 const ICON = 17;

@@ -112,7 +112,7 @@ export const AppHeader: React.FC = () => {
   }
 
   return (
-    <header className="app-header is-phone">
+    <header className="app-header is-phone is-bar">
       {header.close ? (
         <button type="button" className="hd-icon hd-close" aria-label="Close menu" onClick={() => header.close?.()}>
           <IconX size={20} />

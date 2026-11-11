@@ -1,5 +1,5 @@
 /*
- * The five themes as CSS variables, with the exact palettes of docs/mockups/phone-screens.html
+ * The themes as CSS variables, with the exact palettes of docs/mockups/phone-screens.html
  * (--bg, --surface, --line, --accent, --on-accent, --accent-text, --bar = header colour).
  * App.tsx sets `data-theme` on <html> from the Redux theme value.
  */
@@ -53,8 +53,23 @@
   --accent-text: #ff7a3d;
   --bar: #bb3b00;
 }
+/* Monokai (Sublime Text): editor #272822, line highlight #3E3D32, selection #49483E, text #F8F8F2,
+   green #A6E22E (accent), cyan #66D9EF (links, times), pink #F92672 (danger), darker tab-bar header. */
+:root[data-theme='monokai'] {
+  --bg: #272822;
+  --surface: #3e3d32;
+  --line: #49483e;
+  --accent: #a6e22e;
+  --on-accent: #272822;
+  --accent-text: #66d9ef;
+  --bar: #1e1f1c;
+  --text: #f8f8f2;
+  --muted: #a59f85;
+  --danger: #f92672;
+}
 :root[data-theme='ocean'],
 :root[data-theme='green'],
+:root[data-theme='monokai'],
 :root[data-theme='night'],
 :root[data-theme='red'] {
   --surface-2: color-mix(in srgb, var(--surface), white 7%);

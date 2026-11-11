@@ -119,6 +119,10 @@ export const Composer: React.FC<ComposerProps> = (props) => {
     }
   };
 
+  const keepFocus = (e: React.MouseEvent) => {
+    if (document.activeElement === inputRef.current) e.preventDefault();
+  };
+
   const onTimeKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowUp') {
       e.preventDefault();
@@ -182,7 +186,7 @@ export const Composer: React.FC<ComposerProps> = (props) => {
         {tallyCodes && tallyCodes.length > 0 && !editing && (
           <div className="log-tally" data-testid="tally-buttons">
             {tallyCodes.map((code) => (
-              <button type="button" key={code} onClick={() => onTally?.(code)} aria-label={`Log ${code}`}>
+              <button type="button" key={code} onMouseDown={keepFocus} onClick={() => onTally?.(code)} aria-label={`Log ${code}`}>
                 {code}
               </button>
             ))}
@@ -209,6 +213,9 @@ export const Composer: React.FC<ComposerProps> = (props) => {
               type="button"
               className="log-icon-btn log-send"
               aria-label={editing ? 'Save entry' : 'Add entry'}
+              // Keep the focus (and the phone keyboard) in the box: otherwise the tap first blurs the textarea,
+              // the keyboard starts closing and the layout moves under the finger before the click lands.
+              onMouseDown={keepFocus}
               onClick={onSend}
             >
               {editing ? <IconCheck size={"1em"} /> : <IconArrowUp size={"1em"} />}

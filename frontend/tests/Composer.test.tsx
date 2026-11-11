@@ -88,4 +88,17 @@ describe('Composer', () => {
     expect(screen.queryByLabelText('Log entry text')).toBeNull();
     expect(screen.getByRole('button', { name: 'Other text...' })).toBeTruthy();
   });
+  test('tapping send or a tally button keeps the focus (and the phone keyboard) in the box', () => {
+    const p = props({ tallyCodes: ['P'], onTally: jest.fn() });
+    render(<Composer {...(p as any)} />);
+    const box = screen.getByLabelText('Log entry text') as HTMLTextAreaElement;
+    box.focus();
+    const send = screen.getByRole('button', { name: 'Add entry' });
+    expect(fireEvent.mouseDown(send)).toBe(false); // default prevented: no blur
+    fireEvent.click(send);
+    expect(p.onSend).toHaveBeenCalledTimes(1);
+    expect(fireEvent.mouseDown(screen.getByRole('button', { name: 'Log P' }))).toBe(false);
+    box.blur();
+    expect(fireEvent.mouseDown(send)).toBe(true); // box not focused: normal behaviour
+  });
 });

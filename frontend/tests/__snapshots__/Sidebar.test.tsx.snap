@@ -496,6 +496,20 @@ exports[`Sidebar matches snapshot 1`] = `
           Red
         </span>
       </button>
+      <button
+        class="menu-row "
+        type="button"
+      >
+        <span
+          class="menu-sw"
+          style="background: rgb(39, 40, 34); box-shadow: inset 0 0 0 1px #A6E22E;"
+        />
+        <span
+          class="menu-nm"
+        >
+          Monokai
+        </span>
+      </button>
     </div>
     <div
       class="menu-cap"

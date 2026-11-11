@@ -7,7 +7,7 @@ import { useSelector } from 'react-redux';
 import { searchScope } from '../SearchBar/SearchResults';
 import { removeLastPage, setEditName, setSelectedNoteName, setShowTag } from '../../../auth/store/personSlice';
 import { ItemMenu, ItemMenuEntry } from '../../edit/ItemMenu';
-import { useNotesWithChildren } from '../../hooks/useNotesQueries';
+import { useNoteNames, useNotesWithChildren } from '../../hooks/useNotesQueries';
 import { useItemMutations } from '../../edit/itemMutations';
 import { useDeleteWithUndo } from '../../edit/useDeleteWithUndo';
 import { RootState } from '../../../../core/store';
@@ -24,6 +24,7 @@ import { useHeader } from '../../../../shared/header/headerStore';
 import { useNoteOperations } from '../../hooks/useNoteOperations';
 import { NoteScreen, phoneNoteTarget } from '../../editor/NoteScreen';
 import { ItemType } from '../../../../shared/utils/Helpers/types';
+import { askText } from '../../../../shared/components/dialog/AppDialog';
 
 type NoteDetailProps = {
   index?: number;
@@ -68,6 +69,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
   // Phone: `/n/<note>` shows that note full screen on top of its folder page (notes-phone.html 2 / 3).
   const noteTarget = isLastPage && !isLog ? phoneNoteTarget(location.pathname, location.search, pageLink?.params.id ?? '') : null;
   const notebookName = useSelector((state: RootState) => state.person.selectedNoteName) ?? '';
+  const { data: noteNames } = useNoteNames(isLastPage);
   const parentName =
     index > 1
       ? (byId?.[pages[index - 2]?.params.id]?.dataLable?.find((d) => d.id === parentId)?.name ?? byId?.[parentId]?.heading ?? '')
@@ -88,19 +90,24 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
   } else {
     headerMenu.push({
       label: 'Open or create notebook...',
-      onSelect: () => {
-        // eslint-disable-next-line no-alert
-        const name = window.prompt('Notebook name');
-        if (name && name.trim()) dispatch(setSelectedNoteName(name.trim()));
+      onSelect: async () => {
+        const name = await askText({
+          title: 'Open or create notebook',
+          choices: (noteNames ?? []).filter((n) => n !== notebookName),
+          choicesLabel: 'Your notebooks',
+          label: 'New notebook',
+          placeholder: 'Notebook name',
+          confirmLabel: 'Open',
+        });
+        if (name) dispatch(setSelectedNoteName(name));
       },
     });
   }
   headerMenu.push({
     label: 'New folder',
-    onSelect: () => {
-      // eslint-disable-next-line no-alert
-      const name = window.prompt('Folder name');
-      if (name && name.trim()) void folderMutations.create(ItemType.FOLDER, '', undefined, { name: name.trim(), heading: name.trim() } as any);
+    onSelect: async () => {
+      const name = await askText({ title: 'New folder', label: 'Folder name', placeholder: 'e.g. Work', confirmLabel: 'Create' });
+      if (name) void folderMutations.create(ItemType.FOLDER, '', undefined, { name, heading: name } as any);
     },
   });
   headerMenu.push({ label: 'Recently deleted', onSelect: () => history.push('/recently-deleted') });

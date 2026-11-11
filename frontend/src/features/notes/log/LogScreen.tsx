@@ -39,6 +39,7 @@ import {
   weekTotals,
 } from './logModel';
 import { chipLabel, defaultTsForDay, PanelValue, panelFromTs, parsePanel, stepTs } from './entryTime';
+import { askText } from '../../../shared/components/dialog/AppDialog';
 
 const MODE_LABELS: Record<LogMode, string> = {
   'time-tracker': 'Time tracker',
@@ -470,10 +471,15 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
     void saveSettings({ pinned: !settings.pinned });
     setMenuOpen(false);
   };
-  const editBreakWords = () => {
-    // eslint-disable-next-line no-alert
-    const value = window.prompt('Break words (comma separated)', breakWords.join(', '));
+  const editBreakWords = async () => {
     setMenuOpen(false);
+    const value = await askText({
+      title: 'Break words',
+      label: 'Entries starting with these words count as breaks (comma separated)',
+      initial: breakWords.join(', '),
+      placeholder: 'Break, Lunch',
+      confirmLabel: 'Save',
+    });
     if (value === null) return;
     const words = value.split(',').map((w) => w.trim()).filter(Boolean);
     void saveSettings({ breakWords: words });

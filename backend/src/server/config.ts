@@ -15,6 +15,8 @@ const EnvSchema = z.object({
   ACCESS_EXPIRES: z.string().default('15m'),
   REFRESH_EXPIRES: z.string().default('30d'),
   MAX_SESSIONS: z.coerce.number().int().positive().default(3),
+  /** API requests per IP per 15 minutes. Raise it only for local development and automated UI checks. */
+  RATE_LIMIT_MAX: z.coerce.number().int().positive().default(300),
   CORS_ALLOWED_ORIGINS: z.string().optional(),
   COOKIE_SECURE: z.string().optional(),
   MONGODB_URI: z.string().optional(),
@@ -63,6 +65,7 @@ const config = {
   env: parsed.data.NODE_ENV,
   isProd: parsed.data.NODE_ENV === 'production',
   port: parsed.data.PORT,
+  rateLimitMax: parsed.data.RATE_LIMIT_MAX,
   mongoUri: parsed.data.MONGODB_URI,
   jwt: {
     secret: parsed.data.JWT_SECRET,

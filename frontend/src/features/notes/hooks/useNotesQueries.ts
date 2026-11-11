@@ -6,6 +6,7 @@ import { createInitPage, setLogDirAtTop, getStorageJsonData } from '../../../sha
 import { useEffect } from 'react';
 import { useDispatch, useStore } from 'react-redux';
 import { setByIdState, setPersonById, removePersonById } from '../../auth/store/personSlice';
+import { retryUnlessClientError } from '../../../shared/utils/Helpers/retryPolicy';
 
 /**
  * Query Keys - Hierarchical structure for easy cache invalidation
@@ -73,7 +74,7 @@ export function useNotesWithChildren(parentId?: string, enabled: boolean = true)
     },
     staleTime: 5 * 60 * 1000,
     enabled: enabled && !!parentId,
-    retry: 2,
+    retry: retryUnlessClientError(2),
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
@@ -96,7 +97,7 @@ export function useNoteNames(enabled: boolean = true) {
     queryKey: notesKeys.noteNames(),
     queryFn: () => notesApi.getNoteNames(),
     staleTime: 10 * 60 * 1000, // 10 minutes (note names change less frequently)
-    retry: 2,
+    retry: retryUnlessClientError(2),
     enabled,
   });
 }
