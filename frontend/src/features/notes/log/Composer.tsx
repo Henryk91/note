@@ -35,7 +35,7 @@ type ComposerProps = {
   inputRef: React.RefObject<HTMLTextAreaElement>;
 };
 
-const isTouch = () => typeof window !== 'undefined' && !!window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+export const isTouch = () => typeof window !== 'undefined' && !!window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
 
 const Stepper: React.FC<{ label: string; unit: Unit; onStep: ComposerProps['onStep'] }> = ({ label, unit, onStep }) => {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);

@@ -8,7 +8,7 @@ import { useLogData } from './useLogData';
 import { prefillKey } from './QuickLogSheet';
 import { useLogMutations, usePendingEntries } from './logApi';
 import { Calendar } from './Calendar';
-import { Composer } from './Composer';
+import { Composer, isTouch } from './Composer';
 import { LogRow } from './LogRow';
 import { DailyValueSummary } from './Summaries';
 import { SummaryScreen, summaryCopyText } from './SummaryScreen';
@@ -286,6 +286,8 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
     }
     const ts = resolveTs();
     if (ts === null) return;
+    // Phones: close the keyboard once the entry is sent (desktop keeps the focus for the next entry).
+    if (isTouch()) inputRef.current?.blur();
     if (editing) {
       void mutations.update(editing, value, ts);
       setDay(dayKeyOf(ts));

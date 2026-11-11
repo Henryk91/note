@@ -453,3 +453,14 @@ header.app-header input,
   font-family: inherit;
   line-height: inherit;
 }
+
+/* iOS zooms into any text field whose font is smaller than 16px when it gets focus. On touch screens every
+   field uses 16px, so tapping the log entry box, the time fields or a dialog field never zooms the page. */
+@media (pointer: coarse) {
+  /* :root:root body raises the specificity above the per-screen `!important` sizes (e.g. 15px in the log). */
+  :root:root body input:not([type='checkbox']):not([type='radio']):not([type='range']),
+  :root:root body textarea,
+  :root:root body select {
+    font-size: 16px !important;
+  }
+}
