@@ -1,0 +1,59 @@
+/* Toasts ("Entry deleted · Undo", errors, confirmations): a compact bar in the current theme's colours. */
+.app-toaster {
+  /* Just under the app header: it never covers the log entry box or the phone toolbar, and the keyboard does not
+     move it. */
+  top: calc(var(--header-h, 56px) + env(safe-area-inset-top, 0px) + 8px) !important;
+  left: 12px !important;
+  right: 12px !important;
+}
+.app-toast {
+  background: var(--surface-2) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--line);
+  border-radius: 12px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
+  padding: 10px 14px !important;
+  min-height: 44px;
+  box-sizing: border-box;
+  max-width: 420px !important;
+  font: 14px/1.35 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif !important;
+}
+.app-toast:has(.log-toast-undo) {
+  padding: 6px 6px 6px 14px !important;
+}
+.app-toast > div {
+  margin: 0 !important;
+  justify-content: flex-start !important;
+}
+/* The message with an action on the right (Undo). */
+.app-toast span:has(> .log-toast-undo) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+}
+.app-toast span::before {
+  content: normal !important;
+}
+.app-toast button.log-toast-undo {
+  flex: none;
+  margin: 0 !important;
+  padding: 0 12px !important;
+  height: 32px;
+  min-width: 0 !important;
+  width: auto !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  color: var(--accent-text) !important;
+  font: 600 14px/1 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif !important;
+  cursor: pointer;
+}
+.app-toast button.log-toast-undo:hover,
+.app-toast button.log-toast-undo:focus-visible {
+  background: var(--surface) !important;
+}
