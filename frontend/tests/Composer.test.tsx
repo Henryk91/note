@@ -107,7 +107,7 @@ describe('Composer', () => {
     const { rerender } = render(<Composer {...(p as any)} />);
     fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
     expect(p.onDeleteEditing).toHaveBeenCalledTimes(1);
-    expect(screen.getByRole('button', { name: 'Cancel edit' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Cancel edit' })).toBeTruthy();
     rerender(<Composer {...(props({ panelOpen: true, editing: false, onDeleteEditing: jest.fn() }) as any)} />);
     expect(screen.queryByRole('button', { name: 'Delete' })).toBeNull();
   });
