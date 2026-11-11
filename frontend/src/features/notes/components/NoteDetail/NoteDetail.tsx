@@ -1,10 +1,9 @@
-import { IconSearch } from '@tabler/icons-react';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import NoteDetailTags from './NoteDetailTags';
 import { useSelector } from 'react-redux';
-import { searchScope } from '../SearchBar/SearchResults';
+import { PhoneSearch, searchScope } from '../SearchBar/SearchResults';
 import { removeLastPage, setEditName, setSelectedNoteName, setShowTag } from '../../../auth/store/personSlice';
 import { ItemMenu, ItemMenuEntry } from '../../edit/ItemMenu';
 import { useNoteNames, useNotesWithChildren } from '../../hooks/useNotesQueries';
@@ -19,7 +18,6 @@ import { LogScreen } from '../../log/LogScreen';
 import { isLogId } from '../../log/useLogData';
 import { MoveToSheet } from '../../layout/MoveToSheet';
 import { PinnedCards } from '../../layout/PinnedCards';
-import { FOCUS_SEARCH_EVENT } from '../../layout/events';
 import { useHeader } from '../../../../shared/header/headerStore';
 import { useNoteOperations } from '../../hooks/useNoteOperations';
 import { NoteScreen, phoneNoteTarget } from '../../editor/NoteScreen';
@@ -159,9 +157,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
         )}
         {index === 0 && (
           <>
-            <button type="button" className="phone-search" onClick={() => window.dispatchEvent(new Event(FOCUS_SEARCH_EVENT))}>
-              <IconSearch size={"1em"} /> {searchScope(notebookName) ? `Search ${searchScope(notebookName)}` : 'Search all notes and logs'}
-            </button>
+            <PhoneSearch label={searchScope(notebookName) ? `Search ${searchScope(notebookName)}` : 'Search all notes and logs'} />
             <PinnedCards />
           </>
         )}

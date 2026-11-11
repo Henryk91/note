@@ -976,6 +976,66 @@ header.app-header .item-menu-list button {
   font-size: 14px !important;
   text-align: left !important;
 }
+/* Phone page search: the field itself is the input (same look as before), results drop down under it. */
+.phone-search-wrap {
+  position: relative;
+  z-index: 20;
+}
+label.phone-search {
+  box-sizing: border-box;
+  cursor: text;
+}
+.phone-search input {
+  flex: 1;
+  min-width: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--text) !important;
+  font: inherit;
+  /* 16 px keeps iOS Safari from zooming into the field; the line box stays the old 14 px button's height. */
+  font-size: 16px !important;
+  line-height: 19.6px;
+  height: 19.6px;
+  outline: none;
+  box-shadow: none !important;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.phone-search input::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+.phone-search input::-webkit-search-cancel-button {
+  display: none;
+}
+.phone-search button.phone-search-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 19.6px;
+  height: 19.6px;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--muted) !important;
+}
+.search-results span::before {
+  content: normal !important;
+  white-space: normal !important;
+}
+.search-results.is-inline {
+  position: absolute;
+  top: calc(100% - 6px);
+  left: 0;
+  right: 0;
+  max-height: 60vh;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
 .pin-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
