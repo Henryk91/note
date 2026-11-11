@@ -14,7 +14,7 @@ import { DailyValueSummary } from './Summaries';
 import { SummaryScreen, summaryCopyText } from './SummaryScreen';
 import { TallyView } from './TallyView';
 import { useDismiss } from '../edit/useDismiss';
-import { useHeader } from '../../../shared/header/headerStore';
+import { isFrontPage, useHeader } from '../../../shared/header/headerStore';
 import { useBreakpoint } from '../layout/useBreakpoint';
 import { ItemMenuEntry } from '../edit/ItemMenu';
 import {
@@ -436,13 +436,11 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
   }, [daily, loaded, editing, text, todayKey]);
 
   const changeMode = (next: LogMode | undefined) => {
-    const merged = { ...settings, mode: next };
-    if (!next) delete merged.mode;
-    void saveSettings(merged);
+    void saveSettings({ mode: next });
     setMenuOpen(false);
   };
   const togglePinned = () => {
-    void saveSettings({ ...settings, pinned: !settings.pinned });
+    void saveSettings({ pinned: !settings.pinned });
     setMenuOpen(false);
   };
   const editBreakWords = () => {
@@ -451,7 +449,7 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
     setMenuOpen(false);
     if (value === null) return;
     const words = value.split(',').map((w) => w.trim()).filter(Boolean);
-    void saveSettings({ ...settings, breakWords: words });
+    void saveSettings({ breakWords: words });
   };
 
   // ---- header (phone): back label, two-line title and this log's `...` menu ----------------------------
@@ -487,7 +485,7 @@ export const LogScreen: React.FC<{ logId: string }> = ({ logId }) => {
           back: { label: (isTally ? grandName : parentName) || 'Back', onClick: () => window.dispatchEvent(new Event('page-back')) },
           menu: logMenu,
         },
-    phone,
+    phone && isFrontPage(pagesState, logId),
   );
 
   const isToday = day === todayKey;

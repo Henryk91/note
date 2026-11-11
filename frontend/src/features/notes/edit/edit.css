@@ -1437,16 +1437,16 @@ header.app-header .item-menu {
   display: flex;
 }
 
-/* log-screen.html forces `line-height: 1.3` on its buttons (BS.base); the rest of the screen is 1.4. */
+/* All buttons on the log screen use the base line-height 1.4 (ui-review R1). */
 .log-screen button {
-  line-height: 1.3;
+  line-height: 1.4;
 }
 .log-screen .log-icon-btn svg {
   display: block;
 }
 .app-main .log-screen button,
 .app-main .log-screen .log-time {
-  line-height: 1.3;
+  line-height: 1.4;
 }
 
 .app-main .log-screen .log-day-sub {
@@ -1549,9 +1549,10 @@ header.app-header .hd-log {
   bottom: 14px;
 }
 
-/* log-screen.html: `font: inherit` inside the 12 px labels, so the date / time fields are 12 px (height 32.8). */
+/* Date / time fields are 14 px (height 35.6), not the label's 12 px (ui-review R2). */
 .log-screen .log-panel-fields input {
-  font-size: inherit !important;
+  font-size: 14px !important;
+  line-height: 1.4;
 }
 
 /* The header (and its menus) sits above the page container (z 200) and the bottom toolbar (300), below sheets (2000). */

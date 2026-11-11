@@ -8,6 +8,16 @@ import { sendOrQueueJSON } from '../../../offlineQueue/queue';
 import { NoteItemType } from '../../../shared/utils/Helpers/types';
 import { buildEntries, detectMode, groupByDay, LogMode, LogSettings } from './logModel';
 
+/** `patch` on top of `current`; keys set to `undefined` in the patch are removed. Other keys are kept as they are. */
+export const mergeSettings = (current: LogSettings | undefined, patch: Partial<LogSettings>): LogSettings => {
+  const next: any = { ...(current ?? {}) };
+  Object.entries(patch).forEach(([k, v]) => {
+    if (v === undefined) delete next[k];
+    else next[k] = v;
+  });
+  return next;
+};
+
 export const isLogId = (id: string | undefined | null) => !!id && /::Log$/.test(id);
 
 /**
@@ -43,8 +53,17 @@ export const useLogData = (logId: string) => {
   const parentName = parentNotes?.heading || (parentId ? parentId.split('::').pop() : '');
   const label = !parentId || parentId === notebook ? notebook : `${notebook} / ${parentName}`;
 
+  /**
+   * Changes only the keys in `patch` (a key set to `undefined` is removed) on top of the settings currently in the cache.
+   * Never writes when the log's own folder document is not loaded: `settings` would then be `{}` and saving would wipe
+   * the stored mode (ui-review N1). A log's mode changes only through `patch.mode`, i.e. the user picking one.
+   */
   const saveSettings = useCallback(
-    async (next: LogSettings) => {
+    async (patch: Partial<LogSettings>) => {
+      const cached: any = qc.getQueryData(notesKeys.withChildren(parentId));
+      const doc = cached?.notes?.[parentId]?.dataLable?.find((d: any) => d.id === logId);
+      if (!doc) return false;
+      const next: LogSettings = mergeSettings(doc.settings, patch);
       qc.setQueryData(notesKeys.withChildren(parentId), (old: any) => {
         if (!old?.notes?.[parentId]) return old;
         return {
@@ -59,6 +78,7 @@ export const useLogData = (logId: string) => {
         };
       });
       await sendOrQueueJSON('/api/note-v2', { id: logId, settings: next }, { method: 'PUT' });
+      return true;
     },
     [qc, parentId, logId],
   );

@@ -37,13 +37,25 @@ export const useHeader = (next: HeaderState, enabled = true) => {
     if (!enabled) return undefined;
     // Handlers go through the ref so they never act on stale props.
     const n = ref.current;
-    setHeader({
+    const mine: HeaderState = {
       kicker: n.kicker,
       title: n.title,
       back: n.back ? { label: n.back.label, onClick: () => ref.current.back?.onClick() } : null,
       menu: n.menu?.map((m, i) => ({ ...m, onSelect: () => ref.current.menu?.[i]?.onSelect() })),
       action: n.action ? { ...n.action, onClick: () => ref.current.action?.onClick() } : null,
-    });
-    return () => setHeader({});
+    };
+    setHeader(mine);
+    // Only clear the header if it is still ours: a page that unmounts must not wipe the header of the page in front.
+    return () => {
+      if (state === mine) setHeader({});
+    };
   }, [key, enabled]);
 };
+
+/**
+ * A page in the phone page stack may own the header only while it is the page in front (the last page of the stack).
+ * Pages further back stay mounted in the carousel; if they could re-register (e.g. when their data arrives), the header's
+ * `...` menu would act on a page that is not on screen (ui-review N1: a log's mode was changed from another log's screen).
+ */
+export const isFrontPage = (pages: { params: { id: string } }[], id: string): boolean =>
+  pages.length > 0 && pages[pages.length - 1]?.params.id === id;
