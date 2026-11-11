@@ -1,3 +1,4 @@
+import { IconMenu2 } from '@tabler/icons-react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -274,7 +275,7 @@ export const DesktopLayout: React.FC<{ breakpoint: Exclude<Breakpoint, 'mobile'>
             headerExtra={
               !showSidebar ? (
                 <button type="button" className="list-new" aria-label="Show folders" aria-expanded={drawer} onClick={() => setDrawer((v) => !v)}>
-                  &#9776;
+                  <IconMenu2 size={14} />
                 </button>
               ) : null
             }
