@@ -62,7 +62,8 @@ export const LogRow: React.FC<LogRowProps> = ({
   const isBreak = isBreakText(entry.text, breakWords);
   const long = isLongEntry(entry.text);
   const duration = entryDuration(dayEntries, index, nowTs);
-  // The last entry of today has no end yet: the mockup shows "running" instead of a growing duration.
+  // The last entry of today has no end yet: it shows the time since it started in brackets, e.g. "(1h 12m)",
+  // refreshed when the app gets focus (as the old app did). The last entry of an earlier day shows nothing.
   const openEnded = !dayEntries[index + 1] && dayKeyOf(nowTs) === entry.day;
   const prevTask = isBreak && showContinue ? taskBefore(dayEntries, index, breakWords) : null;
 
@@ -137,7 +138,7 @@ export const LogRow: React.FC<LogRowProps> = ({
       </div>
       <div className="log-side">
         {pending && <IconClock size={"1em"} title="Waiting to sync" aria-label="Waiting to sync" />}
-        {duration !== null && <span>{openEnded ? 'running' : formatDuration(duration)}</span>}
+        {duration !== null && <span>{openEnded ? `(${formatDuration(duration)})` : formatDuration(duration)}</span>}
         <button
           type="button"
           className="log-menu-btn"

@@ -183,7 +183,7 @@ const DesktopRow: React.FC<{
           </button>
         )}
       </div>
-      <span className={`dl-dur ${running ? 'is-running' : ''}`}>{running ? 'running' : duration !== null ? formatDuration(duration) : ''}</span>
+      <span className={`dl-dur ${running ? 'is-running' : ''}`}>{duration === null ? '' : running ? `(${formatDuration(duration)})` : formatDuration(duration)}</span>
       <span className="dl-act-wrap">
         <button type="button" className="dl-act" aria-label="Entry actions" aria-expanded={menuOpen} onClick={() => setMenuOpen((v) => !v)}>
           <IconDots size={16} />

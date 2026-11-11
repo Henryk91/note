@@ -93,4 +93,19 @@ describe('LogRow', () => {
     expect(screen.getByLabelText('Waiting to sync')).toBeTruthy();
     expect(screen.getByText('1h 0m')).toBeTruthy();
   });
+
+  test("today's last entry shows the time since it started in brackets; the last entry of an earlier day shows nothing", () => {
+    const today = mk([
+      ['a', 'Start', '2026-11-10T09:00:00+01:00'],
+      ['b', 'DEV-313 Review', '2026-11-10T09:30:00+01:00'],
+    ]);
+    const now = new Date('2026-11-10T10:42:00+01:00').getTime();
+    const { unmount } = renderWithProviders(<LogRow {...(baseProps(today, 1, { nowTs: now }) as any)} />);
+    expect(screen.getByText('(1h 12m)')).toBeTruthy();
+    expect(screen.queryByText('running')).toBeNull();
+    unmount();
+    const later = new Date('2026-11-11T08:00:00+01:00').getTime();
+    const { container } = renderWithProviders(<LogRow {...(baseProps(today, 1, { nowTs: later }) as any)} />);
+    expect(container.textContent).not.toMatch(/\(\d|running/);
+  });
 });
