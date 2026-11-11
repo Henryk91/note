@@ -21,6 +21,7 @@ import { PinnedCards } from '../../layout/PinnedCards';
 import { useFrontIndex, useHeader } from '../../../../shared/header/headerStore';
 import { useNoteOperations } from '../../hooks/useNoteOperations';
 import { NoteScreen, phoneNoteTarget } from '../../editor/NoteScreen';
+import { useNoteLayer } from '../../editor/useNoteLayer';
 import { askText } from '../../../../shared/components/dialog/AppDialog';
 import { pathForFolder } from '../../hooks/useFolderUrlSync';
 import { askAndCreateFolder, logMenuLabel, openOrCreateLog } from '../../edit/folderActions';
@@ -70,6 +71,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
   const isLog = isLogId(pageLink?.params.id);
   // Phone: `/n/<note>` shows that note full screen on top of its folder page (notes-phone.html 2 / 3).
   const noteTarget = isLastPage && !isLog ? phoneNoteTarget(location.pathname, location.search, pageLink?.params.id ?? '') : null;
+  const noteLayer = useNoteLayer(noteTarget);
   const notebookName = useSelector((state: RootState) => state.person.selectedNoteName) ?? '';
   const { data: noteNames } = useNoteNames(isLastPage);
   const parentName =
@@ -124,22 +126,25 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
 
   // A log is not a list of items: it gets its own screen (quick entry box, day navigation, timeline).
   if (isLog) return <LogScreen logId={pageLink.params.id} />;
-  if (noteTarget) {
-    return (
+
+  // Phone: the note slides in over its folder page and back out, moving with it like the page stack does.
+  const noteView = noteLayer && (
+    <div className={`note-layer is-${noteLayer.phase}`}>
       <NoteScreen
         key={pageLink.params.id}
         folderId={pageLink.params.id}
-        noteId={noteTarget}
+        noteId={noteLayer.noteId}
         folderName={index === 0 ? notebookName : person?.heading || ''}
-        enabled
+        enabled={noteLayer.phase !== 'closing'}
       />
-    );
-  }
+    </div>
+  );
+  const folderLayer = noteLayer ? ` folder-layer is-${noteLayer.phase}` : '';
 
   const isNoteNames = location.pathname === '/notes/note-names';
   const personToRender = isNoteNames ? null : ({ ...person } as Note);
 
-  if (!personToRender) return null;
+  if (!personToRender) return noteView || null;
 
   // Logic from useNoteDetailLogic / NoteDetail
   const heading = isLastPage && showTag ? showTag : personToRender?.heading;
@@ -150,7 +155,8 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
   }
 
   return (
-    <div className={`slide-in ${heading === 'Log' && 'logDetailPadding' }`}>
+    <>
+      <div className={`slide-in ${heading === 'Log' && 'logDetailPadding' }${folderLayer}`}>
       <div id={!isLastPage ? 'isFirstPage' : ''} className={`${className} note-detail-item`} key={personToRender?.id}>
         {/* The folder name is already the header title, so the page has no h1; renaming still shows the form here. */}
         {editName && (
@@ -181,7 +187,7 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
           }}
         />
         <br />
-        {isLastPage && (
+        {isLastPage && !noteLayer && (
           <ScrollJump
             count={personToRender?.dataLable?.length ?? 0}
             bottom="calc(var(--toolbar-h, 57px) + 12px)"
@@ -202,7 +208,9 @@ const NoteDetail: React.FC<NoteDetailProps> = ({ index = 0 }) => {
           onClose={() => setMoving(false)}
         />
       )}
-    </div>
+      </div>
+      {noteView}
+    </>
   );
 };
 

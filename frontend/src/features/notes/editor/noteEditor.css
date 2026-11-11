@@ -287,3 +287,45 @@ header.app-header .hd-done {
 .note-doc.is-desktop ol > li::before {
   content: counter(list-item) '. ';
 }
+
+/* Phone: a note slides in over its folder page and back out, like the page stack (300 ms, Swiper's easing). The
+   folder page moves left with it, so the two move together the way two stacked pages do. */
+.note-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: var(--bg);
+}
+.note-layer.is-opening {
+  animation: note-layer-in 300ms ease both;
+}
+.note-layer.is-closing {
+  animation: note-layer-out 300ms ease both;
+  pointer-events: none;
+}
+.folder-layer.is-opening {
+  animation: folder-layer-out 300ms ease both;
+}
+.folder-layer.is-open {
+  transform: translateX(-100%);
+  visibility: hidden;
+}
+.folder-layer.is-closing {
+  animation: folder-layer-in 300ms ease both;
+}
+@keyframes note-layer-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+@keyframes note-layer-out {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+@keyframes folder-layer-out {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+@keyframes folder-layer-in {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
