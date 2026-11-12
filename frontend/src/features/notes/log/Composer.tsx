@@ -3,6 +3,7 @@ import { Suggestion } from './suggest';
 import { SuggestList, useSuggestKeys } from './SuggestList';
 import React, { useEffect, useRef } from 'react';
 import { PanelValue } from './entryTime';
+import { plainPasteHandler } from './plainPaste';
 
 type Unit = 'd' | 'h' | 'min';
 
@@ -227,6 +228,7 @@ export const Composer: React.FC<ComposerProps> = (props) => {
               aria-label="Log entry text"
               className="swiper-no-swiping"
               onChange={(e) => onText(e.target.value)}
+              onPaste={plainPasteHandler(text, onText, inputRef)}
               onKeyDown={onKeyDown}
             />
             <button

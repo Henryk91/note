@@ -15,6 +15,7 @@ import { Suggestion } from './suggest';
 import { SuggestList, useSuggestKeys } from './SuggestList';
 import { getMarkdownText } from '../../../shared/utils/markdown';
 import { PanelValue } from './entryTime';
+import { plainPasteHandler } from './plainPaste';
 import {
   dayKeyOf,
   entryDuration,
@@ -351,6 +352,7 @@ export const DesktopEntryBar: React.FC<{
           aria-label="Log entry text"
           value={text}
           onChange={(e) => onText(e.target.value)}
+          onPaste={plainPasteHandler(text, onText, inputRef)}
           onKeyDown={(e) => {
             if (suggest.onKeyDown(e)) return;
             if (e.key === 'Enter' && (!e.shiftKey || e.metaKey || e.ctrlKey)) {
